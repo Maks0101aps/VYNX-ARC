@@ -33,7 +33,12 @@ for ext in ['zip','7z','tar','tar.gz']:
     result=subprocess.run([str(cli),'extract',str(output),'--output',str(dest),'--replace'],env=env,capture_output=True,startupinfo=startup,timeout=30)
     assert result.returncode==0,(ext,result.stderr)
     assert (dest/'Project/src/дані.txt').read_bytes()==(source/'src/дані.txt').read_bytes()
+    smart_dest=work/('smart-'+ext)
+    run([cli,'extract',output,'--output',smart_dest,'--smart'])
+    assert (smart_dest/'Project/src/дані.txt').read_bytes()==(source/'src/дані.txt').read_bytes()
+    assert not (smart_dest/'Project/Project').exists()
     evidence[ext]='CLI roundtrip matches' + ('; opened by an independent Python reader' if ext in ['zip','7z'] else '')
+    evidence[ext]+='; Smart Extract avoids duplicate archive-root nesting'
 for name in ['test_read_format_rar5_stored.rar','test_read_format_rar_binary_data.rar']:
     run([cli,'test',root/'tests/archives'/name])
 for ext in ['zip','7z']:

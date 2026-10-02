@@ -1050,6 +1050,10 @@ bool MainWindow::smokeTest() {
         applyTheme("dark");
         if (qApp->palette().color(QPalette::Window).lightness() > 80)
             return false;
+        applyTheme("system");
+        const bool systemDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
+        if ((qApp->palette().color(QPalette::Window).lightness() < 80) != systemDark)
+            return false;
         QTemporaryDir temp;
         if (!temp.isValid())
             return false;
@@ -1073,7 +1077,18 @@ bool MainWindow::smokeTest() {
         QEventLoop loop;
         connect(&watcher_, &QFutureWatcher<QString>::finished, &loop, &QEventLoop::quit);
         QTimer::singleShot(10000, &loop, &QEventLoop::quit);
-        openPath(archivePath);
+        QMimeData droppedArchive;
+        droppedArchive.setUrls({QUrl::fromLocalFile(archivePath)});
+        QDragEnterEvent drag(QPoint(20, 20), Qt::CopyAction, &droppedArchive, Qt::LeftButton,
+                             Qt::NoModifier);
+        dragEnterEvent(&drag);
+        if (!drag.isAccepted())
+            return false;
+        QDropEvent drop(QPointF(20, 20), Qt::CopyAction, &droppedArchive, Qt::LeftButton,
+                        Qt::NoModifier);
+        dropEvent(&drop);
+        if (!drop.isAccepted())
+            return false;
         loop.exec();
         if (busy_ || !archive_ || model_->rowCount() != 1 || !model_->row(0).folder)
             return false;
