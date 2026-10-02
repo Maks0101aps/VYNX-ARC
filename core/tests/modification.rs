@@ -214,6 +214,67 @@ fn locked_original_rejects_replacement_without_data_loss() {
     assert_eq!(error.code, "REPLACE");
     assert_eq!(fs::read(&a.path).unwrap(), before);
 }
+#[cfg(windows)]
+#[test]
+fn one_hundred_zip_add_delete_rename_publication_cycles() {
+    let t = tempfile::tempdir().unwrap();
+    let mut archive = make(t.path(), "zip", "");
+    for cycle in 0..100 {
+        let added = t.path().join(format!("added-{cycle}.txt"));
+        fs::write(&added, format!("contents-{cycle}")).unwrap();
+        modification::modify(
+            &archive,
+            &Change::Add {
+                inputs: vec![added],
+                folder: String::new(),
+            },
+            "",
+            &Operation::default(),
+        )
+        .unwrap_or_else(|error| panic!("ZIP add cycle {cycle}: {error}"));
+        archive = Archive::open(&archive.path, "", &Operation::default()).unwrap();
+        assert!(contents(&archive, "").contains_key(&format!("added-{cycle}.txt")));
+
+        let renamed = format!("source/keep-{cycle}.txt");
+        modification::modify(
+            &archive,
+            &Change::Rename {
+                old: "source/keep.txt".into(),
+                new: renamed.clone(),
+            },
+            "",
+            &Operation::default(),
+        )
+        .unwrap_or_else(|error| panic!("ZIP rename cycle {cycle}: {error}"));
+        archive = Archive::open(&archive.path, "", &Operation::default()).unwrap();
+        assert!(contents(&archive, "").contains_key(&renamed));
+
+        modification::modify(
+            &archive,
+            &Change::Delete {
+                names: vec![format!("added-{cycle}.txt")],
+            },
+            "",
+            &Operation::default(),
+        )
+        .unwrap_or_else(|error| panic!("ZIP delete cycle {cycle}: {error}"));
+        archive = Archive::open(&archive.path, "", &Operation::default()).unwrap();
+        assert!(!contents(&archive, "").contains_key(&format!("added-{cycle}.txt")));
+
+        modification::modify(
+            &archive,
+            &Change::Rename {
+                old: renamed,
+                new: "source/keep.txt".into(),
+            },
+            "",
+            &Operation::default(),
+        )
+        .unwrap_or_else(|error| panic!("ZIP restore rename cycle {cycle}: {error}"));
+        archive = Archive::open(&archive.path, "", &Operation::default()).unwrap();
+        assert_eq!(contents(&archive, "")["source/keep.txt"], b"keep");
+    }
+}
 #[test]
 fn deletion_can_produce_empty_archive() {
     for ext in ["zip", "7z"] {
