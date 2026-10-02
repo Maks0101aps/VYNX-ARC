@@ -8,3 +8,6 @@
 *.pdb
 __pycache__/
 aqtinstall.log
+
+# Local archive test data; restored with scripts/fetch-rar-fixtures.py.
+/tests/archives/test*rar*

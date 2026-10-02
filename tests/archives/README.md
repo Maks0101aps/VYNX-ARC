@@ -1,5 +1,11 @@
 # Archive fixtures
 
+RAR binaries are local, ignored test data. Before running tests in a new clone,
+run `python scripts/fetch-rar-fixtures.py`. The downloader uses libarchive commit
+`d294297f9ecade3b2446b677bd087ad84fb7965a` and checks decoded SHA-256 hashes
+from `rar-fixtures.json`. Existing changed files are never overwritten.
+CI restores these files before tests; packages do not contain them.
+
 RAR fixtures are decoded from libarchive's upstream uuencoded test files at
 https://github.com/libarchive/libarchive/tree/master/libarchive/test .
 They contain ordinary test text/data and link metadata. They are test-only and

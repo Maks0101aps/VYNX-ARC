@@ -5,6 +5,8 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Restore verified local RAR test fixtures
+        run: python scripts/fetch-rar-fixtures.py
       - name: Rust MSVC toolchain
         run: rustup toolchain install 1.99.0-x86_64-pc-windows-msvc --profile minimal
       - name: Qt SDK
