@@ -40,7 +40,7 @@ qt_add_resources(VynxArc branding PREFIX "/" FILES assets/icons/vynx-arc.svg ass
 qt_add_translations(VynxArc TS_FILES assets/translations/vynx_uk.ts assets/translations/vynx_ru.ts RESOURCE_PREFIX "/i18n")
 install(TARGETS VynxArc RUNTIME DESTINATION .)
 install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" DESTINATION .)
-install(FILES LICENSE THIRD_PARTY_NOTICES.md DESTINATION .)
+install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
 enable_testing()
 add_test(NAME gui_smoke COMMAND VynxArc --smoke-test)
 set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")

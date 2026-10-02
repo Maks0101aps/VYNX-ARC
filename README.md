@@ -60,5 +60,5 @@ defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;
-see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the packaged `licenses/`
+see [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) and the packaged `licenses/`
 directory. RAR encoding is not implemented.
