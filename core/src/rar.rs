@@ -5,10 +5,17 @@ use std::{
     io::{Cursor, Read},
     path::Path,
     ptr::NonNull,
-    sync::mpsc::{self, Receiver, SyncSender},
+    sync::{
+        Mutex,
+        mpsc::{self, Receiver, SyncSender},
+    },
 };
 use unrar_ng_sys as sys;
 use zeroize::Zeroizing;
+
+// Upstream UnRAR stores ErrHandler as process-global mutable state and clears it
+// on every RAROpenArchiveEx call. Serialize complete list/test decoder lifetimes.
+static UNRAR_GATE: Mutex<()> = Mutex::new(());
 
 enum Event {
     Header(Entry),
@@ -269,6 +276,9 @@ impl Drop for Native {
 }
 
 pub fn list(path: &Path, password: &str, op: &Operation) -> Result<Vec<Entry>> {
+    let _gate = UNRAR_GATE
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut native = Native::open(path, password, op, false, None)?;
     let mut entries = Vec::new();
     while let Some(entry) = native.next(entries.len() as u64)? {
@@ -318,6 +328,11 @@ pub fn streams(
     op: &Operation,
     mut consume: impl FnMut(&Entry, &mut dyn Read) -> Result<()>,
 ) -> Result<()> {
+    // Keep the global UnRAR error state exclusive while its scoped decoder worker
+    // opens, reads, processes and closes this archive.
+    let _gate = UNRAR_GATE
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
     std::thread::scope(|scope| {
         let (tx, rx) = mpsc::sync_channel(2);
         scope.spawn(move || {

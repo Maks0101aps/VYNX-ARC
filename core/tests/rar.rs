@@ -104,3 +104,31 @@ fn rar4_and_rar5_encrypted_headers_and_data() {
         );
     }
 }
+
+#[test]
+fn concurrent_rar_fixtures_repeat_open_list_and_test_without_shared_state_leaks() {
+    let cases = [
+        ("test_read_format_rar5_stored.rar", ""),
+        ("test_read_format_rar4_encrypted_filenames.rar", "password"),
+        ("test_read_format_rar5_encrypted_filenames.rar", "password"),
+        ("test_rar_multivolume_single_file.part1.rar", ""),
+        ("test_read_format_rar5_multiarchive_solid.part01.rar", ""),
+    ];
+    let workers: Vec<_> = cases
+        .into_iter()
+        .map(|(name, password)| {
+            let path = fixture(name);
+            std::thread::spawn(move || {
+                for iteration in 0..10 {
+                    let archive = Archive::open(&path, password, &Operation::default())
+                        .unwrap_or_else(|e| panic!("{name} open {iteration}: {e}"));
+                    operations::test(&archive, password, &Operation::default())
+                        .unwrap_or_else(|e| panic!("{name} test {iteration}: {e}"));
+                }
+            })
+        })
+        .collect();
+    for worker in workers {
+        worker.join().expect("RAR worker panicked");
+    }
+}
