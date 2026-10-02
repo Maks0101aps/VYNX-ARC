@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "SecretUtf8.h"
 #include "ShellRequest.h"
 #include <QRegularExpression>
 #include <QStyleHints>
@@ -54,8 +55,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (busy_)
             return;
         archive_.reset();
-        password_.fill('\0');
-        password_.clear();
+        password_.reset();
         archivePath_.clear();
         pages_->setCurrentIndex(0);
         setWindowTitle(tr("VYNX ARC"));
@@ -367,7 +367,7 @@ MainWindow::~MainWindow() {
     if (operation_)
         vynx::cancel(**operation_);
     watcher_.waitForFinished();
-    password_.fill('\0');
+    password_.reset();
 }
 void MainWindow::beginOperation() {
     shownConflict_ = 0;
@@ -391,14 +391,17 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
     progress_->setRange(0, 0);
     elapsed_.start();
     timer_->start();
-    watcher_.setFuture(QtConcurrent::run([worker = std::move(worker)] {
+    watcher_.setFuture(QtConcurrent::run([worker = std::move(worker)]() mutable {
+        QString result;
         try {
-            return worker();
+            result = worker();
         } catch (const std::exception &e) {
-            return QString::fromUtf8(e.what());
+            result = QString::fromUtf8(e.what());
         } catch (...) {
-            return QStringLiteral("Unexpected worker failure");
+            result = QStringLiteral("Unexpected worker failure");
         }
+        worker = {}; // Release job captures even if the QFuture outlives completion.
+        return result;
     }));
 }
 void MainWindow::chooseOpen() {
@@ -417,6 +420,9 @@ QString MainWindow::askPassword(bool *accepted) {
 }
 void MainWindow::openPath(const QString &path) { openWithPassword(path, {}); }
 void MainWindow::openWithPassword(const QString &path, const QString &password) {
+    openWithSecret(path, secret(password));
+}
+void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &pw) {
     if (busy_)
         return;
     beginOperation();
@@ -424,17 +430,16 @@ void MainWindow::openWithPassword(const QString &path, const QString &password) 
     auto result = std::make_shared<std::shared_ptr<rust::Box<vynx::Archive>>>();
     auto entries = std::make_shared<rust::Vec<vynx::EntryInfo>>();
     auto p = utf8(path);
-    auto pw = utf8(password);
     runJob(
         tr("Opening archive…"),
         [op, result, entries, p, pw] {
-            *result = std::make_shared<rust::Box<vynx::Archive>>(vynx::open_archive(p, pw, **op));
+            *result = std::make_shared<rust::Box<vynx::Archive>>(
+                vynx::open_archive(p, pw->bytes(), **op));
             *entries = vynx::list_entries(***result);
             return QString();
         },
-        [this, result, entries, path, password] {
-            password_.fill('\0');
-            password_ = password.toUtf8();
+        [this, result, entries, path, pw] {
+            password_ = pw;
             archive_ = *result;
             archivePath_ = path;
             model_->load(std::move(*entries));
@@ -456,14 +461,13 @@ void MainWindow::openWithPassword(const QString &path, const QString &password) 
                 updateRecent();
             }
         },
-        [this, path, password](QString error) {
+        [this, path, pw](QString error) {
             if (error.contains("password", Qt::CaseInsensitive) ||
-                (!password.isEmpty() && error.startsWith("7Z"))) {
+                (!pw->bytes().empty() && error.startsWith("7Z"))) {
                 bool accepted = false;
-                const QString next = askPassword(&accepted);
+                auto next = secret(askPassword(&accepted));
                 if (accepted)
-                    QTimer::singleShot(0, this,
-                                       [this, path, next] { openWithPassword(path, next); });
+                    QTimer::singleShot(0, this, [this, path, next] { openWithSecret(path, next); });
             } else
                 QMessageBox::warning(this, tr("Could not open archive"), error);
         });
@@ -508,7 +512,7 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     auto *security = new QLabel(tr("Unsafe paths, links and archive bombs are blocked."));
     security->setWordWrap(true);
     form->addRow(security);
-    auto *password = new QLineEdit(QString::fromUtf8(password_));
+    auto *password = new QLineEdit(password_ ? password_->text() : QString());
     password->setEchoMode(QLineEdit::Password);
     form->addRow(tr("Password, if needed"), password);
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -531,9 +535,9 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
                 ids->push_back(id);
         }
     }
-    password_.fill('\0');
-    password_ = password->text().toUtf8();
-    auto pw = utf8(password->text());
+    auto pw = secret(password->text());
+    password->clear();
+    password_ = pw;
     auto dest = utf8(destination->text());
     const quint8 policies[] = {3, 2, 1, 4, 5, 0};
     auto conflict = policies[conflicts->currentIndex()];
@@ -543,7 +547,7 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     auto archive = archive_;
     runJob(tr("Extracting…"), [archive, op, ids, dest, pw, conflict, smart] {
         vynx::extract_archive(**archive, dest, rust::Slice<const quint64>(ids->data(), ids->size()),
-                              conflict, smart, pw, **op);
+                              conflict, smart, pw->bytes(), **op);
         return QString();
     });
 }
@@ -613,11 +617,12 @@ void MainWindow::testArchive() {
     beginOperation();
     auto archive = archive_;
     auto op = operation_;
-    auto p = utf8(pw);
+    auto p = secret(pw);
+    pw.fill(QChar(0));
     runJob(
         tr("Testing archive…"),
         [archive, op, p] {
-            vynx::test_archive(**archive, p, **op);
+            vynx::test_archive(**archive, p->bytes(), **op);
             return QString();
         },
         [this] {
@@ -686,7 +691,7 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
     auto op = operation_;
     auto archive = archive_;
     auto path = utf8(archivePath_);
-    auto pw = utf8(QString::fromUtf8(password_));
+    auto pw = password_ ? password_ : secret({});
     auto result = std::make_shared<QString>();
     runJob(
         tr("Calculating hashes…"),
@@ -695,10 +700,11 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
                 if (wholeArchive)
                     vynx::verify_file_hash(path, expected, **op);
                 else
-                    vynx::verify_entry_hash(**archive, (*ids)[0], expected, pw, **op);
+                    vynx::verify_entry_hash(**archive, (*ids)[0], expected, pw->bytes(), **op);
             } else {
                 auto hashes = vynx::hash_entries(
-                    **archive, rust::Slice<const quint64>(ids->data(), ids->size()), pw, **op);
+                    **archive, rust::Slice<const quint64>(ids->data(), ids->size()), pw->bytes(),
+                    **op);
                 for (const auto &h : hashes)
                     *result += text(h.name) + "\nSHA-256: " + text(h.sha256) +
                                "\nCRC32: " + text(h.crc32) + "\n\n";
@@ -806,14 +812,15 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     for (int i = 0; i < inputs->count(); ++i)
         sources->push_back(utf8(inputs->item(i)->text()));
     auto out = utf8(output->text());
-    auto pw = utf8(password->text());
+    auto pw = secret(password->text());
+    password->clear();
     const auto selectedFormat = uint8_t(format->currentIndex());
     beginOperation();
     auto op = operation_;
     runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat] {
         vynx::create_archive_as(out,
                                 rust::Slice<const rust::String>(sources->data(), sources->size()),
-                                selectedFormat, pw, **op);
+                                selectedFormat, pw->bytes(), **op);
         return QString();
     });
 }
@@ -883,7 +890,7 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
     summary->setTextFormat(Qt::PlainText);
     summary->setWordWrap(true);
     form->addRow(summary);
-    auto *password = new QLineEdit(QString::fromUtf8(password_));
+    auto *password = new QLineEdit(password_ ? password_->text() : QString());
     password->setEchoMode(QLineEdit::Password);
     form->addRow(tr("Password, if needed"), password);
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -900,8 +907,8 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
     const auto path = archivePath_;
     const auto destination = utf8(model_->folder());
     const auto renamed = utf8(newName);
-    const auto pw = utf8(password->text());
-    const auto reopenPassword = password->text();
+    const auto pw = secret(password->text());
+    password->clear();
     beginOperation();
     auto op = operation_;
     runJob(
@@ -909,12 +916,11 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
         [archive, values, kind, destination, renamed, pw, op] {
             vynx::modify_archive(**archive, uint8_t(kind),
                                  rust::Slice<const rust::String>(values->data(), values->size()),
-                                 renamed, destination, pw, **op);
+                                 renamed, destination, pw->bytes(), **op);
             return QString();
         },
-        [this, path, reopenPassword] {
-            QTimer::singleShot(
-                0, this, [this, path, reopenPassword] { openWithPassword(path, reopenPassword); });
+        [this, path, pw] {
+            QTimer::singleShot(0, this, [this, path, pw] { openWithSecret(path, pw); });
         });
 }
 void MainWindow::back() {
@@ -926,8 +932,11 @@ void MainWindow::back() {
     search_->clear();
     updateStatus();
 }
-void MainWindow::handleShellRequest(quint32 action, const QStringList &paths,
-                                    const QString &password) {
+void MainWindow::handleShellRequest(quint32 action, const QStringList &paths) {
+    handleShellWithSecret(action, paths, secret({}));
+}
+void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
+                                       const std::shared_ptr<SecretUtf8> &pw) {
     if (busy_ || paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
         return;
     if (action == 1) {
@@ -976,22 +985,22 @@ void MainWindow::handleShellRequest(quint32 action, const QStringList &paths,
             [this, output] { QTimer::singleShot(0, this, [this, output] { openPath(output); }); });
         return;
     }
-    const auto pw = utf8(password);
     runJob(
         tr("Processing selected archives…"),
         [paths, op, action, pw] {
             // A single worker processes this bounded selection sequentially.
             for (const auto &path : paths) {
-                auto archive = vynx::open_archive(utf8(path), pw, **op);
+                auto archive = vynx::open_archive(utf8(path), pw->bytes(), **op);
                 if (action == 5) {
-                    vynx::test_archive(*archive, pw, **op);
+                    vynx::test_archive(*archive, pw->bytes(), **op);
                     continue;
                 }
                 const QFileInfo info(path);
                 QString destination = info.absolutePath();
                 if (action == 3)
                     destination += "/" + info.completeBaseName();
-                vynx::extract_archive(*archive, utf8(destination), {}, 3, action == 4, pw, **op);
+                vynx::extract_archive(*archive, utf8(destination), {}, 3, action == 4, pw->bytes(),
+                                      **op);
             }
             return QString();
         },
@@ -999,10 +1008,10 @@ void MainWindow::handleShellRequest(quint32 action, const QStringList &paths,
         [this, paths, action](const QString &error) {
             if (error.contains("password", Qt::CaseInsensitive)) {
                 bool accepted = false;
-                const auto password = askPassword(&accepted);
+                const auto password = secret(askPassword(&accepted));
                 if (accepted)
                     QTimer::singleShot(0, this, [this, paths, action, password] {
-                        handleShellRequest(action, paths, password);
+                        handleShellWithSecret(action, paths, password);
                     });
             } else
                 QMessageBox::warning(this, tr("Operation stopped"), error);
@@ -1146,8 +1155,7 @@ void MainWindow::dropEvent(QDropEvent *e) {
         return;
     }
     if (urls.size() == 1 && urls.first().isLocalFile()) {
-        password_.fill('\0');
-        password_.clear();
+        password_.reset();
         openPath(urls.first().toLocalFile());
         e->acceptProposedAction();
     }
@@ -1293,6 +1301,23 @@ bool MainWindow::smokeTest() {
         if (hashes.size() != 1 || hashes[0].sha256.size() != 64 || hashes[0].crc32.size() != 8)
             return false;
         vynx::verify_entry_hash(**archive_, hashIds[0], hashes[0].sha256, "", *op);
+        auto jobSecret = secret("private");
+        std::weak_ptr<SecretUtf8> secretLifetime = jobSecret;
+        const auto encryptedPath = utf8(temp.path() + "/encrypted.zip");
+        vynx::create_archive(encryptedPath,
+                             rust::Slice<const rust::String>(inputs.data(), inputs.size()),
+                             jobSecret->bytes(), *op);
+        beginOperation();
+        auto passwordOp = operation_;
+        runJob(tr("Testing archive…"), [jobSecret, encryptedPath, passwordOp] {
+            auto encrypted = vynx::open_archive(encryptedPath, jobSecret->bytes(), **passwordOp);
+            vynx::test_archive(*encrypted, jobSecret->bytes(), **passwordOp);
+            return QString();
+        });
+        jobSecret.reset();
+        loop.exec();
+        if (busy_ || !secretLifetime.expired())
+            return false;
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;
         for (quint64 i = 0; i < 100000; ++i) {

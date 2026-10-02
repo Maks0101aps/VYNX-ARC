@@ -15,6 +15,7 @@ class QListWidget;
 class QSettings;
 class QTimer;
 class QAction;
+class SecretUtf8;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -23,7 +24,7 @@ class MainWindow : public QMainWindow {
     ~MainWindow() override;
     void openPath(const QString &path);
     bool smokeTest();
-    void handleShellRequest(quint32 action, const QStringList &paths, const QString &password = {});
+    void handleShellRequest(quint32 action, const QStringList &paths);
 
   protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -49,10 +50,13 @@ class MainWindow : public QMainWindow {
     void runJob(const QString &title, std::function<QString()> worker,
                 std::function<void()> success = {}, std::function<void(QString)> failure = {});
     void openWithPassword(const QString &path, const QString &password);
+    void openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &password);
+    void handleShellWithSecret(quint32 action, const QStringList &paths,
+                               const std::shared_ptr<SecretUtf8> &password);
     void beginOperation();
     void showConflict();
     QString askPassword(bool *accepted);
-    QByteArray password_;
+    std::shared_ptr<SecretUtf8> password_;
     QString archivePath_;
     QStringList history_;
     std::shared_ptr<rust::Box<vynx::Archive>> archive_;

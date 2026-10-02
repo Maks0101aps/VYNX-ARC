@@ -14,8 +14,10 @@ Entry hashing and supplied-digest verification are implemented (HASHING.md).
 The native Explorer component and sparse identity package are implemented, with
 COM/IPC tests. Signing and actual Windows menu activation remain pending; see
 WINDOWS_INTEGRATION.md and CLEAN_VM_CHECKLIST.md. No trust settings were changed.
-Current source validation: 35 Rust tests and 2 native/Qt smoke tests (including the
+Current source validation: 36 Rust tests and 2 native/Qt smoke tests (including the
 actual conflict dialog and entry hash bridge). The counts below are historical.
+Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.md;
+Qt and cryptographic backend wiping limitations remain explicit release gates.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
 

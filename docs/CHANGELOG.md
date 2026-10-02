@@ -16,6 +16,9 @@
 - Add a codec-free native IExplorerCommand component, bounded private selection
   IPC, sparse identity packaging and guarded registration/unregistration scripts.
   Signed registration and real Explorer/clean-VM acceptance remain unverified.
+- Share a non-copyable wiping password buffer across C++ workers/reopen callbacks
+  and document Qt/CXX/Rust/backend password lifetimes without claiming full erasure.
+- Bound Mark-of-the-Web reads before allocating, including a growing-stream check.
 
 ## 0.1.0 - 2026-10-02 (development)
 

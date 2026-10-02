@@ -408,12 +408,20 @@ fn keep_both(
 #[cfg(windows)]
 pub(crate) fn propagate_zone(source: &Path, output: &Path) -> Result<()> {
     let source_ads = format!("{}:Zone.Identifier", source.display());
-    match fs::read(&source_ads) {
-        Ok(zone) => {
-            if zone.len() > 64 * 1024 {
+    match File::open(&source_ads) {
+        Ok(source) => {
+            if source.metadata()?.len() > 64 * 1024 {
                 return Err(ArcError::new(
                     "MOTW",
                     "Source security zone is unexpectedly large",
+                ));
+            }
+            let mut zone = Vec::new();
+            source.take(64 * 1024 + 1).read_to_end(&mut zone)?;
+            if zone.len() > 64 * 1024 {
+                return Err(ArcError::new(
+                    "MOTW",
+                    "Source security zone grew beyond the limit",
                 ));
             }
             fs::write(format!("{}:Zone.Identifier", output.display()), zone)?;
