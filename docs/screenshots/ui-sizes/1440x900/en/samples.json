@@ -1,0 +1,30 @@
+[
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 42434560
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 43044864
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 42369024
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 43053056
+  }
+]

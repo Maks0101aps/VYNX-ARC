@@ -1,0 +1,30 @@
+[
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 42999808
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 43266048
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 42647552
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 43249664
+  }
+]

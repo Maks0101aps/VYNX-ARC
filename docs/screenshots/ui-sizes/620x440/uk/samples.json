@@ -1,0 +1,30 @@
+[
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 42835968
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 43241472
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 42827776
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 43278336
+  }
+]

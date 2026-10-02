@@ -1,0 +1,338 @@
+[
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 42115072
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 43089920
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "en",
+    "scale": "1.25",
+    "working_set_bytes": 42033152
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "en",
+    "scale": "1.25",
+    "working_set_bytes": 42999808
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "en",
+    "scale": "1.5",
+    "working_set_bytes": 42455040
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "en",
+    "scale": "1.5",
+    "working_set_bytes": 43278336
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "en",
+    "scale": "2",
+    "working_set_bytes": 42414080
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "en",
+    "scale": "2",
+    "working_set_bytes": 43335680
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 42647552
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 43143168
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1.25",
+    "working_set_bytes": 42364928
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1.25",
+    "working_set_bytes": 43319296
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1.5",
+    "working_set_bytes": 42680320
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "uk",
+    "scale": "1.5",
+    "working_set_bytes": 43642880
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "uk",
+    "scale": "2",
+    "working_set_bytes": 42528768
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "uk",
+    "scale": "2",
+    "working_set_bytes": 43438080
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 42680320
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 43368448
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1.25",
+    "working_set_bytes": 42205184
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1.25",
+    "working_set_bytes": 43118592
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1.5",
+    "working_set_bytes": 42528768
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "ru",
+    "scale": "1.5",
+    "working_set_bytes": 43638784
+  },
+  {
+    "state": "home",
+    "theme": "light",
+    "language": "ru",
+    "scale": "2",
+    "working_set_bytes": 42483712
+  },
+  {
+    "state": "archive",
+    "theme": "light",
+    "language": "ru",
+    "scale": "2",
+    "working_set_bytes": 43634688
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 41988096
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1",
+    "working_set_bytes": 43171840
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1.25",
+    "working_set_bytes": 42258432
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1.25",
+    "working_set_bytes": 43139072
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1.5",
+    "working_set_bytes": 42393600
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "en",
+    "scale": "1.5",
+    "working_set_bytes": 43380736
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "en",
+    "scale": "2",
+    "working_set_bytes": 42246144
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "en",
+    "scale": "2",
+    "working_set_bytes": 43466752
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 42373120
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1",
+    "working_set_bytes": 43356160
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1.25",
+    "working_set_bytes": 42274816
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1.25",
+    "working_set_bytes": 43331584
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1.5",
+    "working_set_bytes": 42622976
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "1.5",
+    "working_set_bytes": 43442176
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "2",
+    "working_set_bytes": 42541056
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "uk",
+    "scale": "2",
+    "working_set_bytes": 43675648
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 42229760
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1",
+    "working_set_bytes": 43417600
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1.25",
+    "working_set_bytes": 42332160
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1.25",
+    "working_set_bytes": 43487232
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1.5",
+    "working_set_bytes": 42639360
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "1.5",
+    "working_set_bytes": 43560960
+  },
+  {
+    "state": "home",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "2",
+    "working_set_bytes": 42487808
+  },
+  {
+    "state": "archive",
+    "theme": "dark",
+    "language": "ru",
+    "scale": "2",
+    "working_set_bytes": 43622400
+  }
+]
