@@ -8,7 +8,7 @@ fn run() -> Result<()> {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty() || args[0] == "--help" {
         println!(
-            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT...\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
+            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT...\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
         );
         return Ok(());
     }

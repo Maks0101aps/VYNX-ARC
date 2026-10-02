@@ -10,6 +10,10 @@ try {
     $stage=Join-Path $distRoot ('stage-'+[guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory $stage | Out-Null
     Copy-Item -LiteralPath (Join-Path $repoRoot 'build-msvc\VynxArc.exe') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'build-msvc\VynxShell.dll') -Destination $stage
+    & (Join-Path $PSScriptRoot 'build-identity.ps1') -OutputDirectory $distRoot
+    Copy-Item -LiteralPath (Join-Path $distRoot 'VYNX-ARC-Explorer-x64.msix') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'installer\Register-Explorer.ps1'),(Join-Path $repoRoot 'installer\Unregister-Explorer.ps1') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'target\release\vynxarc-cli.exe') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE'),(Join-Path $repoRoot 'docs\THIRD_PARTY_NOTICES.md') -Destination $stage
     Invoke-VynxTool windeployqt @('--release','--no-translations','--no-system-d3d-compiler','--no-opengl-sw','--no-compiler-runtime','--skip-plugin-types','generic,networkinformation,tls',(Join-Path $stage 'VynxArc.exe'))
@@ -40,7 +44,13 @@ try {
         if(!$iscc){$path=Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe';if(Test-Path $path){$iscc=Get-Item -LiteralPath $path}}
         if(!$iscc){throw 'Inno Setup 6 is required for the installer, or use -SkipInstaller.'}
         $compilerPath = if($iscc -is [System.Management.Automation.ApplicationInfo]){$iscc.Source}else{$iscc.FullName}
-        Invoke-VynxTool $compilerPath @("/DStageDir=$stage","/DOutputDir=$distRoot",(Join-Path $repoRoot 'installer\VynxArc.iss'))
+        $installerArguments=@("/DStageDir=$stage","/DOutputDir=$distRoot",(Join-Path $repoRoot 'installer\VynxArc.iss'))
+        if ($env:VYNX_SIGN_SCRIPT) {
+            $sdk=Join-Path ${env:ProgramFiles(x86)} 'Windows Kits\10\bin\10.0.26100.0\x64'
+            Invoke-VynxTool (Join-Path $sdk 'signtool.exe') @('verify','/pa',(Join-Path $stage 'VYNX-ARC-Explorer-x64.msix'))
+            $installerArguments=@('/DSignedIdentity')+$installerArguments
+        }
+        Invoke-VynxTool $compilerPath $installerArguments
     }
     Set-Content -LiteralPath (Join-Path $stage 'portable.flag') -Value ''
     $portable=Join-Path $distRoot 'VYNX-ARC-Portable-x64.zip'

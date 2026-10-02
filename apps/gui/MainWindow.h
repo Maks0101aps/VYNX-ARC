@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow {
     ~MainWindow() override;
     void openPath(const QString &path);
     bool smokeTest();
+    void handleShellRequest(quint32 action, const QStringList &paths, const QString &password = {});
 
   protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -31,7 +32,7 @@ class MainWindow : public QMainWindow {
 
   private:
     void chooseOpen();
-    void chooseCreate();
+    void chooseCreate(const QStringList &initial = {}, int initialFormat = 0);
     void chooseModify(int kind, const QStringList &sources = {}, bool folders = false);
     bool writableArchive() const;
     void chooseExtract(bool smart = false, bool here = false, bool named = false);

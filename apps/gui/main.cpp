@@ -1,7 +1,9 @@
 #include "MainWindow.h"
+#include "ShellRequest.h"
 #include <QApplication>
 #include <QFile>
 #include <QLocale>
+#include <QMessageBox>
 #include <QSettings>
 #include <QTimer>
 #include <QTranslator>
@@ -32,6 +34,20 @@ int main(int argc, char **argv) {
     if (app.arguments().contains("--smoke-test"))
         return window.smokeTest() ? 0 : 1;
     window.show();
+    const int shellIndex = app.arguments().indexOf("--shell-request");
+    if (shellIndex >= 0) {
+        if (shellIndex + 1 >= app.arguments().size())
+            return 2;
+        try {
+            auto request = consumeShellRequest(app.arguments()[shellIndex + 1]);
+            QTimer::singleShot(0, &window, [&window, request] {
+                window.handleShellRequest(request.action, request.paths);
+            });
+        } catch (const std::exception &error) {
+            QMessageBox::warning(&window, "VYNX ARC", QString::fromUtf8(error.what()));
+            return 2;
+        }
+    }
     const int captureIndex = app.arguments().indexOf("--capture");
     if (captureIndex >= 0 && captureIndex + 1 < app.arguments().size()) {
         const auto output = app.arguments()[captureIndex + 1];

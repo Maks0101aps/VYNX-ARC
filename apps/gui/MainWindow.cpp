@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "ShellRequest.h"
 #include <QRegularExpression>
 #include <QStyleHints>
 #include <QtConcurrent>
@@ -724,13 +725,14 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
             dialog.exec();
         });
 }
-void MainWindow::chooseCreate() {
+void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     if (busy_)
         return;
     QDialog d(this);
     d.setWindowTitle(tr("Create archive"));
     auto *form = new QFormLayout(&d);
     auto *inputs = new QListWidget;
+    inputs->addItems(initial);
     inputs->setMinimumWidth(460);
     form->addRow(tr("Sources"), inputs);
     auto *sourceButtons = new QHBoxLayout;
@@ -752,8 +754,14 @@ void MainWindow::chooseCreate() {
             [&] { delete inputs->takeItem(inputs->currentRow()); });
     auto *format = new QComboBox;
     format->addItems({"ZIP", "7Z", "TAR", "TAR.GZ"});
+    format->setCurrentIndex(initialFormat);
     form->addRow(tr("Format"), format);
     auto *output = new QLineEdit;
+    if (!initial.isEmpty())
+        output->setText(outputForFormat(
+            QFileInfo(initial.first()).absolutePath() + "/" +
+                (initial.size() == 1 ? QFileInfo(initial.first()).completeBaseName() : "Archive"),
+            initialFormat));
     auto *save = new QPushButton(tr("Browse…"));
     auto *outLine = new QHBoxLayout;
     outLine->addWidget(output);
@@ -918,6 +926,88 @@ void MainWindow::back() {
     search_->clear();
     updateStatus();
 }
+void MainWindow::handleShellRequest(quint32 action, const QStringList &paths,
+                                    const QString &password) {
+    if (busy_ || paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
+        return;
+    if (action == 1) {
+        openPath(paths.first());
+        if (paths.size() > 1) {
+            auto *dialog = new QDialog(this);
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->setWindowTitle(tr("Selected archives"));
+            auto *layout = new QVBoxLayout(dialog);
+            auto *list = new QListView;
+            list->setModel(new QStringListModel(paths, list));
+            layout->addWidget(list);
+            connect(list, &QListView::doubleClicked, this, [this](const QModelIndex &index) {
+                if (!busy_)
+                    openPath(index.data().toString());
+            });
+            dialog->resize(680, 350);
+            dialog->show();
+        }
+        return;
+    }
+    if (action == 6) {
+        chooseCreate(paths);
+        return;
+    }
+    beginOperation();
+    auto op = operation_;
+    auto values = std::make_shared<rust::Vec<rust::String>>();
+    for (const auto &path : paths)
+        values->push_back(utf8(path));
+    if (action >= 7) {
+        const QFileInfo first(paths.first());
+        const QString name = paths.size() == 1
+                                 ? (first.isDir() ? first.fileName() : first.completeBaseName())
+                                 : "Archive";
+        const quint8 format = action == 7 ? 0 : 1;
+        const auto output = outputForFormat(first.absolutePath() + "/" + name, format);
+        runJob(
+            tr("Creating archive…"),
+            [values, op, target = utf8(output), format] {
+                vynx::create_archive_as(
+                    target, rust::Slice<const rust::String>(values->data(), values->size()), format,
+                    "", **op);
+                return QString();
+            },
+            [this, output] { QTimer::singleShot(0, this, [this, output] { openPath(output); }); });
+        return;
+    }
+    const auto pw = utf8(password);
+    runJob(
+        tr("Processing selected archives…"),
+        [paths, op, action, pw] {
+            // A single worker processes this bounded selection sequentially.
+            for (const auto &path : paths) {
+                auto archive = vynx::open_archive(utf8(path), pw, **op);
+                if (action == 5) {
+                    vynx::test_archive(*archive, pw, **op);
+                    continue;
+                }
+                const QFileInfo info(path);
+                QString destination = info.absolutePath();
+                if (action == 3)
+                    destination += "/" + info.completeBaseName();
+                vynx::extract_archive(*archive, utf8(destination), {}, 3, action == 4, pw, **op);
+            }
+            return QString();
+        },
+        {},
+        [this, paths, action](const QString &error) {
+            if (error.contains("password", Qt::CaseInsensitive)) {
+                bool accepted = false;
+                const auto password = askPassword(&accepted);
+                if (accepted)
+                    QTimer::singleShot(0, this, [this, paths, action, password] {
+                        handleShellRequest(action, paths, password);
+                    });
+            } else
+                QMessageBox::warning(this, tr("Operation stopped"), error);
+        });
+}
 void MainWindow::up() {
     QString folder = model_->folder();
     if (folder.isEmpty())
@@ -1079,6 +1169,28 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 }
 bool MainWindow::smokeTest() {
     try {
+        QByteArray shellData;
+        QDataStream shellStream(&shellData, QIODevice::WriteOnly);
+        shellStream.setByteOrder(QDataStream::LittleEndian);
+        shellStream << quint32(0x52415856) << quint32(7) << quint32(1000);
+        QString shellPath = "C:";
+        for (int i = 0; i < 6; ++i)
+            shellPath += "/" + QString(60, 'x');
+        shellPath += "/дані with spaces.txt";
+        for (int i = 0; i < 1000; ++i) {
+            shellStream << quint32(shellPath.size());
+            for (auto c : shellPath)
+                shellStream << c.unicode();
+        }
+        auto shellRequest = decodeShellRequest(shellData);
+        if (shellRequest.action != 7 || shellRequest.paths.size() != 1000 ||
+            shellRequest.paths.last() != shellPath)
+            return false;
+        try {
+            decodeShellRequest(shellData + 'x');
+            return false;
+        } catch (const std::exception &) {
+        }
         if (outputForFormat("archive.zip", 1) != "archive.7z" ||
             outputForFormat("archive.tar.gz", 0) != "archive.zip")
             return false;

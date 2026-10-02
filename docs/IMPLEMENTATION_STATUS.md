@@ -11,7 +11,10 @@ creation format and free-space preflight have passed core and deployed checks.
 Extraction conflicts now support Ask, Replace, Skip, Keep both, Newer and Stop,
 with comparison details and apply-all. See CONFLICTS.md for semantics and limits.
 Entry hashing and supplied-digest verification are implemented (HASHING.md).
-Current source validation: 35 Rust tests and 1 Qt/CXX smoke test (including the
+The native Explorer component and sparse identity package are implemented, with
+COM/IPC tests. Signing and actual Windows menu activation remain pending; see
+WINDOWS_INTEGRATION.md and CLEAN_VM_CHECKLIST.md. No trust settings were changed.
+Current source validation: 35 Rust tests and 2 native/Qt smoke tests (including the
 actual conflict dialog and entry hash bridge). The counts below are historical.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.

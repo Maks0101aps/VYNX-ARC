@@ -1,0 +1,4 @@
+LIBRARY VynxShell
+EXPORTS
+    DllGetClassObject PRIVATE
+    DllCanUnloadNow PRIVATE

@@ -13,6 +13,9 @@
   newer-time decisions; restore regular-file modified timestamps.
 - Hash selected decoded files without plaintext staging and verify supplied
   SHA-256 / CRC32 digests for archive files or entries through GUI and CLI.
+- Add a codec-free native IExplorerCommand component, bounded private selection
+  IPC, sparse identity packaging and guarded registration/unregistration scripts.
+  Signed registration and real Explorer/clean-VM acceptance remain unverified.
 
 ## 0.1.0 - 2026-10-02 (development)
 
