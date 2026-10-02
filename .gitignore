@@ -36,3 +36,5 @@ Thumbs.db
 /docs/UI_MEMORY.json
 /docs/VERIFICATION.json
 /docs/VERIFICATION_LAST_SUCCESS.json
+/docs/VERIFICATION_ATTEMPTS.json
+/docs/RC_PERFORMANCE.json

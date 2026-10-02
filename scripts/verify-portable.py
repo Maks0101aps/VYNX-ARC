@@ -1,10 +1,11 @@
 import pathlib,zipfile,subprocess,os,time,json,psutil,hashlib,datetime,sys
 root=pathlib.Path(__file__).resolve().parents[1]
 report_path=root/'docs/VERIFICATION.json'
+last_success_path=root/'docs/VERIFICATION_LAST_SUCCESS.json'
 if report_path.exists():
     previous=json.loads(report_path.read_text(encoding='utf-8'))
-    if previous.get('status')!='failed':
-        (root/'docs/VERIFICATION_LAST_SUCCESS.json').write_text(json.dumps(previous,indent=2)+'\n',encoding='utf-8')
+    if previous.get('status')=='passed' and not last_success_path.exists():
+        last_success_path.write_text(json.dumps(previous,indent=2)+'\n',encoding='utf-8')
 def verification_failure(kind,error,traceback):
     report={'status':'failed','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
             'portable_sha256':hashlib.sha256((root/'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),
@@ -52,8 +53,14 @@ for ext in ['zip','7z','tar','tar.gz']:
     assert not (smart_dest/'Project/Project').exists()
     evidence[ext]='CLI roundtrip matches' + ('; opened by an independent Python reader' if ext in ['zip','7z'] else '')
     evidence[ext]+='; Smart Extract avoids duplicate archive-root nesting'
-for name in ['test_read_format_rar5_stored.rar','test_read_format_rar_binary_data.rar']:
-    run([cli,'test',root/'tests/archives'/name])
+rar_cases=['test_read_format_rar_binary_data.rar','test_read_format_rar5_stored.rar',
+           'test_rar_multivolume_single_file.part1.rar',
+           'test_read_format_rar5_multiarchive_solid.part01.rar']
+for name in rar_cases:
+    for iteration in range(10):
+        run([cli,'list',root/'tests/archives'/name])
+        run([cli,'test',root/'tests/archives'/name])
+evidence['rar-repeated']='10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)'
 for ext in ['zip','7z']:
     output=work/f'Project.{ext}'
     run([cli,'rename',output,'Project/src/дані.txt','Project/src/renamed.txt'])
@@ -96,7 +103,7 @@ assert missing.returncode==1 and b'MISSING_VOLUME' in missing.stderr and parts[1
 hidden.rename(parts[1])
 evidence['split-7z']='Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed'
 print('Independent ZIP/7Z read and packaged format tests passed',flush=True)
-screens=root/'docs/screenshots';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
+screens=scratch/'verification-captures';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
 measure=[]
 for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25'),('light','ru','2')]:
     (app/'data/settings.ini').write_text(f'[General]\ntheme={theme}\nlanguage={lang}\nhistoryEnabled=false\n',encoding='utf-8')
