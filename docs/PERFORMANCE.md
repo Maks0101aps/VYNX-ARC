@@ -3,6 +3,8 @@
 Measured 2026-10-02 on Windows 11 x64 build 26200, Ryzen 5 7500F, approximately
 32 GiB RAM. Qt 6.12.0 MSVC and an optimized Rust core are used in both revisions.
 Raw samples and executable SHA-256 values are in UI_MEMORY.json.
+This generated report is local and ignored by Git; reproduce it with the RAM
+runner documented in UI_QA.md. The table below preserves the recorded results.
 
 ## Settled working set before/after the UI refactor
 

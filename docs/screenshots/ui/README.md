@@ -3,6 +3,9 @@
 See [UI QA](../../UI_QA.md) for scope, measurements and remaining acceptance.
 Names encode page, theme, language and Qt scale factor. Full application captures
 are 1060×720 logical pixels. Native title bars are outside QWidget captures.
+The image matrix is generated locally and ignored by Git; these links work after
+running the capture commands in the QA document. Curated tracked illustrations
+are available in the parent directory.
 
 | View | Light | Dark |
 | --- | --- | --- |

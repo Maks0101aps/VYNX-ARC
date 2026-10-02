@@ -19,7 +19,9 @@ project/Qt/build metadata, source, licenses and the absence of telemetry.
 
 Baseline source is `36451d7`; checkpoint `1c7acaa` preserves the runner. All 48
 baseline captures remain in `.dev/ui-baseline`; four representative originals and
-the complete one-second sample list are committed in `screenshots/ui-before`.
+the complete one-second sample list remain locally in `screenshots/ui-before`.
+Generated image matrices and JSON reports are ignored by Git. The runners recreate
+them locally; four curated browser illustrations remain tracked for documentation.
 
 The polished presentation from `79b93ed` produced **126 real QWidget captures**:
 
