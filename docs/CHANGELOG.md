@@ -9,6 +9,8 @@
 - Make the selected GUI creation format authoritative and normalize extensions.
 - Preflight free space for extraction, creation and archive replacement.
 - Detect changed entry counts and ZIP CRC metadata during stream operations.
+- Add asynchronous extraction conflict comparison, apply-all, Keep both and
+  newer-time decisions; restore regular-file modified timestamps.
 
 ## 0.1.0 - 2026-10-02 (development)
 

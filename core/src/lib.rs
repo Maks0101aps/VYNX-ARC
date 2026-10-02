@@ -7,6 +7,7 @@ pub mod operations;
 #[cfg(windows)]
 pub mod rar;
 pub mod security;
+pub mod timestamps;
 
 pub use archive::{Archive, Entry, Format};
 pub use error::{ArcError, Result};

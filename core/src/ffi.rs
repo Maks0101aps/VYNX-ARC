@@ -22,6 +22,15 @@ pub mod bridge {
         total: u64,
         current: String,
     }
+    struct ConflictInfo {
+        id: u64,
+        incoming_name: String,
+        incoming_size: u64,
+        incoming_modified: u64,
+        existing_path: String,
+        existing_size: u64,
+        existing_modified: u64,
+    }
     extern "Rust" {
         type Archive;
         type Operation;
@@ -29,6 +38,9 @@ pub mod bridge {
         fn clone_operation(op: &Operation) -> Box<Operation>;
         fn cancel(op: &Operation);
         fn progress(op: &Operation) -> ProgressInfo;
+        fn conflict_request(op: &Operation) -> ConflictInfo;
+        fn reply_conflict(op: &Operation, id: u64, choice: u8, all: bool) -> bool;
+        fn cancelled(op: &Operation) -> bool;
         fn open_archive(path: &str, password: &str, op: &Operation) -> Result<Box<Archive>>;
         fn list_entries(archive: &Archive) -> Vec<EntryInfo>;
         fn archive_format(archive: &Archive) -> String;
@@ -128,6 +140,9 @@ fn extract_archive(
             0 => operations::Conflict::Refuse,
             1 => operations::Conflict::Skip,
             2 => operations::Conflict::Replace,
+            3 => operations::Conflict::Ask,
+            4 => operations::Conflict::Rename,
+            5 => operations::Conflict::Newer,
             _ => return Err(ArcError::new("OPTIONS", "Invalid conflict policy")),
         };
         let options = operations::ExtractOptions {
@@ -158,6 +173,42 @@ fn create_archive(output: &str, inputs: &[String], password: &str, op: &Operatio
 }
 fn hash_archive_file(path: &str, op: &Operation) -> Result<String> {
     guarded(|| operations::hash_file(Path::new(path), op))
+}
+fn cancelled(op: &Operation) -> bool {
+    op.check().is_err()
+}
+fn conflict_request(op: &Operation) -> bridge::ConflictInfo {
+    if let Some((id, request)) = op.pending_conflict() {
+        bridge::ConflictInfo {
+            id,
+            incoming_name: request.incoming_name,
+            incoming_size: request.incoming_size,
+            incoming_modified: request.incoming_modified.unwrap_or(0),
+            existing_path: request.existing_path,
+            existing_size: request.existing_size,
+            existing_modified: request.existing_modified.unwrap_or(0),
+        }
+    } else {
+        bridge::ConflictInfo {
+            id: 0,
+            incoming_name: String::new(),
+            incoming_size: 0,
+            incoming_modified: 0,
+            existing_path: String::new(),
+            existing_size: 0,
+            existing_modified: 0,
+        }
+    }
+}
+fn reply_conflict(op: &Operation, id: u64, choice: u8, all: bool) -> bool {
+    let choice = match choice {
+        0 => operations::Conflict::Refuse,
+        1 => operations::Conflict::Skip,
+        2 => operations::Conflict::Replace,
+        4 => operations::Conflict::Rename,
+        _ => return false,
+    };
+    op.reply_conflict(id, choice, all)
 }
 fn create_archive_as(
     output: &str,

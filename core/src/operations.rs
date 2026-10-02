@@ -8,7 +8,7 @@ use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
     sync::{
-        Arc, Mutex,
+        Arc, Condvar, Mutex,
         atomic::{AtomicBool, AtomicU64, Ordering},
     },
 };
@@ -22,6 +22,23 @@ struct State {
     done: AtomicU64,
     total: AtomicU64,
     current: Mutex<String>,
+    conflict: Mutex<PendingConflict>,
+    conflict_ready: Condvar,
+}
+#[derive(Clone, Debug)]
+pub struct ConflictDetails {
+    pub incoming_name: String,
+    pub incoming_size: u64,
+    pub incoming_modified: Option<u64>,
+    pub existing_path: String,
+    pub existing_size: u64,
+    pub existing_modified: Option<u64>,
+}
+#[derive(Default)]
+struct PendingConflict {
+    id: u64,
+    request: Option<ConflictDetails>,
+    reply: Option<(Conflict, bool)>,
 }
 #[derive(Clone, Debug)]
 pub struct Progress {
@@ -32,6 +49,7 @@ pub struct Progress {
 impl Operation {
     pub fn cancel(&self) {
         self.0.cancelled.store(true, Ordering::Relaxed);
+        self.0.conflict_ready.notify_all();
     }
     pub fn check(&self) -> Result<()> {
         if self.0.cancelled.load(Ordering::Relaxed) {
@@ -62,13 +80,61 @@ impl Operation {
     pub fn advance(&self, n: u64) {
         self.0.done.fetch_add(n, Ordering::Relaxed);
     }
+    pub fn pending_conflict(&self) -> Option<(u64, ConflictDetails)> {
+        let state = self.0.conflict.lock().ok()?;
+        Some((state.id, state.request.clone()?))
+    }
+    pub fn reply_conflict(&self, id: u64, choice: Conflict, all: bool) -> bool {
+        if !matches!(
+            choice,
+            Conflict::Refuse | Conflict::Replace | Conflict::Skip | Conflict::Rename
+        ) {
+            return false;
+        }
+        let Ok(mut state) = self.0.conflict.lock() else {
+            return false;
+        };
+        if state.id != id || state.request.is_none() || state.reply.is_some() {
+            return false;
+        }
+        state.reply = Some((choice, all));
+        self.0.conflict_ready.notify_all();
+        true
+    }
+    fn ask_conflict(&self, details: ConflictDetails) -> Result<(Conflict, bool)> {
+        self.check()?;
+        let internal = |_| ArcError::new("INTERNAL", "Conflict request lock failed");
+        let mut state = self.0.conflict.lock().map_err(internal)?;
+        state.id += 1;
+        state.request = Some(details);
+        state.reply = None;
+        loop {
+            if let Err(error) = self.check() {
+                state.request = None;
+                return Err(error);
+            }
+            if let Some(reply) = state.reply.take() {
+                state.request = None;
+                return Ok(reply);
+            }
+            state = self
+                .0
+                .conflict_ready
+                .wait_timeout(state, std::time::Duration::from_millis(100))
+                .map_err(|_| ArcError::new("INTERNAL", "Conflict wait failed"))?
+                .0;
+        }
+    }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Conflict {
     Refuse,
     Skip,
     Replace,
+    Ask,
+    Rename,
+    Newer,
 }
 pub struct ExtractOptions {
     pub destination: PathBuf,
@@ -135,9 +201,14 @@ pub fn extract(
 ) -> Result<PathBuf> {
     op.check()?;
     let total = archive.validate(&options.policy)?;
-    let selected = |e: &Entry| options.selected.is_empty() || options.selected.contains(&e.id);
+    if options.selected.len() > options.policy.max_entries {
+        return Err(ArcError::new("LIMIT", "Too many selected entries"));
+    }
+    let ids: std::collections::HashSet<_> = options.selected.iter().copied().collect();
+    let available: std::collections::HashSet<_> = archive.entries.iter().map(|e| e.id).collect();
+    let selected = |e: &Entry| ids.is_empty() || ids.contains(&e.id);
     for id in &options.selected {
-        if !archive.entries.iter().any(|e| e.id == *id) {
+        if !available.contains(id) {
             return Err(ArcError::new("SELECTION", "Unknown entry id"));
         }
     }
@@ -191,10 +262,55 @@ pub fn extract(
         fs::create_dir_all(security::output_path(&root, &entry.name)?)?;
     }
     let mut actual = 0u64;
+    let mut effective = options.conflict;
+    let reserved: std::collections::HashSet<_> = archive
+        .entries
+        .iter()
+        .map(|e| security::validate_name(&e.name).map(|n| n.to_uppercase()))
+        .collect::<Result<_>>()?;
     archive.streams(password, op, |entry, data| {
         op.phase(&entry.name);
-        let output = security::output_path(&root, &entry.name)?;
-        if !selected(entry) || output.exists() && options.conflict == Conflict::Skip {
+        let mut output = security::output_path(&root, &entry.name)?;
+        let mut choice = effective;
+        if selected(entry) && output.exists() {
+            let existing = fs::metadata(&output)?;
+            let modified = existing
+                .modified()
+                .ok()
+                .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+                .map(|d| d.as_secs());
+            if choice == Conflict::Newer {
+                choice = match (entry.modified_unix, modified) {
+                    (Some(incoming), Some(old)) if incoming > old.saturating_add(2) => {
+                        Conflict::Replace
+                    }
+                    (Some(_), Some(_)) => Conflict::Skip,
+                    _ => Conflict::Ask,
+                };
+            }
+            if choice == Conflict::Ask {
+                let (decision, all) = op.ask_conflict(ConflictDetails {
+                    incoming_name: entry.name.clone(),
+                    incoming_size: entry.size,
+                    incoming_modified: entry.modified_unix,
+                    existing_path: output.to_string_lossy().into_owned(),
+                    existing_size: existing.len(),
+                    existing_modified: modified,
+                })?;
+                choice = decision;
+                if all {
+                    effective = decision;
+                }
+                if choice == Conflict::Refuse {
+                    op.cancel();
+                    return op.check();
+                }
+            }
+            if choice == Conflict::Rename {
+                output = keep_both(&root, &output, &reserved, op)?;
+            }
+        }
+        if !selected(entry) || output.exists() && choice == Conflict::Skip {
             return copy_checked(
                 data,
                 &mut std::io::sink(),
@@ -224,7 +340,16 @@ pub fn extract(
         security::check_ancestors(&output)?;
         #[cfg(windows)]
         propagate_zone(&archive.path, temp.path())?;
-        if options.conflict == Conflict::Replace {
+        if let Some(seconds) = entry.modified_unix {
+            let modified = std::time::UNIX_EPOCH
+                .checked_add(std::time::Duration::from_secs(seconds))
+                .ok_or_else(|| ArcError::new("TIME", "Invalid modified time"))?;
+            temp.as_file()
+                .set_times(fs::FileTimes::new().set_modified(modified))?;
+            temp.as_file().sync_all()?;
+        }
+        op.check()?;
+        if choice == Conflict::Replace {
             temp.persist(&output).map_err(|e| ArcError::from(e.error))?;
         } else {
             temp.persist_noclobber(&output)
@@ -233,6 +358,51 @@ pub fn extract(
         Ok(())
     })?;
     Ok(root)
+}
+
+fn keep_both(
+    root: &Path,
+    output: &Path,
+    reserved: &std::collections::HashSet<String>,
+    op: &Operation,
+) -> Result<PathBuf> {
+    let parent = output
+        .parent()
+        .ok_or_else(|| ArcError::new("PATH", "No output parent"))?;
+    let stem = output
+        .file_stem()
+        .and_then(|v| v.to_str())
+        .ok_or_else(|| ArcError::new("NAME", "Invalid conflict filename"))?;
+    let extension = output
+        .extension()
+        .and_then(|v| v.to_str())
+        .map(|e| format!(".{e}"))
+        .unwrap_or_default();
+    for number in 2..=10000 {
+        op.check()?;
+        let suffix = format!(" ({number}){extension}");
+        let mut base = stem.to_owned();
+        while base.encode_utf16().count() + suffix.encode_utf16().count() > 255 {
+            if base.pop().is_none() {
+                return Err(ArcError::new(
+                    "NAME",
+                    "Cannot form a safe conflict filename",
+                ));
+            }
+        }
+        let path = parent.join(format!("{base}{suffix}"));
+        let relative = path
+            .strip_prefix(root)
+            .map_err(|_| ArcError::new("PATH", "Conflict path escaped destination"))?;
+        let name = security::validate_name(&relative.to_string_lossy())?;
+        if !path.exists() && !reserved.contains(&name.to_uppercase()) {
+            return Ok(path);
+        }
+    }
+    Err(ArcError::new(
+        "CONFLICT",
+        "Too many existing copies; choose another destination",
+    ))
 }
 
 #[cfg(windows)]

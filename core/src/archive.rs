@@ -56,6 +56,7 @@ pub struct Entry {
     pub encrypted: bool,
     pub crc: Option<u32>,
     pub modified: String,
+    pub modified_unix: Option<u64>,
 }
 
 #[derive(Clone)]
@@ -123,6 +124,7 @@ impl Archive {
                         encrypted: f.encrypted(),
                         crc: Some(f.crc32()),
                         modified: f.last_modified().map(|d| d.to_string()).unwrap_or_default(),
+                        modified_unix: f.last_modified().and_then(crate::timestamps::zip_unix),
                     });
                 }
             }
@@ -150,6 +152,10 @@ impl Archive {
                         }),
                         crc: f.has_crc.then_some(f.crc as u32),
                         modified: String::new(),
+                        modified_unix: f
+                            .has_last_modified_date
+                            .then(|| crate::timestamps::nt_unix(f.last_modified_date.into()))
+                            .flatten(),
                     });
                 }
             }
@@ -175,6 +181,7 @@ impl Archive {
                         id: i as u64,
                         name,
                         size: f.size(),
+                        modified_unix: f.header().mtime().ok(),
                         directory: kind.is_dir(),
                         link: !kind.is_file() && !kind.is_dir(),
                         ..Default::default()

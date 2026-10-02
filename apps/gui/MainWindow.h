@@ -48,6 +48,7 @@ class MainWindow : public QMainWindow {
                 std::function<void()> success = {}, std::function<void(QString)> failure = {});
     void openWithPassword(const QString &path, const QString &password);
     void beginOperation();
+    void showConflict();
     QString askPassword(bool *accepted);
     QByteArray password_;
     QString archivePath_;
@@ -76,4 +77,5 @@ class MainWindow : public QMainWindow {
     std::function<void(QString)> failure_;
     bool busy_ = false;
     bool closePending_ = false;
+    quint64 shownConflict_ = 0;
 };

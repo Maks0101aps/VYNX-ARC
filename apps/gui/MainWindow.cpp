@@ -321,6 +321,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                            .arg(displaySize(p.done), p.total ? displaySize(p.total) : tr("unknown"),
                                 displaySize(quint64(p.done / seconds)),
                                 QString::number(seconds, 'f', 1)));
+        showConflict();
     });
     connect(&watcher_, &QFutureWatcher<QString>::finished, this, [this] {
         timer_->stop();
@@ -362,6 +363,7 @@ MainWindow::~MainWindow() {
     password_.fill('\0');
 }
 void MainWindow::beginOperation() {
+    shownConflict_ = 0;
     operation_ = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
 }
 void MainWindow::runJob(const QString &title, std::function<QString()> worker,
@@ -489,8 +491,9 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     }
     form->addRow(tr("Files"), scope);
     auto *conflicts = new QComboBox;
-    conflicts->addItems(
-        {tr("Stop on conflict"), tr("Skip existing files"), tr("Replace existing files")});
+    conflicts->addItems({tr("Ask for each conflict"), tr("Replace existing files"),
+                         tr("Skip existing files"), tr("Keep both / rename incoming"),
+                         tr("Replace if newer"), tr("Stop on conflict")});
     form->addRow(tr("Existing files"), conflicts);
     auto *smartBox = new QCheckBox(tr("Smart Extract: avoid redundant nesting"));
     smartBox->setChecked(smart);
@@ -525,7 +528,8 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     password_ = password->text().toUtf8();
     auto pw = utf8(password->text());
     auto dest = utf8(destination->text());
-    auto conflict = quint8(conflicts->currentIndex());
+    const quint8 policies[] = {3, 2, 1, 4, 5, 0};
+    auto conflict = policies[conflicts->currentIndex()];
     smart = smartBox->isChecked();
     beginOperation();
     auto op = operation_;
@@ -535,6 +539,62 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
                               conflict, smart, pw, **op);
         return QString();
     });
+}
+void MainWindow::showConflict() {
+    if (!operation_)
+        return;
+    auto request = vynx::conflict_request(**operation_);
+    if (!request.id || request.id == shownConflict_)
+        return;
+    shownConflict_ = request.id;
+    auto op = operation_;
+    auto *dialog = new QDialog(this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setWindowTitle(tr("File already exists"));
+    dialog->setWindowModality(Qt::ApplicationModal);
+    dialog->setMinimumWidth(540);
+    auto *layout = new QVBoxLayout(dialog);
+    auto date = [this](quint64 seconds) {
+        return seconds ? QDateTime::fromSecsSinceEpoch(qint64(seconds)).toString(Qt::ISODate)
+                       : tr("Unknown");
+    };
+    auto *comparison = new QLabel(tr("Existing: %1\nSize: %2 bytes\nModified: %3\n\nIncoming: "
+                                     "%4\nSize: %5 bytes\nModified: %6")
+                                      .arg(text(request.existing_path))
+                                      .arg(request.existing_size)
+                                      .arg(date(request.existing_modified))
+                                      .arg(text(request.incoming_name))
+                                      .arg(request.incoming_size)
+                                      .arg(date(request.incoming_modified)));
+    comparison->setTextFormat(Qt::PlainText);
+    comparison->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    comparison->setWordWrap(true);
+    layout->addWidget(comparison);
+    auto *all = new QCheckBox(tr("Apply this choice to all conflicts"));
+    layout->addWidget(all);
+    auto *buttons = new QDialogButtonBox;
+    layout->addWidget(buttons);
+    auto add = [&](const QString &label, quint8 choice, QDialogButtonBox::ButtonRole role) {
+        auto *button = buttons->addButton(label, role);
+        connect(button, &QPushButton::clicked, dialog, [dialog, op, id = request.id, all, choice] {
+            vynx::reply_conflict(**op, id, choice, all->isChecked());
+            dialog->accept();
+        });
+    };
+    add(tr("Replace"), 2, QDialogButtonBox::DestructiveRole);
+    add(tr("Skip"), 1, QDialogButtonBox::ActionRole);
+    add(tr("Keep both"), 4, QDialogButtonBox::ActionRole);
+    add(tr("Cancel"), 0, QDialogButtonBox::RejectRole);
+    connect(dialog, &QDialog::finished, dialog,
+            [op, id = request.id] { vynx::reply_conflict(**op, id, 0, false); });
+    connect(&watcher_, &QFutureWatcher<QString>::finished, dialog, &QDialog::reject);
+    auto *cancelTimer = new QTimer(dialog);
+    connect(cancelTimer, &QTimer::timeout, dialog, [dialog, op] {
+        if (vynx::cancelled(**op))
+            dialog->reject();
+    });
+    cancelTimer->start(100);
+    dialog->open();
 }
 void MainWindow::testArchive() {
     if (busy_ || !archive_)
@@ -994,6 +1054,37 @@ bool MainWindow::smokeTest() {
             restored.readAll() != "real GUI bridge roundtrip")
             return false;
         restored.close();
+        // Exercise the real asynchronous conflict dialog and bridge reply.
+        beginOperation();
+        auto conflictOp = operation_;
+        auto conflictArchive = archive_;
+        bool conflictDialogSeen = false;
+        QTimer answer;
+        connect(&answer, &QTimer::timeout, this, [&] {
+            for (auto *dialog : findChildren<QDialog *>()) {
+                if (dialog->windowTitle() != tr("File already exists"))
+                    continue;
+                for (auto *box : dialog->findChildren<QCheckBox *>())
+                    box->setChecked(true);
+                for (auto *button : dialog->findChildren<QPushButton *>()) {
+                    if (button->text() == tr("Skip")) {
+                        conflictDialogSeen = true;
+                        button->click();
+                        return;
+                    }
+                }
+            }
+        });
+        answer.start(50);
+        runJob(tr("Extracting…"), [conflictArchive, conflictOp,
+                                   destination = utf8(temp.path() + "/out")] {
+            vynx::extract_archive(**conflictArchive, destination, {}, 3, false, "", **conflictOp);
+            return QString();
+        });
+        loop.exec();
+        answer.stop();
+        if (busy_ || !conflictDialogSeen || vynx::conflict_request(**conflictOp).id)
+            return false;
         rust::Vec<rust::String> rename;
         rename.push_back("source/nested/дані.txt");
         vynx::modify_archive(**archive_, 2,

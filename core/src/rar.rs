@@ -201,6 +201,12 @@ impl Native {
                 || h.host_os == 3 && h.file_attr & 0xf000 == 0xa000,
             crc: Some(h.file_crc),
             modified: String::new(),
+            modified_unix: zip::DateTime::try_from_msdos(
+                (h.file_time >> 16) as u16,
+                h.file_time as u16,
+            )
+            .ok()
+            .and_then(crate::timestamps::zip_unix),
         };
         self.context.bytes = 0;
         self.context.expected = entry.size;
