@@ -262,11 +262,6 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
     security::check_ancestors(&archive.path)?;
     drop(zip_metadata);
     drop(source_guard);
-    // The directory pins prevent ancestor replacement while reading/writing the
-    // archive, but their Windows handles omit FILE_SHARE_DELETE. Keeping them
-    // alive across MoveFileEx/ReplaceFile blocks publication in that same parent.
-    // Publication is the established pathname-race boundary documented above.
-    drop(_pins);
     // No cancellation after the commit decision: a successful publish is reported
     // as success so the GUI refreshes instead of claiming the old archive survived.
     commit(replacement, &archive.path, op)
