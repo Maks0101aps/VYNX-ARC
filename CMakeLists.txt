@@ -6,6 +6,7 @@ find_package(Qt6 6.12 REQUIRED COMPONENTS Widgets Concurrent Test LinguistTools)
 find_program(CARGO_EXECUTABLE cargo REQUIRED)
 qt_standard_project_setup()
 file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS core/src/*.rs)
+file(GLOB_RECURSE CLI_SOURCES CONFIGURE_DEPENDS apps/cli/src/*.rs)
 file(GLOB_RECURSE RAR_SOURCES CONFIGURE_DEPENDS third_party/unrar-sys/src/*.rs third_party/unrar-sys/vendor/unrar/*.cpp third_party/unrar-sys/vendor/unrar/*.hpp)
 set(RUST_TARGET_DIR "${CMAKE_SOURCE_DIR}/target")
 if(MSVC)
@@ -16,7 +17,7 @@ endif()
 add_custom_command(OUTPUT "${RUST_LIBRARY}"
     COMMAND ${CARGO_EXECUTABLE} build --workspace --release --locked
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    DEPENDS ${CORE_SOURCES} ${RAR_SOURCES} third_party/unrar-sys/build.rs core/build.rs core/Cargo.toml Cargo.toml Cargo.lock
+    DEPENDS ${CORE_SOURCES} ${CLI_SOURCES} ${RAR_SOURCES} apps/cli/Cargo.toml third_party/unrar-sys/build.rs core/build.rs core/Cargo.toml Cargo.toml Cargo.lock
     VERBATIM)
 add_custom_target(rust_core DEPENDS "${RUST_LIBRARY}")
 add_library(vynx_core STATIC IMPORTED GLOBAL)

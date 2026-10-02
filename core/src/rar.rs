@@ -22,6 +22,7 @@ struct Context {
     sender: Option<SyncSender<Event>>,
     bytes: u64,
     expected: u64,
+    missing_volume: Option<String>,
 }
 extern "C" fn callback(
     message: sys::UINT,
@@ -84,6 +85,20 @@ extern "C" fn callback(
             }
             sys::UCM_CHANGEVOLUME | sys::UCM_CHANGEVOLUMEW => {
                 if p2 == sys::RAR_VOL_ASK {
+                    if p1 != 0 && message == sys::UCM_CHANGEVOLUMEW {
+                        let mut name = Vec::new();
+                        // SAFETY: Official UCM_CHANGEVOLUMEW supplies a live,
+                        // terminated wchar_t filename for the callback duration.
+                        // No pointer or borrowed buffer escapes this call.
+                        for index in 0..32768 {
+                            let c = unsafe { *(p1 as *const u16).add(index) };
+                            if c == 0 {
+                                break;
+                            }
+                            name.push(c);
+                        }
+                        context.missing_volume = Some(String::from_utf16_lossy(&name));
+                    }
                     -1
                 } else {
                     0
@@ -95,6 +110,17 @@ extern "C" fn callback(
         }
     }))
     .unwrap_or(-1)
+}
+impl Context {
+    fn result(&self, code: i32) -> Result<()> {
+        if let Some(path) = &self.missing_volume {
+            return Err(ArcError::new(
+                "MISSING_VOLUME",
+                format!("Archive part is missing: {path}"),
+            ));
+        }
+        check(code)
+    }
 }
 
 fn error(code: i32) -> ArcError {
@@ -143,6 +169,7 @@ impl Native {
             sender,
             bytes: 0,
             expected: 0,
+            missing_volume: None,
         });
         let mut data = sys::OpenArchiveDataEx::new(
             filename.as_ptr(),
@@ -158,6 +185,7 @@ impl Native {
         // allocations remain live for this call and then the complete Native lifetime.
         let raw = unsafe { sys::RAROpenArchiveEx(&mut data) };
         let Some(handle) = NonNull::new(raw.cast_mut()) else {
+            context.result(data.open_result as i32)?;
             return Err(error(data.open_result as i32));
         };
         let native = Self {
@@ -165,7 +193,7 @@ impl Native {
             context,
             _filename: filename,
         };
-        check(data.open_result as i32)?;
+        native.context.result(data.open_result as i32)?;
         Ok(native)
     }
     fn next(&mut self, id: u64) -> Result<Option<Entry>> {
@@ -174,10 +202,13 @@ impl Native {
         // SAFETY: handle is open and exclusively accessed by this thread; h is writable,
         // correctly initialized upstream ABI storage with no dangling auxiliary buffers.
         let code = unsafe { sys::RARReadHeaderEx(self.handle.as_ptr(), &mut h) };
+        if self.context.missing_volume.is_some() {
+            self.context.result(code)?;
+        }
         if code == sys::ERAR_END_ARCHIVE {
             return Ok(None);
         }
-        check(code)?;
+        self.context.result(code)?;
         let raw = h.filename_w;
         let end = raw
             .iter()
@@ -224,7 +255,7 @@ impl Native {
             )
         };
         self.context.op.check()?;
-        check(code)
+        self.context.result(code)
     }
 }
 impl Drop for Native {
@@ -376,6 +407,7 @@ mod tests {
             sender: Some(tx),
             bytes: 0,
             expected: 4,
+            missing_volume: None,
         });
         let data = b"test";
         let ptr = (&mut *ctx as *mut Context) as sys::LPARAM;
@@ -402,6 +434,7 @@ mod tests {
             sender: None,
             bytes: 0,
             expected: 0,
+            missing_volume: None,
         });
         let mut out = [0u16; 4];
         let ptr = (&mut *ctx as *mut Context) as sys::LPARAM;

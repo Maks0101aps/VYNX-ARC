@@ -504,6 +504,33 @@ pub fn create(options: &CreateOptions, op: &Operation) -> Result<()> {
 }
 
 pub fn create_as(options: &CreateOptions, format: Format, op: &Operation) -> Result<()> {
+    create_internal(options, format, None, op)
+}
+pub fn create_split(options: &CreateOptions, size: u64, op: &Operation) -> Result<()> {
+    create_internal(options, Format::SevenZ, Some(size), op)
+}
+fn create_internal(
+    options: &CreateOptions,
+    format: Format,
+    split: Option<u64>,
+    op: &Operation,
+) -> Result<()> {
+    if let Some(size) = split {
+        if size < 64 * 1024 {
+            return Err(ArcError::new(
+                "OPTIONS",
+                "Split volume must be at least 64 KiB",
+            ));
+        }
+        let first = PathBuf::from(format!("{}.001", options.output.display()));
+        security::check_ancestors(&first)?;
+        if first.exists() {
+            return Err(ArcError::new(
+                "CONFLICT",
+                "First archive volume already exists",
+            ));
+        }
+    }
     if options.inputs.is_empty() {
         return Err(ArcError::new(
             "INPUT",
@@ -544,7 +571,11 @@ pub fn create_as(options: &CreateOptions, format: Format, op: &Operation) -> Res
         ..Default::default()
     };
     op.total(security::validate_plan(&entries, 1, &policy)?);
-    crate::disk::preflight(&options.output, sources.iter().map(|(e, _)| e.size).sum())?;
+    let required = sources.iter().map(|(e, _)| e.size).sum::<u64>();
+    let required = required
+        .checked_mul(if split.is_some() { 2 } else { 1 })
+        .ok_or_else(|| ArcError::new("LIMIT", "Split space estimate overflow"))?;
+    crate::disk::preflight(&options.output, required)?;
     let parent = options
         .output
         .parent()
@@ -639,6 +670,9 @@ pub fn create_as(options: &CreateOptions, format: Format, op: &Operation) -> Res
     test(&archive, &options.password, op)?;
     op.check()?;
     security::check_ancestors(&options.output)?;
+    if let Some(size) = split {
+        return crate::volumes::publish(temp.as_file_mut(), &options.output, size, op);
+    }
     temp.persist_noclobber(&options.output)
         .map_err(|e| ArcError::from(e.error))?;
     Ok(())

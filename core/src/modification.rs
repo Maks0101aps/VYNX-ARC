@@ -36,7 +36,9 @@ fn under(name: &str, prefix: &str) -> bool {
 /// publication still has the documented hostile-local-process race limitation.
 pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation) -> Result<()> {
     op.check()?;
-    if !matches!(archive.format, Format::Zip | Format::SevenZ) {
+    if !matches!(archive.format, Format::Zip | Format::SevenZ)
+        || crate::volumes::first_part(&archive.path).is_some()
+    {
         return Err(ArcError::new(
             "READ_ONLY",
             "This format is read only; modification supports ZIP and 7Z",

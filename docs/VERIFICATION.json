@@ -4,32 +4,33 @@
     "zip": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
     "7z": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
     "tar": "CLI roundtrip matches",
-    "tar.gz": "CLI roundtrip matches"
+    "tar.gz": "CLI roundtrip matches",
+    "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
   },
   "memory_samples": [
     {
       "theme": "light",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 43061248
+      "working_set_bytes": 43053056
     },
     {
       "theme": "dark",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 43081728
+      "working_set_bytes": 43307008
     },
     {
       "theme": "dark",
       "language": "uk",
       "scale": "1.25",
-      "working_set_bytes": 43401216
+      "working_set_bytes": 43188224
     },
     {
       "theme": "light",
       "language": "ru",
       "scale": "2",
-      "working_set_bytes": 43581440
+      "working_set_bytes": 43708416
     }
   ],
   "remaining_processes": []

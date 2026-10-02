@@ -9,6 +9,7 @@ pub mod operations;
 pub mod rar;
 pub mod security;
 pub mod timestamps;
+pub mod volumes;
 
 pub use archive::{Archive, Entry, Format};
 pub use error::{ArcError, Result};

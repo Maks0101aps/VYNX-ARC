@@ -8,7 +8,7 @@ fn run() -> Result<()> {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty() || args[0] == "--help" {
         println!(
-            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT...\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
+            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT... [--split-bytes N (7Z only)]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
         );
         return Ok(());
     }
@@ -67,14 +67,30 @@ fn run() -> Result<()> {
             println!("Replacement archive verified and committed");
         }
         "hash" => println!("{}", operations::hash_file(Path::new(&path), &op)?),
-        "create" => operations::create(
-            &CreateOptions {
+        "create" => {
+            let mut inputs = Vec::new();
+            let mut split = None;
+            let mut iter = args.into_iter();
+            while let Some(arg) = iter.next() {
+                if arg == "--split-bytes" {
+                    split = Some(iter.next().and_then(|v| v.parse::<u64>().ok()).ok_or_else(
+                        || ArcError::new("USAGE", "--split-bytes needs a positive byte count"),
+                    )?);
+                } else {
+                    inputs.push(PathBuf::from(arg));
+                }
+            }
+            let options = CreateOptions {
                 output: path.into(),
-                inputs: args.into_iter().map(PathBuf::from).collect(),
-                password: zeroize::Zeroizing::new(String::new()),
-            },
-            &op,
-        )?,
+                inputs,
+                password: String::new().into(),
+            };
+            if let Some(size) = split {
+                operations::create_split(&options, size, &op)?;
+            } else {
+                operations::create(&options, &op)?;
+            }
+        }
         "list" | "test" | "extract" => {
             let archive = Archive::open(Path::new(&path), "", &op)?;
             match command.as_str() {

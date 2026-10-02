@@ -4,7 +4,6 @@ use crate::{
     security::{Policy, validate_plan},
 };
 use std::{
-    fs::File,
     io::{Read, Seek, SeekFrom},
     path::{Path, PathBuf},
 };
@@ -67,7 +66,7 @@ pub struct Archive {
     pub physical_size: u64,
 }
 
-pub fn detect(file: &mut File) -> Result<Format> {
+pub fn detect(file: &mut (impl Read + Seek)) -> Result<Format> {
     let mut header = [0u8; 512];
     let n = file.read(&mut header)?;
     file.seek(SeekFrom::Start(0))?;
@@ -96,15 +95,16 @@ pub fn detect(file: &mut File) -> Result<Format> {
 impl Archive {
     pub fn open(path: &Path, password: &str, op: &Operation) -> Result<Self> {
         op.phase("Reading archive metadata");
-        let mut file = File::open(path)?;
-        let physical_size = file.metadata()?.len();
+        let mut file = crate::volumes::Reader::open(path)?;
+        let physical_size = file.len();
+        let path = file.path().to_owned();
         let format = detect(&mut file)?;
         let mut entries = Vec::new();
         let max_entries = Policy::default().max_entries;
         match format {
             #[cfg(windows)]
             Format::Rar => {
-                entries = crate::rar::list(path, password, op)?;
+                entries = crate::rar::list(&path, password, op)?;
             }
             Format::Zip => {
                 let mut zip = zip::ZipArchive::new(file)?;
@@ -208,7 +208,7 @@ impl Archive {
         op: &Operation,
         mut consume: impl FnMut(&Entry, &mut dyn Read) -> Result<()>,
     ) -> Result<()> {
-        let file = File::open(&self.path)?;
+        let file = crate::volumes::Reader::open(&self.path)?;
         match self.format {
             #[cfg(windows)]
             Format::Rar => {

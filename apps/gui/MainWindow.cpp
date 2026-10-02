@@ -784,6 +784,23 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     auto *password = new QLineEdit;
     password->setEchoMode(QLineEdit::Password);
     form->addRow(tr("Password (optional)"), password);
+    auto *advanced = new QGroupBox(tr("Advanced: split 7Z volumes"));
+    advanced->setCheckable(true);
+    advanced->setChecked(false);
+    advanced->setVisible(initialFormat == 1);
+    auto *splitForm = new QFormLayout(advanced);
+    auto *split = new QComboBox;
+    split->addItems({tr("No split"), "100 MiB", "500 MiB", "1 GiB", "4 GiB", tr("Custom")});
+    auto *customSplit = new QSpinBox;
+    customSplit->setRange(1, 1048576);
+    customSplit->setValue(100);
+    customSplit->setSuffix(" MiB");
+    customSplit->setVisible(false);
+    splitForm->addRow(tr("Volume size"), split);
+    splitForm->addRow(customSplit);
+    connect(split, &QComboBox::currentIndexChanged, &d,
+            [customSplit](int index) { customSplit->setVisible(index == 5); });
+    form->addRow(advanced);
     auto *encryptionLabel = new QLabel(tr("ZIP uses AES-256. 7Z encrypts data and filenames."));
     encryptionLabel->setWordWrap(true);
     form->addRow(encryptionLabel);
@@ -792,6 +809,7 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
         if (i >= 2)
             password->clear();
         encryptionLabel->setVisible(i < 2);
+        advanced->setVisible(i == 1);
     });
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText(tr("Create"));
@@ -815,12 +833,21 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     auto pw = secret(password->text());
     password->clear();
     const auto selectedFormat = uint8_t(format->currentIndex());
+    const quint64 splitSizes[] = {0,          100ULL << 20, 500ULL << 20,
+                                  1ULL << 30, 4ULL << 30,   quint64(customSplit->value()) << 20};
+    const auto volumeSize =
+        selectedFormat == 1 && advanced->isChecked() ? splitSizes[split->currentIndex()] : 0;
     beginOperation();
     auto op = operation_;
-    runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat] {
-        vynx::create_archive_as(out,
-                                rust::Slice<const rust::String>(sources->data(), sources->size()),
-                                selectedFormat, pw->bytes(), **op);
+    runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
+        if (volumeSize)
+            vynx::create_split_archive(
+                out, rust::Slice<const rust::String>(sources->data(), sources->size()), volumeSize,
+                pw->bytes(), **op);
+        else
+            vynx::create_archive_as(
+                out, rust::Slice<const rust::String>(sources->data(), sources->size()),
+                selectedFormat, pw->bytes(), **op);
         return QString();
     });
 }
@@ -836,15 +863,14 @@ void MainWindow::navigate(const QString &folder) {
 bool MainWindow::writableArchive() const {
     if (!archive_)
         return false;
-    const auto format = text(vynx::archive_format(**archive_));
-    return format == "ZIP" || format == "7Z";
+    return vynx::archive_writable(**archive_);
 }
 void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders) {
     if (busy_ || !archive_)
         return;
     if (!writableArchive()) {
-        statusBar()->showMessage(tr("This archive is read only. Modification supports ZIP and 7Z."),
-                                 10000);
+        statusBar()->showMessage(
+            tr("This archive is read only. Modification supports single-file ZIP and 7Z."), 10000);
         return;
     }
     QStringList names = sources;

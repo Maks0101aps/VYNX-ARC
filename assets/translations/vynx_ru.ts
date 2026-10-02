@@ -46,29 +46,29 @@
     <context>
         <name>MainWindow</name>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="27" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="28" />
             <location filename="../../apps/gui/MainWindow.cpp" line="61" />
             <location filename="../../apps/gui/MainWindow.cpp" line="120" />
             <source>VYNX ARC</source>
             <translation>VYNX ARC</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="39" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="40" />
             <source>&amp;File</source>
             <translation>&amp;Файл</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="48" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="49" />
             <source>&amp;Open archive…</source>
             <translation>&amp;Открыть архив…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="50" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="51" />
             <source>&amp;Create archive…</source>
             <translation>&amp;Создать архив…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="53" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="54" />
             <source>Close archive</source>
             <translation>Закрыть архив</translation>
         </message>
@@ -184,15 +184,15 @@ ZIP, 7Z, RAR, TAR и TAR.GZ.
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="125" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="408" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="411" />
             <source>Open archive</source>
             <translation>Открыть архив</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="126" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="732" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="772" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="795" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="738" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="778" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="819" />
             <source>Create archive</source>
             <translation>Создать архив</translation>
         </message>
@@ -241,7 +241,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="188" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="515" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="519" />
             <source>Extract</source>
             <translation>Распаковать</translation>
         </message>
@@ -267,7 +267,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="298" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="594" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="598" />
             <source>Cancel</source>
             <translation>Отмена</translation>
         </message>
@@ -293,196 +293,202 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="357" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="1008" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1043" />
             <source>Operation stopped</source>
             <translation>Операция остановлена</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="409" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="412" />
             <source>Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz);;All files (*)</source>
             <translation>Архивы (*.zip *.7z *.rar *.tar *.tar.gz *.tgz);;Все файлы (*)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="414" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="417" />
             <source>Archive password</source>
             <translation>Пароль архива</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="415" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="418" />
             <source>Password (kept only for this open archive)</source>
             <translation>Пароль (только для открытого архива)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="429" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="434" />
             <source>Opening archive…</source>
             <translation>Открытие архива…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="444" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="449" />
             <source>VYNX ARC — %1</source>
             <translation>VYNX ARC — %1</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="468" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="472" />
             <source>Could not open archive</source>
             <translation>Не удалось открыть архив</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="475" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="479" />
             <source>Extract archive</source>
             <translation>Распаковать архив</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="481" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="765" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="485" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="771" />
             <source>Browse…</source>
             <translation>Обзор…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="485" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="489" />
             <source>Destination</source>
             <translation>Назначение</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="487" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="491" />
             <source>Extraction destination</source>
             <translation>Папка для распаковки</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="493" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="497" />
             <source>All files</source>
             <translation>Все файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="496" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="500" />
             <source>Selected files and folders</source>
             <translation>Выбранные файлы и папки</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="499" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="503" />
             <source>Files</source>
             <translation>Файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="501" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="505" />
             <source>Ask for each conflict</source>
             <translation>Спрашивать при каждом конфликте</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="502" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="506" />
             <source>Keep both / rename incoming</source>
             <translation>Сохранить оба / переименовать новый</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="503" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="507" />
             <source>Stop on conflict</source>
             <translation>Остановить при конфликте</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="502" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="873" />
+            <source>This archive is read only. Modification supports single-file ZIP and 7Z.</source>
+            <translation>Этот архив доступен только для чтения. Изменение поддерживается для однотомных ZIP и 7Z.</translation>
+        </message>
+        <message>
+            <location filename="../../apps/gui/MainWindow.cpp" line="506" />
             <source>Skip existing files</source>
             <translation>Пропустить существующие файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="501" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="505" />
             <source>Replace existing files</source>
             <translation>Заменить существующие файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="504" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="508" />
             <source>Existing files</source>
             <translation>Существующие файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="505" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="509" />
             <source>Smart Extract: avoid redundant nesting</source>
             <translation>Умная распаковка: без лишних папок</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="508" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="512" />
             <source>Unsafe paths, links and archive bombs are blocked.</source>
             <translation>Опасные пути, ссылки и архивные бомбы блокируются.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="513" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="888" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="517" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="921" />
             <source>Password, if needed</source>
             <translation>Пароль, если нужен</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="544" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="1265" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="548" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1302" />
             <source>Extracting…</source>
             <translation>Распаковка…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="618" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="623" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1338" />
             <source>Testing archive…</source>
             <translation>Проверка архива…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="624" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="629" />
             <source>Archive test</source>
             <translation>Проверка архива</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="625" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="630" />
             <source>All archive streams decoded successfully.
 Checksums were verified where provided by the backend.</source>
             <translation>Все потоки архива успешно декодированы.
 Контрольные суммы проверены там, где их предоставляет формат.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="637" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="642" />
             <source>Hashing archive file…</source>
             <translation>Вычисление хешей архива…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="644" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="649" />
             <source>Archive hashes</source>
             <translation>Хеши архива</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="649" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="720" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="654" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="726" />
             <source>Copy hashes</source>
             <translation>Копировать хеши</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="737" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="743" />
             <source>Sources</source>
             <translation>Источники</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="88" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="739" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="745" />
             <source>Add files…</source>
             <translation>Добавить файлы…</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="91" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="740" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="746" />
             <source>Add folder…</source>
             <translation>Добавить папку…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="503" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="507" />
             <source>Replace if newer</source>
             <translation>Заменить, если новее</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="560" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="1251" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="564" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1288" />
             <source>File already exists</source>
             <translation>Файл уже существует</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="566" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="570" />
             <source>Unknown</source>
             <translation>Неизвестно</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="568" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="572" />
             <source>Existing: %1
 Size: %2 bytes
 Modified: %3
@@ -499,158 +505,177 @@ Modified: %6</source>
 Изменён: %6</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="580" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="584" />
             <source>Apply this choice to all conflicts</source>
             <translation>Применить выбор ко всем конфликтам</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="591" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="595" />
             <source>Replace</source>
             <translation>Заменить</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="592" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="1256" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="596" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1293" />
             <source>Skip</source>
             <translation>Пропустить</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="593" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="597" />
             <source>Keep both</source>
             <translation>Сохранить оба</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="670" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="675" />
             <source>Select regular files; verification requires one file.</source>
             <translation>Выберите обычные файлы; для проверки нужен один файл.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="678" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="710" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="683" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="716" />
             <source>Verify hash</source>
             <translation>Проверить хеш</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="679" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="684" />
             <source>Expected SHA-256 (64 hex) or CRC32 (8 hex)</source>
             <translation>Ожидаемый SHA-256 (64 шестнадцатеричных знака) или CRC32 (8 знаков)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="692" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="697" />
             <source>Calculating hashes…</source>
             <translation>Вычисление хешей…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="711" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="717" />
             <source>The computed digest matches the supplied value.</source>
             <translation>Вычисленный хеш совпадает с указанным значением.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="715" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="721" />
             <source>Entry hashes</source>
             <translation>Хеши записей</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="741" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="747" />
             <source>Remove</source>
             <translation>Убрать</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="747" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="850" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="753" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="883" />
             <source>Source files</source>
             <translation>Исходные файлы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="749" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="846" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="755" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="879" />
             <source>Source folder</source>
             <translation>Исходная папка</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="758" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="764" />
             <source>Format</source>
             <translation>Формат</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="769" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="775" />
             <source>Output archive</source>
             <translation>Новый архив</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="774" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="780" />
             <source>All files (*)</source>
             <translation>Все файлы (*)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="780" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="786" />
             <source>Password (optional)</source>
             <translation>Пароль (необязательно)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="781" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="787" />
+            <source>Advanced: split 7Z volumes</source>
+            <translation>Дополнительно: тома 7Z</translation>
+        </message>
+        <message>
+            <location filename="../../apps/gui/MainWindow.cpp" line="793" />
+            <source>No split</source>
+            <translation>Без разделения</translation>
+        </message>
+        <message>
+            <location filename="../../apps/gui/MainWindow.cpp" line="793" />
+            <source>Custom</source>
+            <translation>Другой размер</translation>
+        </message>
+        <message>
+            <location filename="../../apps/gui/MainWindow.cpp" line="799" />
+            <source>Volume size</source>
+            <translation>Размер тома</translation>
+        </message>
+        <message>
+            <location filename="../../apps/gui/MainWindow.cpp" line="804" />
             <source>ZIP uses AES-256. 7Z encrypts data and filenames.</source>
             <translation>ZIP использует AES-256. 7Z шифрует данные и имена файлов.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="791" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="815" />
             <source>Create</source>
             <translation>Создать</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="796" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="820" />
             <source>Choose source files and an output archive.</source>
             <translation>Выберите исходные файлы и путь нового архива.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="813" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="969" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="842" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1004" />
             <source>Creating archive…</source>
             <translation>Создание архива…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="839" />
             <source>This archive is read only. Modification supports ZIP and 7Z.</source>
-            <translation>Этот архив доступен только для чтения. Изменять можно ZIP и 7Z.</translation>
+            <translation type="vanished">Этот архив доступен только для чтения. Изменять можно ZIP и 7Z.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="856" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="889" />
             <source>Select files or folders first.</source>
             <translation>Сначала выберите файлы или папки.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="862" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="895" />
             <source>Select one entry to rename.</source>
             <translation>Выберите одну запись для переименования.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="866" />
-            <location filename="../../apps/gui/MainWindow.cpp" line="876" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="899" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="909" />
             <source>Rename entry</source>
             <translation>Переименовать запись</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="866" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="899" />
             <source>New archive path</source>
             <translation>Новый путь в архиве</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="872" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="905" />
             <source>Modify archive</source>
             <translation>Изменить архив</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="874" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="907" />
             <source>Add files and folders</source>
             <translation>Добавить файлы и папки</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="875" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="908" />
             <source>Delete entries</source>
             <translation>Удалить записи</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="878" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="911" />
             <source>%1: %2 item(s)
 Destination in archive: %3
 A verified replacement will be published only after completion.
@@ -661,62 +686,62 @@ Duplicate paths are rejected. Contents are recompressed.</source>
 Повторяющиеся пути отклоняются. Содержимое сжимается заново.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="938" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="973" />
             <source>Selected archives</source>
             <translation>Выбранные архивы</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="981" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1015" />
             <source>Processing selected archives…</source>
             <translation>Обработка выбранных архивов…</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1022" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1057" />
             <source>%1 entries · %2 · %3</source>
             <translation>%1 записей · %2 · %3</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1030" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1065" />
             <source>%1 selected · %2</source>
             <translation>Выбрано: %1 · %2</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1043" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1078" />
             <source>Settings</source>
             <translation>Настройки</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1046" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1081" />
             <source>Follow system</source>
             <translation>Как в системе</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1046" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1081" />
             <source>Light</source>
             <translation>Светлая</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1046" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1081" />
             <source>Dark</source>
             <translation>Тёмная</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1049" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1084" />
             <source>Appearance</source>
             <translation>Оформление</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1055" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1090" />
             <source>Language (restart required)</source>
             <translation>Язык (нужен перезапуск)</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1056" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1091" />
             <source>Remember recent archives locally</source>
             <translation>Сохранять историю архивов локально</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1059" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1094" />
             <source>Path protection and link blocking are always enabled.
 No network requests or background services.
 Explorer integration is not installed by this development build.</source>
@@ -725,12 +750,12 @@ Explorer integration is not installed by this development build.</source>
 Интеграция с Проводником в этой версии ещё не установлена.</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1157" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1191" />
             <source>Operation in progress</source>
             <translation>Операция выполняется</translation>
         </message>
         <message>
-            <location filename="../../apps/gui/MainWindow.cpp" line="1158" />
+            <location filename="../../apps/gui/MainWindow.cpp" line="1192" />
             <source>Cancel the operation and close after it stops?</source>
             <translation>Отменить операцию и закрыть окно после её остановки?</translation>
         </message>

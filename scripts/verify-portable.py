@@ -56,6 +56,25 @@ for ext in ['zip','7z']:
         with py7zr.SevenZipFile(output) as z:z.extractall(independent)
         assert (independent/'added.txt').read_bytes()==added.read_bytes()
     evidence[ext]+='; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed'
+split_source=work/'split-payload.bin';split_source.write_bytes(os.urandom(192*1024+17))
+split_prefix=work/'split.7z'
+run([cli,'create',split_prefix,'--split-bytes','65536',split_source])
+parts=sorted(work.glob('split.7z.*'));assert len(parts)>=3
+run([cli,'test',parts[0]]);run([cli,'list',parts[1]])
+split_dest=work/'split-extract'
+run([cli,'extract',parts[0],'--output',split_dest])
+assert (split_dest/split_source.name).read_bytes()==split_source.read_bytes()
+joined=work/'joined.7z'
+with joined.open('wb') as stream:
+    for part in parts:stream.write(part.read_bytes())
+independent=work/'split-independent'
+with py7zr.SevenZipFile(joined) as z:z.extractall(independent)
+assert (independent/split_source.name).read_bytes()==split_source.read_bytes()
+hidden=parts[1].with_suffix('.hidden');parts[1].rename(hidden)
+missing=subprocess.run([str(cli),'test',str(parts[0])],env=env,capture_output=True,startupinfo=startup,timeout=30)
+assert missing.returncode==1 and b'MISSING_VOLUME' in missing.stderr and parts[1].name.encode() in missing.stderr
+hidden.rename(parts[1])
+evidence['split-7z']='Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed'
 print('Independent ZIP/7Z read and packaged format tests passed',flush=True)
 screens=root/'docs/screenshots';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
 measure=[]

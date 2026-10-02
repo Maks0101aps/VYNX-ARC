@@ -49,6 +49,7 @@ pub mod bridge {
         fn open_archive(path: &str, password: &str, op: &Operation) -> Result<Box<Archive>>;
         fn list_entries(archive: &Archive) -> Vec<EntryInfo>;
         fn archive_format(archive: &Archive) -> String;
+        fn archive_writable(archive: &Archive) -> bool;
         fn extract_archive(
             archive: &Archive,
             destination: &str,
@@ -84,6 +85,13 @@ pub mod bridge {
             output: &str,
             inputs: &[String],
             format: u8,
+            password: &str,
+            op: &Operation,
+        ) -> Result<()>;
+        fn create_split_archive(
+            output: &str,
+            inputs: &[String],
+            volume_size: u64,
             password: &str,
             op: &Operation,
         ) -> Result<()>;
@@ -182,6 +190,29 @@ fn list_entries(archive: &Archive) -> Vec<bridge::EntryInfo> {
 }
 fn archive_format(archive: &Archive) -> String {
     archive.format.name().into()
+}
+fn archive_writable(archive: &Archive) -> bool {
+    matches!(archive.format, crate::Format::Zip | crate::Format::SevenZ)
+        && crate::volumes::first_part(&archive.path).is_none()
+}
+fn create_split_archive(
+    output: &str,
+    inputs: &[String],
+    volume_size: u64,
+    password: &str,
+    op: &Operation,
+) -> Result<()> {
+    guarded(|| {
+        operations::create_split(
+            &operations::CreateOptions {
+                output: output.into(),
+                inputs: inputs.iter().map(PathBuf::from).collect(),
+                password: Zeroizing::new(password.into()),
+            },
+            volume_size,
+            op,
+        )
+    })
 }
 fn extract_archive(
     archive: &Archive,

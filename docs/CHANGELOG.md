@@ -2,6 +2,11 @@
 
 ## Unreleased — work toward 0.2.0
 
+- Read numbered split-7Z archives and create verified 7Z volumes with GUI/CLI size
+  selection, bounded part indexing, no-clobber publication and cancellation cleanup.
+- Report exact missing parts for split-7Z and native RAR4/RAR5 multivolume decoding.
+- Keep all RAR fixture binaries local; restore pinned, SHA-256 checked data for CI.
+
 - Migrate Qt, CXX and Rust to the MSVC ABI and deploy app-local VC143 runtime.
 - Streaming transactional ZIP/7Z add, delete and rename with encrypted archives,
   verified replacement, cancellation cleanup and bounded lock retries.
