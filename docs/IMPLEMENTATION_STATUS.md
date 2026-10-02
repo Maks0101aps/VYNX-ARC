@@ -1,4 +1,4 @@
-# Implementation status — 0.1.0 development milestone
+# Implementation status вЂ” 0.1.0 development milestone
 
 ## Work toward 0.2.0 (in progress)
 
@@ -19,7 +19,7 @@ Split-7Z reading/creation, exact missing-volume messages and real RAR4/RAR5
 multipart decoding are implemented; see VOLUMES.md for limits and known issues.
 RAR fixture binaries stay local and are restored from a pinned upstream commit
 with SHA-256 checks before CI tests.
-Current source validation: 41 Rust tests and 3 CTest targets (seven presentation
+Current source validation: 43 Rust tests and 3 CTest targets (seven presentation
 checks, native shell smoke and GUI smoke including the actual conflict dialog
 and entry hash bridge). The counts below are historical.
 Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.md;
@@ -39,10 +39,18 @@ metadata is exposed through the bridge for display/sorting only.
 See UI_DESIGN.md and UI_QA.md for the visual matrix, reproducible commands,
 regression evidence, known limits and before/after RAM measurements. This is a
 development UI milestone, not production or complete 0.2.0 acceptance.
-The final deployed verifier passed GUI smoke and four format/Smart Extract round
-trips, then failed ZIP replacement with `AccessDenied`. VERIFICATION.json records
-that failure; VERIFICATION_LAST_SUCCESS.json is the earlier complete candidate
-run. Final packaged modification acceptance remains blocked by this known issue.
+The final deployed verifier passed GUI/CLI smoke, four format round trips,
+Smart Extract and repeated packaged RAR opens/tests, then failed ZIP replacement
+with `AccessDenied` in all three repeated attempts. VERIFICATION.json records the
+failure series; VERIFICATION_LAST_SUCCESS.json is the earlier complete candidate
+run. ZIP publication acceptance remains blocked.
+
+Native RAR code 15 was traced to the vendored UnRAR DLL's process-global mutable
+`ErrHandler`, which is reset on each open; overlapping calls can interfere. The
+adapter now serializes decoder lifetimes. Its concurrent regression repeats open,
+list and test 10 times across RAR4, RAR5, encrypted and multipart fixtures. The
+prior parallel test failure and repeated passing runs support this fix; broad
+external-process concurrency is not claimed.
 
 ### Remaining 0.2.0 acceptance work
 
@@ -53,10 +61,13 @@ run. Final packaged modification acceptance remains blocked by this known issue.
 - Broaden ETA/phase-total acceptance on real long operations and review throttling.
 - Broaden malformed-input, decompression-bomb, Unicode/collision and filesystem-race
   coverage; audit remaining Qt/cryptographic-backend password copies and lifetimes.
-- Diagnose intermittent native RAR open code 15 and ZIP replacement access-denied
-  observations. Passing reruns do not establish their cause or resolution.
-- Add timed 100k browsing and ZIP/7Z/RAR operation benchmarks; current settled
-  small-browser RAM comparisons do not establish large-archive performance.
+- Diagnose the remaining intermittent ZIP replacement `AccessDenied`; directory
+  pin release was tested and rejected as a cause, so ancestor guards remain held
+  through publication. Defender real-time was enabled, Controlled Folder Access
+  disabled and no matching block events found; attribution remains undetermined.
+- Extend performance validation with repeat trials, cache-controlled runs, memory
+  growth tests and external 7-Zip/WinRAR comparisons. Current one-trial measurements
+  and bounds are in `PERFORMANCE.md`.
 - Verify signed Explorer activation, actual selection/menu behavior, and clean
   Windows 11 install/uninstall. No certificate is available; MSIX stays unsigned
   and unregistered. CLEAN_VM_CHECKLIST.md is prepared but has not been executed.

@@ -48,7 +48,7 @@ The final build adds smoke coverage only; it does not change this presentation.
 
 ## Functional regression
 
-- Final release build: **41 Rust tests** and **3 CTest targets passed**:
+- Final release build: **43 Rust tests** and **3 CTest targets passed**:
   presentation (seven behavior checks), native shell smoke and GUI smoke.
 - Presentation checks cover numeric/date ordering and missing dates, folder-first
   order, cached folder totals, breadcrumb mouse/keyboard/collapse behavior, shared
@@ -59,14 +59,17 @@ The final build adds smoke coverage only; it does not change this presentation.
   dialog Skip/apply-all, rename/reopen/hash bridge, encrypted work/password shared
   lifetime, cancellation, 100,000 metadata rows and Light/Dark/System palettes.
   Synthetic drop events do not establish Explorer drag-out interoperability.
+- The Windows release build additionally passed full parallel Rust tests,
+  including the new repeated RAR regression, and the same three CTest targets.
 - The deployed verifier restricts PATH to Windows/System32 and removes developer
   Qt variables. It independently reads ZIP/7Z, checks ZIP/7Z/TAR/TAR.GZ round trips,
   real RAR fixtures, add/delete/rename/hash/verify and split-7Z/missing parts.
   Smart Extract now checks actual bytes and absence of duplicate root nesting.
-  `VERIFICATION.json` records the **failed final run** and completed checks before
-  its failure; `VERIFICATION_LAST_SUCCESS.json` retains the earlier complete run
+  `VERIFICATION.json` records three **failed final runs** and checks completed
+  before each failure; `VERIFICATION_LAST_SUCCESS.json` retains the earlier complete run
   on the same archive core/presentation. The final run passed GUI/CLI smoke and
-  four format round trips/Smart Extract before failing during ZIP replacement.
+  four format round trips/Smart Extract and 80 packaged RAR operations per run
+  before failing during ZIP replacement.
   Full final packaged modification acceptance is therefore blocked.
 
 ## Measurements and limitations
@@ -75,14 +78,31 @@ The final build adds smoke coverage only; it does not change this presentation.
 same small ZIP, English, 100% scaling and isolated PATH. Working set is sampled
 after five seconds settling and one second CPU observation. A 100ms startup poll
 is an observed peak, not an exact maximum. `PERFORMANCE.md` summarizes medians.
-These measurements do not establish throughput or large-archive memory bounds.
+Those samples compare UI working sets; they do not establish leak growth or
+large-archive memory bounds. See PERFORMANCE.md for bounded single-trial operation
+measurements and their limits.
 
-The intermittent ZIP replacement `AccessDenied` recurred during additional
-packaged runs, including the final run after successful candidate verification;
-the operation reported that the original was preserved. The cause remains
-undiagnosed. Earlier native RAR open code 15 is also unresolved. No codec/security
-changes were made to force a pass. Passing source tests do not supersede the
-failed final deployed modification check.
+The ZIP replacement `AccessDenied` recurred in all three repeated final packaged
+runs after all prior format and RAR checks passed; the operation reported that the
+original was preserved. Cause remains unknown. System Defender real-time protection
+was on, Controlled Folder Access was off, and no matching Defender block events
+were found. A post-failure process-handle check found no app archive handles and
+could open the archive for delete access, so it did not identify a persistent
+handle owner. Retrying with another executable path sometimes succeeded; that is
+not accepted as a fix. The ancestor-pin-release hypothesis was falsified by the
+100-cycle test passing both with and without early release; the protection remains
+held through publication. No sleeps, suppressed errors or weakened security were
+used to force acceptance.
+
+RAR code 15 in the bundled UnRAR API is `ERAR_EOPEN`: a starting archive or
+required volume failed to open. Inspection found that UnRAR resets and reads its
+process-global `ErrHandler` on each `RAROpenArchiveEx`; overlapping decoder calls
+could race. A global Rust mutex now covers list and complete stream/test lifetime.
+The previous parallel failure is recorded in the local test log; a regression
+exercised 50 open/test cycles across RAR4, RAR5, encrypted and multipart fixtures,
+and packaged verification performed 80 RAR list/test operations on each run.
+Repeated checks passed after the fix. This closes the observed in-process race,
+not arbitrary multiple-process or external file access.
 
 Remaining UI acceptance: real screen-reader traversal, native frame/Snap,
 Explorer drag-out, clean Windows VM install/uninstall, signed Explorer activation,
