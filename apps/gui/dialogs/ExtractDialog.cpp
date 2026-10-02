@@ -4,6 +4,7 @@ ExtractDialog::ExtractDialog(const QString &defaultDest, bool hasSelection, bool
                              const QString &initialPassword, QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Extract archive"));
+    setMinimumWidth(500);
     auto *form = new QFormLayout(this);
     destination = new QLineEdit(defaultDest);
     auto *browse = new QPushButton(tr("Browse…"));

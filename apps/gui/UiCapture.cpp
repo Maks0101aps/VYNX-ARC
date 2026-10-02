@@ -6,6 +6,7 @@
 #include "dialogs/SettingsDialog.h"
 #include "pages/ArchivePage.h"
 #include "widgets/OperationPanel.h"
+#include "widgets/ToastOverlay.h"
 #include <QtWidgets>
 // Explicit screenshot fixtures only: no extraction, mutation or conflict replies.
 QWidget *MainWindow::prepareCapture(const QString &mode) {
@@ -25,6 +26,7 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
     else if (mode == "about")
         dialog = new AboutDialog(this);
     else if (mode == "operation") {
+        toast_->hide();
         operationView_->begin(tr("Extracting Project.7z"));
         operationView_->updateProgress(0, 528ULL << 20, "Project/src/components/README.md", 0);
         operationView_->updateProgress(380ULL << 20, 528ULL << 20,

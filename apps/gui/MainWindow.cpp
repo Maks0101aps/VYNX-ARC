@@ -153,7 +153,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     table_->sortByColumn(0, Qt::AscendingOrder);
     table_->setColumnWidth(1, 100);
     table_->setColumnWidth(2, 100);
-    table_->setColumnWidth(3, 70);
+    table_->setColumnWidth(
+        3, qMax(70, table_->fontMetrics().horizontalAdvance(
+                        model_->headerData(3, Qt::Horizontal, Qt::DisplayRole).toString()) +
+                        28));
     table_->setColumnWidth(4, 80);
     table_->setColumnWidth(5, 140);
     table_->setColumnHidden(6, true);

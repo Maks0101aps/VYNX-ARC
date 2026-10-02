@@ -70,6 +70,7 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     advanced = new QGroupBox(tr("Advanced: split 7Z volumes"));
     advanced->setCheckable(true);
     advanced->setChecked(false);
+    advanced->setMaximumHeight(advanced->fontMetrics().height() + 18);
     advanced->setVisible(initialFormat == 1);
     auto *splitForm = new QFormLayout(advanced);
     split = new QComboBox;
@@ -85,6 +86,8 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     splitLabel->hide();
     split->hide();
     connect(advanced, &QGroupBox::toggled, this, [this, splitLabel](bool expanded) {
+        advanced->setMaximumHeight(expanded ? QWIDGETSIZE_MAX
+                                            : advanced->fontMetrics().height() + 18);
         split->setVisible(expanded);
         splitLabel->setVisible(expanded);
         customSplit->setVisible(expanded && split->currentIndex() == 5);
