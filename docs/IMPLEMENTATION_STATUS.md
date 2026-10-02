@@ -19,7 +19,7 @@ Split-7Z reading/creation, exact missing-volume messages and real RAR4/RAR5
 multipart decoding are implemented; see VOLUMES.md for limits and known issues.
 RAR fixture binaries stay local and are restored from a pinned upstream commit
 with SHA-256 checks before CI tests.
-Current source validation: 43 Rust tests and 3 CTest targets (seven presentation
+Current source validation: 44 Rust tests and 3 CTest targets (seven presentation
 checks, native shell smoke and GUI smoke including the actual conflict dialog
 and entry hash bridge). The counts below are historical.
 Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.md;
@@ -39,12 +39,7 @@ metadata is exposed through the bridge for display/sorting only.
 See UI_DESIGN.md and UI_QA.md for the visual matrix, reproducible commands,
 regression evidence, known limits and before/after RAM measurements. This is a
 development UI milestone, not production or complete 0.2.0 acceptance.
-The final deployed verifier passed GUI/CLI smoke, four format round trips,
-Smart Extract and repeated packaged RAR opens/tests, then failed ZIP replacement
-with `AccessDenied` in all three repeated attempts. VERIFICATION.json records the
-failure series; VERIFICATION_LAST_SUCCESS.json is the earlier complete candidate
-run. ZIP publication acceptance remains blocked.
-
+On portable artifact SHA-256 `7fc7a01842c06742aa668216fee2d58efbb13dba3f5c0470277406dec2ea828f`, the packaged verifier produced a reproducible location matrix. With both app and archive workspace under `.dev`, all three attempts failed at ZIP rename with Win32 error 5. With the app under `%TEMP%` and archive workspace under `.dev`, all three failed. With the app under `.dev` and archive workspace under `%TEMP%`, all three passed; both under `%TEMP%` also passed 3/3. A `.dev` `NoIndex` probe still failed 3/3. Simple packaged ZIP-add passed 5/5 in each location, and direct `MoveFileExW` replacement passed 10/10 in both. Thus the archive workspace location is associated with the verifier failure; the responsible process/filter or policy is not identified. Defender real-time was enabled, Controlled Folder Access was disabled, and no matching block events were found. Windows `tempfile::persist` calls `MoveFileExW(MOVEFILE_REPLACE_EXISTING)`; code 5 is `ERROR_ACCESS_DENIED`. This evidence does not establish an application-code root cause or clear the normal Documents/project location. Release publication acceptance remains blocked. The verifier records both execution paths; `VERIFICATION_LAST_SUCCESS.json` remains historical.
 Native RAR code 15 was traced to the vendored UnRAR DLL's process-global mutable
 `ErrHandler`, which is reset on each open; overlapping calls can interfere. The
 adapter now serializes decoder lifetimes. Its concurrent regression repeats open,
@@ -61,13 +56,14 @@ external-process concurrency is not claimed.
 - Broaden ETA/phase-total acceptance on real long operations and review throttling.
 - Broaden malformed-input, decompression-bomb, Unicode/collision and filesystem-race
   coverage; audit remaining Qt/cryptographic-backend password copies and lifetimes.
-- Diagnose the remaining intermittent ZIP replacement `AccessDenied`; directory
-  pin release was tested and rejected as a cause, so ancestor guards remain held
-  through publication. Defender real-time was enabled, Controlled Folder Access
-  disabled and no matching block events found; attribution remains undetermined.
-- Extend performance validation with repeat trials, cache-controlled runs, memory
-  growth tests and external 7-Zip/WinRAR comparisons. Current one-trial measurements
-  and bounds are in `PERFORMANCE.md`.
+- Diagnose the location-associated ZIP replacement `AccessDenied` in the Documents
+  project workspace. Three-trial controls pass when only the archive workspace moves
+  to `%TEMP%`, but this does not clear the normal project path or identify the
+  external process/filter. Ancestor pin release and a `NoIndex` probe were not causes.
+- Extend performance validation with cache-controlled runs, repeated open/close
+  memory-growth tests and external 7-Zip/WinRAR comparisons. Three-trial dataset
+  medians are recorded in `PERFORMANCE.md`; one-trial 100k browsing and the absence
+  of cache control remain limitations.
 - Verify signed Explorer activation, actual selection/menu behavior, and clean
   Windows 11 install/uninstall. No certificate is available; MSIX stays unsigned
   and unregistered. CLEAN_VM_CHECKLIST.md is prepared but has not been executed.

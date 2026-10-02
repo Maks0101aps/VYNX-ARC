@@ -15,8 +15,12 @@ def verification_failure(kind,error,traceback):
     sys.__excepthook__(kind,error,traceback)
 sys.excepthook=verification_failure
 import tempfile
-scratch=root/'.dev';scratch.mkdir(exist_ok=True)
-app=pathlib.Path(tempfile.mkdtemp(prefix='portable-check-',dir=scratch))
+scratch=pathlib.Path(os.environ.get('VYNX_VERIFY_SCRATCH',root/'.dev')).resolve()
+app_scratch=pathlib.Path(os.environ.get('VYNX_VERIFY_APP_SCRATCH',scratch)).resolve()
+work_scratch=pathlib.Path(os.environ.get('VYNX_VERIFY_WORK_SCRATCH',scratch)).resolve()
+app_scratch.mkdir(parents=True,exist_ok=True)
+work_scratch.mkdir(parents=True,exist_ok=True)
+app=pathlib.Path(tempfile.mkdtemp(prefix='portable-check-',dir=app_scratch))
 with zipfile.ZipFile(root/'dist/VYNX-ARC-Portable-x64.zip') as z:z.extractall(app)
 env=os.environ.copy();env['PATH']=str(pathlib.Path(os.environ['SystemRoot'])/'System32')+';'+os.environ['SystemRoot'];env['QT_QPA_PLATFORM']='windows';env['QT_ASSUME_STDERR_HAS_CONSOLE']='1'
 for key in ['QTDIR','QT_PLUGIN_PATH','QML2_IMPORT_PATH','VYNX_QT_ROOT']:env.pop(key,None)
@@ -28,7 +32,7 @@ def run(command):
     return r.stdout.decode(errors='replace')
 run([exe,'--smoke-test']);print('Isolated deployed GUI smoke passed',flush=True)
 run([cli,'--help']);print('Isolated deployed CLI passed',flush=True)
-work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)
+work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=work_scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)
 (source/'README.md').write_text('# Archive verification\nReal test files for VYNX ARC.\n',encoding='utf-8');(source/'src/дані.txt').write_text('Перевірка архівів — справжні байти.\n',encoding='utf-8');(source/'empty.txt').write_bytes(b'')
 import py7zr
 evidence={}

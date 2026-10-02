@@ -279,8 +279,10 @@ fn commit(mut replacement: tempfile::NamedTempFile, path: &Path, op: &Operation)
                     return Err(ArcError::new(
                         "REPLACE",
                         format!(
-                            "Could not replace archive; original preserved: {}",
-                            error.error
+                            "Could not replace archive {} (OS error {:?}): {}; original preserved",
+                            path.display(),
+                            error.error.raw_os_error(),
+                            error.error,
                         ),
                     ));
                 }

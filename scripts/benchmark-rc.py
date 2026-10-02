@@ -9,10 +9,16 @@ import subprocess
 import tempfile
 import time
 import zipfile
+import argparse
 
 import psutil
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--trials', type=int, default=3)
+args = parser.parse_args()
+if args.trials < 1 or args.trials > 10:
+    parser.error('--trials must be between 1 and 10')
 APP = pathlib.Path(os.environ.get('VYNX_BENCH_STAGE', ROOT / 'dist/stage-906053756d6c449ebbe6ac20830ecbb6'))
 CLI = APP / 'vynxarc-cli.exe'
 OUT = ROOT / 'docs/RC_PERFORMANCE.json'
@@ -101,18 +107,21 @@ for name, recipe in datasets.items():
     source, source_bytes = write_dataset(name, recipe)
     expected = tree_hash(source)
     for fmt in ('zip', '7z'):
-        archive = SCRATCH / f'{name}.{fmt}'
-        create = measure([CLI, 'create', archive, source])
-        archive_bytes = archive.stat().st_size
-        output = SCRATCH / f'extract-{name}-{fmt}'
-        extract = measure([CLI, 'extract', archive, '--output', output, '--replace'])
-        extracted = output / name
-        if tree_hash(extracted) != expected:
-            raise RuntimeError(f'Extracted bytes differ: {name} {fmt}')
-        for op_name, result in [('create', create), ('extract', extract)]:
-            records.append({'dataset': name, 'format': fmt.upper(), 'operation': op_name,
-                            'source_bytes': source_bytes, 'archive_bytes': archive_bytes,
-                            'compression_setting': 'actual format default', **result})
+        for trial in range(1, args.trials + 1):
+            archive = SCRATCH / f'{name}-{trial}.{fmt}'
+            create = measure([CLI, 'create', archive, source])
+            archive_bytes = archive.stat().st_size
+            output = SCRATCH / f'extract-{name}-{fmt}-{trial}'
+            extract = measure([CLI, 'extract', archive, '--output', output])
+            extracted = output / name
+            if tree_hash(extracted) != expected:
+                raise RuntimeError(f'Extracted bytes differ: {name} {fmt} trial {trial}')
+            for op_name, result in [('create', create), ('extract', extract)]:
+                records.append({'dataset': name, 'format': fmt.upper(), 'operation': op_name,
+                                'trial': trial, 'source_bytes': source_bytes,
+                                'throughput_mib_s': round(source_bytes / (1024 * 1024) / result['wall_seconds'], 3),
+                                'archive_bytes': archive_bytes,
+                                'compression_setting': 'actual format default', **result})
     print(f'Measured {name}', flush=True)
 
 # Real small RAR fixtures exercise native RAR4/RAR5 decoding; the CLI intentionally
@@ -122,18 +131,21 @@ rar_fixtures = ['test_read_format_rar_binary_data.rar', 'test_read_format_rar5_c
                 'test_read_format_rar5_multiarchive_solid.part01.rar']
 for fixture_name in rar_fixtures:
     archive = ROOT / 'tests/archives' / fixture_name
-    listing = measure([CLI, 'list', archive])
-    output = SCRATCH / f'rar-{fixture_name.replace(".rar", "")}'
-    extraction = measure([CLI, 'extract', archive, '--output', output])
-    records.append({'dataset': fixture_name, 'format': 'RAR', 'operation': 'list',
-                    'source_bytes': archive.stat().st_size, **listing})
-    records.append({'dataset': fixture_name, 'format': 'RAR', 'operation': 'extract',
-                    'source_bytes': archive.stat().st_size, **extraction})
+    for trial in range(1, args.trials + 1):
+        listing = measure([CLI, 'list', archive])
+        output = SCRATCH / f'rar-{fixture_name.replace(".rar", "")}-{trial}'
+        extraction = measure([CLI, 'extract', archive, '--output', output])
+        records.append({'dataset': fixture_name, 'format': 'RAR', 'operation': 'list',
+                        'trial': trial, 'source_bytes': archive.stat().st_size, **listing})
+        records.append({'dataset': fixture_name, 'format': 'RAR', 'operation': 'extract',
+                        'trial': trial, 'source_bytes': archive.stat().st_size,
+                        'throughput_mib_s': round(archive.stat().st_size / (1024 * 1024) / extraction['wall_seconds'], 3),
+                        **extraction})
     print(f'Measured {fixture_name}', flush=True)
 
 # Process-cold launches (Windows file cache remains managed by the OS).
 gui = APP / 'VynxArc.exe'
-for attempt in range(3):
+for attempt in range(args.trials):
     capture = SCRATCH / f'cold-start-{attempt}.png'
     row = measure([gui, '--capture', capture])
     records.append({'dataset': 'empty Home window', 'format': 'GUI',
@@ -150,7 +162,7 @@ capture = SCRATCH / 'hundred-k-browser.png'
 row = measure([gui, hundred_k, '--capture', capture])
 records.append({'dataset': '100000 one-byte entries', 'format': 'ZIP',
                 'operation': 'GUI open, model/sort/layout and capture',
-                'archive_bytes': hundred_k.stat().st_size, **row})
+                'trial': 1, 'archive_bytes': hundred_k.stat().st_size, **row})
 print('Measured 100k-entry GUI open', flush=True)
 
 result = {
@@ -159,7 +171,7 @@ result = {
     'windows_caption': 'Windows 11 Pro', 'windows_version': '10.0.26200',
     'storage': {'filesystem': 'NTFS', 'drive_type': 'fixed', 'media': 'NVMe'},
     'portable_sha256': hashlib.sha256((ROOT / 'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),
-    'method': 'Packaged CLI; PATH restricted to Windows/System32; no developer Qt variables; real round-trip bytes compared; 10ms RSS polling.',
+    'method': f'{args.trials} packaged CLI trials per dataset/format/operation; PATH restricted to Windows/System32; no developer Qt variables; real round-trip bytes compared; 10ms RSS polling.',
     'settings': 'ZIP and 7Z use the application format defaults; no simulated compression preset.',
     'dataset_recipes': {'many_small': '1000 x 1024-byte text files', 'few_large': '3 x 16 MiB deterministic random files',
                         'mixed': '80 files, alternating deterministic compressible/random data, 32 KiB to 640 KiB',
@@ -170,7 +182,7 @@ result = {
                     'RSS peak is a 10ms observed peak, not an exact maximum.',
                     'RAR measurements use small real fixtures, not matched-size datasets.',
                     'The 7-Zip CLI has 10ms polling granularity; CPU samples can quantize to zero on short work.',
-                    'No WinRAR/7-Zip comparison, clean VM, disk-cache control, or repeated trials.']
+                    'No WinRAR/7-Zip comparison, clean VM, or disk-cache control; OS cache state was not controlled.']
 }
 OUT.write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
 print(f'Wrote {len(records)} actual measurements to {OUT}', flush=True)

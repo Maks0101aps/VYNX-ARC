@@ -48,7 +48,7 @@ The final build adds smoke coverage only; it does not change this presentation.
 
 ## Functional regression
 
-- Final release build: **43 Rust tests** and **3 CTest targets passed**:
+- Final release build: **44 Rust tests** and **3 CTest targets passed**:
   presentation (seven behavior checks), native shell smoke and GUI smoke.
 - Presentation checks cover numeric/date ordering and missing dates, folder-first
   order, cached folder totals, breadcrumb mouse/keyboard/collapse behavior, shared
@@ -59,40 +59,46 @@ The final build adds smoke coverage only; it does not change this presentation.
   dialog Skip/apply-all, rename/reopen/hash bridge, encrypted work/password shared
   lifetime, cancellation, 100,000 metadata rows and Light/Dark/System palettes.
   Synthetic drop events do not establish Explorer drag-out interoperability.
-- The Windows release build additionally passed full parallel Rust tests,
-  including the new repeated RAR regression, and the same three CTest targets.
+- The Windows release build additionally passed full parallel Rust tests (44 total),
+  including the repeated RAR regression, and the same three CTest targets.
 - The deployed verifier restricts PATH to Windows/System32 and removes developer
   Qt variables. It independently reads ZIP/7Z, checks ZIP/7Z/TAR/TAR.GZ round trips,
   real RAR fixtures, add/delete/rename/hash/verify and split-7Z/missing parts.
   Smart Extract now checks actual bytes and absence of duplicate root nesting.
-  `VERIFICATION.json` records three **failed final runs** and checks completed
-  before each failure; `VERIFICATION_LAST_SUCCESS.json` retains the earlier complete run
-  on the same archive core/presentation. The final run passed GUI/CLI smoke and
-  four format round trips/Smart Extract and 80 packaged RAR operations per run
-  before failing during ZIP replacement.
-  Full final packaged modification acceptance is therefore blocked.
+  The same package passed 3/3 runs with its archive workspace under `%TEMP%`, and
+  failed 3/3 with the archive workspace under `.dev`, regardless of the app extraction
+  location. Each attempt completed GUI/CLI smoke, four format round trips, Smart
+  Extract and 80 packaged RAR operations. The exact responsible process or filesystem
+  filter remains unknown, so packaged modification acceptance is blocked for the
+  project/Documents workspace. `VERIFICATION.json` and
+  `VERIFICATION_ATTEMPTS.json` retain the latest path-specific run; the last-success
+  report is not overwritten.
 
 ## Measurements and limitations
 
 `UI_MEMORY.json` records three fresh launches for each revision/state/theme, the
 same small ZIP, English, 100% scaling and isolated PATH. Working set is sampled
 after five seconds settling and one second CPU observation. A 100ms startup poll
-is an observed peak, not an exact maximum. `PERFORMANCE.md` summarizes medians.
+is an observed peak, not an exact maximum. `PERFORMANCE.md` summarizes settled UI medians and three-trial operation medians.
 Those samples compare UI working sets; they do not establish leak growth or
-large-archive memory bounds. See PERFORMANCE.md for bounded single-trial operation
-measurements and their limits.
+large-archive memory bounds. See PERFORMANCE.md for three-trial operation
+medians and their limits.
 
-The ZIP replacement `AccessDenied` recurred in all three repeated final packaged
-runs after all prior format and RAR checks passed; the operation reported that the
-original was preserved. Cause remains unknown. System Defender real-time protection
-was on, Controlled Folder Access was off, and no matching Defender block events
-were found. A post-failure process-handle check found no app archive handles and
-could open the archive for delete access, so it did not identify a persistent
-handle owner. Retrying with another executable path sometimes succeeded; that is
-not accepted as a fix. The ancestor-pin-release hypothesis was falsified by the
-100-cycle test passing both with and without early release; the protection remains
-held through publication. No sleeps, suppressed errors or weakened security were
-used to force acceptance.
+The verifier path matrix reproduced a location-associated replacement failure on
+portable SHA-256 `7fc7a01842c06742aa668216fee2d58efbb13dba3f5c0470277406dec2ea828f`.
+Runs with the archive workspace under `.dev` failed 3/3 whether the app was
+extracted to `.dev` or `%TEMP%`; runs with the workspace under `%TEMP%` passed 3/3
+for either app location. A `.dev` `NoIndex` probe still failed. Direct
+`MoveFileExW(MOVEFILE_REPLACE_EXISTING)` tests passed 10/10 in both locations, and
+simple packaged ZIP-add passed 5/5 in each. The verifier's full sequence therefore
+exposes a location-sensitive interaction that those smaller controls do not.
+Windows publication uses `MoveFileExW` through `tempfile::persist`; code 5 means
+`ERROR_ACCESS_DENIED`, but the responsible process or policy remains unidentified.
+Defender real-time protection was on, Controlled Folder Access was off, no matching
+block events were found, and post-failure inspection found no app-owned archive
+handles. Search indexing is not established as the cause. Ancestor-pin release was
+falsified; no acceptance was inferred from relocating the verifier workspace.
+
 
 RAR code 15 in the bundled UnRAR API is `ERAR_EOPEN`: a starting archive or
 required volume failed to open. Inspection found that UnRAR resets and reads its

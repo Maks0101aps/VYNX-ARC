@@ -20,6 +20,8 @@
 - Report exact missing parts for split-7Z and native RAR4/RAR5 multivolume decoding.
 - Keep all RAR fixture binaries local; restore pinned, SHA-256 checked data for CI.
 - Serialize bundled UnRAR decoder lifetimes to protect its process-global error handler.
+- Expand security policy regressions for entry-count, total-size, ratio and duplicate-path limits.
+- Measure three trials per packaged archive dataset and record median throughput, CPU and RSS.
 
 - Migrate Qt, CXX and Rust to the MSVC ABI and deploy app-local VC143 runtime.
 - Streaming transactional ZIP/7Z add, delete and rename with encrypted archives,

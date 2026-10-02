@@ -311,4 +311,68 @@ mod tests {
         };
         assert!(validate_plan(&[e], 1, &p).is_err());
     }
+
+    #[test]
+    fn enforces_entry_count_total_size_ratio_and_duplicate_limits() {
+        let entry = |name: &str, size: u64, directory: bool| Entry {
+            name: name.into(),
+            size,
+            directory,
+            ..Default::default()
+        };
+
+        let count_policy = Policy {
+            max_entries: 1,
+            ..Default::default()
+        };
+        assert_eq!(
+            validate_plan(
+                &[entry("one", 1, false), entry("two", 1, false)],
+                2,
+                &count_policy,
+            )
+            .unwrap_err()
+            .code,
+            "LIMIT"
+        );
+
+        let total_policy = Policy {
+            max_total_bytes: 3,
+            ..Default::default()
+        };
+        assert_eq!(
+            validate_plan(
+                &[entry("one", 2, false), entry("two", 2, false)],
+                4,
+                &total_policy,
+            )
+            .unwrap_err()
+            .code,
+            "LIMIT"
+        );
+
+        let ratio_policy = Policy {
+            max_ratio: 2,
+            ..Default::default()
+        };
+        assert_eq!(
+            validate_plan(&[entry("large", 30, false)], 10, &ratio_policy)
+                .unwrap_err()
+                .code,
+            "RATIO"
+        );
+
+        for names in [["same", "same"], ["Readme", "README"]] {
+            assert_eq!(
+                validate_plan(
+                    &[entry(names[0], 0, false), entry(names[1], 0, false)],
+                    0,
+                    &Policy::default(),
+                )
+                .unwrap_err()
+                .code,
+                "COLLISION"
+            );
+        }
+    }
 }
