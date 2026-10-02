@@ -31,6 +31,11 @@ pub mod bridge {
         existing_size: u64,
         existing_modified: u64,
     }
+    struct EntryHashInfo {
+        name: String,
+        sha256: String,
+        crc32: String,
+    }
     extern "Rust" {
         type Archive;
         type Operation;
@@ -61,6 +66,20 @@ pub mod bridge {
             op: &Operation,
         ) -> Result<()>;
         fn hash_archive_file(path: &str, op: &Operation) -> Result<String>;
+        fn hash_entries(
+            archive: &Archive,
+            selected: &[u64],
+            password: &str,
+            op: &Operation,
+        ) -> Result<Vec<EntryHashInfo>>;
+        fn verify_entry_hash(
+            archive: &Archive,
+            id: u64,
+            expected: &str,
+            password: &str,
+            op: &Operation,
+        ) -> Result<()>;
+        fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<()>;
         fn create_archive_as(
             output: &str,
             inputs: &[String],
@@ -86,6 +105,44 @@ fn guarded<T>(f: impl FnOnce() -> Result<T>) -> Result<T> {
             "Unexpected core failure; operation stopped",
         ))
     })
+}
+fn hash_entries(
+    archive: &Archive,
+    selected: &[u64],
+    password: &str,
+    op: &Operation,
+) -> Result<Vec<bridge::EntryHashInfo>> {
+    guarded(|| {
+        crate::hashing::entries(archive, selected, password, op).map(|items| {
+            items
+                .into_iter()
+                .map(|h| bridge::EntryHashInfo {
+                    name: h.name,
+                    sha256: h.sha256,
+                    crc32: h.crc32,
+                })
+                .collect()
+        })
+    })
+}
+fn verify_entry_hash(
+    archive: &Archive,
+    id: u64,
+    expected: &str,
+    password: &str,
+    op: &Operation,
+) -> Result<()> {
+    guarded(|| {
+        crate::hashing::validate_expected(expected)?;
+        let hashes = crate::hashing::entries(archive, &[id], password, op)?;
+        let h = hashes
+            .first()
+            .ok_or_else(|| ArcError::new("SELECTION", "Select a regular file"))?;
+        crate::hashing::verify(&h.sha256, &h.crc32, expected)
+    })
+}
+fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<()> {
+    guarded(|| crate::hashing::verify_file(Path::new(path), expected, op))
 }
 fn new_operation() -> Box<Operation> {
     Box::new(Operation::default())

@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow {
     void chooseExtract(bool smart = false, bool here = false, bool named = false);
     void testArchive();
     void hashFile();
+    void hashContents(bool verify = false, bool wholeArchive = false);
     void navigate(const QString &folder);
     void back();
     void up();

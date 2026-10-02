@@ -10,8 +10,9 @@ the MSVC build. ZIP/7Z streaming modification, GUI commands / drag-to-add, expli
 creation format and free-space preflight have passed core and deployed checks.
 Extraction conflicts now support Ask, Replace, Skip, Keep both, Newer and Stop,
 with comparison details and apply-all. See CONFLICTS.md for semantics and limits.
-Current source validation: 33 Rust tests and 1 Qt/CXX smoke test (including the
-actual conflict dialog). The baseline test counts below are historical.
+Entry hashing and supplied-digest verification are implemented (HASHING.md).
+Current source validation: 35 Rust tests and 1 Qt/CXX smoke test (including the
+actual conflict dialog and entry hash bridge). The counts below are historical.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
 

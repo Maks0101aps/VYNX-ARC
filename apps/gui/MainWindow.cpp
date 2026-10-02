@@ -77,6 +77,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *hash =
         addAction(operationsMenu, tr("Calculate SHA-256 / CRC32"), {}, [this] { hashFile(); });
     archiveActions_ = {extract, smart, here, named, test, hash};
+    archiveActions_.append(
+        addAction(operationsMenu, tr("Hash selected files"), {}, [this] { hashContents(); }));
+    archiveActions_.append(addAction(operationsMenu, tr("Verify selected file hash…"), {},
+                                     [this] { hashContents(true); }));
+    archiveActions_.append(addAction(operationsMenu, tr("Verify archive file hash…"), {},
+                                     [this] { hashContents(true, true); }));
     operationsMenu->addSeparator();
     auto *addFiles = addAction(operationsMenu, tr("Add files…"), QKeySequence("Ctrl+Shift+A"),
                                [this] { chooseModify(0); });
@@ -647,6 +653,77 @@ void MainWindow::hashFile() {
             d.exec();
         });
 }
+void MainWindow::hashContents(bool verify, bool wholeArchive) {
+    if (busy_ || !archive_)
+        return;
+    auto ids = std::make_shared<rust::Vec<quint64>>();
+    if (!wholeArchive) {
+        for (const auto &index : table_->selectionModel()->selectedRows()) {
+            const auto &row = model_->row(filter_->mapToSource(index).row());
+            if (row.folder)
+                continue;
+            for (auto id : row.memberIds)
+                ids->push_back(id);
+        }
+        if (ids->empty() || (verify && ids->size() != 1)) {
+            statusBar()->showMessage(tr("Select regular files; verification requires one file."),
+                                     6000);
+            return;
+        }
+    }
+    std::string expected;
+    if (verify) {
+        bool accepted = false;
+        auto value = QInputDialog::getText(this, tr("Verify hash"),
+                                           tr("Expected SHA-256 (64 hex) or CRC32 (8 hex)"),
+                                           QLineEdit::Normal, {}, &accepted);
+        if (!accepted)
+            return;
+        expected = utf8(value.trimmed());
+    }
+    beginOperation();
+    auto op = operation_;
+    auto archive = archive_;
+    auto path = utf8(archivePath_);
+    auto pw = utf8(QString::fromUtf8(password_));
+    auto result = std::make_shared<QString>();
+    runJob(
+        tr("Calculating hashes…"),
+        [archive, ids, op, path, pw, expected, verify, wholeArchive, result] {
+            if (verify) {
+                if (wholeArchive)
+                    vynx::verify_file_hash(path, expected, **op);
+                else
+                    vynx::verify_entry_hash(**archive, (*ids)[0], expected, pw, **op);
+            } else {
+                auto hashes = vynx::hash_entries(
+                    **archive, rust::Slice<const quint64>(ids->data(), ids->size()), pw, **op);
+                for (const auto &h : hashes)
+                    *result += text(h.name) + "\nSHA-256: " + text(h.sha256) +
+                               "\nCRC32: " + text(h.crc32) + "\n\n";
+            }
+            return QString();
+        },
+        [this, result, verify] {
+            if (verify) {
+                QMessageBox::information(this, tr("Verify hash"),
+                                         tr("The computed digest matches the supplied value."));
+                return;
+            }
+            QDialog dialog(this);
+            dialog.setWindowTitle(tr("Entry hashes"));
+            auto *layout = new QVBoxLayout(&dialog);
+            auto *report = new QPlainTextEdit(*result);
+            report->setReadOnly(true);
+            layout->addWidget(report);
+            auto *copy = new QPushButton(tr("Copy hashes"));
+            layout->addWidget(copy);
+            connect(copy, &QPushButton::clicked, &dialog,
+                    [result] { QApplication::clipboard()->setText(*result); });
+            dialog.resize(700, 400);
+            dialog.exec();
+        });
+}
 void MainWindow::chooseCreate() {
     if (busy_)
         return;
@@ -1097,6 +1174,13 @@ bool MainWindow::smokeTest() {
         navigate("source/nested");
         if (model_->rowCount() != 1 || model_->row(0).name != "renamed.txt")
             return false;
+        rust::Vec<quint64> hashIds;
+        hashIds.push_back(model_->row(0).memberIds.front());
+        auto hashes = vynx::hash_entries(
+            **archive_, rust::Slice<const quint64>(hashIds.data(), hashIds.size()), "", *op);
+        if (hashes.size() != 1 || hashes[0].sha256.size() != 64 || hashes[0].crc32.size() != 8)
+            return false;
+        vynx::verify_entry_hash(**archive_, hashIds[0], hashes[0].sha256, "", *op);
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;
         for (quint64 i = 0; i < 100000; ++i) {

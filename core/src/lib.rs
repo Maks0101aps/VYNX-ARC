@@ -2,6 +2,7 @@ pub mod archive;
 pub mod disk;
 pub mod error;
 pub mod ffi;
+pub mod hashing;
 pub mod modification;
 pub mod operations;
 #[cfg(windows)]

@@ -41,6 +41,12 @@ for ext in ['zip','7z']:
     run([cli,'rename',output,'Project/src/дані.txt','Project/src/renamed.txt'])
     added=work/'added.txt';added.write_bytes(b'packaged transactional add')
     run([cli,'add',output,added]);run([cli,'delete',output,'Project/empty.txt']);run([cli,'test',output])
+    digest=hashlib.sha256(added.read_bytes()).hexdigest()
+    assert digest in run([cli,'hash-entry',output,'added.txt'])
+    run([cli,'verify-entry',output,'added.txt',digest])
+    run([cli,'verify',output,hashlib.sha256(output.read_bytes()).hexdigest()])
+    mismatch=subprocess.run([str(cli),'verify-entry',str(output),'added.txt','0'*64],env=env,capture_output=True,startupinfo=startup,timeout=30)
+    assert mismatch.returncode==1 and b'HASH_MISMATCH' in mismatch.stderr
     listing=run([cli,'list',output])
     assert 'renamed.txt' in listing and 'added.txt' in listing and 'Project/empty.txt' not in listing
     if ext=='zip':
@@ -49,7 +55,7 @@ for ext in ['zip','7z']:
         independent=pathlib.Path(tempfile.mkdtemp(prefix='modified-7z-',dir=work))
         with py7zr.SevenZipFile(output) as z:z.extractall(independent)
         assert (independent/'added.txt').read_bytes()==added.read_bytes()
-    evidence[ext]+='; packaged add/rename/delete and independent read of replacement passed'
+    evidence[ext]+='; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed'
 print('Independent ZIP/7Z read and packaged format tests passed',flush=True)
 screens=root/'docs/screenshots';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
 measure=[]
@@ -64,5 +70,5 @@ for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25
     assert process.returncode==0,(stdout,stderr)
     assert screenshot.exists()
 result={'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':[p.pid for p in psutil.process_iter(['name']) if p.info['name']=='VynxArc.exe']}
-(root/'docs/VERIFICATION.json').write_text(json.dumps(result,indent=2),encoding='utf-8')
+(root/'docs/VERIFICATION.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(result,indent=2),flush=True)

@@ -11,6 +11,8 @@
 - Detect changed entry counts and ZIP CRC metadata during stream operations.
 - Add asynchronous extraction conflict comparison, apply-all, Keep both and
   newer-time decisions; restore regular-file modified timestamps.
+- Hash selected decoded files without plaintext staging and verify supplied
+  SHA-256 / CRC32 digests for archive files or entries through GUI and CLI.
 
 ## 0.1.0 - 2026-10-02 (development)
 

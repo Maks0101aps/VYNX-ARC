@@ -19,6 +19,35 @@ fn run() -> Result<()> {
     let path = args.remove(0);
     let op = Operation::default();
     match command.as_str() {
+        "hash-entry" | "verify-entry" => {
+            let name = args
+                .first()
+                .ok_or_else(|| ArcError::new("USAGE", "Specify an entry path"))?;
+            let archive = Archive::open(Path::new(&path), "", &op)?;
+            let entry = archive
+                .entries
+                .iter()
+                .find(|e| &e.name == name && !e.directory)
+                .ok_or_else(|| ArcError::new("SELECTION", "Regular file not found"))?;
+            let hashes = vynx_arc_core::hashing::entries(&archive, &[entry.id], "", &op)?;
+            let h = &hashes[0];
+            if command == "verify-entry" {
+                let expected = args
+                    .get(1)
+                    .ok_or_else(|| ArcError::new("USAGE", "Specify SHA-256 or CRC32"))?;
+                vynx_arc_core::hashing::verify(&h.sha256, &h.crc32, expected)?;
+                println!("Digest matches");
+            } else {
+                println!("{}\nSHA-256: {}\nCRC32: {}", h.name, h.sha256, h.crc32);
+            }
+        }
+        "verify" => {
+            let expected = args
+                .first()
+                .ok_or_else(|| ArcError::new("USAGE", "verify FILE SHA256_OR_CRC32"))?;
+            vynx_arc_core::hashing::verify_file(Path::new(&path), expected, &op)?;
+            println!("Digest matches");
+        }
         "add" | "delete" | "rename" => {
             use vynx_arc_core::modification::{self, Change};
             let archive = Archive::open(Path::new(&path), "", &op)?;
