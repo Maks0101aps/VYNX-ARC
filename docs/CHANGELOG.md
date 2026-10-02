@@ -2,6 +2,16 @@
 
 ## Unreleased — work toward 0.2.0
 
+- Separate compact Home and archive workspace into native Widgets pages; move
+  creation, extraction, conflict, settings and about presentation into dialogs.
+- Add vector navigation/file icons, clickable collapsing breadcrumbs, responsive
+  search, shared selection-aware command controls and narrow-window overflow.
+- Sort packed sizes, ratios and timestamps numerically; show unknown/default DOS
+  dates as a dash. Add cached totals, quiet notices and smoothed cautious ETA.
+- Polish light/dark palettes, recent archive rows, locale-aware column sizing and
+  format-authoritative creation. Add presentation tests and deployed visual/RAM
+  runners; retain the archive core and mandatory extraction protection.
+
 - Show verification status, algorithm, actual hash and expected hash in GUI results
   and mismatch diagnostics without hashing the archive a second time.
 

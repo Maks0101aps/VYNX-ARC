@@ -19,12 +19,30 @@ Split-7Z reading/creation, exact missing-volume messages and real RAR4/RAR5
 multipart decoding are implemented; see VOLUMES.md for limits and known issues.
 RAR fixture binaries stay local and are restored from a pinned upstream commit
 with SHA-256 checks before CI tests.
-Current source validation: 41 Rust tests and 2 native/Qt smoke tests (including the
-actual conflict dialog and entry hash bridge). The counts below are historical.
+Current source validation: 41 Rust tests and 3 CTest targets (seven presentation
+checks, native shell smoke and GUI smoke including the actual conflict dialog
+and entry hash bridge). The counts below are historical.
 Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.md;
 Qt and cryptographic backend wiping limitations remain explicit release gates.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
+
+### Native UI refactor and visual QA
+
+Home and archive workspace are separate pages. Navigation, breadcrumbs, search,
+shared command actions, numeric/date sorting, cached vector icons, local recents,
+operation progress/ETA and creation/extraction/conflict/settings/about dialogs
+are implemented as focused presentation components. MainWindow keeps worker and
+archive ownership. Existing core security policies are unchanged; timestamp
+metadata is exposed through the bridge for display/sorting only.
+
+See UI_DESIGN.md and UI_QA.md for the visual matrix, reproducible commands,
+regression evidence, known limits and before/after RAM measurements. This is a
+development UI milestone, not production or complete 0.2.0 acceptance.
+The final deployed verifier passed GUI smoke and four format/Smart Extract round
+trips, then failed ZIP replacement with `AccessDenied`. VERIFICATION.json records
+that failure; VERIFICATION_LAST_SUCCESS.json is the earlier complete candidate
+run. Final packaged modification acceptance remains blocked by this known issue.
 
 ### Remaining 0.2.0 acceptance work
 
@@ -32,13 +50,13 @@ This is not a claim that the new 0.2.0 prompt or production-readiness gates are 
   only split-size selection is currently exposed in the advanced creation UI.
 - Implement Eco/Balanced/Maximum resource policies with effective codec settings,
   bounded metadata allocations before parsing, and measured memory behavior.
-- Add meaningful ETA and review phase/progress totals and throttling.
+- Broaden ETA/phase-total acceptance on real long operations and review throttling.
 - Broaden malformed-input, decompression-bomb, Unicode/collision and filesystem-race
   coverage; audit remaining Qt/cryptographic-backend password copies and lifetimes.
 - Diagnose intermittent native RAR open code 15 and ZIP replacement access-denied
   observations. Passing reruns do not establish their cause or resolution.
-- Add repeatable startup/idle/100k browsing and ZIP/7Z/RAR operation benchmarks;
-  current small-browser working-set samples are not those acceptance measurements.
+- Add timed 100k browsing and ZIP/7Z/RAR operation benchmarks; current settled
+  small-browser RAM comparisons do not establish large-archive performance.
 - Verify signed Explorer activation, actual selection/menu behavior, and clean
   Windows 11 install/uninstall. No certificate is available; MSIX stays unsigned
   and unregistered. CLEAN_VM_CHECKLIST.md is prepared but has not been executed.

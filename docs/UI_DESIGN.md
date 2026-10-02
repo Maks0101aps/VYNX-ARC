@@ -46,13 +46,14 @@ metadata cannot distinguish a deliberately supplied 1980-01-01 timestamp from
 that default; such legitimate dates are also hidden. Other known timestamps,
 including an explicitly known Unix epoch, remain representable and sortable.
 
-The known intermittent ZIP replacement `AccessDenied` recurred twice during
-deployed verification; the original was preserved. The next candidate passed the
-full independent verifier. No lock retry, security setting or codec behavior was
-changed to force that pass, and the cause is still undiagnosed. This is separate
-from the UI pass. The earlier intermittent native RAR open is also unresolved.
+The known intermittent ZIP replacement `AccessDenied` recurred during deployed
+verification, including additional runs after successful candidates; the original
+was preserved. No lock retry, security setting or codec behavior was changed to
+force a pass, and the cause is still undiagnosed. This is separate from the UI
+pass. The earlier intermittent native RAR open is also unresolved.
 
 Screenshot progress/conflict examples are explicit UI fixtures, not throughput
 measurements or proof of a live conflict. QWidget grabs exclude native frame/Snap
 behavior; screen-reader and clean-VM/Explorer acceptance remain manual checks.
-Final screenshot and settled-memory evidence are recorded separately after QA.
+Final screenshots, settled-memory evidence, regression scope and remaining manual
+acceptance are recorded in UI_QA.md and UI_MEMORY.json.

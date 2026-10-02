@@ -1,5 +1,18 @@
-import pathlib,zipfile,subprocess,os,time,json,psutil,hashlib
+import pathlib,zipfile,subprocess,os,time,json,psutil,hashlib,datetime,sys
 root=pathlib.Path(__file__).resolve().parents[1]
+report_path=root/'docs/VERIFICATION.json'
+if report_path.exists():
+    previous=json.loads(report_path.read_text(encoding='utf-8'))
+    if previous.get('status')!='failed':
+        (root/'docs/VERIFICATION_LAST_SUCCESS.json').write_text(json.dumps(previous,indent=2)+'\n',encoding='utf-8')
+def verification_failure(kind,error,traceback):
+    report={'status':'failed','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'portable_sha256':hashlib.sha256((root/'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),
+            'error':str(error),'completed_archive_checks':globals().get('evidence',{}),
+            'note':'A failed final run is not replaced by an earlier passing result. See VERIFICATION_LAST_SUCCESS.json for the earlier completed run.'}
+    report_path.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
+    sys.__excepthook__(kind,error,traceback)
+sys.excepthook=verification_failure
 import tempfile
 scratch=root/'.dev';scratch.mkdir(exist_ok=True)
 app=pathlib.Path(tempfile.mkdtemp(prefix='portable-check-',dir=scratch))
@@ -97,6 +110,6 @@ for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25
     assert screenshot.exists()
 remaining=[p.pid for p in psutil.process_iter(['exe']) if p.info['exe'] and os.path.normcase(p.info['exe'])==os.path.normcase(str(exe.resolve()))]
 assert not remaining,('Verified application left running',remaining)
-result={'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':remaining,'process_scope':'Only the executable unpacked by this verifier; unrelated running app instances are excluded'}
+result={'status':'passed','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'portable_sha256':hashlib.sha256((root/'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),'application_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':remaining,'process_scope':'Only the executable unpacked by this verifier; unrelated running app instances are excluded'}
 (root/'docs/VERIFICATION.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(result,indent=2),flush=True)

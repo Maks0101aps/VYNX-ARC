@@ -1,37 +1,13 @@
 {
-  "isolated_environment": "PATH only Windows and System32; all developer Qt variables removed",
-  "archive_verification": {
-    "zip": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
-    "7z": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
-    "tar": "CLI roundtrip matches",
-    "tar.gz": "CLI roundtrip matches",
-    "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+  "status": "failed",
+  "timestamp_utc": "2026-10-02T15:59:08.637129+00:00",
+  "portable_sha256": "d90ad1cf75ee1622e59e848a2b820365eeef004509cae425b98ba32941ddd49d",
+  "error": "(1, '', 'REPLACE: Could not replace archive; original preserved: Access is denied. (os error 5)\\n')",
+  "completed_archive_checks": {
+    "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting",
+    "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting",
+    "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting"
   },
-  "memory_samples": [
-    {
-      "theme": "light",
-      "language": "en",
-      "scale": "1",
-      "working_set_bytes": 43143168
-    },
-    {
-      "theme": "dark",
-      "language": "en",
-      "scale": "1",
-      "working_set_bytes": 43212800
-    },
-    {
-      "theme": "dark",
-      "language": "uk",
-      "scale": "1.25",
-      "working_set_bytes": 43556864
-    },
-    {
-      "theme": "light",
-      "language": "ru",
-      "scale": "2",
-      "working_set_bytes": 43929600
-    }
-  ],
-  "remaining_processes": []
+  "note": "A failed final run is not replaced by an earlier passing result. See VERIFICATION_LAST_SUCCESS.json for the earlier completed run."
 }

@@ -1,0 +1,258 @@
+{
+  "method": "Three fresh launches per state/theme/revision; RSS after 5 seconds settling plus 1 second CPU sampling. Peak is 100ms polling, not an exact maximum. Same small ZIP, English, 100% DPI, restricted PATH. Read-only processes terminated after sampling.",
+  "windows": "Windows-10-10.0.26200-SP0",
+  "logical_cpus": 12,
+  "ram_bytes": 33934004224,
+  "binary_sha256": {
+    "before": "221438162490172891735a64bd28c971aad68da958354ca87c2a56a10d694c81",
+    "after": "d68e50306684198cdea71cdde87d024896c58de698fecc386f19763a2386ba1a"
+  },
+  "samples": [
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "home",
+      "repetition": 1,
+      "settled_working_set_bytes": 41943040,
+      "observed_startup_peak_bytes": 41943040,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "home",
+      "repetition": 2,
+      "settled_working_set_bytes": 41984000,
+      "observed_startup_peak_bytes": 41984000,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "home",
+      "repetition": 3,
+      "settled_working_set_bytes": 41848832,
+      "observed_startup_peak_bytes": 41848832,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 1,
+      "settled_working_set_bytes": 42827776,
+      "observed_startup_peak_bytes": 42827776,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 2,
+      "settled_working_set_bytes": 42938368,
+      "observed_startup_peak_bytes": 42938368,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 3,
+      "settled_working_set_bytes": 42876928,
+      "observed_startup_peak_bytes": 42876928,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 1,
+      "settled_working_set_bytes": 41996288,
+      "observed_startup_peak_bytes": 41996288,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 2,
+      "settled_working_set_bytes": 41918464,
+      "observed_startup_peak_bytes": 41918464,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 3,
+      "settled_working_set_bytes": 41779200,
+      "observed_startup_peak_bytes": 41779200,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 1,
+      "settled_working_set_bytes": 42971136,
+      "observed_startup_peak_bytes": 42971136,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 2,
+      "settled_working_set_bytes": 42754048,
+      "observed_startup_peak_bytes": 42754048,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "before",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 3,
+      "settled_working_set_bytes": 42819584,
+      "observed_startup_peak_bytes": 42819584,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "home",
+      "repetition": 1,
+      "settled_working_set_bytes": 42496000,
+      "observed_startup_peak_bytes": 42496000,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "home",
+      "repetition": 2,
+      "settled_working_set_bytes": 42606592,
+      "observed_startup_peak_bytes": 42606592,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "home",
+      "repetition": 3,
+      "settled_working_set_bytes": 42065920,
+      "observed_startup_peak_bytes": 42065920,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 1,
+      "settled_working_set_bytes": 42971136,
+      "observed_startup_peak_bytes": 42971136,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 2,
+      "settled_working_set_bytes": 42778624,
+      "observed_startup_peak_bytes": 42778624,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "light",
+      "state": "archive",
+      "repetition": 3,
+      "settled_working_set_bytes": 42856448,
+      "observed_startup_peak_bytes": 42856448,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 1,
+      "settled_working_set_bytes": 42139648,
+      "observed_startup_peak_bytes": 42139648,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 2,
+      "settled_working_set_bytes": 42213376,
+      "observed_startup_peak_bytes": 42213376,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "home",
+      "repetition": 3,
+      "settled_working_set_bytes": 42209280,
+      "observed_startup_peak_bytes": 42209280,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 1,
+      "settled_working_set_bytes": 42606592,
+      "observed_startup_peak_bytes": 42606592,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 2,
+      "settled_working_set_bytes": 42799104,
+      "observed_startup_peak_bytes": 42799104,
+      "idle_cpu_percent": 0.0
+    },
+    {
+      "revision": "after",
+      "theme": "dark",
+      "state": "archive",
+      "repetition": 3,
+      "settled_working_set_bytes": 42684416,
+      "observed_startup_peak_bytes": 42684416,
+      "idle_cpu_percent": 0.0
+    }
+  ],
+  "median_comparison": [
+    {
+      "theme": "light",
+      "state": "home",
+      "before": 41943040,
+      "after": 42496000,
+      "delta_bytes": 552960
+    },
+    {
+      "theme": "light",
+      "state": "archive",
+      "before": 42876928,
+      "after": 42856448,
+      "delta_bytes": -20480
+    },
+    {
+      "theme": "dark",
+      "state": "home",
+      "before": 41918464,
+      "after": 42209280,
+      "delta_bytes": 290816
+    },
+    {
+      "theme": "dark",
+      "state": "archive",
+      "before": 42819584,
+      "after": 42684416,
+      "delta_bytes": -135168
+    }
+  ]
+}
