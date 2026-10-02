@@ -1,3 +1,5 @@
 #include <windows.h>
+#ifndef VYNX_MSVC
 1 RT_MANIFEST "app.manifest"
+#endif
 IDI_ICON1 ICON "../../assets/icons/vynx-arc.ico"

@@ -1,12 +1,20 @@
 param([string]$QtRoot = $env:VYNX_QT_ROOT)
 $ErrorActionPreference = 'Stop'
-if (!$QtRoot) { $QtRoot = Join-Path $env:LOCALAPPDATA 'VynxArcDev\Qt' }
+if (!$QtRoot) { $QtRoot = Join-Path $env:LOCALAPPDATA 'VynxArcDev\QtMSVC' }
 if (!(Test-Path (Join-Path $QtRoot 'lib\cmake\Qt6\Qt6Config.cmake'))) {
-    throw 'Set VYNX_QT_ROOT to a Qt 6.12.0 MinGW x64 SDK directory.'
+    throw 'Set VYNX_QT_ROOT to the Qt 6.12.0 MSVC 2022 x64 SDK directory.'
 }
-$compilerBin = Join-Path $QtRoot 'Tools\mingw1310_64\bin'
-if (!(Test-Path (Join-Path $compilerBin 'g++.exe'))) { throw 'Qt-compatible MinGW 13.1 x64 compiler is required.' }
-$env:PATH = "$(Join-Path $env:USERPROFILE '.cargo\bin');$compilerBin;$(Join-Path $QtRoot 'bin');$env:PATH"
+$vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+if (!(Test-Path $vswhere)) { throw 'Visual Studio 2022 C++ Build Tools and Windows SDK are required.' }
+$vsRoot = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+if (!$vsRoot) { throw 'Install the Visual Studio C++ build workload.' }
+Import-Module (Join-Path $vsRoot 'Common7\Tools\Microsoft.VisualStudio.DevShell.dll')
+Enter-VsDevShell -VsInstallPath $vsRoot -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64' | Out-Null
+$env:PATH = "$(Join-Path $env:USERPROFILE '.cargo\bin');$(Join-Path $QtRoot 'bin');$env:PATH"
+# Select the actual compiler/linker, even if unrelated user Cargo configuration
+# contains an experimental linker or cached SDK search paths.
+$env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = (Get-Command link.exe).Source
+$env:CARGO_ENCODED_RUSTFLAGS = ''
 $env:VYNX_QT_ROOT = $QtRoot
 function Invoke-VynxTool {
     param([string]$Tool, [string[]]$Arguments)

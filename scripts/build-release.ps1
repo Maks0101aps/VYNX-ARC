@@ -9,20 +9,24 @@ try {
     New-Item -ItemType Directory -Force $distRoot | Out-Null
     $stage=Join-Path $distRoot ('stage-'+[guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory $stage | Out-Null
-    Copy-Item -LiteralPath (Join-Path $repoRoot 'build\VynxArc.exe') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'build-msvc\VynxArc.exe') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'target\release\vynxarc-cli.exe') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE'),(Join-Path $repoRoot 'THIRD_PARTY_NOTICES.md') -Destination $stage
     Invoke-VynxTool windeployqt @('--release','--no-translations','--no-system-d3d-compiler','--no-opengl-sw','--no-compiler-runtime','--skip-plugin-types','generic,networkinformation,tls',(Join-Path $stage 'VynxArc.exe'))
-    foreach($dll in 'libgcc_s_seh-1.dll','libstdc++-6.dll','libwinpthread-1.dll') {
-        Copy-Item -LiteralPath (Join-Path $env:VYNX_QT_ROOT "Tools\mingw1310_64\bin\$dll") -Destination $stage
-    }
+    # App-local MSVC runtime: no developer SDK or runtime installation needed.
+    $crt = Get-ChildItem -LiteralPath (Join-Path $vsRoot 'VC\Redist\MSVC') -Directory |
+        Where-Object Name -Match '^\d+\.' | Sort-Object Name -Descending | Select-Object -First 1
+    $crtDirectory = Join-Path $crt.FullName 'x64\Microsoft.VC143.CRT'
+    if (!(Test-Path $crtDirectory)) { throw 'MSVC redistributable DLLs not found.' }
+    Get-ChildItem -LiteralPath $crtDirectory -Filter '*.dll' | Copy-Item -Destination $stage
     New-Item -ItemType Directory -Force (Join-Path $stage 'translations') | Out-Null
     foreach($lang in 'uk','ru') {
         Copy-Item -LiteralPath (Join-Path $env:VYNX_QT_ROOT "translations\qtbase_$lang.qm") -Destination (Join-Path $stage 'translations')
     }
     $licenseRoot=Join-Path $stage 'licenses'
     New-Item -ItemType Directory -Force $licenseRoot | Out-Null
-    Invoke-VynxTool cargo @('metadata','--locked','--format-version','1','--filter-platform','x86_64-pc-windows-gnu') | Where-Object { $_.StartsWith('{') } | Set-Content -Encoding UTF8 (Join-Path $licenseRoot 'CARGO_LICENSES.json')
+    Copy-Item -LiteralPath (Join-Path $vsRoot 'Licenses\1033\Redist.txt') -Destination (Join-Path $licenseRoot 'MSVC-Redist.txt')
+    Invoke-VynxTool cargo @('metadata','--locked','--format-version','1','--filter-platform','x86_64-pc-windows-msvc') | Where-Object { $_.StartsWith('{') } | Set-Content -Encoding UTF8 (Join-Path $licenseRoot 'CARGO_LICENSES.json')
     Invoke-VynxTool python @((Join-Path $PSScriptRoot 'collect-licenses.py'),$licenseRoot,$env:VYNX_QT_ROOT)
     # Authenticode signing is performed only after binaries and DLLs are final.
     # VYNX_SIGN_SCRIPT is a trusted locally supplied script using a secure key service.

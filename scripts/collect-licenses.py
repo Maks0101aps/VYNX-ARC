@@ -29,7 +29,7 @@ compiler=qt/'Tools/mingw1310_64'
 for file in compiler.rglob('*'):
     if file.is_file() and file.name.lower() in ['copying','copying3','copying.runtime','copying.lib','copyright','license.txt']:
         target=root/'mingw'/file.relative_to(compiler);target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(file,target)
-rust_doc=pathlib.Path.home()/'.rustup/toolchains/1.99.0-x86_64-pc-windows-gnu/share/doc/rust'
+rust_doc=pathlib.Path.home()/'.rustup/toolchains/1.99.0-x86_64-pc-windows-msvc/share/doc/rust'
 for name in ['COPYRIGHT-library.html']:
     if not (rust_doc/name).exists():raise RuntimeError('Rust standard library notice missing: '+name)
     shutil.copy2(rust_doc/name,root/('Rust-'+name))

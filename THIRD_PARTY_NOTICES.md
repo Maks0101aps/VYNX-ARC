@@ -41,3 +41,9 @@ software is permitted, provided that full text of this paragraph, starting from
 is not available, and in source code comments of resulting package.
 
 Developer Python tooling is not a runtime dependency and is not shipped.
+
+MSVC packages contain app-local Microsoft Visual C++ 2022 (VC143) runtime DLLs,
+copyright Microsoft Corporation, distributed under Microsoft's Visual Studio
+redistributable terms. They retain their separate license and are not MIT/Qt
+components. The installed SDK's redistributable list is included in
+`licenses/MSVC-Redist.txt`. Upstream list: https://aka.ms/vs/17/redist.txt.

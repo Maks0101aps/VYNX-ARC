@@ -5,29 +5,21 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rust GNU toolchain
-        run: rustup toolchain install 1.99.0-x86_64-pc-windows-gnu --profile minimal
+      - name: Rust MSVC toolchain
+        run: rustup toolchain install 1.99.0-x86_64-pc-windows-msvc --profile minimal
       - name: Qt SDK
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.12.0'
-          arch: win64_mingw
-          tools: tools_mingw1310,qt.tools.win64_mingw1310
+          arch: win64_msvc2022_64
       - name: Build and tests
         shell: pwsh
         run: |
-          $env:PATH = "$env:QT_ROOT_DIR/../../Tools/mingw1310_64/bin;$env:PATH"
-          cargo test --workspace --locked
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release "-DCMAKE_PREFIX_PATH=$env:QT_ROOT_DIR"
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          cmake --build build
-          if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          ctest --test-dir build --output-on-failure
+          scripts/build.ps1 -QtRoot $env:QT_ROOT_DIR
       - name: Dependency security audit
         shell: pwsh
         run: |
-          $env:PATH = "$env:QT_ROOT_DIR/../../Tools/mingw1310_64/bin;$env:PATH"
+          . scripts/env.ps1 -QtRoot $env:QT_ROOT_DIR
           cargo install cargo-audit --version 0.22.2 --locked
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           cargo audit
