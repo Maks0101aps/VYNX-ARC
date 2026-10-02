@@ -1,0 +1,49 @@
+param([string]$QtRoot=$env:VYNX_QT_ROOT, [switch]$SkipInstaller)
+$ErrorActionPreference='Stop'
+. (Join-Path $PSScriptRoot 'env.ps1') -QtRoot $QtRoot
+$repoRoot=Split-Path $PSScriptRoot -Parent
+Push-Location $repoRoot
+try {
+    & (Join-Path $PSScriptRoot 'build.ps1') -QtRoot $env:VYNX_QT_ROOT
+    $distRoot=Join-Path $repoRoot 'dist'
+    New-Item -ItemType Directory -Force $distRoot | Out-Null
+    $stage=Join-Path $distRoot ('stage-'+[guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory $stage | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'build\VynxArc.exe') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'target\release\vynxarc-cli.exe') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE'),(Join-Path $repoRoot 'THIRD_PARTY_NOTICES.md') -Destination $stage
+    Invoke-VynxTool windeployqt @('--release','--no-translations','--no-system-d3d-compiler','--no-opengl-sw','--no-compiler-runtime','--skip-plugin-types','generic,networkinformation,tls',(Join-Path $stage 'VynxArc.exe'))
+    foreach($dll in 'libgcc_s_seh-1.dll','libstdc++-6.dll','libwinpthread-1.dll') {
+        Copy-Item -LiteralPath (Join-Path $env:VYNX_QT_ROOT "Tools\mingw1310_64\bin\$dll") -Destination $stage
+    }
+    New-Item -ItemType Directory -Force (Join-Path $stage 'translations') | Out-Null
+    foreach($lang in 'uk','ru') {
+        Copy-Item -LiteralPath (Join-Path $env:VYNX_QT_ROOT "translations\qtbase_$lang.qm") -Destination (Join-Path $stage 'translations')
+    }
+    $licenseRoot=Join-Path $stage 'licenses'
+    New-Item -ItemType Directory -Force $licenseRoot | Out-Null
+    Invoke-VynxTool cargo @('metadata','--locked','--format-version','1','--filter-platform','x86_64-pc-windows-gnu') | Where-Object { $_.StartsWith('{') } | Set-Content -Encoding UTF8 (Join-Path $licenseRoot 'CARGO_LICENSES.json')
+    Invoke-VynxTool python @((Join-Path $PSScriptRoot 'collect-licenses.py'),$licenseRoot,$env:VYNX_QT_ROOT)
+    # Authenticode signing is performed only after binaries and DLLs are final.
+    # VYNX_SIGN_SCRIPT is a trusted locally supplied script using a secure key service.
+    if($env:VYNX_SIGN_SCRIPT) { & $env:VYNX_SIGN_SCRIPT $stage; if($LASTEXITCODE){throw 'Signing failed'} }
+    $env:QT_QPA_PLATFORM='windows'
+    $env:QT_ASSUME_STDERR_HAS_CONSOLE='1'
+    Invoke-VynxTool (Join-Path $stage 'VynxArc.exe') @('--smoke-test')
+    Invoke-VynxTool (Join-Path $stage 'vynxarc-cli.exe') @('--help')
+    if(!$SkipInstaller){
+        $iscc=Get-Command ISCC -ErrorAction SilentlyContinue
+        if(!$iscc){$path=Join-Path $env:LOCALAPPDATA 'Programs\Inno Setup 6\ISCC.exe';if(Test-Path $path){$iscc=Get-Item -LiteralPath $path}}
+        if(!$iscc){throw 'Inno Setup 6 is required for the installer, or use -SkipInstaller.'}
+        $compilerPath = if($iscc -is [System.Management.Automation.ApplicationInfo]){$iscc.Source}else{$iscc.FullName}
+        Invoke-VynxTool $compilerPath @("/DStageDir=$stage","/DOutputDir=$distRoot",(Join-Path $repoRoot 'installer\VynxArc.iss'))
+    }
+    Set-Content -LiteralPath (Join-Path $stage 'portable.flag') -Value ''
+    $portable=Join-Path $distRoot 'VYNX-ARC-Portable-x64.zip'
+    Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $portable -Force
+    $artifacts=Get-ChildItem -LiteralPath $distRoot -File | Where-Object Extension -In '.zip','.exe','.msix'
+    $hashes=$artifacts | ForEach-Object { "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)" }
+    $hashes | Set-Content -LiteralPath (Join-Path $distRoot 'SHA256SUMS.txt') -Encoding ASCII
+    Write-Host "Runnable staging directory: $stage"
+    Write-Host "Portable release: $portable"
+} finally {Remove-Item Env:\QT_QPA_PLATFORM,Env:\QT_ASSUME_STDERR_HAS_CONSOLE -ErrorAction SilentlyContinue;Pop-Location}

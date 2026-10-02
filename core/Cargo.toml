@@ -1,0 +1,25 @@
+[package]
+name = "vynx-arc-core"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[lib]
+crate-type = ["rlib", "staticlib"]
+
+[dependencies]
+cxx = "=1.0.202"
+zip = { version = "=8.6.0", default-features = false, features = ["deflate", "aes-crypto", "bzip2", "zstd", "lzma", "xz"] }
+sevenz-rust2 = "=0.23.0"
+sha2 = "=0.11.0"
+crc32fast = "=1.5.2"
+tempfile = "=3.27.0"
+zeroize = "=1.9.0"
+tar = "=0.4.46"
+flate2 = "=1.1.10"
+
+[target.'cfg(windows)'.dependencies]
+unrar-ng-sys = { version = "=0.7.7", default-features = false, features = ["std"] }
+
+[build-dependencies]
+cxx-build = "=1.0.202"

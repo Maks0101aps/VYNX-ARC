@@ -1,0 +1,9 @@
+[package]
+name = "vynxarc-cli"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+
+[dependencies]
+vynx-arc-core = { path = "../../core" }
+zeroize = "=1.9.0"

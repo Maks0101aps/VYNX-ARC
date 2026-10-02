@@ -1,0 +1,12 @@
+[workspace]
+members = ["core", "apps/cli"]
+resolver = "2"
+exclude = ["third_party/unrar-sys"]
+
+[patch.crates-io]
+unrar-ng-sys = { path = "third_party/unrar-sys" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "debuginfo"

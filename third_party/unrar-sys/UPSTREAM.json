@@ -1,0 +1,7 @@
+{
+  "bindings": "unrar-ng-sys 0.7.7",
+  "decoder": "UnRAR 7.23",
+  "url": "https://www.rarlab.com/rar/unrarsrc-7.2.7.tar.gz",
+  "sha256": "01d903a7dcf413cb2925696d7796e48e38d471f79bfe7ef3ad2aebf6c12dbefd",
+  "changes": "Official stable source replaces the forked beta decoder. The two writable header/open data pointers are declared mutable in the bindings. The Windows build omits a redundant pthread link because the Rust GNU runtime already provides it. No batch-extraction functions are called."
+}
