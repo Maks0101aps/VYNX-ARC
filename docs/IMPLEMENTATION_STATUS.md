@@ -11,6 +11,7 @@ creation format and free-space preflight have passed core and deployed checks.
 Extraction conflicts now support Ask, Replace, Skip, Keep both, Newer and Stop,
 with comparison details and apply-all. See CONFLICTS.md for semantics and limits.
 Entry hashing and supplied-digest verification are implemented (HASHING.md).
+Verification reports now include match status, algorithm and actual/expected values.
 The native Explorer component and sparse identity package are implemented, with
 COM/IPC tests. Signing and actual Windows menu activation remain pending; see
 WINDOWS_INTEGRATION.md and CLEAN_VM_CHECKLIST.md. No trust settings were changed.
@@ -24,6 +25,25 @@ Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.m
 Qt and cryptographic backend wiping limitations remain explicit release gates.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
+
+### Remaining 0.2.0 acceptance work
+
+- Implement format-specific compression presets and advanced encoder settings;
+  only split-size selection is currently exposed in the advanced creation UI.
+- Implement Eco/Balanced/Maximum resource policies with effective codec settings,
+  bounded metadata allocations before parsing, and measured memory behavior.
+- Add meaningful ETA and review phase/progress totals and throttling.
+- Broaden malformed-input, decompression-bomb, Unicode/collision and filesystem-race
+  coverage; audit remaining Qt/cryptographic-backend password copies and lifetimes.
+- Diagnose intermittent native RAR open code 15 and ZIP replacement access-denied
+  observations. Passing reruns do not establish their cause or resolution.
+- Add repeatable startup/idle/100k browsing and ZIP/7Z/RAR operation benchmarks;
+  current small-browser working-set samples are not those acceptance measurements.
+- Verify signed Explorer activation, actual selection/menu behavior, and clean
+  Windows 11 install/uninstall. No certificate is available; MSIX stays unsigned
+  and unregistered. CLEAN_VM_CHECKLIST.md is prepared but has not been executed.
+- Review metadata preservation and complete final independent package verification
+  before claiming the 0.2.0 milestone complete. BLAKE3 remains optional.
 
 The following sections retain the original 0.1.0 evidence for comparison.
 

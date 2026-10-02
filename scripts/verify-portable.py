@@ -47,6 +47,8 @@ for ext in ['zip','7z']:
     run([cli,'verify',output,hashlib.sha256(output.read_bytes()).hexdigest()])
     mismatch=subprocess.run([str(cli),'verify-entry',str(output),'added.txt','0'*64],env=env,capture_output=True,startupinfo=startup,timeout=30)
     assert mismatch.returncode==1 and b'HASH_MISMATCH' in mismatch.stderr
+    assert b'DOES NOT MATCH' in mismatch.stderr and b'Algorithm: SHA-256' in mismatch.stderr
+    assert f'Actual: {digest}'.encode() in mismatch.stderr
     listing=run([cli,'list',output])
     assert 'renamed.txt' in listing and 'added.txt' in listing and 'Project/empty.txt' not in listing
     if ext=='zip':

@@ -79,8 +79,8 @@ pub mod bridge {
             expected: &str,
             password: &str,
             op: &Operation,
-        ) -> Result<()>;
-        fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<()>;
+        ) -> Result<String>;
+        fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<String>;
         fn create_archive_as(
             output: &str,
             inputs: &[String],
@@ -139,18 +139,18 @@ fn verify_entry_hash(
     expected: &str,
     password: &str,
     op: &Operation,
-) -> Result<()> {
+) -> Result<String> {
     guarded(|| {
         crate::hashing::validate_expected(expected)?;
         let hashes = crate::hashing::entries(archive, &[id], password, op)?;
         let h = hashes
             .first()
             .ok_or_else(|| ArcError::new("SELECTION", "Select a regular file"))?;
-        crate::hashing::verify(&h.sha256, &h.crc32, expected)
+        crate::hashing::verification_report(&h.sha256, &h.crc32, expected)
     })
 }
-fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<()> {
-    guarded(|| crate::hashing::verify_file(Path::new(path), expected, op))
+fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<String> {
+    guarded(|| crate::hashing::verify_file_report(Path::new(path), expected, op))
 }
 fn new_operation() -> Box<Operation> {
     Box::new(Operation::default())

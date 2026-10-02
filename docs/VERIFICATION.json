@@ -12,25 +12,25 @@
       "theme": "light",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 43053056
+      "working_set_bytes": 43143168
     },
     {
       "theme": "dark",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 43307008
+      "working_set_bytes": 43212800
     },
     {
       "theme": "dark",
       "language": "uk",
       "scale": "1.25",
-      "working_set_bytes": 43188224
+      "working_set_bytes": 43556864
     },
     {
       "theme": "light",
       "language": "ru",
       "scale": "2",
-      "working_set_bytes": 43708416
+      "working_set_bytes": 43929600
     }
   ],
   "remaining_processes": []

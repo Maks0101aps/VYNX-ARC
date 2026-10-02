@@ -73,6 +73,17 @@ fn file_verification_and_invalid_input() {
     fs::write(&p, b"abc").unwrap();
     hashing::verify_file(&p, SHA, &Operation::default()).unwrap();
     hashing::verify_file(&p, "352441C2", &Operation::default()).unwrap();
+    let report = hashing::verify_file_report(&p, SHA, &Operation::default()).unwrap();
+    assert!(report.starts_with("MATCH\nAlgorithm: SHA-256\n"));
+    assert!(report.contains(&format!("Actual: {SHA}")));
+    let error = hashing::verify_file_report(&p, "00000000", &Operation::default()).unwrap_err();
+    assert_eq!(error.code, "HASH_MISMATCH");
+    assert!(error.message.contains("DOES NOT MATCH\nAlgorithm: CRC32"));
+    assert!(
+        error
+            .message
+            .contains("Actual: 352441c2\nExpected: 00000000")
+    );
     for bad in [
         "",
         "xyz",

@@ -698,9 +698,10 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
         [archive, ids, op, path, pw, expected, verify, wholeArchive, result] {
             if (verify) {
                 if (wholeArchive)
-                    vynx::verify_file_hash(path, expected, **op);
+                    *result = text(vynx::verify_file_hash(path, expected, **op));
                 else
-                    vynx::verify_entry_hash(**archive, (*ids)[0], expected, pw->bytes(), **op);
+                    *result = text(
+                        vynx::verify_entry_hash(**archive, (*ids)[0], expected, pw->bytes(), **op));
             } else {
                 auto hashes = vynx::hash_entries(
                     **archive, rust::Slice<const quint64>(ids->data(), ids->size()), pw->bytes(),
@@ -714,7 +715,8 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
         [this, result, verify] {
             if (verify) {
                 QMessageBox::information(this, tr("Verify hash"),
-                                         tr("The computed digest matches the supplied value."));
+                                         tr("The computed digest matches the supplied value.") +
+                                             "\n\n" + *result);
                 return;
             }
             QDialog dialog(this);

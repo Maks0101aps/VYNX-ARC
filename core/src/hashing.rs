@@ -76,15 +76,24 @@ pub fn entries(
 }
 /// The expected value is a single SHA-256 or CRC32 hexadecimal digest.
 pub fn verify(sha256: &str, crc32: &str, expected: &str) -> Result<()> {
+    verification_report(sha256, crc32, expected).map(|_| ())
+}
+pub fn verification_report(sha256: &str, crc32: &str, expected: &str) -> Result<String> {
     let expected = validate_expected(expected)?;
     let actual = if expected.len() == 64 { sha256 } else { crc32 };
+    let algorithm = if expected.len() == 64 {
+        "SHA-256"
+    } else {
+        "CRC32"
+    };
+    let details = format!("Algorithm: {algorithm}\nActual: {actual}\nExpected: {expected}");
     if !expected.eq_ignore_ascii_case(actual) {
         return Err(ArcError::new(
             "HASH_MISMATCH",
-            "Computed digest does not match the supplied value",
+            format!("DOES NOT MATCH\n{details}"),
         ));
     }
-    Ok(())
+    Ok(format!("MATCH\n{details}"))
 }
 pub fn validate_expected(expected: &str) -> Result<&str> {
     let expected = expected.trim();
@@ -106,13 +115,20 @@ pub fn validate_expected(expected: &str) -> Result<&str> {
     Ok(expected)
 }
 pub fn verify_file(path: &std::path::Path, expected: &str, op: &Operation) -> Result<()> {
+    verify_file_report(path, expected, op).map(|_| ())
+}
+pub fn verify_file_report(
+    path: &std::path::Path,
+    expected: &str,
+    op: &Operation,
+) -> Result<String> {
     // Validate before the expensive read, even if the file is missing.
     let expected = validate_expected(expected)?;
     let result = crate::operations::hash_file(path, op)?;
     let (sha, crc) = result
         .split_once('\n')
         .ok_or_else(|| ArcError::new("INTERNAL", "Hash result format"))?;
-    verify(
+    verification_report(
         sha.strip_prefix("SHA-256: ").unwrap_or(""),
         crc.strip_prefix("CRC32: ").unwrap_or(""),
         expected,

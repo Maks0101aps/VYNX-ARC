@@ -2,6 +2,9 @@
 
 ## Unreleased — work toward 0.2.0
 
+- Show verification status, algorithm, actual hash and expected hash in GUI results
+  and mismatch diagnostics without hashing the archive a second time.
+
 - Read numbered split-7Z archives and create verified 7Z volumes with GUI/CLI size
   selection, bounded part indexing, no-clobber publication and cancellation cleanup.
 - Report exact missing parts for split-7Z and native RAR4/RAR5 multivolume decoding.

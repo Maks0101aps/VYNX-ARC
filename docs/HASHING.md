@@ -14,6 +14,11 @@ distinct HASH_FORMAT / HASH_MISMATCH errors. CRC32 detects accidental corruption
 it does not authenticate a file. A match is only as trustworthy as the supplied
 digest and does not certify that archive content is safe.
 
+GUI verification reports MATCH or DOES NOT MATCH, the detected algorithm, actual
+digest and supplied value. A mismatch retains the HASH_MISMATCH error code;
+archive corruption, cancellation and malformed digests remain separate errors.
+Reporting uses the same completed streaming hash, without a second decoding pass.
+
 CLI commands: `hash FILE`, `verify FILE DIGEST`, `hash-entry ARCHIVE ENTRY`,
 `verify-entry ARCHIVE ENTRY DIGEST`. Passwords remain GUI-only and are never passed
 on command lines. Regression vectors cover abc and empty contents, ZIP/7Z/TAR/
