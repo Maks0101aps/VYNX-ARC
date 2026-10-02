@@ -16,6 +16,8 @@ pub mod bridge {
         encrypted: bool,
         crc: String,
         modified: String,
+        modified_unix: u64,
+        modified_known: bool,
     }
     struct ProgressInfo {
         done: u64,
@@ -185,6 +187,8 @@ fn list_entries(archive: &Archive) -> Vec<bridge::EntryInfo> {
             encrypted: e.encrypted,
             crc: e.crc.map(|v| format!("{v:08x}")).unwrap_or_default(),
             modified: e.modified.clone(),
+            modified_unix: e.modified_unix.unwrap_or(0),
+            modified_known: e.modified_unix.is_some(),
         })
         .collect()
 }

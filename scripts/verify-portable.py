@@ -90,6 +90,8 @@ for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25
     stdout,stderr=process.communicate(timeout=20)
     assert process.returncode==0,(stdout,stderr)
     assert screenshot.exists()
-result={'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':[p.pid for p in psutil.process_iter(['name']) if p.info['name']=='VynxArc.exe']}
+remaining=[p.pid for p in psutil.process_iter(['exe']) if p.info['exe'] and os.path.normcase(p.info['exe'])==os.path.normcase(str(exe.resolve()))]
+assert not remaining,('Verified application left running',remaining)
+result={'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':remaining,'process_scope':'Only the executable unpacked by this verifier; unrelated running app instances are excluded'}
 (root/'docs/VERIFICATION.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(result,indent=2),flush=True)

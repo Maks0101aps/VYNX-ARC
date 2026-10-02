@@ -24,6 +24,22 @@ add_library(vynx_core STATIC IMPORTED GLOBAL)
 set_target_properties(vynx_core PROPERTIES IMPORTED_LOCATION "${RUST_LIBRARY}")
 add_dependencies(vynx_core rust_core)
 qt_add_executable(VynxArc WIN32 apps/gui/main.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h apps/gui/MainWindow.cpp apps/gui/MainWindow.h apps/gui/ShellRequest.cpp apps/gui/ShellRequest.h)
+target_sources(VynxArc PRIVATE
+    apps/gui/UiCapture.cpp
+    apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h
+    apps/gui/dialogs/ExtractDialog.cpp apps/gui/dialogs/ExtractDialog.h
+    apps/gui/dialogs/ConflictDialog.cpp apps/gui/dialogs/ConflictDialog.h
+    apps/gui/dialogs/SettingsDialog.cpp apps/gui/dialogs/SettingsDialog.h
+    apps/gui/dialogs/AboutDialog.cpp apps/gui/dialogs/AboutDialog.h
+    apps/gui/Theme.cpp apps/gui/Theme.h
+    apps/gui/pages/HomePage.cpp apps/gui/pages/HomePage.h
+    apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
+    apps/gui/widgets/BreadcrumbBar.cpp apps/gui/widgets/BreadcrumbBar.h
+    apps/gui/widgets/IconProvider.cpp apps/gui/widgets/IconProvider.h
+    apps/gui/widgets/RecentDelegate.cpp apps/gui/widgets/RecentDelegate.h
+    apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
+    apps/gui/widgets/ToastOverlay.cpp apps/gui/widgets/ToastOverlay.h)
+target_compile_definitions(VynxArc PRIVATE VYNX_VERSION="${PROJECT_VERSION}")
 target_include_directories(VynxArc PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
 target_link_libraries(VynxArc PRIVATE Qt6::Widgets Qt6::Concurrent vynx_core)
 if(WIN32)
@@ -53,6 +69,22 @@ install(TARGETS VynxArc RUNTIME DESTINATION .)
 install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" DESTINATION .)
 install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
 enable_testing()
+add_executable(VynxPresentationTests
+    apps/gui/tests/GuiPresentationTest.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h
+    apps/gui/Theme.cpp apps/gui/widgets/IconProvider.cpp
+    apps/gui/widgets/BreadcrumbBar.cpp apps/gui/widgets/BreadcrumbBar.h
+    apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
+    apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
+    apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h)
+target_include_directories(VynxPresentationTests PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
+target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test vynx_core)
+if(WIN32)
+    target_link_libraries(VynxPresentationTests PRIVATE bcrypt ntdll userenv ws2_32 advapi32 shell32 ole32 crypt32)
+    target_compile_options(VynxPresentationTests PRIVATE /utf-8)
+endif()
+set_target_properties(VynxPresentationTests PROPERTIES WIN32_EXECUTABLE FALSE)
+add_test(NAME presentation COMMAND VynxPresentationTests -o -,txt)
+set_tests_properties(presentation PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 if(TARGET VynxShellSmoke)
     add_test(NAME shell_smoke COMMAND VynxShellSmoke $<TARGET_FILE:VynxShell>)
 endif()

@@ -16,6 +16,10 @@ class QSettings;
 class QTimer;
 class QAction;
 class SecretUtf8;
+class BreadcrumbBar;
+class ArchivePage;
+class OperationPanel;
+class ToastOverlay;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -25,6 +29,7 @@ class MainWindow : public QMainWindow {
     void openPath(const QString &path);
     bool smokeTest();
     void handleShellRequest(quint32 action, const QStringList &paths);
+    QWidget *prepareCapture(const QString &mode);
 
   protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
@@ -43,6 +48,7 @@ class MainWindow : public QMainWindow {
     void navigate(const QString &folder);
     void back();
     void up();
+    void showProperties();
     void settings();
     void applyTheme(const QString &theme);
     void updateRecent();
@@ -66,7 +72,13 @@ class MainWindow : public QMainWindow {
     ArchiveFilter *filter_;
     QTableView *table_;
     QLineEdit *search_;
-    QLabel *breadcrumb_;
+    BreadcrumbBar *breadcrumb_;
+    ArchivePage *archivePage_;
+    OperationPanel *operationView_;
+    ToastOverlay *toast_;
+    QLabel *archiveSummary_;
+    QList<QAction *> mutationActions_;
+    QAction *renameAction_, *deleteAction_;
     QLabel *current_;
     QLabel *rate_;
     QProgressBar *progress_;

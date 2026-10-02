@@ -14,6 +14,8 @@ struct ArchiveRow {
     bool folder = false;
     QString crc;
     QString modified;
+    qint64 modifiedTime = 0;
+    bool modifiedKnown = false;
     QVector<quint64> memberIds;
 };
 QString displaySize(quint64 bytes);
@@ -30,12 +32,14 @@ class ArchiveModel : public QAbstractTableModel {
     const ArchiveRow &row(int index) const { return rows_.at(index); }
     QString folder() const { return folder_; }
     quint64 totalSize() const;
+    quint64 totalPacked() const;
     int count() const { return int(entries_.size()); }
 
   private:
     rust::Vec<vynx::EntryInfo> entries_;
     QVector<ArchiveRow> rows_;
     QString folder_;
+    quint64 totalSize_ = 0, totalPacked_ = 0;
 };
 class ArchiveFilter : public QSortFilterProxyModel {
   public:

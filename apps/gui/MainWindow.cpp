@@ -1,6 +1,19 @@
 #include "MainWindow.h"
+#include "FormatUtils.h"
 #include "SecretUtf8.h"
 #include "ShellRequest.h"
+#include "Theme.h"
+#include "dialogs/AboutDialog.h"
+#include "dialogs/ConflictDialog.h"
+#include "dialogs/CreateArchiveDialog.h"
+#include "dialogs/ExtractDialog.h"
+#include "dialogs/SettingsDialog.h"
+#include "pages/ArchivePage.h"
+#include "pages/HomePage.h"
+#include "widgets/BreadcrumbBar.h"
+#include "widgets/IconProvider.h"
+#include "widgets/OperationPanel.h"
+#include "widgets/ToastOverlay.h"
 #include <QRegularExpression>
 #include <QStyleHints>
 #include <QtConcurrent>
@@ -13,17 +26,6 @@ static std::string utf8(const QString &s) {
     auto b = s.toUtf8();
     return std::string(b.constData(), size_t(b.size()));
 }
-static QString outputForFormat(QString path, int format) {
-    const QStringList extensions{"zip", "7z", "tar", "tar.gz"};
-    for (const auto &ext : QStringList{"tar.gz", "zip", "7z", "tar", "tgz"}) {
-        if (path.endsWith("." + ext, Qt::CaseInsensitive)) {
-            path.chop(ext.size() + 1);
-            break;
-        }
-    }
-    return path + "." + extensions.at(format);
-}
-
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle(tr("VYNX ARC"));
     setWindowIcon(QIcon(":/assets/icons/vynx-arc.png"));
@@ -62,6 +64,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         for (auto *a : archiveActions_)
             a->setEnabled(false);
         statusBar()->clearMessage();
+        archiveSummary_->clear();
     });
     addAction(fileMenu, tr("Exit"), QKeySequence::Quit, [this] { close(); });
     auto *operationsMenu = menuBar()->addMenu(tr("&Archive"));
@@ -100,130 +103,67 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     addAction(viewMenu, tr("Settings…"), QKeySequence("Ctrl+,"), [this] { settings(); });
     auto *help = menuBar()->addMenu(tr("&Help"));
     addAction(help, tr("About VYNX ARC"), {}, [this] {
-        QMessageBox::about(this, tr("About VYNX ARC"),
-                           tr("VYNX ARC 0.1.0\nWindows x64 · Qt 6.12 · Rust core\nDevelopment "
-                              "build\n\nOffline archive operations. No telemetry.\nZIP, 7Z, TAR "
-                              "and TAR.GZ.\n\nMIT application license. Third-party components "
-                              "retain their licenses.\nSource: "
-                              "github.com/Maks0101aps/VYNX-ARC\nSee bundled "
-                              "THIRD_PARTY_NOTICES.md."));
+        AboutDialog dialog(this);
+        dialog.exec();
     });
 
     auto *central = new QWidget;
     auto *layout = new QVBoxLayout(central);
-    layout->setContentsMargins(24, 18, 24, 18);
-    layout->setSpacing(16);
+    layout->setContentsMargins(16, 12, 16, 12);
+    layout->setSpacing(12);
     setCentralWidget(central);
-    auto *header = new QHBoxLayout;
-    auto *logo = new QLabel;
-    logo->setPixmap(QIcon(":/assets/icons/vynx-arc.png").pixmap(36, 36));
-    auto *brand = new QLabel(tr("VYNX ARC"));
-    brand->setObjectName("brand");
-    header->addWidget(logo);
-    header->addWidget(brand);
-    header->addStretch();
-    auto *openButton = new QPushButton(tr("Open archive"));
-    auto *createButton = new QPushButton(tr("Create archive"));
-    connect(openButton, &QPushButton::clicked, this, [this] { chooseOpen(); });
-    connect(createButton, &QPushButton::clicked, this, [this] { chooseCreate(); });
-    header->addWidget(openButton);
-    header->addWidget(createButton);
-    connect(open, &QAction::changed, openButton,
-            [open, openButton] { openButton->setEnabled(open->isEnabled()); });
-    connect(create, &QAction::changed, createButton,
-            [create, createButton] { createButton->setEnabled(create->isEnabled()); });
-    layout->addLayout(header);
     pages_ = new QStackedWidget;
     layout->addWidget(pages_, 1);
-    auto *home = new QWidget;
-    auto *homeLayout = new QVBoxLayout(home);
-    homeLayout->setContentsMargins(32, 40, 32, 20);
-    auto *title = new QLabel(tr("Everything in its place."));
-    title->setObjectName("hero");
-    homeLayout->addWidget(title);
-    auto *subtitle = new QLabel(tr("Open, explore and extract your archives.\nDrop an archive "
-                                   "anywhere in this window."));
-    subtitle->setObjectName("muted");
-    homeLayout->addWidget(subtitle);
-    homeLayout->addSpacing(32);
-    auto *recentHeader = new QHBoxLayout;
-    recentHeader->addWidget(new QLabel(tr("Recent archives")));
-    recentHeader->addStretch();
-    auto *clear = new QPushButton(tr("Clear history"));
-    recentHeader->addWidget(clear);
-    homeLayout->addLayout(recentHeader);
-    connect(clear, &QPushButton::clicked, this, [this] {
+    auto *home = new HomePage(open, create);
+    recent_ = home->recent;
+    connect(home, &HomePage::openRequested, this, &MainWindow::openPath);
+    connect(home, &HomePage::clearHistory, this, [this] {
         settings_->remove("recent");
         updateRecent();
     });
-    recent_ = new QListWidget;
-    recent_->setAccessibleName(tr("Recent archives"));
-    recent_->setObjectName("recent");
-    homeLayout->addWidget(recent_, 1);
-    connect(recent_, &QListWidget::itemActivated, this,
-            [this](QListWidgetItem *i) { openPath(i->data(Qt::UserRole).toString()); });
+    connect(home, &HomePage::removeRecent, this, [this](const QString &path) {
+        auto recent = settings_->value("recent").toStringList();
+        recent.removeAll(path);
+        settings_->setValue("recent", recent);
+        updateRecent();
+    });
     pages_->addWidget(home);
-    auto *browser = new QWidget;
-    auto *browserLayout = new QVBoxLayout(browser);
-    browserLayout->setContentsMargins(0, 0, 0, 0);
-    browserLayout->setSpacing(12);
-    auto *nav = new QHBoxLayout;
-    auto *backButton = new QPushButton(tr("Back"));
-    auto *upButton = new QPushButton(tr("Up"));
-    connect(backButton, &QPushButton::clicked, this, [this] { back(); });
-    connect(upButton, &QPushButton::clicked, this, [this] { up(); });
-    nav->addWidget(backButton);
-    nav->addWidget(upButton);
-    breadcrumb_ = new QLabel;
-    breadcrumb_->setTextFormat(Qt::PlainText);
-    breadcrumb_->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    nav->addWidget(breadcrumb_, 1);
-    search_ = new QLineEdit;
-    search_->setPlaceholderText(tr("Filter filenames…"));
-    search_->setAccessibleName(tr("Filter filenames"));
-    search_->setMaximumWidth(260);
-    nav->addWidget(search_);
-    browserLayout->addLayout(nav);
-    auto *commands = new QHBoxLayout;
-    auto *extractButton = new QPushButton(tr("Extract"));
-    extractButton->setObjectName("primary");
-    auto *testButton = new QPushButton(tr("Test archive"));
-    auto *more = new QPushButton(tr("More"));
-    auto *moreMenu = new QMenu(more);
-    for (auto *a : {smart, here, named, hash, addFiles, addFolder, rename, remove})
-        moreMenu->addAction(a);
-    more->setMenu(moreMenu);
-    connect(extractButton, &QPushButton::clicked, this, [this] { chooseExtract(); });
-    connect(testButton, &QPushButton::clicked, this, [this] { testArchive(); });
-    commands->addWidget(extractButton);
-    commands->addWidget(testButton);
-    commands->addWidget(more);
-    commands->addStretch();
-    browserLayout->addLayout(commands);
+    auto *properties = addAction(operationsMenu, tr("Properties"), QKeySequence("Alt+Return"),
+                                 [this] { showProperties(); });
+    archiveActions_.append(properties);
+    properties->setEnabled(false);
+    archivePage_ =
+        new ArchivePage(extract, addFiles, test, remove, rename, archiveActions_[6],
+                        {smart, here, named, hash, archiveActions_[6], archiveActions_[7],
+                         archiveActions_[8], addFiles, addFolder, rename, remove, properties});
+    pages_->addWidget(archivePage_);
+    connect(archivePage_->back, &QToolButton::clicked, this, &MainWindow::back);
+    connect(archivePage_->up, &QToolButton::clicked, this, &MainWindow::up);
+    breadcrumb_ = archivePage_->breadcrumb;
+    search_ = archivePage_->search;
+    table_ = archivePage_->table;
+    connect(breadcrumb_, &BreadcrumbBar::navigateRequested, this, &MainWindow::navigate);
     model_ = new ArchiveModel(this);
     filter_ = new ArchiveFilter(this);
     filter_->setSourceModel(model_);
     filter_->setFilterCaseSensitivity(Qt::CaseInsensitive);
     filter_->setFilterKeyColumn(0);
-    table_ = new QTableView;
     table_->setModel(filter_);
-    table_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table_->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    table_->setSortingEnabled(true);
-    table_->sortByColumn(0, Qt::AscendingOrder);
-    table_->setAlternatingRowColors(false);
-    table_->setShowGrid(false);
-    table_->verticalHeader()->hide();
-    table_->verticalHeader()->setDefaultSectionSize(34);
-    table_->horizontalHeader()->setStretchLastSection(false);
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    table_->setColumnWidth(1, 105);
-    table_->setColumnWidth(2, 105);
-    table_->setColumnHidden(3, true);
+    table_->sortByColumn(0, Qt::AscendingOrder);
+    table_->setColumnWidth(1, 100);
+    table_->setColumnWidth(2, 100);
+    table_->setColumnWidth(3, 70);
+    table_->setColumnWidth(4, 80);
+    table_->setColumnWidth(5, 140);
     table_->setColumnHidden(6, true);
-    table_->setAccessibleName(tr("Archive contents"));
-    browserLayout->addWidget(table_, 1);
-    pages_->addWidget(browser);
+    mutationActions_ = {addFiles, addFolder, rename, remove};
+    renameAction_ = rename;
+    deleteAction_ = remove;
+    archiveSummary_ = new QLabel;
+    archiveSummary_->setObjectName("muted");
+    statusBar()->addPermanentWidget(archiveSummary_);
+    toast_ = new ToastOverlay(central);
     connect(search_, &QLineEdit::textChanged, this, [this](const QString &s) {
         if (s.contains('*') || s.contains('?'))
             filter_->setFilterRegularExpression(
@@ -238,7 +178,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (r.folder)
             navigate(r.fullPath);
         else
-            chooseExtract();
+            showProperties();
     });
     connect(table_->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             [this] { updateStatus(); });
@@ -248,6 +188,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(searchShortcut, &QShortcut::activated, this, [this] {
         search_->setFocus();
         search_->selectAll();
+    });
+    auto *escapeSearch = new QShortcut(QKeySequence(Qt::Key_Escape), search_);
+    escapeSearch->setContext(Qt::WidgetShortcut);
+    connect(escapeSearch, &QShortcut::activated, this, [this] {
+        if (!search_->text().isEmpty())
+            search_->clear();
+        else
+            table_->setFocus();
     });
     auto *upShortcut = new QShortcut(QKeySequence("Alt+Up"), this);
     connect(upShortcut, &QShortcut::activated, this, [this] { up(); });
@@ -263,16 +211,35 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             if (r.folder)
                 navigate(r.fullPath);
             else
-                chooseExtract();
+                showProperties();
         }
     });
     table_->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(table_, &QWidget::customContextMenuRequested, this,
-            [this, extract, smart, test, hash](QPoint p) {
-                QMenu m;
-                for (auto *a : {extract, smart, test, hash})
-                    m.addAction(a);
-                m.exec(table_->viewport()->mapToGlobal(p));
+            [this, extract, addFiles, addFolder, rename, remove, properties](QPoint p) {
+                auto index = table_->indexAt(p);
+                if (!index.isValid())
+                    return;
+                if (!table_->selectionModel()->isSelected(index))
+                    table_->selectRow(index.row());
+                QMenu menu;
+                const auto rows = table_->selectionModel()->selectedRows();
+                if (rows.size() == 1 &&
+                    model_->row(filter_->mapToSource(rows.first()).row()).folder)
+                    connect(menu.addAction(tr("Open folder")), &QAction::triggered, this,
+                            [this, index] {
+                                navigate(model_->row(filter_->mapToSource(index).row()).fullPath);
+                            });
+                menu.addAction(extract);
+                menu.addAction(archiveActions_[6]);
+                if (writableArchive()) {
+                    menu.addSeparator();
+                    for (auto *a : {addFiles, addFolder, rename, remove})
+                        menu.addAction(a);
+                }
+                menu.addSeparator();
+                menu.addAction(properties);
+                menu.exec(table_->viewport()->mapToGlobal(p));
             });
     auto *columns = viewMenu->addMenu(tr("Columns"));
     for (int c = 1; c < 7; ++c) {
@@ -281,29 +248,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         a->setCheckable(true);
         a->setChecked(!table_->isColumnHidden(c));
         connect(a, &QAction::toggled, this,
-                [this, c](bool show) { table_->setColumnHidden(c, !show); });
+                [this, c](bool show) { archivePage_->setColumnPreference(c, show); });
     }
+    connect(columns, &QMenu::aboutToShow, this, [this, columns] {
+        int column = 1;
+        for (auto *action : columns->actions()) {
+            QSignalBlocker blocker(action);
+            action->setChecked(!table_->isColumnHidden(column++));
+        }
+    });
 
-    operationPanel_ = new QWidget;
-    operationPanel_->setObjectName("operation");
-    auto *opLayout = new QVBoxLayout(operationPanel_);
-    opLayout->setContentsMargins(16, 12, 16, 12);
-    current_ = new QLabel;
-    current_->setWordWrap(true);
-    current_->setTextFormat(Qt::PlainText);
-    opLayout->addWidget(current_);
-    auto *progressLine = new QHBoxLayout;
-    progress_ = new QProgressBar;
-    progress_->setAccessibleName(tr("Operation progress"));
-    cancel_ = new QPushButton(tr("Cancel"));
-    progressLine->addWidget(progress_, 1);
-    progressLine->addWidget(cancel_);
-    opLayout->addLayout(progressLine);
-    rate_ = new QLabel;
-    rate_->setObjectName("muted");
-    opLayout->addWidget(rate_);
+    operationView_ = new OperationPanel;
+    operationPanel_ = operationView_;
+    current_ = operationView_->current;
+    rate_ = operationView_->rate;
+    progress_ = operationView_->progress;
+    cancel_ = operationView_->cancel;
     layout->addWidget(operationPanel_);
-    operationPanel_->hide();
     connect(cancel_, &QPushButton::clicked, this, [this] {
         if (operation_) {
             vynx::cancel(**operation_);
@@ -317,17 +278,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (!operation_)
             return;
         auto p = vynx::progress(**operation_);
-        current_->setText(text(p.current));
-        if (p.total) {
-            progress_->setRange(0, 1000);
-            progress_->setValue(int(qMin(1000.0, double(p.done) / double(p.total) * 1000.0)));
-        } else
-            progress_->setRange(0, 0);
-        double seconds = qMax(0.001, elapsed_.elapsed() / 1000.0);
-        rate_->setText(tr("%1 / %2 · %3/s · %4 s")
-                           .arg(displaySize(p.done), p.total ? displaySize(p.total) : tr("unknown"),
-                                displaySize(quint64(p.done / seconds)),
-                                QString::number(seconds, 'f', 1)));
+        operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed());
         showConflict();
     });
     connect(&watcher_, &QFutureWatcher<QString>::finished, this, [this] {
@@ -339,6 +290,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             a->setEnabled(true);
         for (auto *a : archiveActions_)
             a->setEnabled(bool(archive_));
+        if (archive_)
+            updateStatus();
         QString error = watcher_.result();
         auto success = std::move(success_);
         auto failure = std::move(failure_);
@@ -350,7 +303,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (error.isEmpty()) {
             if (success)
                 success();
-            statusBar()->showMessage(tr("Operation completed"), 8000);
+            toast_->notify(tr("Operation completed"));
+            updateStatus();
         } else if (failure) {
             failure(error);
         } else
@@ -385,8 +339,7 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
         a->setEnabled(false);
     for (auto *a : archiveActions_)
         a->setEnabled(false);
-    operationPanel_->show();
-    current_->setText(title);
+    operationView_->begin(title);
     cancel_->setEnabled(true);
     progress_->setRange(0, 0);
     elapsed_.start();
@@ -446,8 +399,9 @@ void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<Secre
             history_.clear();
             search_->clear();
             pages_->setCurrentIndex(1);
-            setWindowTitle(tr("VYNX ARC — %1").arg(QFileInfo(path).fileName()));
-            breadcrumb_->setText(QFileInfo(path).fileName() + " / ");
+            setWindowTitle(tr("%1 — VYNX ARC").arg(QFileInfo(path).fileName()));
+            breadcrumb_->setPath(QFileInfo(path).fileName(), {});
+            archivePage_->setWritable(writableArchive());
             for (auto *a : archiveActions_)
                 a->setEnabled(true);
             updateStatus();
@@ -475,54 +429,17 @@ void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<Secre
 void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     if (busy_ || !archive_)
         return;
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Extract archive"));
-    auto *form = new QFormLayout(&dialog);
     QString defaultDest = QFileInfo(archivePath_).absolutePath();
     if (named)
         defaultDest += "/" + QFileInfo(archivePath_).completeBaseName();
-    auto *destination = new QLineEdit(defaultDest);
-    auto *browse = new QPushButton(tr("Browse…"));
-    auto *destLayout = new QHBoxLayout;
-    destLayout->addWidget(destination);
-    destLayout->addWidget(browse);
-    form->addRow(tr("Destination"), destLayout);
-    connect(browse, &QPushButton::clicked, &dialog, [&] {
-        QString p = QFileDialog::getExistingDirectory(&dialog, tr("Extraction destination"),
-                                                      destination->text());
-        if (!p.isEmpty())
-            destination->setText(p);
-    });
-    auto *scope = new QComboBox;
-    scope->addItem(tr("All files"));
-    auto selectedRows = table_->selectionModel()->selectedRows();
-    if (!selectedRows.isEmpty()) {
-        scope->addItem(tr("Selected files and folders"));
-        scope->setCurrentIndex(1);
-    }
-    form->addRow(tr("Files"), scope);
-    auto *conflicts = new QComboBox;
-    conflicts->addItems({tr("Ask for each conflict"), tr("Replace existing files"),
-                         tr("Skip existing files"), tr("Keep both / rename incoming"),
-                         tr("Replace if newer"), tr("Stop on conflict")});
-    form->addRow(tr("Existing files"), conflicts);
-    auto *smartBox = new QCheckBox(tr("Smart Extract: avoid redundant nesting"));
-    smartBox->setChecked(smart);
-    form->addRow(smartBox);
-    auto *security = new QLabel(tr("Unsafe paths, links and archive bombs are blocked."));
-    security->setWordWrap(true);
-    form->addRow(security);
-    auto *password = new QLineEdit(password_ ? password_->text() : QString());
-    password->setEchoMode(QLineEdit::Password);
-    form->addRow(tr("Password, if needed"), password);
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    buttons->button(QDialogButtonBox::Ok)->setText(tr("Extract"));
-    form->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    if (here) {
-        smartBox->setChecked(false);
-    }
+    const auto selectedRows = table_->selectionModel()->selectedRows();
+    ExtractDialog dialog(defaultDest, !selectedRows.isEmpty(), smart, here,
+                         password_ ? password_->text() : QString(), this);
+    auto *destination = dialog.destination;
+    auto *scope = dialog.scope;
+    auto *conflicts = dialog.conflicts;
+    auto *smartBox = dialog.smartBox;
+    auto *password = dialog.password;
     if (dialog.exec() != QDialog::Accepted)
         return;
     if (destination->text().isEmpty())
@@ -559,43 +476,15 @@ void MainWindow::showConflict() {
         return;
     shownConflict_ = request.id;
     auto op = operation_;
-    auto *dialog = new QDialog(this);
+    auto *dialog = new ConflictDialog(text(request.existing_path), request.existing_size,
+                                      request.existing_modified, text(request.incoming_name),
+                                      request.incoming_size, request.incoming_modified, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle(tr("File already exists"));
     dialog->setWindowModality(Qt::ApplicationModal);
-    dialog->setMinimumWidth(540);
-    auto *layout = new QVBoxLayout(dialog);
-    auto date = [this](quint64 seconds) {
-        return seconds ? QDateTime::fromSecsSinceEpoch(qint64(seconds)).toString(Qt::ISODate)
-                       : tr("Unknown");
-    };
-    auto *comparison = new QLabel(tr("Existing: %1\nSize: %2 bytes\nModified: %3\n\nIncoming: "
-                                     "%4\nSize: %5 bytes\nModified: %6")
-                                      .arg(text(request.existing_path))
-                                      .arg(request.existing_size)
-                                      .arg(date(request.existing_modified))
-                                      .arg(text(request.incoming_name))
-                                      .arg(request.incoming_size)
-                                      .arg(date(request.incoming_modified)));
-    comparison->setTextFormat(Qt::PlainText);
-    comparison->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    comparison->setWordWrap(true);
-    layout->addWidget(comparison);
-    auto *all = new QCheckBox(tr("Apply this choice to all conflicts"));
-    layout->addWidget(all);
-    auto *buttons = new QDialogButtonBox;
-    layout->addWidget(buttons);
-    auto add = [&](const QString &label, quint8 choice, QDialogButtonBox::ButtonRole role) {
-        auto *button = buttons->addButton(label, role);
-        connect(button, &QPushButton::clicked, dialog, [dialog, op, id = request.id, all, choice] {
-            vynx::reply_conflict(**op, id, choice, all->isChecked());
-            dialog->accept();
-        });
-    };
-    add(tr("Replace"), 2, QDialogButtonBox::DestructiveRole);
-    add(tr("Skip"), 1, QDialogButtonBox::ActionRole);
-    add(tr("Keep both"), 4, QDialogButtonBox::ActionRole);
-    add(tr("Cancel"), 0, QDialogButtonBox::RejectRole);
+    connect(dialog, &ConflictDialog::decision, dialog,
+            [op, id = request.id](quint8 choice, bool all) {
+                vynx::reply_conflict(**op, id, choice, all);
+            });
     connect(dialog, &QDialog::finished, dialog,
             [op, id = request.id] { vynx::reply_conflict(**op, id, 0, false); });
     connect(&watcher_, &QFutureWatcher<QString>::finished, dialog, &QDialog::reject);
@@ -625,11 +514,7 @@ void MainWindow::testArchive() {
             vynx::test_archive(**archive, p->bytes(), **op);
             return QString();
         },
-        [this] {
-            QMessageBox::information(this, tr("Archive test"),
-                                     tr("All archive streams decoded successfully.\nChecksums were "
-                                        "verified where provided by the backend."));
-        });
+        [this] { toast_->notify(tr("All archive streams decoded successfully.")); });
 }
 void MainWindow::hashFile() {
     if (busy_ || !archive_)
@@ -653,8 +538,10 @@ void MainWindow::hashFile() {
             l->addWidget(t);
             auto *b = new QPushButton(tr("Copy hashes"));
             l->addWidget(b);
-            connect(b, &QPushButton::clicked, &d,
-                    [result] { QApplication::clipboard()->setText(*result); });
+            connect(b, &QPushButton::clicked, &d, [this, result] {
+                QApplication::clipboard()->setText(*result);
+                toast_->notify(tr("Hash copied"));
+            });
             d.resize(660, 200);
             d.exec();
         });
@@ -714,9 +601,18 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
         },
         [this, result, verify] {
             if (verify) {
-                QMessageBox::information(this, tr("Verify hash"),
-                                         tr("The computed digest matches the supplied value.") +
-                                             "\n\n" + *result);
+                auto *report = new QDialog(this);
+                report->setAttribute(Qt::WA_DeleteOnClose);
+                report->setWindowTitle(tr("Verify hash"));
+                auto *layout = new QVBoxLayout(report);
+                auto *value = new QPlainTextEdit(*result);
+                value->setReadOnly(true);
+                layout->addWidget(value);
+                auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+                layout->addWidget(buttons);
+                connect(buttons, &QDialogButtonBox::rejected, report, &QDialog::reject);
+                report->resize(700, 240);
+                report->show();
                 return;
             }
             QDialog dialog(this);
@@ -727,8 +623,10 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
             layout->addWidget(report);
             auto *copy = new QPushButton(tr("Copy hashes"));
             layout->addWidget(copy);
-            connect(copy, &QPushButton::clicked, &dialog,
-                    [result] { QApplication::clipboard()->setText(*result); });
+            connect(copy, &QPushButton::clicked, &dialog, [this, result] {
+                QApplication::clipboard()->setText(*result);
+                toast_->notify(tr("Hash copied"));
+            });
             dialog.resize(700, 400);
             dialog.exec();
         });
@@ -736,96 +634,14 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
 void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     if (busy_)
         return;
-    QDialog d(this);
-    d.setWindowTitle(tr("Create archive"));
-    auto *form = new QFormLayout(&d);
-    auto *inputs = new QListWidget;
-    inputs->addItems(initial);
-    inputs->setMinimumWidth(460);
-    form->addRow(tr("Sources"), inputs);
-    auto *sourceButtons = new QHBoxLayout;
-    auto *files = new QPushButton(tr("Add files…"));
-    auto *folder = new QPushButton(tr("Add folder…"));
-    auto *remove = new QPushButton(tr("Remove"));
-    sourceButtons->addWidget(files);
-    sourceButtons->addWidget(folder);
-    sourceButtons->addWidget(remove);
-    form->addRow(sourceButtons);
-    connect(files, &QPushButton::clicked, &d,
-            [&] { inputs->addItems(QFileDialog::getOpenFileNames(&d, tr("Source files"))); });
-    connect(folder, &QPushButton::clicked, &d, [&] {
-        auto p = QFileDialog::getExistingDirectory(&d, tr("Source folder"));
-        if (!p.isEmpty())
-            inputs->addItem(p);
-    });
-    connect(remove, &QPushButton::clicked, &d,
-            [&] { delete inputs->takeItem(inputs->currentRow()); });
-    auto *format = new QComboBox;
-    format->addItems({"ZIP", "7Z", "TAR", "TAR.GZ"});
-    format->setCurrentIndex(initialFormat);
-    form->addRow(tr("Format"), format);
-    auto *output = new QLineEdit;
-    if (!initial.isEmpty())
-        output->setText(outputForFormat(
-            QFileInfo(initial.first()).absolutePath() + "/" +
-                (initial.size() == 1 ? QFileInfo(initial.first()).completeBaseName() : "Archive"),
-            initialFormat));
-    auto *save = new QPushButton(tr("Browse…"));
-    auto *outLine = new QHBoxLayout;
-    outLine->addWidget(output);
-    outLine->addWidget(save);
-    form->addRow(tr("Output archive"), outLine);
-    connect(save, &QPushButton::clicked, &d, [&] {
-        const QStringList extensions{"zip", "7z", "tar", "tar.gz"};
-        auto p = QFileDialog::getSaveFileName(&d, tr("Create archive"),
-                                              "Archive." + extensions[format->currentIndex()],
-                                              tr("All files (*)"));
-        if (!p.isEmpty())
-            output->setText(p);
-    });
-    auto *password = new QLineEdit;
-    password->setEchoMode(QLineEdit::Password);
-    form->addRow(tr("Password (optional)"), password);
-    auto *advanced = new QGroupBox(tr("Advanced: split 7Z volumes"));
-    advanced->setCheckable(true);
-    advanced->setChecked(false);
-    advanced->setVisible(initialFormat == 1);
-    auto *splitForm = new QFormLayout(advanced);
-    auto *split = new QComboBox;
-    split->addItems({tr("No split"), "100 MiB", "500 MiB", "1 GiB", "4 GiB", tr("Custom")});
-    auto *customSplit = new QSpinBox;
-    customSplit->setRange(1, 1048576);
-    customSplit->setValue(100);
-    customSplit->setSuffix(" MiB");
-    customSplit->setVisible(false);
-    splitForm->addRow(tr("Volume size"), split);
-    splitForm->addRow(customSplit);
-    connect(split, &QComboBox::currentIndexChanged, &d,
-            [customSplit](int index) { customSplit->setVisible(index == 5); });
-    form->addRow(advanced);
-    auto *encryptionLabel = new QLabel(tr("ZIP uses AES-256. 7Z encrypts data and filenames."));
-    encryptionLabel->setWordWrap(true);
-    form->addRow(encryptionLabel);
-    connect(format, &QComboBox::currentIndexChanged, &d, [&](int i) {
-        password->setEnabled(i < 2);
-        if (i >= 2)
-            password->clear();
-        encryptionLabel->setVisible(i < 2);
-        advanced->setVisible(i == 1);
-    });
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    buttons->button(QDialogButtonBox::Ok)->setText(tr("Create"));
-    form->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, &d, [&] {
-        if (inputs->count() == 0 || output->text().isEmpty()) {
-            QMessageBox::information(&d, tr("Create archive"),
-                                     tr("Choose source files and an output archive."));
-            return;
-        }
-        output->setText(outputForFormat(output->text(), format->currentIndex()));
-        d.accept();
-    });
-    connect(buttons, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+    CreateArchiveDialog d(initial, initialFormat, this);
+    auto *inputs = d.inputs;
+    auto *format = d.format;
+    auto *output = d.output;
+    auto *password = d.password;
+    auto *advanced = d.advanced;
+    auto *split = d.split;
+    auto *customSplit = d.customSplit;
     if (d.exec() != QDialog::Accepted)
         return;
     auto sources = std::make_shared<rust::Vec<rust::String>>();
@@ -856,11 +672,14 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
 void MainWindow::navigate(const QString &folder) {
     if (busy_ || !archive_)
         return;
+    if (folder == model_->folder())
+        return;
     history_.append(model_->folder());
     model_->navigate(folder);
     search_->clear();
-    breadcrumb_->setText(QFileInfo(archivePath_).fileName() + " / " + folder);
+    breadcrumb_->setPath(QFileInfo(archivePath_).fileName(), folder);
     updateStatus();
+    table_->setFocus();
 }
 bool MainWindow::writableArchive() const {
     if (!archive_)
@@ -956,7 +775,7 @@ void MainWindow::back() {
         return;
     QString folder = history_.takeLast();
     model_->navigate(folder);
-    breadcrumb_->setText(QFileInfo(archivePath_).fileName() + " / " + folder);
+    breadcrumb_->setPath(QFileInfo(archivePath_).fileName(), folder);
     search_->clear();
     updateStatus();
 }
@@ -1053,13 +872,34 @@ void MainWindow::up() {
     navigate(slash < 0 ? QString() : folder.left(slash));
 }
 void MainWindow::updateStatus() {
+    if (!archive_)
+        return;
     const auto rows = table_->selectionModel()->selectedRows();
+    archivePage_->back->setEnabled(!busy_ && !history_.isEmpty());
+    archivePage_->up->setEnabled(!busy_ && !model_->folder().isEmpty());
+    for (auto *action : mutationActions_)
+        action->setEnabled(!busy_ && writableArchive());
+    renameAction_->setEnabled(!busy_ && writableArchive() && rows.size() == 1);
+    deleteAction_->setEnabled(!busy_ && writableArchive() && !rows.isEmpty());
+    bool regular = false;
+    for (const auto &index : rows)
+        regular |= !model_->row(filter_->mapToSource(index).row()).folder;
+    archiveActions_[6]->setEnabled(!busy_ && regular);
+    archiveActions_[7]->setEnabled(!busy_ && regular && rows.size() == 1);
+    archiveActions_.last()->setEnabled(!busy_ && rows.size() == 1);
+    auto summary = text(vynx::archive_format(**archive_));
+    if (!writableArchive())
+        summary += tr(" · read only");
+    auto packed = model_->totalPacked();
+    auto total = model_->totalSize();
+    if (packed)
+        summary += tr(" · %1 packed").arg(displaySize(packed));
+    if (packed && total && packed <= total)
+        summary += tr(" · %1% saved").arg(qRound(100.0 * (1 - double(packed) / double(total))));
+    archiveSummary_->setText(summary);
     if (rows.isEmpty())
         statusBar()->showMessage(
-            tr("%1 entries · %2 · %3")
-                .arg(model_->count())
-                .arg(displaySize(model_->totalSize()),
-                     archive_ ? text(vynx::archive_format(**archive_)) : QString()));
+            tr("%1 items · %2").arg(filter_->rowCount()).arg(displaySize(model_->totalSize())));
     else {
         quint64 size = 0;
         for (auto i : rows)
@@ -1067,41 +907,59 @@ void MainWindow::updateStatus() {
         statusBar()->showMessage(tr("%1 selected · %2").arg(rows.size()).arg(displaySize(size)));
     }
 }
+void MainWindow::showProperties() {
+    if (busy_ || !archive_)
+        return;
+    const auto rows = table_->selectionModel()->selectedRows();
+    if (rows.size() != 1)
+        return;
+    const auto &row = model_->row(filter_->mapToSource(rows.first()).row());
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Properties"));
+    dialog.setMinimumWidth(360);
+    auto *layout = new QFormLayout(&dialog);
+    auto label = [&](const QString &title, const QString &value) {
+        auto *text = new QLabel(value);
+        text->setTextFormat(Qt::PlainText);
+        text->setWordWrap(true);
+        text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+        layout->addRow(title, text);
+    };
+    label(tr("Name"), row.name);
+    label(tr("Archive path"), row.fullPath);
+    if (!row.folder) {
+        label(tr("Size"), displaySize(row.size));
+        label(tr("Packed"), row.packed ? displaySize(row.packed) : tr("Unknown"));
+        label(tr("Modified"),
+              row.modifiedKnown
+                  ? QLocale().toString(QDateTime::fromSecsSinceEpoch(row.modifiedTime),
+                                       QLocale::LongFormat)
+                  : tr("Unknown"));
+        if (!row.crc.isEmpty())
+            label("CRC32", row.crc);
+    }
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+    layout->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    dialog.exec();
+}
 void MainWindow::updateRecent() {
     recent_->clear();
     for (auto p : settings_->value("recent").toStringList()) {
         auto *i = new QListWidgetItem(QFileInfo(p).fileName() + "\n" + p, recent_);
+        i->setIcon(Icons::get("archive"));
         i->setData(Qt::UserRole, p);
         i->setToolTip(p);
     }
 }
 void MainWindow::settings() {
-    QDialog d(this);
-    d.setWindowTitle(tr("Settings"));
-    auto *l = new QFormLayout(&d);
-    auto *theme = new QComboBox;
-    theme->addItems({tr("Follow system"), tr("Light"), tr("Dark")});
-    QStringList ids{"system", "light", "dark"};
-    theme->setCurrentIndex(qMax(0, ids.indexOf(settings_->value("theme", "system").toString())));
-    l->addRow(tr("Appearance"), theme);
-    auto *language = new QComboBox;
-    language->addItems({"English", "Українська", "Русский"});
-    const QStringList languages{"en", "uk", "ru"};
-    language->setCurrentIndex(
-        qMax(0, languages.indexOf(settings_->value("language", "en").toString())));
-    l->addRow(tr("Language (restart required)"), language);
-    auto *history = new QCheckBox(tr("Remember recent archives locally"));
-    history->setChecked(settings_->value("historyEnabled", true).toBool());
-    l->addRow(history);
-    auto *notice = new QLabel(tr("Path protection and link blocking are always enabled.\nNo "
-                                 "network requests or background services.\nExplorer "
-                                 "integration is not installed by this development build."));
-    notice->setWordWrap(true);
-    l->addRow(notice);
-    auto *b = new QDialogButtonBox(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
-    l->addRow(b);
-    connect(b, &QDialogButtonBox::accepted, &d, &QDialog::accept);
-    connect(b, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+    SettingsDialog d(settings_->value("theme", "system").toString(),
+                     settings_->value("language", "en").toString(),
+                     settings_->value("historyEnabled", true).toBool(), this);
+    auto *theme = d.theme;
+    auto *language = d.language;
+    auto *history = d.history;
+    const QStringList ids{"system", "light", "dark"}, languages{"en", "uk", "ru"};
     if (d.exec() == QDialog::Accepted) {
         settings_->setValue("language", languages[language->currentIndex()]);
         settings_->setValue("theme", ids[theme->currentIndex()]);
@@ -1113,55 +971,8 @@ void MainWindow::settings() {
     }
 }
 void MainWindow::applyTheme(const QString &theme) {
-    bool dark = theme == "dark" ||
-                (theme == "system" && qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark);
-    QPalette p = qApp->style()->standardPalette();
-    if (!dark) {
-        p.setColor(QPalette::Window, QColor("#f5f6f9"));
-        p.setColor(QPalette::WindowText, QColor("#202632"));
-        p.setColor(QPalette::Base, Qt::white);
-        p.setColor(QPalette::AlternateBase, QColor("#f0f3f8"));
-        p.setColor(QPalette::Text, QColor("#202632"));
-        p.setColor(QPalette::Button, QColor("#eef1f6"));
-        p.setColor(QPalette::ButtonText, QColor("#202632"));
-        p.setColor(QPalette::Disabled, QPalette::Text, QColor("#737c8b"));
-        p.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#737c8b"));
-    } else {
-        p.setColor(QPalette::Window, QColor("#17191e"));
-        p.setColor(QPalette::WindowText, QColor("#f1f3f7"));
-        p.setColor(QPalette::Base, QColor("#1e2128"));
-        p.setColor(QPalette::AlternateBase, QColor("#242832"));
-        p.setColor(QPalette::Text, QColor("#f1f3f7"));
-        p.setColor(QPalette::Button, QColor("#272b34"));
-        p.setColor(QPalette::ButtonText, QColor("#f1f3f7"));
-        p.setColor(QPalette::Disabled, QPalette::Text, QColor("#858b97"));
-        p.setColor(QPalette::Disabled, QPalette::ButtonText, QColor("#858b97"));
-    }
-    p.setColor(QPalette::Highlight, QColor("#2563eb"));
-    p.setColor(QPalette::HighlightedText, Qt::white);
-    p.setColor(QPalette::PlaceholderText, QColor(dark ? "#aab1bf" : "#626a79"));
-    p.setColor(QPalette::ToolTipBase, QColor(dark ? "#272b34" : "#ffffff"));
-    p.setColor(QPalette::ToolTipText, QColor(dark ? "#f1f3f7" : "#202632"));
-    qApp->setPalette(p);
-    qApp->setStyleSheet("QWidget { font-family: 'Segoe UI'; font-size: 10pt; } QLabel#brand { "
-                        "font-size: 17pt; font-weight: 600; } QLabel#hero { font-size: 30pt; "
-                        "font-weight: 600; } QLabel#muted { color: " +
-                        QString(dark ? "#aab1bf" : "#626a79") +
-                        "; } QPushButton { padding: 8px 16px; border-radius: 8px; border: 1px "
-                        "solid " +
-                        QString(dark ? "#393f4b" : "#cfd3db") +
-                        "; } QPushButton:hover { border-color: #2563eb; } QPushButton:focus, "
-                        "QLineEdit:focus { border: 2px solid #2563eb; } QPushButton#primary { "
-                        "background: #2563eb; color: white; border-color: #2563eb; } QLineEdit { "
-                        "padding: 8px; border: 1px solid " +
-                        QString(dark ? "#393f4b" : "#cfd3db") +
-                        "; border-radius: 8px; } QHeaderView::section { padding: 8px; border: 0; "
-                        "} QTableView { border: 1px solid " +
-                        QString(dark ? "#303541" : "#d8dce4") +
-                        "; border-radius: 8px; } QProgressBar { min-height: 18px; border-radius: "
-                        "5px; text-align: center; } QProgressBar::chunk { background: #2563eb; "
-                        "border-radius: 4px; } QListWidget#recent { border: 0; } "
-                        "QListWidget#recent::item { padding: 12px; } ");
+    applyUiTheme(theme);
+    table_->viewport()->update();
 }
 void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
     if (!busy_ && e->mimeData()->hasUrls())

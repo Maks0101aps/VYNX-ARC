@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QLocale>
 #include <QMessageBox>
+#include <QPointer>
 #include <QSettings>
 #include <QTimer>
 #include <QTranslator>
@@ -11,7 +12,7 @@ int main(int argc, char **argv) {
     QApplication app(argc, argv);
     app.setApplicationName("VYNX ARC");
     app.setOrganizationName("VYNX");
-    app.setApplicationVersion("0.1.0");
+    app.setApplicationVersion(VYNX_VERSION);
     app.setStyle("Fusion");
     const QString portable = QCoreApplication::applicationDirPath() + "/portable.flag";
     std::unique_ptr<QSettings> settings;
@@ -22,6 +23,7 @@ int main(int argc, char **argv) {
         settings = std::make_unique<QSettings>(QSettings::IniFormat, QSettings::UserScope, "VYNX",
                                                "VYNX ARC");
     const QString language = settings->value("language", "en").toString();
+    QLocale::setDefault(QLocale(language == "uk" ? "uk_UA" : language == "ru" ? "ru_RU" : "en_US"));
     QTranslator translator;
     if (language != "en" && translator.load(":/i18n/vynx_" + language + ".qm"))
         app.installTranslator(&translator);
@@ -31,6 +33,18 @@ int main(int argc, char **argv) {
                           QCoreApplication::applicationDirPath() + "/translations"))
         app.installTranslator(&qtTranslator);
     MainWindow window;
+    const int sizeIndex = app.arguments().indexOf("--capture-size");
+    if (sizeIndex >= 0 && sizeIndex + 1 < app.arguments().size()) {
+        const auto dimensions = app.arguments()[sizeIndex + 1].split('x');
+        if (dimensions.size() != 2)
+            return 2;
+        bool widthValid = false, heightValid = false;
+        int width = dimensions[0].toInt(&widthValid), height = dimensions[1].toInt(&heightValid);
+        if (!widthValid || !heightValid || width < 620 || height < 440 || width > 3840 ||
+            height > 2160)
+            return 2;
+        window.resize(width, height);
+    }
     if (app.arguments().contains("--smoke-test"))
         return window.smokeTest() ? 0 : 1;
     window.show();
@@ -51,8 +65,15 @@ int main(int argc, char **argv) {
     const int captureIndex = app.arguments().indexOf("--capture");
     if (captureIndex >= 0 && captureIndex + 1 < app.arguments().size()) {
         const auto output = app.arguments()[captureIndex + 1];
-        QTimer::singleShot(1800, &window, [&window, output, &app] {
-            app.exit(window.grab().save(output) ? 0 : 1);
+        auto target = std::make_shared<QPointer<QWidget>>(&window);
+        const int modeIndex = app.arguments().indexOf("--capture-ui");
+        if (modeIndex >= 0 && modeIndex + 1 < app.arguments().size()) {
+            const auto mode = app.arguments()[modeIndex + 1];
+            QTimer::singleShot(1000, &window,
+                               [&window, target, mode] { *target = window.prepareCapture(mode); });
+        }
+        QTimer::singleShot(1800, &window, [target, output, &app] {
+            app.exit(*target && (*target)->grab().save(output) ? 0 : 1);
         });
     }
     if (app.arguments().size() > 1 && !app.arguments()[1].startsWith("--")) {

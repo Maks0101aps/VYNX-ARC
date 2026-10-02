@@ -11,6 +11,10 @@ import psutil
 parser = argparse.ArgumentParser()
 parser.add_argument('--app', required=True, type=pathlib.Path)
 parser.add_argument('--output', required=True, type=pathlib.Path)
+parser.add_argument('--quick', action='store_true')
+parser.add_argument('--window-size')
+parser.add_argument('--details-only',action='store_true')
+parser.add_argument('--workspace-content',action='store_true')
 args = parser.parse_args()
 app = args.app.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
@@ -30,10 +34,10 @@ startup.wShowWindow = 0
 samples = []
 try:
     for theme in ['light', 'dark']:
-        for language in ['en', 'uk', 'ru']:
+        for language in (['en'] if args.quick else ['en', 'uk', 'ru']):
             configuration.write_text(f'[General]\ntheme={theme}\nlanguage={language}\nhistoryEnabled=false\n', encoding='utf-8')
-            for scale in ['1', '1.25', '1.5', '2']:
-                for state in ['home', 'archive']:
+            for scale in (['1'] if args.quick or args.details_only else ['1', '1.25', '1.5', '2']):
+                for state in (['create','extract','conflict','settings','about','operation','breadcrumb'] if args.details_only else ['home', 'archive']):
                     output = args.output / f'{state}-{theme}-{language}-{scale}.png'
                     env = os.environ.copy()
                     env['QT_SCALE_FACTOR'] = scale
@@ -41,9 +45,13 @@ try:
                     for key in ['QT_PLUGIN_PATH', 'QML2_IMPORT_PATH', 'VYNX_QT_ROOT']:
                         env.pop(key, None)
                     command = [str(app / 'VynxArc.exe')]
-                    if state == 'archive':
+                    if state != 'home':
                         command.append(str(archive))
                     command += ['--capture', str(output.resolve())]
+                    if args.details_only or (args.workspace_content and state=='archive'):
+                        command += ['--capture-ui',state]
+                    if args.window_size:
+                        command += ['--capture-size', args.window_size]
                     process = subprocess.Popen(command, env=env, startupinfo=startup, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
                         time.sleep(1)
