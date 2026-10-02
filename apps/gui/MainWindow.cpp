@@ -11,6 +11,16 @@ static std::string utf8(const QString &s) {
     auto b = s.toUtf8();
     return std::string(b.constData(), size_t(b.size()));
 }
+static QString outputForFormat(QString path, int format) {
+    const QStringList extensions{"zip", "7z", "tar", "tar.gz"};
+    for (const auto &ext : QStringList{"tar.gz", "zip", "7z", "tar", "tgz"}) {
+        if (path.endsWith("." + ext, Qt::CaseInsensitive)) {
+            path.chop(ext.size() + 1);
+            break;
+        }
+    }
+    return path + "." + extensions.at(format);
+}
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     setWindowTitle(tr("VYNX ARC"));
@@ -67,6 +77,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *hash =
         addAction(operationsMenu, tr("Calculate SHA-256 / CRC32"), {}, [this] { hashFile(); });
     archiveActions_ = {extract, smart, here, named, test, hash};
+    operationsMenu->addSeparator();
+    auto *addFiles = addAction(operationsMenu, tr("Add files…"), QKeySequence("Ctrl+Shift+A"),
+                               [this] { chooseModify(0); });
+    auto *addFolder =
+        addAction(operationsMenu, tr("Add folder…"), {}, [this] { chooseModify(0, {}, true); });
+    auto *rename = addAction(operationsMenu, tr("Rename entry…"), QKeySequence("F2"),
+                             [this] { chooseModify(2); });
+    auto *remove = addAction(operationsMenu, tr("Delete entries…"), QKeySequence::Delete,
+                             [this] { chooseModify(1); });
+    archiveActions_.append({addFiles, addFolder, rename, remove});
     for (auto *a : archiveActions_)
         a->setEnabled(false);
     auto *viewMenu = menuBar()->addMenu(tr("&View"));
@@ -163,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *testButton = new QPushButton(tr("Test archive"));
     auto *more = new QPushButton(tr("More"));
     auto *moreMenu = new QMenu(more);
-    for (auto *a : {smart, here, named, hash})
+    for (auto *a : {smart, here, named, hash, addFiles, addFolder, rename, remove})
         moreMenu->addAction(a);
     more->setMenu(moreMenu);
     connect(extractButton, &QPushButton::clicked, this, [this] { chooseExtract(); });
@@ -631,6 +651,7 @@ void MainWindow::chooseCreate() {
                                      tr("Choose source files and an output archive."));
             return;
         }
+        output->setText(outputForFormat(output->text(), format->currentIndex()));
         d.accept();
     });
     connect(buttons, &QDialogButtonBox::rejected, &d, &QDialog::reject);
@@ -641,11 +662,13 @@ void MainWindow::chooseCreate() {
         sources->push_back(utf8(inputs->item(i)->text()));
     auto out = utf8(output->text());
     auto pw = utf8(password->text());
+    const auto selectedFormat = uint8_t(format->currentIndex());
     beginOperation();
     auto op = operation_;
-    runJob(tr("Creating archive…"), [sources, out, pw, op] {
-        vynx::create_archive(out, rust::Slice<const rust::String>(sources->data(), sources->size()),
-                             pw, **op);
+    runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat] {
+        vynx::create_archive_as(out,
+                                rust::Slice<const rust::String>(sources->data(), sources->size()),
+                                selectedFormat, pw, **op);
         return QString();
     });
 }
@@ -657,6 +680,97 @@ void MainWindow::navigate(const QString &folder) {
     search_->clear();
     breadcrumb_->setText(QFileInfo(archivePath_).fileName() + " / " + folder);
     updateStatus();
+}
+bool MainWindow::writableArchive() const {
+    if (!archive_)
+        return false;
+    const auto format = text(vynx::archive_format(**archive_));
+    return format == "ZIP" || format == "7Z";
+}
+void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders) {
+    if (busy_ || !archive_)
+        return;
+    if (!writableArchive()) {
+        statusBar()->showMessage(tr("This archive is read only. Modification supports ZIP and 7Z."),
+                                 10000);
+        return;
+    }
+    QStringList names = sources;
+    if (kind == 0 && names.isEmpty()) {
+        if (folders) {
+            const auto folder = QFileDialog::getExistingDirectory(this, tr("Source folder"));
+            if (!folder.isEmpty())
+                names.append(folder);
+        } else
+            names = QFileDialog::getOpenFileNames(this, tr("Source files"));
+    } else if (kind != 0) {
+        for (const auto &index : table_->selectionModel()->selectedRows())
+            names.append(model_->row(filter_->mapToSource(index).row()).fullPath);
+    }
+    if (names.isEmpty()) {
+        statusBar()->showMessage(tr("Select files or folders first."), 6000);
+        return;
+    }
+    QString newName;
+    if (kind == 2) {
+        if (names.size() != 1) {
+            statusBar()->showMessage(tr("Select one entry to rename."), 6000);
+            return;
+        }
+        bool accepted = false;
+        newName = QInputDialog::getText(this, tr("Rename entry"), tr("New archive path"),
+                                        QLineEdit::Normal, names.first(), &accepted);
+        if (!accepted || newName == names.first())
+            return;
+    }
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Modify archive"));
+    auto *form = new QFormLayout(&dialog);
+    const auto operation = kind == 0   ? tr("Add files and folders")
+                           : kind == 1 ? tr("Delete entries")
+                                       : tr("Rename entry");
+    auto *summary = new QLabel(
+        tr("%1: %2 item(s)\nDestination in archive: %3\nA verified replacement will be published "
+           "only after completion.\nDuplicate paths are rejected. Contents are recompressed.")
+            .arg(operation)
+            .arg(names.size())
+            .arg(model_->folder().isEmpty() ? "/" : model_->folder()));
+    summary->setTextFormat(Qt::PlainText);
+    summary->setWordWrap(true);
+    form->addRow(summary);
+    auto *password = new QLineEdit(QString::fromUtf8(password_));
+    password->setEchoMode(QLineEdit::Password);
+    form->addRow(tr("Password, if needed"), password);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttons->button(QDialogButtonBox::Ok)->setText(operation);
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    if (dialog.exec() != QDialog::Accepted)
+        return;
+    auto values = std::make_shared<rust::Vec<rust::String>>();
+    for (const auto &name : names)
+        values->push_back(utf8(name));
+    auto archive = archive_;
+    const auto path = archivePath_;
+    const auto destination = utf8(model_->folder());
+    const auto renamed = utf8(newName);
+    const auto pw = utf8(password->text());
+    const auto reopenPassword = password->text();
+    beginOperation();
+    auto op = operation_;
+    runJob(
+        operation,
+        [archive, values, kind, destination, renamed, pw, op] {
+            vynx::modify_archive(**archive, uint8_t(kind),
+                                 rust::Slice<const rust::String>(values->data(), values->size()),
+                                 renamed, destination, pw, **op);
+            return QString();
+        },
+        [this, path, reopenPassword] {
+            QTimer::singleShot(
+                0, this, [this, path, reopenPassword] { openWithPassword(path, reopenPassword); });
+        });
 }
 void MainWindow::back() {
     if (busy_ || history_.isEmpty())
@@ -793,6 +907,17 @@ void MainWindow::dropEvent(QDropEvent *e) {
     if (busy_)
         return;
     const auto urls = e->mimeData()->urls();
+    if (archive_) {
+        QStringList sources;
+        for (const auto &url : urls) {
+            if (!url.isLocalFile())
+                return;
+            sources.append(url.toLocalFile());
+        }
+        chooseModify(0, sources);
+        e->acceptProposedAction();
+        return;
+    }
     if (urls.size() == 1 && urls.first().isLocalFile()) {
         password_.fill('\0');
         password_.clear();
@@ -817,6 +942,9 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 }
 bool MainWindow::smokeTest() {
     try {
+        if (outputForFormat("archive.zip", 1) != "archive.7z" ||
+            outputForFormat("archive.tar.gz", 0) != "archive.zip")
+            return false;
         applyTheme("light");
         if (qApp->palette().color(QPalette::Window).lightness() < 200)
             return false;
@@ -864,6 +992,19 @@ bool MainWindow::smokeTest() {
         QFile restored(temp.path() + "/out/source/nested/дані.txt");
         if (!restored.open(QIODevice::ReadOnly) ||
             restored.readAll() != "real GUI bridge roundtrip")
+            return false;
+        restored.close();
+        rust::Vec<rust::String> rename;
+        rename.push_back("source/nested/дані.txt");
+        vynx::modify_archive(**archive_, 2,
+                             rust::Slice<const rust::String>(rename.data(), rename.size()),
+                             "source/nested/renamed.txt", "", "", *op);
+        openPath(archivePath);
+        loop.exec();
+        if (busy_ || !archive_)
+            return false;
+        navigate("source/nested");
+        if (model_->rowCount() != 1 || model_->row(0).name != "renamed.txt")
             return false;
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;

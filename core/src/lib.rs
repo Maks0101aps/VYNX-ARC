@@ -1,6 +1,8 @@
 pub mod archive;
+pub mod disk;
 pub mod error;
 pub mod ffi;
+pub mod modification;
 pub mod operations;
 #[cfg(windows)]
 pub mod rar;

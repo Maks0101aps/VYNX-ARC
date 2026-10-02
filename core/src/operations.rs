@@ -84,7 +84,7 @@ pub struct CreateOptions {
 }
 
 /// Bounded streaming with limits enforced against actual bytes, not just metadata.
-fn copy_checked(
+pub(crate) fn copy_checked(
     source: &mut dyn Read,
     target: &mut dyn Write,
     entry: &Entry,
@@ -152,6 +152,15 @@ pub fn extract(
         options.destination.clone()
     };
     security::check_ancestors(&root)?;
+    crate::disk::preflight(
+        &root,
+        archive
+            .entries
+            .iter()
+            .filter(|e| selected(e))
+            .map(|e| e.size)
+            .sum(),
+    )?;
     let _root_pins = security::pin_ancestors(&root)?;
     fs::create_dir_all(&root)?;
     let root = root.canonicalize()?;
@@ -227,7 +236,7 @@ pub fn extract(
 }
 
 #[cfg(windows)]
-fn propagate_zone(source: &Path, output: &Path) -> Result<()> {
+pub(crate) fn propagate_zone(source: &Path, output: &Path) -> Result<()> {
     let source_ads = format!("{}:Zone.Identifier", source.display());
     match fs::read(&source_ads) {
         Ok(zone) => {
@@ -255,7 +264,7 @@ pub fn test(archive: &Archive, password: &str, op: &Operation) -> Result<()> {
     })
 }
 
-fn collect(
+pub(crate) fn collect(
     path: &Path,
     name: String,
     entries: &mut Vec<(Entry, PathBuf)>,
@@ -313,6 +322,10 @@ impl Read for CountReader<'_> {
 }
 
 pub fn create(options: &CreateOptions, op: &Operation) -> Result<()> {
+    create_as(options, Format::for_output(&options.output)?, op)
+}
+
+pub fn create_as(options: &CreateOptions, format: Format, op: &Operation) -> Result<()> {
     if options.inputs.is_empty() {
         return Err(ArcError::new(
             "INPUT",
@@ -320,7 +333,12 @@ pub fn create(options: &CreateOptions, op: &Operation) -> Result<()> {
         ));
     }
     op.check()?;
-    let format = Format::for_output(&options.output)?;
+    if Format::for_output(&options.output)? != format {
+        return Err(ArcError::new(
+            "FORMAT",
+            "Output extension must match the selected format",
+        ));
+    }
     if !options.password.is_empty() && matches!(format, Format::Tar | Format::TarGz) {
         return Err(ArcError::new("ENCRYPTION", "TAR cannot be encrypted"));
     }
@@ -334,6 +352,7 @@ pub fn create(options: &CreateOptions, op: &Operation) -> Result<()> {
     op.phase("Scanning input files");
     let mut sources = Vec::new();
     for input in &options.inputs {
+        security::check_ancestors(input)?;
         let path = input.canonicalize()?;
         let name = path
             .file_name()
@@ -347,6 +366,7 @@ pub fn create(options: &CreateOptions, op: &Operation) -> Result<()> {
         ..Default::default()
     };
     op.total(security::validate_plan(&entries, 1, &policy)?);
+    crate::disk::preflight(&options.output, sources.iter().map(|(e, _)| e.size).sum())?;
     let parent = options
         .output
         .parent()

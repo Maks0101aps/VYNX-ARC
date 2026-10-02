@@ -36,6 +36,20 @@ for ext in ['zip','7z','tar','tar.gz']:
     evidence[ext]='CLI roundtrip matches' + ('; opened by an independent Python reader' if ext in ['zip','7z'] else '')
 for name in ['test_read_format_rar5_stored.rar','test_read_format_rar_binary_data.rar']:
     run([cli,'test',root/'tests/archives'/name])
+for ext in ['zip','7z']:
+    output=work/f'Project.{ext}'
+    run([cli,'rename',output,'Project/src/дані.txt','Project/src/renamed.txt'])
+    added=work/'added.txt';added.write_bytes(b'packaged transactional add')
+    run([cli,'add',output,added]);run([cli,'delete',output,'Project/empty.txt']);run([cli,'test',output])
+    listing=run([cli,'list',output])
+    assert 'renamed.txt' in listing and 'added.txt' in listing and 'Project/empty.txt' not in listing
+    if ext=='zip':
+        with zipfile.ZipFile(output) as z:assert z.read('added.txt')==added.read_bytes()
+    else:
+        independent=pathlib.Path(tempfile.mkdtemp(prefix='modified-7z-',dir=work))
+        with py7zr.SevenZipFile(output) as z:z.extractall(independent)
+        assert (independent/'added.txt').read_bytes()==added.read_bytes()
+    evidence[ext]+='; packaged add/rename/delete and independent read of replacement passed'
 print('Independent ZIP/7Z read and packaged format tests passed',flush=True)
 screens=root/'docs/screenshots';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
 measure=[]

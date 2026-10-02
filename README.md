@@ -36,11 +36,11 @@ No development SDK is required to run the packages.
 
 ## Build
 
-Install the pinned Rust GNU toolchain, Qt 6.12.0 MinGW SDK, its compatible
-MinGW 13.1 compiler, CMake and Ninja. See [BUILD.md](docs/BUILD.md).
+Install the pinned Rust MSVC toolchain, Qt 6.12.0 MSVC SDK, Visual Studio 2022
+C++ Build Tools and Windows SDK, CMake and Ninja. See [BUILD.md](docs/BUILD.md).
 
 ```powershell
-$env:VYNX_QT_ROOT = "$env:LOCALAPPDATA\VynxArcDev\Qt"
+$env:VYNX_QT_ROOT = "$env:LOCALAPPDATA\VynxArcDev\QtMSVC"
 scripts/build.ps1
 scripts/build-release.ps1
 ```

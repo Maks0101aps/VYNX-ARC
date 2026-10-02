@@ -209,6 +209,12 @@ impl Archive {
             }
             Format::Zip => {
                 let mut zip = zip::ZipArchive::new(file)?;
+                if zip.len() != self.entries.len() {
+                    return Err(ArcError::new(
+                        "CHANGED",
+                        "Archive entry count changed since opening",
+                    ));
+                }
                 for entry in &self.entries {
                     op.check()?;
                     if entry.directory {
@@ -219,7 +225,10 @@ impl Archive {
                     } else {
                         zip.by_index_decrypt(entry.id as usize, password.as_bytes())?
                     };
-                    if f.name() != entry.name || f.size() != entry.size {
+                    if f.name() != entry.name
+                        || f.size() != entry.size
+                        || entry.crc.is_some_and(|crc| crc != f.crc32())
+                    {
                         return Err(ArcError::new("CHANGED", "Archive changed since opening"));
                     }
                     consume(entry, &mut f)?;
@@ -227,6 +236,12 @@ impl Archive {
             }
             Format::SevenZ => {
                 let mut reader = sevenz_rust2::ArchiveReader::new(file, password.into())?;
+                if reader.archive().files.len() != self.entries.len() {
+                    return Err(ArcError::new(
+                        "CHANGED",
+                        "Archive entry count changed since opening",
+                    ));
+                }
                 reader.set_thread_count(2);
                 let mut callback_error = None;
                 let indexed: std::collections::HashMap<_, _> =

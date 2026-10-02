@@ -49,6 +49,22 @@ pub mod bridge {
             op: &Operation,
         ) -> Result<()>;
         fn hash_archive_file(path: &str, op: &Operation) -> Result<String>;
+        fn create_archive_as(
+            output: &str,
+            inputs: &[String],
+            format: u8,
+            password: &str,
+            op: &Operation,
+        ) -> Result<()>;
+        fn modify_archive(
+            archive: &Archive,
+            kind: u8,
+            names: &[String],
+            new_name: &str,
+            folder: &str,
+            password: &str,
+            op: &Operation,
+        ) -> Result<()>;
     }
 }
 fn guarded<T>(f: impl FnOnce() -> Result<T>) -> Result<T> {
@@ -142,4 +158,58 @@ fn create_archive(output: &str, inputs: &[String], password: &str, op: &Operatio
 }
 fn hash_archive_file(path: &str, op: &Operation) -> Result<String> {
     guarded(|| operations::hash_file(Path::new(path), op))
+}
+fn create_archive_as(
+    output: &str,
+    inputs: &[String],
+    format: u8,
+    password: &str,
+    op: &Operation,
+) -> Result<()> {
+    guarded(|| {
+        let format = match format {
+            0 => crate::Format::Zip,
+            1 => crate::Format::SevenZ,
+            2 => crate::Format::Tar,
+            3 => crate::Format::TarGz,
+            _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
+        };
+        operations::create_as(
+            &operations::CreateOptions {
+                output: output.into(),
+                inputs: inputs.iter().map(PathBuf::from).collect(),
+                password: Zeroizing::new(password.into()),
+            },
+            format,
+            op,
+        )
+    })
+}
+fn modify_archive(
+    archive: &Archive,
+    kind: u8,
+    names: &[String],
+    new_name: &str,
+    folder: &str,
+    password: &str,
+    op: &Operation,
+) -> Result<()> {
+    guarded(|| {
+        use crate::modification::Change;
+        let change = match kind {
+            0 => Change::Add {
+                inputs: names.iter().map(PathBuf::from).collect(),
+                folder: folder.into(),
+            },
+            1 => Change::Delete {
+                names: names.to_vec(),
+            },
+            2 if names.len() == 1 => Change::Rename {
+                old: names[0].clone(),
+                new: new_name.into(),
+            },
+            _ => return Err(ArcError::new("OPTIONS", "Invalid modification request")),
+        };
+        crate::modification::modify(archive, &change, password, op)
+    })
 }

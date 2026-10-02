@@ -32,6 +32,8 @@ class MainWindow : public QMainWindow {
   private:
     void chooseOpen();
     void chooseCreate();
+    void chooseModify(int kind, const QStringList &sources = {}, bool folders = false);
+    bool writableArchive() const;
     void chooseExtract(bool smart = false, bool here = false, bool named = false);
     void testArchive();
     void hashFile();

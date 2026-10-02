@@ -1,5 +1,18 @@
 # Implementation status — 0.1.0 development milestone
 
+## Work toward 0.2.0 (in progress)
+
+The recoverable 0.1.0 baseline is Git commit `4303895`; MSVC migration checkpoint
+`4ef433d` is pushed to main. Qt/CXX architecture and working archive support remain.
+MSVC builds and deployed GUI/CLI checks passed with developer paths removed.
+The GNU directive warning is explained in TOOLCHAIN.md and no longer emitted by
+the MSVC build. ZIP/7Z streaming modification, GUI commands / drag-to-add, explicit
+creation format and free-space preflight are being implemented and verified.
+See MODIFICATION.md for the transaction model and metadata-preservation limitations.
+This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
+
+The following sections retain the original 0.1.0 evidence for comparison.
+
 Evidence recorded on 2026-10-02 on Windows 11 Pro x64. This is an implementation
 session report, not V1 acceptance or a production security certification.
 

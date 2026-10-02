@@ -19,6 +19,24 @@ fn run() -> Result<()> {
     let path = args.remove(0);
     let op = Operation::default();
     match command.as_str() {
+        "add" | "delete" | "rename" => {
+            use vynx_arc_core::modification::{self, Change};
+            let archive = Archive::open(Path::new(&path), "", &op)?;
+            let change = match command.as_str() {
+                "add" => Change::Add {
+                    inputs: args.into_iter().map(PathBuf::from).collect(),
+                    folder: String::new(),
+                },
+                "delete" => Change::Delete { names: args },
+                _ if args.len() == 2 => Change::Rename {
+                    old: args[0].clone(),
+                    new: args[1].clone(),
+                },
+                _ => return Err(ArcError::new("USAGE", "rename ARCHIVE OLD_PATH NEW_PATH")),
+            };
+            modification::modify(&archive, &change, "", &op)?;
+            println!("Replacement archive verified and committed");
+        }
         "hash" => println!("{}", operations::hash_file(Path::new(&path), &op)?),
         "create" => operations::create(
             &CreateOptions {

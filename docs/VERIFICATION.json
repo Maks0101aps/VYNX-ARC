@@ -1,8 +1,8 @@
 {
   "isolated_environment": "PATH only Windows and System32; all developer Qt variables removed",
   "archive_verification": {
-    "zip": "CLI roundtrip matches; opened by an independent Python reader",
-    "7z": "CLI roundtrip matches; opened by an independent Python reader",
+    "zip": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete and independent read of replacement passed",
+    "7z": "CLI roundtrip matches; opened by an independent Python reader; packaged add/rename/delete and independent read of replacement passed",
     "tar": "CLI roundtrip matches",
     "tar.gz": "CLI roundtrip matches"
   },
@@ -11,25 +11,25 @@
       "theme": "light",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 41848832
+      "working_set_bytes": 42983424
     },
     {
       "theme": "dark",
       "language": "en",
       "scale": "1",
-      "working_set_bytes": 41848832
+      "working_set_bytes": 42815488
     },
     {
       "theme": "dark",
       "language": "uk",
       "scale": "1.25",
-      "working_set_bytes": 42201088
+      "working_set_bytes": 43220992
     },
     {
       "theme": "light",
       "language": "ru",
       "scale": "2",
-      "working_set_bytes": 42459136
+      "working_set_bytes": 43450368
     }
   ],
   "remaining_processes": []

@@ -4,6 +4,7 @@ if (!$QtRoot) { $QtRoot = Join-Path $env:LOCALAPPDATA 'VynxArcDev\QtMSVC' }
 if (!(Test-Path (Join-Path $QtRoot 'lib\cmake\Qt6\Qt6Config.cmake'))) {
     throw 'Set VYNX_QT_ROOT to the Qt 6.12.0 MSVC 2022 x64 SDK directory.'
 }
+if (!(Test-Path (Join-Path $QtRoot 'lib\Qt6Core.lib'))) { throw 'This SDK is not an MSVC Qt build; do not mix MinGW and MSVC ABIs.' }
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
 if (!(Test-Path $vswhere)) { throw 'Visual Studio 2022 C++ Build Tools and Windows SDK are required.' }
 $vsRoot = & $vswhere -latest -products '*' -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
@@ -14,7 +15,7 @@ $env:PATH = "$(Join-Path $env:USERPROFILE '.cargo\bin');$(Join-Path $QtRoot 'bin
 # Select the actual compiler/linker, even if unrelated user Cargo configuration
 # contains an experimental linker or cached SDK search paths.
 $env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = (Get-Command link.exe).Source
-$env:CARGO_ENCODED_RUSTFLAGS = ''
+$env:CARGO_ENCODED_RUSTFLAGS = '-Cprefer-dynamic=no'
 $env:VYNX_QT_ROOT = $QtRoot
 function Invoke-VynxTool {
     param([string]$Tool, [string[]]$Arguments)
