@@ -1,0 +1,5 @@
+* text=auto eol=lf
+*.png -text
+*.ico -text
+*.rar -text
+third_party/unrar-sys/vendor/unrar/** -text
