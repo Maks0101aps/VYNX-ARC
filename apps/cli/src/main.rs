@@ -8,7 +8,7 @@ fn run() -> Result<()> {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty() || args[0] == "--help" {
         println!(
-            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT... [--split-bytes N (7Z only)]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
+            "VYNX ARC 0.1.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT... [--preset store|fast|balanced|maximum] [--resource eco|balanced|maximum] [--split-bytes N (7Z only)]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nStandalone: .gz .xz .bz2 .zst .lzma (one file); TAR: .tar.xz .tar.bz2 .tar.zst. Read commands also accept --resource.\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
         );
         return Ok(());
     }
@@ -18,6 +18,23 @@ fn run() -> Result<()> {
     let command = args.remove(0);
     let path = args.remove(0);
     let op = Operation::default();
+    let mut selected_resource = 1;
+    if let Some(index) = args.iter().position(|v| v == "--resource") {
+        let value = args
+            .get(index + 1)
+            .ok_or_else(|| ArcError::new("USAGE", "--resource needs a mode"))?;
+        selected_resource = match value.as_str() {
+            "eco" => 0,
+            "balanced" => 1,
+            "maximum" => 2,
+            _ => return Err(ArcError::new("USAGE", "Unknown resource mode")),
+        };
+        args.drain(index..=index + 1);
+        op.configure(vynx_arc_core::settings::Settings::from_ids(
+            2,
+            selected_resource,
+        )?);
+    }
     match command.as_str() {
         "hash-entry" | "verify-entry" => {
             let name = args
@@ -70,9 +87,31 @@ fn run() -> Result<()> {
         "create" => {
             let mut inputs = Vec::new();
             let mut split = None;
+            let mut preset = 2;
+            let mut resource = selected_resource;
             let mut iter = args.into_iter();
             while let Some(arg) = iter.next() {
-                if arg == "--split-bytes" {
+                if arg == "--preset" || arg == "--resource" {
+                    let value = iter
+                        .next()
+                        .ok_or_else(|| ArcError::new("USAGE", "Option needs a value"))?;
+                    if arg == "--preset" {
+                        preset = match value.as_str() {
+                            "store" => 0,
+                            "fast" => 1,
+                            "balanced" => 2,
+                            "maximum" => 3,
+                            _ => return Err(ArcError::new("USAGE", "Unknown preset")),
+                        };
+                    } else {
+                        resource = match value.as_str() {
+                            "eco" => 0,
+                            "balanced" => 1,
+                            "maximum" => 2,
+                            _ => return Err(ArcError::new("USAGE", "Unknown resource mode")),
+                        };
+                    }
+                } else if arg == "--split-bytes" {
                     split = Some(iter.next().and_then(|v| v.parse::<u64>().ok()).ok_or_else(
                         || ArcError::new("USAGE", "--split-bytes needs a positive byte count"),
                     )?);
@@ -85,6 +124,15 @@ fn run() -> Result<()> {
                 inputs,
                 password: String::new().into(),
             };
+            op.configure(vynx_arc_core::settings::Settings::from_ids(
+                preset, resource,
+            )?);
+            println!(
+                "{}",
+                op.settings()
+                    .effective(vynx_arc_core::Format::for_output(&options.output)?)?
+                    .details()
+            );
             if let Some(size) = split {
                 operations::create_split(&options, size, &op)?;
             } else {

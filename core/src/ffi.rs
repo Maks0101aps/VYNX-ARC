@@ -23,6 +23,9 @@ pub mod bridge {
         done: u64,
         total: u64,
         current: String,
+        phase: String,
+        details: String,
+        cancelled: bool,
     }
     struct ConflictInfo {
         id: u64,
@@ -42,6 +45,8 @@ pub mod bridge {
         type Archive;
         type Operation;
         fn new_operation() -> Box<Operation>;
+        fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()>;
+        fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String>;
         fn clone_operation(op: &Operation) -> Box<Operation>;
         fn cancel(op: &Operation);
         fn progress(op: &Operation) -> ProgressInfo;
@@ -157,6 +162,30 @@ fn verify_file_hash(path: &str, expected: &str, op: &Operation) -> Result<String
 fn new_operation() -> Box<Operation> {
     Box::new(Operation::default())
 }
+fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()> {
+    op.configure(crate::settings::Settings::from_ids(preset, resource)?);
+    Ok(())
+}
+fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
+    let format = match format {
+        0 => crate::Format::Zip,
+        1 => crate::Format::SevenZ,
+        2 => crate::Format::Tar,
+        3 => crate::Format::TarGz,
+        4 => crate::Format::Gzip,
+        5 => crate::Format::Xz,
+        6 => crate::Format::Bzip2,
+        7 => crate::Format::Zstd,
+        8 => crate::Format::Lzma,
+        9 => crate::Format::TarXz,
+        10 => crate::Format::TarBz2,
+        11 => crate::Format::TarZst,
+        _ => return Err(ArcError::new("FORMAT", "Unsupported format")),
+    };
+    Ok(crate::settings::Settings::from_ids(preset, resource)?
+        .effective(format)?
+        .details())
+}
 fn clone_operation(op: &Operation) -> Box<Operation> {
     Box::new(op.clone())
 }
@@ -169,6 +198,9 @@ fn progress(op: &Operation) -> bridge::ProgressInfo {
         done: p.done,
         total: p.total,
         current: p.current,
+        phase: p.phase,
+        details: p.details,
+        cancelled: p.cancelled,
     }
 }
 fn open_archive(path: &str, password: &str, op: &Operation) -> Result<Box<Archive>> {
@@ -315,6 +347,14 @@ fn create_archive_as(
             1 => crate::Format::SevenZ,
             2 => crate::Format::Tar,
             3 => crate::Format::TarGz,
+            4 => crate::Format::Gzip,
+            5 => crate::Format::Xz,
+            6 => crate::Format::Bzip2,
+            7 => crate::Format::Zstd,
+            8 => crate::Format::Lzma,
+            9 => crate::Format::TarXz,
+            10 => crate::Format::TarBz2,
+            11 => crate::Format::TarZst,
             _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
         };
         operations::create_as(

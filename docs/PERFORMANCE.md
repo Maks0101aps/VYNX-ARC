@@ -1,5 +1,77 @@
 # Performance evidence
 
+## Post-0.2 development matrix — 2026-10-03
+
+Development branch `feature/0.3-development`, Windows 11 Pro x64 build 26200,
+Ryzen 5 7500F (12 logical CPUs), approximately 32 GiB RAM. The optimized MSVC
+CLI uses the new settings; it is a development build, not an accepted release.
+Public version remains 0.1.0 and the 0.2.0 publication gate remains blocked.
+
+The final matrix measured ZIP and 7Z creation/extraction for four presets
+(Store/Fast/Balanced/Maximum), three resource modes (Eco/Balanced/Maximum) and
+four datasets: 32 MiB deterministic random data, 32 MiB repeated text, 1,000
+small text files, and a mixed tree (16 MiB random, about 16 MiB repeated data,
+128 small files). All **192 process measurements / 96 archive pairs** completed
+with independent SHA-256 verification of every extracted file. Each configuration
+has one observation; these are not medians or statistically controlled speed claims.
+An earlier 192-measurement matrix also passed, using a different intermediate CLI;
+the tables and raw files below use only the final build.
+
+Wall time includes process startup, creation verification and 10 ms polling.
+CPU time sums native user/kernel process times. Peak RSS uses Windows
+PeakWorkingSetSize sampled during process lifetime, so an unsampled final peak
+may be missed. Output size is measured archive bytes; throughput divides source
+bytes by wall time. Cache state, Defender/indexing and other host activity were
+uncontrolled. Some GUI validation overlapped this run. No environment changes or
+competitor benchmarks were performed. These measurements do not identify or
+resolve the separate project-location ZIP replacement blocker.
+
+CLI SHA-256: `bdb9bef60019a6ed61c2efddf4ec59604cd75959d9d696c7c7ae993c9621da2e`.
+Archive workspace: `C:\Users\Maksi\AppData\Local\Temp\vynx-dev-benchmark-zk2dna_w`.
+Full per-preset/per-resource wall, CPU, RSS, output-byte and throughput records
+are in [development-20261003.csv](benchmarks/development-20261003.csv); machine,
+binary, source and dataset hashes are in
+[development-20261003.json](benchmarks/development-20261003.json).
+The measurement HEAD is the base commit with feature changes then uncommitted;
+source fingerprints and the executable hash identify the measured implementation.
+Reproduce with `python scripts/benchmark-development.py --mib 32` after a release
+build. Generated reports retain their own artifact identities in `.dev`.
+
+### Balanced preset / Balanced resource observations
+
+| Dataset / format | Source MiB | Create wall / CPU (s) | Extract wall / CPU (s) | Archive bytes | Create / extract peak RSS (MiB) | Create / extract MiB/s |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| random / ZIP | 32.00 | 0.550 / 0.531 | 0.098 / 0.062 | 33,564,897 | 10.0 / 9.8 | 58.19 / 325.86 |
+| random / 7Z | 32.00 | 4.086 / 8.031 | 0.088 / 0.094 | 33,556,200 | 240.1 / 50.0 | 7.83 / 362.70 |
+| compressible / ZIP | 32.00 | 0.067 / 0.031 | 0.056 / 0.047 | 173,051 | 10.6 / 9.8 | 474.40 / 567.00 |
+| compressible / 7Z | 32.00 | 0.566 / 1.125 | 0.077 / 0.062 | 5,478 | 184.0 / 45.5 | 56.56 / 415.67 |
+| small-files / ZIP | 2.08 | 0.566 / 0.516 | 7.109 / 4.734 | 153,782 | 11.0 / 10.7 | 3.67 / 0.29 |
+| small-files / 7Z | 2.08 | 1.897 / 2.219 | 8.031 / 6.500 | 49,363 | 27.5 / 19.1 | 1.10 / 0.26 |
+| mixed / ZIP | 32.20 | 0.408 / 0.344 | 0.937 / 0.609 | 16,882,512 | 10.2 / 9.9 | 78.93 / 34.37 |
+| mixed / 7Z | 32.20 | 2.697 / 5.016 | 1.079 / 0.766 | 16,787,537 | 227.3 / 46.6 | 11.94 / 29.84 |
+
+### Ranges across all twelve preset/resource configurations
+
+| Dataset / format | Create wall min–max (s) | Extract wall min–max (s) | Highest observed RSS (MiB) |
+| --- | ---: | ---: | ---: |
+| random / ZIP | 0.108–0.628 | 0.068–0.181 | 10.6 |
+| random / 7Z | 0.140–9.888 | 0.067–0.100 | 455.8 |
+| compressible / ZIP | 0.067–0.120 | 0.056–0.078 | 10.6 |
+| compressible / 7Z | 0.109–1.609 | 0.067–0.100 | 330.3 |
+| small-files / ZIP | 0.456–0.601 | 6.709–7.938 | 11.2 |
+| small-files / 7Z | 0.545–4.605 | 6.951–11.744 | 49.5 |
+| mixed / ZIP | 0.160–0.443 | 0.879–1.093 | 10.7 |
+| mixed / 7Z | 0.224–5.574 | 0.900–1.862 | 265.4 |
+
+ZIP encoding remains single-threaded in every resource mode. 7Z thread/dictionary
+choices materially change CPU and memory cost; Maximum is not guaranteed faster
+or smaller for every dataset. Resource budgets are encoder planning estimates,
+not hard RSS ceilings. New-format performance, battery/energy use, long-term
+memory retention and other hardware remain unmeasured. See DEVELOPMENT.md for
+actual settings and limitations.
+
+## Historical 2026-10-02 milestone evidence
+
 Measured 2026-10-02 on Windows 11 x64 build 26200, Ryzen 5 7500F, approximately
 32 GiB RAM. Qt 6.12.0 MSVC and an optimized Rust core are used in both revisions.
 Raw samples and executable SHA-256 values are in UI_MEMORY.json.

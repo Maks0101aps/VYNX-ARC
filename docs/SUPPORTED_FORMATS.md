@@ -13,6 +13,14 @@ Yes describes implemented behavior, not qualification of every possible codec.
 | RAR multipart | Yes (Windows) | Yes (Windows) | Yes (Windows) | No | No | Backend-supported encrypted RAR | No | Yes, RAR4/RAR5 | No | Start at first part; exact missing-volume path; encrypted multipart combinations not independently qualified |
 | TAR | Yes | Yes | Yes | Yes | No | No | No | No | No | Stream scanning; regular files/directories only |
 | TAR.GZ / TGZ | Yes | Yes | Yes | Yes | No | No | No | No | No | Stream decoding for metadata; regular files/directories only |
+| TAR.XZ | Yes | Yes | Yes | Yes | No | No | No | No | No | XZ/LZMA2; bounded stream decoding; regular files/directories only |
+| TAR.BZ2 | Yes | Yes | Yes | Yes | No | No | No | No | No | BZIP2; bounded stream decoding; regular files/directories only |
+| TAR.ZST | Yes | Yes | Yes | Yes | No | No | No | No | No | ZSTD; bounded decoder window; regular files/directories only |
+| GZIP | Yes | Yes | Yes | Yes | No | No | No | No | No | One decoded file; creation requires one regular input file; Deflate levels 0/1/6/9 |
+| XZ | Yes | Yes | Yes | Yes | No | No | No | No | No | One decoded file; LZMA2 presets and bounded dictionary; no Store mode |
+| BZIP2 | Yes | Yes | Yes | Yes | No | No | No | No | No | One decoded file; compression levels 1/6/9 (Eco caps at 3); no Store mode |
+| ZSTD | Yes | Yes | Yes | Yes | No | No | No | No | No | One decoded file; levels 1/3/19, bounded window; no Store mode |
+| LZMA | Yes | Yes | Yes | Yes | No | No | No | No | No | Legacy .lzma header, one decoded file, single encoder thread, no native checksum or Store mode |
 
 Browse reads metadata. Test decodes regular-file streams and enforces policy and
 available checksums; it is not a content authenticity check. Link-containing
@@ -26,6 +34,17 @@ Signatures identify manually opened archives. Split-7Z filenames select the
 numbered reader before signature detection. Split creation stages/verifies the
 whole archive before publishing parts; see [VOLUMES.md](VOLUMES.md).
 
-Unsupported: standalone GZIP/XZ/BZIP2/ZSTD/LZMA, TAR.XZ/TAR.BZ2/TAR.ZST,
-CAB/ISO/WIM/CPIO/AR, split ZIP, and RAR creation/modification. ZIPX compatibility
+The added formats are development features on `feature/0.3-development`.
+Standalone metadata requires a complete bounded decoding pass to discover size
+and CRC32. Its one output name derives from the archive filename, not an embedded
+untrusted filename. GZIP/XZ/BZIP2/ZSTD payloads with TAR headers are recognized
+as compressed TAR; legacy `.lzma` remains a standalone stream. Embedded compressed
+checksums are enforced where present. LZMA testing checks successful decoding and
+the metadata-pass CRC, not an embedded checksum or authenticity guarantee.
+TAR readers drain the compressed stream after the TAR end marker so trailer
+errors are not hidden. See [DEVELOPMENT.md](DEVELOPMENT.md) for resource and preset
+limits. Codec-library support is not blanket qualification of malformed inputs,
+concatenation variants or every external producer.
+
+Unsupported: CAB/ISO/WIM/CPIO/AR, split ZIP, and RAR creation/modification. ZIPX compatibility
 is codec-specific and is not advertised broadly.

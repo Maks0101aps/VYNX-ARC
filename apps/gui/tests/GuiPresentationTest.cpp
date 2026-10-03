@@ -1,4 +1,5 @@
 #include "../ArchiveModel.h"
+#include "../OperationQueue.h"
 #include "../Theme.h"
 #include "../dialogs/CreateArchiveDialog.h"
 #include "../pages/ArchivePage.h"
@@ -7,10 +8,40 @@
 #include "../widgets/OperationPanel.h"
 #include <QtTest>
 #include <QtWidgets>
+#include <memory>
 
 class GuiPresentationTest : public QObject {
     Q_OBJECT
   private slots:
+    void queuedRequestsAreOrderedAndCancellable() {
+        OperationQueue queue;
+        QStringList started;
+        const auto first = queue.enqueue("first", [&] { started << "first"; });
+        const auto second = queue.enqueue("second", [&] { started << "second"; });
+        queue.enqueue("third", [&] { started << "third"; });
+        QVERIFY(first != second);
+        QVERIFY(queue.cancel(second));
+        auto job = queue.take();
+        QVERIFY(job);
+        job->start();
+        job = queue.take();
+        QVERIFY(job);
+        job->start();
+        QVERIFY(!queue.take());
+        QCOMPARE(started, QStringList({"first", "third"}));
+        auto owner = std::make_shared<int>(1);
+        std::weak_ptr<int> retained = owner;
+        const auto pending = queue.enqueue("captured", [owner] {});
+        owner.reset();
+        QVERIFY(!retained.expired());
+        QVERIFY(queue.cancel(pending));
+        QVERIFY(retained.expired());
+        for (int i = 0; i < 32; ++i)
+            QVERIFY(queue.enqueue("bounded", [] {}));
+        QVERIFY(!queue.enqueue("overflow", [] {}));
+        queue.clear();
+        QCOMPARE(queue.size(), size_t(0));
+    }
     void initTestCase() {
         const auto fontId = QFontDatabase::addApplicationFont(qEnvironmentVariable("SystemRoot") +
                                                               "/Fonts/segoeui.ttf");
@@ -162,6 +193,20 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!panel.rate->text().contains("remaining"));
         panel.updateProgress(20, 0, "unknown total", 9000);
         QVERIFY(!panel.rate->text().contains("remaining"));
+    }
+    void effectivePresetAndCancellationAreVisible() {
+        CreateArchiveDialog dialog({}, 0);
+        dialog.preset->setCurrentIndex(0);
+        QVERIFY(dialog.findChild<QLabel *>("effectiveCompression")->text().contains("Store"));
+        dialog.format->setCurrentIndex(5);
+        QVERIFY(dialog.preset->currentIndex() != 0);
+        dialog.resource->setCurrentIndex(0);
+        QVERIFY(dialog.findChild<QLabel *>("effectiveCompression")->text().contains("2 MiB"));
+        OperationPanel panel;
+        panel.begin("Working");
+        panel.updateProgress(100, 0, "file", 5000, "Verifying", {}, true);
+        QCOMPARE(panel.progress->maximum(), 0);
+        QVERIFY(!panel.cancel->isEnabled());
     }
     void vectorIconsFollowTheme() {
         auto icon = Icons::get("folder");

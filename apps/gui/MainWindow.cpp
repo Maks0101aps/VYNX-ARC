@@ -268,6 +268,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     progress_ = operationView_->progress;
     cancel_ = operationView_->cancel;
     layout->addWidget(operationPanel_);
+    queueView_ = new QListWidget;
+    queueView_->setObjectName("operationQueue");
+    queueView_->setAccessibleName(tr("Operation queue"));
+    queueView_->setMaximumHeight(90);
+    queueView_->hide();
+    layout->addWidget(queueView_);
+    cancelPending_ = new QPushButton(tr("Cancel selected pending operation"));
+    cancelPending_->setObjectName("cancelPendingOperation");
+    cancelPending_->hide();
+    layout->addWidget(cancelPending_);
+    connect(cancelPending_, &QPushButton::clicked, this, [this] {
+        auto *item = queueView_->currentItem();
+        if (item && queue_.cancel(item->data(Qt::UserRole).toULongLong())) {
+            item->setText(tr("Cancelled — %1").arg(item->data(Qt::UserRole + 1).toString()));
+            item->setData(Qt::UserRole + 2, true);
+        }
+    });
     connect(cancel_, &QPushButton::clicked, this, [this] {
         if (operation_) {
             vynx::cancel(**operation_);
@@ -281,7 +298,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (!operation_)
             return;
         auto p = vynx::progress(**operation_);
-        operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed());
+        operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed(),
+                                       text(p.phase), text(p.details), p.cancelled);
         showConflict();
     });
     connect(&watcher_, &QFutureWatcher<QString>::finished, this, [this] {
@@ -296,6 +314,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (archive_)
             updateStatus();
         QString error = watcher_.result();
+        if (runningItem_) {
+            runningItem_->setText((error.isEmpty() ? tr("Completed — %1") : tr("Stopped — %1"))
+                                      .arg(runningItem_->data(Qt::UserRole + 1).toString()));
+            runningItem_->setData(Qt::UserRole + 2, true);
+            runningItem_ = nullptr;
+            while (queueView_->count() > 64) {
+                int old = -1;
+                for (int i = 0; i < queueView_->count(); ++i)
+                    if (queueView_->item(i)->data(Qt::UserRole + 2).toBool()) {
+                        old = i;
+                        break;
+                    }
+                if (old < 0)
+                    break;
+                delete queueView_->takeItem(old);
+            }
+        }
         auto success = std::move(success_);
         auto failure = std::move(failure_);
         operation_.reset();
@@ -312,6 +347,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             failure(error);
         } else
             QMessageBox::warning(this, tr("Operation stopped"), error);
+        QTimer::singleShot(0, this, [this] { startNextQueued(); });
     });
     updateRecent();
     applyTheme(settings_->value("theme", "system").toString());
@@ -321,6 +357,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 }
 MainWindow::~MainWindow() {
+    queue_.clear();
     if (operation_)
         vynx::cancel(**operation_);
     watcher_.waitForFinished();
@@ -329,12 +366,21 @@ MainWindow::~MainWindow() {
 void MainWindow::beginOperation() {
     shownConflict_ = 0;
     operation_ = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
+    vynx::configure_operation(**operation_, 2,
+                              uint8_t(qBound(0, settings_->value("resourceMode", 1).toInt(), 2)));
 }
 void MainWindow::runJob(const QString &title, std::function<QString()> worker,
                         std::function<void()> success, std::function<void(QString)> failure) {
     if (busy_)
         return;
     busy_ = true;
+    if (!runningItem_) {
+        runningItem_ = new QListWidgetItem(queueView_);
+        runningItem_->setData(Qt::UserRole + 1, title);
+    }
+    runningItem_->setText(tr("Running — %1").arg(title));
+    queueView_->show();
+    cancelPending_->show();
     success_ = std::move(success);
     failure_ = std::move(failure);
     pages_->setEnabled(false);
@@ -360,12 +406,33 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
         return result;
     }));
 }
+void MainWindow::startNextQueued() {
+    if (busy_ || closePending_)
+        return;
+    auto next = queue_.take();
+    if (!next)
+        return;
+    for (int i = 0; i < queueView_->count(); ++i) {
+        auto *item = queueView_->item(i);
+        if (item->data(Qt::UserRole).toULongLong() == next->id) {
+            runningItem_ = item;
+            break;
+        }
+    }
+    next->start();
+    if (!busy_ && runningItem_) {
+        runningItem_->setText(tr("Stopped — %1").arg(next->title));
+        runningItem_->setData(Qt::UserRole + 2, true);
+        runningItem_ = nullptr;
+        QTimer::singleShot(0, this, [this] { startNextQueued(); });
+    }
+}
 void MainWindow::chooseOpen() {
     if (busy_)
         return;
-    QString p = QFileDialog::getOpenFileName(
-        this, tr("Open archive"), {},
-        tr("Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz);;All files (*)"));
+    QString p = QFileDialog::getOpenFileName(this, tr("Open archive"), {},
+                                             tr("Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz "
+                                                "*.gz *.xz *.bz2 *.zst *.lzma);;All files (*)"));
     if (!p.isEmpty())
         openPath(p);
 }
@@ -379,8 +446,10 @@ void MainWindow::openWithPassword(const QString &path, const QString &password) 
     openWithSecret(path, secret(password));
 }
 void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &pw) {
-    if (busy_)
+    if (busy_) {
+        handleShellWithSecret(1, {path}, pw);
         return;
+    }
     beginOperation();
     auto op = operation_;
     auto result = std::make_shared<std::shared_ptr<rust::Box<vynx::Archive>>>();
@@ -638,6 +707,7 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     if (busy_)
         return;
     CreateArchiveDialog d(initial, initialFormat, this);
+    d.resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
     auto *inputs = d.inputs;
     auto *format = d.format;
     auto *output = d.output;
@@ -660,6 +730,9 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
         selectedFormat == 1 && advanced->isChecked() ? splitSizes[split->currentIndex()] : 0;
     beginOperation();
     auto op = operation_;
+    vynx::configure_operation(**op, uint8_t(d.preset->currentIndex()),
+                              uint8_t(d.resource->currentIndex()));
+    settings_->setValue("resourceMode", d.resource->currentIndex());
     runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
         if (volumeSize)
             vynx::create_split_archive(
@@ -787,8 +860,23 @@ void MainWindow::handleShellRequest(quint32 action, const QStringList &paths) {
 }
 void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
                                        const std::shared_ptr<SecretUtf8> &pw) {
-    if (busy_ || paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
+    if (paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
         return;
+    if (busy_) {
+        const auto title = tr("Requested operation — %1").arg(paths.first());
+        const auto id = queue_.enqueue(
+            title, [this, action, paths, pw] { handleShellWithSecret(action, paths, pw); });
+        if (!id) {
+            toast_->notify(tr("Operation queue is full"));
+            return;
+        }
+        auto *item = new QListWidgetItem(tr("Pending — %1").arg(title), queueView_);
+        item->setData(Qt::UserRole, id);
+        item->setData(Qt::UserRole + 1, title);
+        queueView_->show();
+        cancelPending_->show();
+        return;
+    }
     if (action == 1) {
         openPath(paths.first());
         if (paths.size() > 1) {
@@ -1174,6 +1262,28 @@ bool MainWindow::smokeTest() {
         jobSecret.reset();
         loop.exec();
         if (busy_ || !secretLifetime.expired())
+            return false;
+        // Exercise real dispatch, visible state and pending cancellation while a job runs.
+        beginOperation();
+        runJob(tr("Queue control"), [] { return QString(); });
+        handleShellRequest(5, {archivePath});
+        auto *firstQueued = queueView_->item(queueView_->count() - 1);
+        handleShellRequest(5, {temp.path() + "/must-not-run.zip"});
+        auto *cancelledQueued = queueView_->item(queueView_->count() - 1);
+        handleShellRequest(5, {archivePath});
+        auto *lastQueued = queueView_->item(queueView_->count() - 1);
+        if (queue_.size() != 3 || !firstQueued->text().startsWith(tr("Pending")))
+            return false;
+        queueView_->setCurrentItem(cancelledQueued);
+        cancelPending_->click();
+        if (queue_.size() != 2 || !cancelledQueued->text().startsWith(tr("Cancelled")))
+            return false;
+        do {
+            QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+            loop.exec();
+        } while (busy_ || queue_.size());
+        if (!firstQueued->text().startsWith(tr("Completed")) ||
+            !lastQueued->text().startsWith(tr("Completed")))
             return false;
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;

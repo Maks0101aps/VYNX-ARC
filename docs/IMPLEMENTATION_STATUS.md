@@ -1,6 +1,21 @@
 # Implementation status вЂ” 0.1.0 development milestone
 
-## Work toward 0.2.0 (in progress)
+## Post-0.2 development work in progress
+
+The separate `feature/0.3-development` worktree implements compression presets,
+resource policy, a bounded serial operation queue, phase-aware progress/ETA and
+eight additional standalone/compressed TAR formats. Current development validation
+is 59 Rust tests, strict Clippy, fmt, audit and three CTest targets; GUI smoke also
+exercises actual queued dispatch and pending cancellation. See
+[DEVELOPMENT.md](DEVELOPMENT.md) for exact mappings, evidence and limitations, and
+[PERFORMANCE.md](PERFORMANCE.md) for measurements. Public version remains 0.1.0.
+
+The earlier acceptance evidence below is historical and is not rewritten by this
+feature branch. 0.2.0 remains B / blocked; ZIP publication root cause is STILL
+UNKNOWN and the Pylance OFF experiment remains pending. Publication implementation
+and retry behavior are unchanged by this feature pass.
+
+## Work toward 0.2.0 (in progress; preserved evidence)
 
 ### 2026-10-03 blocker and consistency pass
 
@@ -68,11 +83,9 @@ external-process concurrency is not claimed.
 
 ### Earlier milestone backlog (2026-10-02; not this pass's acceptance criteria)
 
-- Implement format-specific compression presets and advanced encoder settings;
-  only split-size selection is currently exposed in the advanced creation UI.
-- Implement Eco/Balanced/Maximum resource policies with effective codec settings,
-  bounded metadata allocations before parsing, and measured memory behavior.
-- Broaden ETA/phase-total acceptance on real long operations and review throttling.
+- Presets and resource policies are implemented on the separate development branch;
+  broader hostile-metadata allocation auditing and long-operation ETA qualification
+  remain open. See DEVELOPMENT.md for measured behavior and backend limitations.
 - Broaden malformed-input, decompression-bomb, Unicode/collision and filesystem-race
   coverage; audit remaining Qt/cryptographic-backend password copies and lifetimes.
 - Diagnose the location-associated ZIP replacement `AccessDenied` in the Documents

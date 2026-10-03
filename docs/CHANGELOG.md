@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased — Post-0.2 development work in progress
+
+- Develop separately on `feature/0.3-development`; preserve the blocked release
+  checkout, investigation files and recovery snapshot. Public version stays 0.1.0.
+- Add real Store/Fast/Balanced/Maximum presets, format-specific codec settings,
+  Eco/Balanced/Maximum resources and effective settings in the creation dialog,
+  CLI and operation details.
+- Bound LZMA dictionaries and encoder thread selection, cap 7Z decoder workers,
+  and temporarily lower the Windows Eco worker priority with restoration on exit.
+- Add phase-aware progress, cancellation state, smoothed throughput and cautious
+  ETA; keep unknown totals indeterminate and archive work on QtConcurrent workers.
+- Queue incoming open/Explorer requests in a bounded in-process FIFO with visible
+  states and pending cancellation. This first queue serializes all jobs.
+- Read/test/extract/create standalone GZIP, XZ, BZIP2, ZSTD and LZMA, plus
+  TAR.XZ/TAR.BZ2/TAR.ZST. Standalone creation accepts one regular file.
+- Add decoder size/window bounds, compressed TAR trailer verification, regression
+  tests and the ZIP/7Z preset/resource benchmark matrix. See DEVELOPMENT.md.
+- Leave ZIP replacement publication and retries unchanged. 0.2.0 acceptance
+  remains B / blocked; root cause is STILL UNKNOWN and the Pylance OFF control
+  is pending. This development work does not clear that release gate.
+
 ## Unreleased вЂ” work toward 0.2.0
 
 - Separate compact Home and archive workspace into native Widgets pages; move

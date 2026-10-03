@@ -1,5 +1,6 @@
 #pragma once
 #include "ArchiveModel.h"
+#include "OperationQueue.h"
 #include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QMainWindow>
@@ -12,6 +13,7 @@ class QPushButton;
 class QLabel;
 class QStackedWidget;
 class QListWidget;
+class QListWidgetItem;
 class QSettings;
 class QTimer;
 class QAction;
@@ -60,6 +62,11 @@ class MainWindow : public QMainWindow {
     void handleShellWithSecret(quint32 action, const QStringList &paths,
                                const std::shared_ptr<SecretUtf8> &password);
     void beginOperation();
+    void startNextQueued();
+    OperationQueue queue_;
+    QListWidget *queueView_;
+    QPushButton *cancelPending_;
+    QListWidgetItem *runningItem_ = nullptr;
     void showConflict();
     QString askPassword(bool *accepted);
     std::shared_ptr<SecretUtf8> password_;

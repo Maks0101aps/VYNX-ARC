@@ -28,9 +28,12 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
     else if (mode == "operation") {
         toast_->hide();
         operationView_->begin(tr("Extracting Project.7z"));
-        operationView_->updateProgress(0, 528ULL << 20, "Project/src/components/README.md", 0);
-        operationView_->updateProgress(380ULL << 20, 528ULL << 20,
-                                       "Project/src/components/README.md", 5000);
+        operationView_->updateProgress(0, 528ULL << 20, "Project/src/components/README.md", 0,
+                                       tr("Extracting and verifying files"),
+                                       tr("7Z decoder worker limit 2"));
+        operationView_->updateProgress(
+            380ULL << 20, 528ULL << 20, "Project/src/components/README.md", 5000,
+            tr("Extracting and verifying files"), tr("7Z decoder worker limit 2"));
         return this;
     } else if (mode == "archive" && archive_)
         navigate("Project");

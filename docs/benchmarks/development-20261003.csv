@@ -1,0 +1,193 @@
+dataset,format,preset,resource,operation,wall_seconds,cpu_seconds,peak_rss_bytes,input_bytes,archive_bytes,throughput_mib_s,exit_code,effective_settings
+random,zip,store,eco,create,0.20507899999938672,0.09375,10285056,33554432,33554652,156.03742947886275,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,zip,store,eco,extract,0.06780710000020918,0.078125,10190848,33554432,33554652,471.92698109639383,0,
+random,zip,store,balanced,create,0.10835629999928642,0.09375,10035200,33554432,33554652,295.322007121051,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,zip,store,balanced,extract,0.068997299997136,0.0625,10547200,33554432,33554652,463.7862641194407,0,
+random,zip,store,maximum,create,0.10949540000001434,0.0625,10342400,33554432,33554652,292.2497200795267,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,zip,store,maximum,extract,0.06816420000541257,0.0625,10944512,33554432,33554652,469.4546403751389,0,
+random,zip,fast,eco,create,0.4066009000016493,0.375,10801152,33554432,35390119,78.70125225957493,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,zip,fast,eco,extract,0.1724372999960906,0.125,10309632,33554432,35390119,185.57469874978028,0,
+random,zip,fast,balanced,create,0.4386283999992884,0.359375,10481664,33554432,35390119,72.95469240033685,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,zip,fast,balanced,extract,0.1814968000035151,0.140625,10313728,33554432,35390119,176.31164846642062,0,
+random,zip,fast,maximum,create,0.4806405999988783,0.359375,10801152,33554432,35390119,66.57781302718638,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,zip,fast,maximum,extract,0.1590903000032995,0.15625,10297344,33554432,35390119,201.14362723142975,0,
+random,zip,balanced,eco,create,0.551246800001536,0.515625,11149312,33554432,33564897,58.05022360204328,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,zip,balanced,eco,extract,0.09831989999656798,0.0625,10309632,33554432,33564897,325.46819108966764,0,
+random,zip,balanced,balanced,create,0.5498963999998523,0.53125,10461184,33554432,33564897,58.192779585406626,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,zip,balanced,balanced,extract,0.09820079999917652,0.0625,10293248,33554432,33564897,325.8629257630115,0,
+random,zip,balanced,maximum,create,0.5388134000022546,0.515625,10805248,33554432,33564897,59.38976276363226,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,zip,balanced,maximum,extract,0.09948119999899063,0.078125,10293248,33554432,33564897,321.66881783014964,0,
+random,zip,maximum,eco,create,0.6025827999983449,0.546875,10469376,33554432,33564857,53.10473515023644,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,zip,maximum,eco,extract,0.09915599999658298,0.0625,10383360,33554432,33564857,322.72378878840163,0,
+random,zip,maximum,balanced,create,0.5927503999992041,0.546875,11145216,33554432,33564857,53.985623628500235,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,zip,maximum,balanced,extract,0.09881740000128048,0.078125,10297344,33554432,33564857,323.8296089513116,0,
+random,zip,maximum,maximum,create,0.6284496000007493,0.5625,10866688,33554432,33564857,50.91895992926377,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,zip,maximum,maximum,extract,0.11041480000130832,0.0625,10977280,33554432,33564857,289.816220285875,0,
+random,7z,store,eco,create,0.173226999999315,0.125,11259904,33554432,33554628,184.72870857387437,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,7z,store,eco,extract,0.06850660000054631,0.0625,10297344,33554432,33554628,467.1082786146855,0,
+random,7z,store,balanced,create,0.1395693000013125,0.125,11141120,33554432,33554629,229.27678221284387,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,7z,store,balanced,extract,0.06823399999848334,0.03125,10293248,33554432,33554629,468.97441159409203,0,
+random,7z,store,maximum,create,0.14164060000621248,0.09375,11141120,33554432,33554628,225.92392293308876,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,7z,store,maximum,extract,0.06667249999736669,0.03125,10297344,33554432,33554628,479.958003693635,0,
+random,7z,fast,eco,create,2.950449399999343,2.90625,18276352,33554432,33556290,10.84580538815786,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,7z,fast,eco,extract,0.06700470000214409,0.03125,11427840,33554432,33556290,477.5784385121645,0,
+random,7z,fast,balanced,create,2.065506800005096,4.0625,62296064,33554432,33556271,15.492565795436283,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,7z,fast,balanced,extract,0.07764509999833535,0.0625,16805888,33554432,33556271,412.1316090865496,0,
+random,7z,fast,maximum,create,0.872314300002472,6.0625,115986432,33554432,33556273,36.684025470990576,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,7z,fast,maximum,extract,0.077511700001196,0.0625,16236544,33554432,33556273,412.8409001416075,0,
+random,7z,balanced,eco,create,7.591074299998581,7.546875,35672064,33554432,33556210,4.215477116329368,0,LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,7z,balanced,eco,extract,0.0793541999955778,0.0625,12468224,33554432,33556210,403.2552782560126,0,
+random,7z,balanced,balanced,create,4.085959299998649,8.03125,251756544,33554432,33556200,7.831698176731859,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,7z,balanced,balanced,extract,0.08822740000323392,0.09375,52412416,33554432,33556200,362.6991161342968,0,
+random,7z,balanced,maximum,create,2.5149056000009296,8.96875,457486336,33554432,33556201,12.724135649460628,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,7z,balanced,maximum,extract,0.08899839999503456,0.09375,52461568,33554432,33556201,359.5570257643436,0,
+random,7z,maximum,eco,create,8.49324379999598,8.375,35164160,33554432,33556201,3.7677006281175096,0,LZMA2 level 9; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+random,7z,maximum,eco,extract,0.06811439999728464,0.078125,12451840,33554432,33556201,469.7978694853903,0,
+random,7z,maximum,balanced,create,9.888141399998858,9.765625,209305600,33554432,33556200,3.236199676513899,0,LZMA2 level 9; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+random,7z,maximum,balanced,extract,0.09059039999556262,0.0625,85975040,33554432,33556200,353.2383122446468,0,
+random,7z,maximum,maximum,create,8.62697869999829,8.5625,477900800,33554432,33556201,3.7092939617442595,0,LZMA2 level 9; dictionary/window 32 MiB; codec threads 2; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+random,7z,maximum,maximum,extract,0.09970759999850998,0.109375,111144960,33554432,33556201,320.93842395643065,0,
+compressible,zip,store,eco,create,0.10896109999885084,0.0625,10276864,33554432,33554676,293.6827913846087,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,zip,store,eco,extract,0.06683399999747053,0.03125,10321920,33554432,33554676,478.79821649476474,0,
+compressible,zip,store,balanced,create,0.10834629999590106,0.078125,10276864,33554432,33554676,295.34926436076375,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,zip,store,balanced,extract,0.06743730000016512,0.03125,10182656,33554432,33554676,474.5148456406417,0,
+compressible,zip,store,maximum,create,0.11964409999927739,0.078125,10276864,33554432,33554676,267.45990817928566,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,zip,store,maximum,extract,0.06847489999927348,0.046875,10182656,33554432,33554676,467.3245232974349,0,
+compressible,zip,fast,eco,create,0.07836030000180472,0.078125,10522624,33554432,341662,408.3700547249437,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,zip,fast,eco,extract,0.067527399995015,0.046875,10309632,33554432,341662,473.88171323584646,0,
+compressible,zip,fast,balanced,create,0.07816370000364259,0.078125,10399744,33554432,341662,409.39720098343264,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,zip,fast,balanced,extract,0.06810060000134399,0.046875,10326016,33554432,341662,469.8930699489941,0,
+compressible,zip,fast,maximum,create,0.07767179999791551,0.046875,10518528,33554432,341662,411.98993715684185,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,zip,fast,maximum,extract,0.06758930000069086,0.03125,10567680,33554432,341662,473.44772027041137,0,
+compressible,zip,balanced,eco,create,0.06862879999971483,0.0625,10776576,33554432,173051,466.2765486229246,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,zip,balanced,eco,extract,0.06839570000011008,0.046875,10317824,33554432,173051,467.8656699170927,0,
+compressible,zip,balanced,balanced,create,0.06745389999559848,0.03125,11141120,33554432,173051,474.3980704168043,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,zip,balanced,balanced,extract,0.05643720000080066,0.046875,10326016,33554432,173051,567.0019065358669,0,
+compressible,zip,balanced,maximum,create,0.06764989999646787,0.03125,10457088,33554432,173051,473.02361129389374,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,zip,balanced,maximum,extract,0.057461000003968365,0.03125,10387456,33554432,173051,556.8994622054962,0,
+compressible,zip,maximum,eco,create,0.09826220000104513,0.09375,10473472,33554432,81661,325.65930744131157,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,zip,maximum,eco,extract,0.07720269999845186,0.0625,10309632,33554432,81661,414.49327550256265,0,
+compressible,zip,maximum,balanced,create,0.09865690000151517,0.09375,10473472,33554432,81661,324.35643122283943,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,zip,maximum,balanced,extract,0.07798859999456909,0.078125,10317824,33554432,81661,410.31637960199816,0,
+compressible,zip,maximum,maximum,create,0.09892709999985527,0.09375,10444800,33554432,81661,323.470515157594,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,zip,maximum,maximum,extract,0.07798360000015236,0.0625,10317824,33554432,81661,410.34268743604395,0,
+compressible,7z,store,eco,create,0.12926089999382384,0.109375,11161600,33554432,33554639,247.56132752850226,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,7z,store,eco,extract,0.06692920000205049,0.046875,10448896,33554432,33554639,478.11717455190893,0,
+compressible,7z,store,balanced,create,0.14019860000553308,0.109375,11165696,33554432,33554639,228.2476429774412,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,7z,store,balanced,extract,0.068042200000491,0.03125,11046912,33554432,33554639,470.2963748933616,0,
+compressible,7z,store,maximum,create,0.13928789999772562,0.078125,11153408,33554432,33554639,229.73998459681363,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,7z,store,maximum,extract,0.06672640000033425,0.03125,11055104,33554432,33554639,479.5703050043117,0,
+compressible,7z,fast,eco,create,0.2412101999943843,0.203125,16900096,33554432,6612,132.66437323440303,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,7z,fast,eco,extract,0.06733830000302987,0.046875,11513856,33554432,6612,475.2124719299443,0,
+compressible,7z,fast,balanced,create,0.1503610999934608,0.296875,42315776,33554432,8005,212.82100224986166,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,7z,fast,balanced,extract,0.08298579999973299,0.0625,20238336,33554432,8005,385.6081401890801,0,
+compressible,7z,fast,maximum,create,0.1094749000039883,0.28125,49905664,33554432,8005,292.3044460313205,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,7z,fast,maximum,extract,0.06762470000103349,0.078125,39165952,33554432,8005,473.1998811012981,0,
+compressible,7z,balanced,eco,create,0.9967371000020648,0.953125,31485952,33554432,5471,32.10475460373022,0,LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,7z,balanced,eco,extract,0.0998978999996325,0.078125,12505088,33554432,5471,320.3270539232328,0,
+compressible,7z,balanced,balanced,create,0.5657863999949768,1.125,192913408,33554432,5478,56.558446792436335,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,7z,balanced,balanced,extract,0.07698380000510952,0.0625,47755264,33554432,5478,415.67186859931724,0,
+compressible,7z,balanced,maximum,create,0.31670569999550935,1.0625,327593984,33554432,5480,101.0401770490829,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,7z,balanced,maximum,extract,0.07730060000176309,0.078125,84529152,33554432,5480,413.96832623899604,0,
+compressible,7z,maximum,eco,create,1.459639499997138,1.453125,30912512,33554432,5189,21.923221453011337,0,LZMA2 level 9; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+compressible,7z,maximum,eco,extract,0.0667646000001696,0.046875,12558336,33554432,5189,479.295914300673,0,
+compressible,7z,maximum,balanced,create,1.502607900001749,1.453125,124399616,33554432,5189,21.29630757296215,0,LZMA2 level 9; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+compressible,7z,maximum,balanced,extract,0.08882330000051297,0.0625,60960768,33554432,5189,360.2658311480793,0,
+compressible,7z,maximum,maximum,create,1.6090167999936966,1.578125,346394624,33554432,5190,19.887921617801233,0,LZMA2 level 9; dictionary/window 32 MiB; codec threads 2; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+compressible,7z,maximum,maximum,extract,0.0782478999972227,0.0625,86147072,33554432,5190,408.9566621102393,0,
+small-files,zip,store,eco,create,0.46525780000229133,0.4375,11448320,2178000,2294122,4.464412334672483,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,zip,store,eco,extract,6.789012399996864,4.921875,11186176,2178000,2294122,0.3059506359325212,0,
+small-files,zip,store,balanced,create,0.50374130000273,0.46875,11460608,2178000,2294122,4.1233519290984395,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,zip,store,balanced,extract,6.829883499995049,4.5625,10969088,2178000,2294122,0.3041197790759269,0,
+small-files,zip,store,maximum,create,0.4563426000022446,0.4375,11456512,2178000,2294122,4.551629983969491,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,zip,store,maximum,extract,6.7111224999971455,4.859375,11063296,2178000,2294122,0.30950152692544297,0,
+small-files,zip,fast,eco,create,0.5444334999992861,0.5,11603968,2178000,153683,3.8151632130196544,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,zip,fast,eco,extract,6.8316780000022845,4.765625,11223040,2178000,153683,0.30403989490314354,0,
+small-files,zip,fast,balanced,create,0.48840000000200234,0.453125,11796480,2178000,153683,4.252871951523949,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,zip,fast,balanced,extract,6.708526200003689,4.828125,11235328,2178000,153683,0.3096213086462523,0,
+small-files,zip,fast,maximum,create,0.5523590000011609,0.515625,11743232,2178000,153683,3.7604215032767585,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,zip,fast,maximum,extract,6.850666899998032,4.734375,11055104,2178000,153683,0.30319714729282915,0,
+small-files,zip,balanced,eco,create,0.49978099999862025,0.46875,11714560,2178000,153782,4.156025661516838,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,zip,balanced,eco,extract,6.7334502000012435,4.6875,11046912,2178000,153782,0.3084752392068525,0,
+small-files,zip,balanced,balanced,create,0.5664548999993713,0.515625,11563008,2178000,153782,3.666845606128781,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,zip,balanced,balanced,extract,7.108850800002983,4.734375,11235328,2178000,153782,0.2921854346882538,0,
+small-files,zip,balanced,maximum,create,0.5422174999985145,0.53125,11743232,2178000,153782,3.830755483064458,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,zip,balanced,maximum,extract,7.16351289999875,5.078125,11264000,2178000,153782,0.2899558764154909,0,
+small-files,zip,maximum,eco,create,0.5744744000039645,0.53125,11603968,2178000,146792,3.6156574794603173,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,zip,maximum,eco,extract,7.221078399998078,5.046875,11022336,2178000,146792,0.28764438579331386,0,
+small-files,zip,maximum,balanced,create,0.531001200004539,0.5,11763712,2178000,146792,3.911672254441341,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,zip,maximum,balanced,extract,7.254307800001698,5.03125,11255808,2178000,146792,0.28632678932265965,0,
+small-files,zip,maximum,maximum,create,0.6007676999943214,0.578125,11550720,2178000,146792,3.457414007364986,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,zip,maximum,maximum,extract,7.93844359999639,5.546875,11235328,2178000,146792,0.2616511202691869,0,
+small-files,7z,store,eco,create,4.604859500002931,0.984375,25845760,2178000,2184698,0.45106754313166136,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,7z,store,eco,extract,11.743554799999401,6.40625,11194368,2178000,2184698,0.17687171359160503,0,
+small-files,7z,store,balanced,create,0.5473031000001356,0.515625,26415104,2178000,2185339,3.7951596859807624,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,7z,store,balanced,extract,7.247819600001094,5.375,11223040,2178000,2185339,0.2865831071640496,0,
+small-files,7z,store,maximum,create,0.5452368999976898,0.5,25821184,2178000,2184710,3.809541616023445,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,7z,store,maximum,extract,6.950819300000148,4.734375,11358208,2178000,2184710,0.29882846488798354,0,
+small-files,7z,fast,eco,create,0.9431074000021908,0.875,28209152,2178000,48659,2.202403099719064,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,7z,fast,eco,extract,10.420379099996353,6.8125,12427264,2178000,48659,0.19933081524198476,0,
+small-files,7z,fast,balanced,create,1.2643472000054317,1.234375,28708864,2178000,49126,1.6428261644616995,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,7z,fast,balanced,extract,7.153764700000465,5.515625,12726272,2178000,49126,0.2903509897568587,0,
+small-files,7z,fast,maximum,create,1.0189527999973507,1.15625,28540928,2178000,49325,2.03846798511002,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,7z,fast,maximum,extract,7.488824100000784,5.5,12816384,2178000,49325,0.2773603216468384,0,
+small-files,7z,balanced,eco,create,1.2850615000061225,1.21875,28270592,2178000,49215,1.6163449462324693,0,LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,7z,balanced,eco,extract,7.618123499996727,5.578125,13484032,2178000,49215,0.27265279450165186,0,
+small-files,7z,balanced,balanced,create,1.8968623000037041,2.21875,28831744,2178000,49363,1.095020266430914,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,7z,balanced,balanced,extract,8.030840300001728,6.5,19992576,2178000,49363,0.2586407628019157,0,
+small-files,7z,balanced,maximum,create,1.818063800004893,2.171875,28602368,2178000,49410,1.1424806220371488,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,7z,balanced,maximum,extract,7.961992599994119,6.0625,20008960,2178000,49410,0.26087724084726566,0,
+small-files,7z,maximum,eco,create,1.1156752000024426,1.109375,28512256,2178000,49355,1.8617449425498254,0,LZMA2 level 9; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+small-files,7z,maximum,eco,extract,7.238279899996996,5.15625,13553664,2178000,49355,0.28696080972686266,0,
+small-files,7z,maximum,balanced,create,1.828566399999545,2.171875,28626944,2178000,49354,1.1359186415835538,0,LZMA2 level 9; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+small-files,7z,maximum,balanced,extract,7.921555300003092,6.359375,20144128,2178000,49354,0.2622089453988918,0,
+small-files,7z,maximum,maximum,create,4.299460500005807,5.21875,51912704,2178000,49421,0.48310774366458464,0,LZMA2 level 9; dictionary/window 32 MiB; codec threads 2; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+small-files,7z,maximum,maximum,extract,10.614916500002437,9.75,45187072,2178000,49421,0.19567772022816532,0,
+mixed,zip,store,eco,create,0.15974819999973988,0.140625,10510336,33761031,33774681,201.54861313083742,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,zip,store,eco,extract,0.9138428000005661,0.546875,10313728,33761031,33774681,35.23256752701369,0,
+mixed,zip,store,balanced,create,0.16120020000380464,0.125,10510336,33761031,33774681,199.73317749813774,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,zip,store,balanced,extract,0.8785559000025387,0.609375,10330112,33761031,33774681,36.647671662101615,0,
+mixed,zip,store,maximum,create,0.16060389999620384,0.125,11059200,33761031,33774681,200.47475908652436,0,Store level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,zip,store,maximum,extract,0.9023171000008006,0.59375,10326016,33761031,33774681,35.68260887449284,0,
+mixed,zip,fast,eco,create,0.32765240000298945,0.28125,11190272,33761031,17890962,98.26580900918611,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,zip,fast,eco,extract,1.0306454000019585,0.71875,11051008,33761031,17890962,31.23967579929434,0,
+mixed,zip,fast,balanced,create,0.2861191999982111,0.265625,10891264,33761031,17890962,112.53012087373556,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,zip,fast,balanced,extract,0.9536076000003959,0.71875,11051008,33761031,17890962,33.763392993178584,0,
+mixed,zip,fast,maximum,create,0.3062475999977323,0.28125,11165696,33761031,17890962,105.13397708368531,0,Deflate level 1; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,zip,fast,maximum,extract,0.9348259999969741,0.625,10432512,33761031,17890962,34.44173371322517,0,
+mixed,zip,balanced,eco,create,0.3497318000008818,0.328125,10641408,33761031,16882512,92.0620548660832,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,zip,balanced,eco,extract,0.967006400001992,0.65625,11059200,33761031,16882512,33.29556884011201,0,
+mixed,zip,balanced,balanced,create,0.40791239999816753,0.34375,10670080,33761031,16882512,78.93123170621892,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,zip,balanced,balanced,extract,0.9368552000014461,0.609375,10428416,33761031,16882512,34.36713396055817,0,
+mixed,zip,balanced,maximum,create,0.38044799999624956,0.34375,10829824,33761031,16882512,84.62924804549534,0,Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,zip,balanced,maximum,extract,0.93489010000485,0.71875,10448896,33761031,16882512,34.43937224271407,0,
+mixed,zip,maximum,eco,create,0.3981835999948089,0.375,10661888,33761031,16824551,80.8597545466839,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,zip,maximum,eco,extract,0.9143755000040983,0.609375,10461184,33761031,16824551,35.21204161742184,0,
+mixed,zip,maximum,balanced,create,0.42120450000220444,0.390625,10653696,33761031,16824551,76.44037079358532,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,zip,maximum,balanced,extract,1.0925879999995232,0.78125,10436608,33761031,16824551,29.4685903195983,0,
+mixed,zip,maximum,maximum,create,0.44335490000230493,0.421875,10661888,33761031,16824551,72.62134276609513,0,Deflate level 9; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,zip,maximum,maximum,extract,0.956459500004712,0.625,11059200,33761031,16824551,33.66271981190693,0,
+mixed,7z,store,eco,create,0.2237094000010984,0.203125,14749696,33761031,33762252,143.92344782980567,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,7z,store,eco,extract,0.9003826999978628,0.65625,10412032,33761031,33762252,35.75927009722825,0,
+mixed,7z,store,balanced,create,0.24627849999524187,0.1875,14868480,33761031,33762274,130.7342222756646,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,7z,store,balanced,extract,0.9846794999975828,0.734375,11079680,33761031,33762274,32.69797752484362,0,
+mixed,7z,store,maximum,create,0.23320480000256794,0.234375,14823424,33761031,33762281,138.06331670591976,0,Copy level 0; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,7z,store,maximum,extract,0.9816371000051731,0.75,10473472,33761031,33762281,32.799318770577784,0,
+mixed,7z,fast,eco,create,1.6232897000008961,1.59375,18411520,33761031,16787981,19.834431377268913,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,7z,fast,eco,extract,0.9327850999980001,0.65625,11599872,33761031,16787981,34.517090978580434,0,
+mixed,7z,fast,balanced,create,1.0276145999960136,1.875,46448640,33761031,16788630,31.331812685631476,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,7z,fast,balanced,extract,1.0248438999988139,0.890625,20058112,33761031,16788630,31.41651929638502,0,
+mixed,7z,fast,maximum,create,0.6120968999966863,3.34375,99569664,33761031,16788615,52.60119461521455,0,LZMA2 level 1; dictionary/window 1 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,7z,fast,maximum,extract,0.9326541999980691,0.75,39899136,33761031,16788615,34.52193552568774,0,
+mixed,7z,balanced,eco,create,4.650324199996248,4.578125,35848192,33761031,16787515,6.923609360422912,0,LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,7z,balanced,eco,extract,0.9881122000006144,0.640625,12673024,33761031,16787515,32.584384809817344,0,
+mixed,7z,balanced,balanced,create,2.697289299998374,5.015625,238350336,33761031,16787537,11.936809358979263,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,7z,balanced,balanced,extract,1.0791692999991938,0.765625,48836608,33761031,16787537,29.83501120734186,0,
+mixed,7z,balanced,maximum,create,2.6182678999975906,4.859375,237289472,33761031,16787535,12.297071724449909,0,LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,7z,balanced,maximum,extract,1.208819700004824,0.828125,49115136,33761031,16787535,26.635095506771382,0,
+mixed,7z,maximum,eco,create,4.91457100000116,4.890625,35332096,33761031,16787447,6.551340525976247,0,LZMA2 level 9; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)
+mixed,7z,maximum,eco,extract,0.9563313000035123,0.640625,12640256,33761031,16787447,33.667232432920436,0,
+mixed,7z,maximum,balanced,create,5.574305399997684,5.5625,159686656,33761031,16787473,5.775971327317049,0,LZMA2 level 9; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)
+mixed,7z,maximum,balanced,extract,1.0673781000004965,0.96875,52850688,33761031,16787473,30.164595057815255,0,
+mixed,7z,maximum,maximum,create,4.8067327000026125,4.875,278339584,33761031,16787461,6.6983188310175255,0,LZMA2 level 9; dictionary/window 32 MiB; codec threads 2; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)
+mixed,7z,maximum,maximum,extract,1.862145999999484,1.28125,77905920,33761031,16787461,17.290281299159215,0,

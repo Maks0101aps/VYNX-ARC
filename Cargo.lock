@@ -478,6 +478,9 @@ name = "lzma-rust2"
 version = "0.21.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fde178a3caf126c440fa15628147772d8ee590a39477d711353fbe2e58a73a5b"
+dependencies = [
+ "sha2",
+]
 
 [[package]]
 name = "memchr"
@@ -753,10 +756,12 @@ dependencies = [
 name = "vynx-arc-core"
 version = "0.1.0"
 dependencies = [
+ "bzip2",
  "crc32fast",
  "cxx",
  "cxx-build",
  "flate2",
+ "lzma-rust2 0.21.0",
  "sevenz-rust2",
  "sha2",
  "tar",
@@ -764,6 +769,7 @@ dependencies = [
  "unrar-ng-sys",
  "zeroize",
  "zip",
+ "zstd",
 ]
 
 [[package]]
