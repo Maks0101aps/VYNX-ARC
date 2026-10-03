@@ -31,7 +31,10 @@ Validation includes plain/encrypted split-7Z round trips, opening `.002`, missin
 parts, collisions, cancellation rollback with a concurrent pathname replacement,
 and real RAR4/RAR5 multipart fixtures. RAR fixtures are restored locally using
 `scripts/fetch-rar-fixtures.py` and are excluded from Git and release packages.
-An earlier native RAR open failed once with decoder code 15; ten subsequent
-parallel suite runs passed. Its cause remains undiagnosed; this is not proof of
-native decoder thread safety. The packaged verifier also concatenates created
+The observed native RAR code-15 race was traced to UnRAR's process-global mutable
+`ErrHandler`, reset/read by overlapping decoder calls. The adapter serializes
+complete in-process decoder lifetimes with a mutex. The concurrent regression
+now runs 120 open/list/test sequences across six RAR4/RAR5, encrypted and multipart
+fixtures. This does not assert safety across unrelated external processes.
+The packaged verifier also concatenates created
 parts and extracts them through independent `py7zr`.

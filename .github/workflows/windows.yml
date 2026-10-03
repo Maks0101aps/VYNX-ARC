@@ -8,20 +8,18 @@ jobs:
       - name: Restore verified local RAR test fixtures
         run: python scripts/fetch-rar-fixtures.py
       - name: Rust MSVC toolchain
-        run: rustup toolchain install 1.99.0-x86_64-pc-windows-msvc --profile minimal
+        run: rustup toolchain install 1.99.0-x86_64-pc-windows-msvc --profile minimal --component rustfmt --component clippy
       - name: Qt SDK
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.12.0'
           arch: win64_msvc2022_64
-      - name: Build and tests
-        shell: pwsh
-        run: |
-          scripts/build.ps1 -QtRoot $env:QT_ROOT_DIR
-      - name: Dependency security audit
+      - name: Install pinned audit tool
         shell: pwsh
         run: |
           . scripts/env.ps1 -QtRoot $env:QT_ROOT_DIR
           cargo install cargo-audit --version 0.22.2 --locked
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
-          cargo audit
+      - name: Source quality, security audit, native build and tests
+        shell: pwsh
+        run: scripts/check.ps1 -QtRoot $env:QT_ROOT_DIR

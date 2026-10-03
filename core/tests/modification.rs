@@ -333,3 +333,33 @@ fn long_archive_path_rebuild_and_corrupt_input_preserve_bytes() {
     );
     assert_eq!(fs::read(&a.path).unwrap(), bytes);
 }
+
+#[cfg(windows)]
+#[test]
+fn physical_long_unicode_path_and_motw_survive_modification() {
+    let t = tempfile::tempdir().unwrap();
+    let path = t
+        .path()
+        .join("a".repeat(110))
+        .join("b".repeat(110))
+        .join("архіви");
+    fs::create_dir_all(&path).unwrap();
+    let a = make(&path, "zip", "private");
+    assert!(a.path.as_os_str().len() > 260);
+    let zone_path = format!("{}:Zone.Identifier", a.path.display());
+    let zone = b"[ZoneTransfer]\r\nZoneId=3\r\n";
+    fs::write(&zone_path, zone).unwrap();
+    modification::modify(
+        &a,
+        &Change::Rename {
+            old: "source/keep.txt".into(),
+            new: "source/renamed.txt".into(),
+        },
+        "private",
+        &Operation::default(),
+    )
+    .unwrap();
+    let updated = Archive::open(&a.path, "private", &Operation::default()).unwrap();
+    assert_eq!(contents(&updated, "private")["source/renamed.txt"], b"keep");
+    assert_eq!(fs::read(zone_path).unwrap(), zone);
+}

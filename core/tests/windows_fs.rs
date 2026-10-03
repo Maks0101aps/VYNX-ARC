@@ -71,3 +71,43 @@ fn motw_propagates_and_oversized_zone_is_not_published() {
     assert!(!t.path().join("blocked/file.txt").exists());
     assert_eq!(fs::read_dir(t.path().join("blocked")).unwrap().count(), 0);
 }
+
+#[test]
+fn locked_extraction_output_preserves_bytes_and_cleans_staging() {
+    use std::os::windows::fs::OpenOptionsExt;
+    use vynx_arc_core::{operations, *};
+    let t = tempfile::tempdir().unwrap();
+    let input = t.path().join("file.txt");
+    fs::write(&input, b"new bytes").unwrap();
+    let path = t.path().join("archive.zip");
+    operations::create(
+        &CreateOptions {
+            output: path.clone(),
+            inputs: vec![input],
+            password: String::new().into(),
+        },
+        &Operation::default(),
+    )
+    .unwrap();
+    let destination = t.path().join("output");
+    fs::create_dir(&destination).unwrap();
+    let output = destination.join("file.txt");
+    fs::write(&output, b"old bytes").unwrap();
+    let lock = fs::OpenOptions::new()
+        .read(true)
+        .share_mode(1)
+        .open(&output)
+        .unwrap();
+    let archive = Archive::open(&path, "", &Operation::default()).unwrap();
+    let options = ExtractOptions {
+        destination: destination.clone(),
+        selected: vec![],
+        conflict: Conflict::Replace,
+        smart: false,
+        policy: security::Policy::default(),
+    };
+    assert!(operations::extract(&archive, &options, "", &Operation::default()).is_err());
+    assert_eq!(fs::read(&output).unwrap(), b"old bytes");
+    assert_eq!(fs::read_dir(destination).unwrap().count(), 1);
+    drop(lock);
+}

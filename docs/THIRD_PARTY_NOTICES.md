@@ -8,7 +8,7 @@ Rust dependency graph.
 | Component | Version | License | Upstream |
 |---|---|---|---|
 | Qt Core / Gui / Widgets / Concurrent | 6.12.0 | LGPL-3.0-or-later (selected open-source terms) | https://www.qt.io/ |
-| MinGW GCC runtime | 13.1.0 | GPL-3.0 with GCC Runtime Library Exception; MinGW notices | https://gcc.gnu.org/ |
+| MSVC VC143 runtime | SDK-selected redistributable; exact files in package | Microsoft distributable-code terms in licenses/MSVC-Redist.txt | https://visualstudio.microsoft.com/ |
 | CXX / cxx-build | 1.0.202 | MIT OR Apache-2.0 | https://github.com/dtolnay/cxx |
 | zip | 8.6.0 | MIT | https://github.com/zip-rs/zip2 |
 | sevenz-rust2 | 0.23.0 | Apache-2.0 | https://github.com/hasenbanck/sevenz-rust2 |

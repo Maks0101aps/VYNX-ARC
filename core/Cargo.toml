@@ -7,6 +7,10 @@ license = "MIT"
 [lib]
 crate-type = ["rlib", "staticlib"]
 
+[features]
+# Explicit opt-in; normal packages contain neither logging nor diagnostic hooks.
+publication-diagnostics = []
+
 [dependencies]
 cxx = "=1.0.202"
 zip = { version = "=8.6.0", default-features = false, features = ["deflate", "aes-crypto", "bzip2", "zstd", "lzma", "xz"] }

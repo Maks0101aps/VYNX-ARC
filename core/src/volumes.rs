@@ -220,7 +220,7 @@ pub fn publish(source: &mut File, prefix: &Path, size: u64, op: &Operation) -> R
     op.phase("Staging split volumes");
     for _ in &names {
         op.check()?;
-        let mut part = tempfile::NamedTempFile::new_in(parent)?;
+        let mut part = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
         let mut remaining = size;
         let mut buffer = [0u8; 128 * 1024];
         while remaining > 0 {
@@ -250,7 +250,7 @@ pub fn publish(source: &mut File, prefix: &Path, size: u64, op: &Operation) -> R
             op.check()?;
             security::check_ancestors(&name)?;
             let file = part
-                .persist_noclobber(&name)
+                .persist_noclobber(security::publication_path(&name)?)
                 .map_err(|e| ArcError::from(e.error))?;
             published.push((name, file));
         }

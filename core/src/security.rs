@@ -202,6 +202,23 @@ pub fn check_ancestors(path: &Path) -> Result<()> {
     }
     Ok(())
 }
+
+/// Resolve the existing parent, not the final target. Windows canonical paths
+/// carry the extended-length prefix required by tempfile's native publication
+/// calls even when the host executable has no longPathAware manifest.
+pub(crate) fn publication_path(path: &Path) -> Result<PathBuf> {
+    check_ancestors(path)?;
+    let parent = path
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .unwrap_or(Path::new("."));
+    let name = path
+        .file_name()
+        .ok_or_else(|| ArcError::new("PATH", "No publication filename"))?;
+    let resolved = parent.canonicalize()?.join(name);
+    check_ancestors(&resolved)?;
+    Ok(resolved)
+}
 pub fn output_path(root: &Path, name: &str) -> Result<PathBuf> {
     let safe = validate_name(name)?;
     let path = root.join(safe);

@@ -2,6 +2,25 @@
 
 ## Work toward 0.2.0 (in progress)
 
+### 2026-10-03 blocker and consistency pass
+
+Version remains 0.1.0; engineering decision **B: still blocked**.
+See [RELEASE_ACCEPTANCE.md](RELEASE_ACCEPTANCE.md) for current evidence and
+[PUBLICATION_DIAGNOSTICS.md](PUBLICATION_DIAGNOSTICS.md) for reproduction/capture.
+Current source gates pass with 50 Rust tests and 3 CTest targets. Publication
+retries were removed; the same Windows error 5 now fails once without masking.
+A separate physical long-path publication defect was reproduced and fixed by
+resolving existing parents to extended Windows paths without changing APIs.
+The project replacement stress matrix fails with/without MOTW, while TEMP
+controls pass. Failure-time Restart Manager and kernel snapshots identify a
+Pylance process using the target ZIP; they do not yet establish the denial's
+mechanism. No security software or indexing setting was changed.
+The RAR mutex is retained; concurrent pressure now covers 120 sequences.
+CI and release builds enforce the shared `scripts/check.ps1` source gates.
+Clean Windows VM acceptance remains NOT TESTED.
+
+### Earlier 2026-10-02 implementation evidence
+
 The recoverable 0.1.0 baseline is Git commit `4303895`; MSVC migration checkpoint
 `4ef433d` is pushed to main. Qt/CXX architecture and working archive support remain.
 MSVC builds and deployed GUI/CLI checks passed with developer paths removed.
@@ -19,7 +38,7 @@ Split-7Z reading/creation, exact missing-volume messages and real RAR4/RAR5
 multipart decoding are implemented; see VOLUMES.md for limits and known issues.
 RAR fixture binaries stay local and are restored from a pinned upstream commit
 with SHA-256 checks before CI tests.
-Current source validation: 44 Rust tests and 3 CTest targets (seven presentation
+At that checkpoint source validation was 44 Rust tests and 3 CTest targets (seven presentation
 checks, native shell smoke and GUI smoke including the actual conflict dialog
 and entry hash bridge). The counts below are historical.
 Password-copy reduction and boundary audit are documented in PASSWORD_LIFETIME.md;
@@ -27,7 +46,7 @@ Qt and cryptographic backend wiping limitations remain explicit release gates.
 See MODIFICATION.md for the transaction model and metadata-preservation limitations.
 This is not a claim that the new 0.2.0 prompt or production-readiness gates are complete.
 
-### Native UI refactor and visual QA
+### Native UI refactor and visual QA (2026-10-02 evidence)
 
 Home and archive workspace are separate pages. Navigation, breadcrumbs, search,
 shared command actions, numeric/date sorting, cached vector icons, local recents,
@@ -47,7 +66,7 @@ list and test 10 times across RAR4, RAR5, encrypted and multipart fixtures. The
 prior parallel test failure and repeated passing runs support this fix; broad
 external-process concurrency is not claimed.
 
-### Remaining 0.2.0 acceptance work
+### Earlier milestone backlog (2026-10-02; not this pass's acceptance criteria)
 
 - Implement format-specific compression presets and advanced encoder settings;
   only split-size selection is currently exposed in the advanced creation UI.

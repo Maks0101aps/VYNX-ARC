@@ -7,6 +7,9 @@ Reject traversal, absolute/UNC/drive paths, ADS, reserved DOS names (including
 superscript COM/LPT names), control characters, trailing dots/spaces, empty components,
 oversized paths, duplicate names and case-insensitive collisions. Reject links,
 reparse points and file/directory prefix conflicts. Never execute extracted content.
+Unicode normalization-equivalent names are not normalized or collision-checked;
+that remains unresolved. Uppercase case-collision checks are not a complete
+model of every Windows/Unicode filesystem identity rule.
 Never recursively extract embedded archives. Do not strip Mark-of-the-Web.
 
 Apply checked size arithmetic and count / individual / total output limits before

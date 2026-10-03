@@ -269,3 +269,34 @@ fn hashes_match_known_vectors() {
         "SHA-256: 15e2b0d3c33891ebb0f1ef609ec419420c20e320ce94c65fbc8c3312448eb225\nCRC32: cbf43926"
     );
 }
+
+#[test]
+fn changed_zip_count_or_crc_since_open_is_rejected_without_publication() {
+    use std::io::Write;
+    let t = tempfile::tempdir().unwrap();
+    let path = t.path().join("changed.zip");
+    let write_zip = |content: &[u8], extra: bool| {
+        let mut writer = zip::ZipWriter::new(fs::File::create(&path).unwrap());
+        let options = zip::write::SimpleFileOptions::default()
+            .compression_method(zip::CompressionMethod::Stored);
+        writer.start_file("file.txt", options).unwrap();
+        writer.write_all(content).unwrap();
+        if extra {
+            writer.start_file("extra.txt", options).unwrap();
+            writer.write_all(b"extra").unwrap();
+        }
+        writer.finish().unwrap();
+    };
+    for extra in [false, true] {
+        write_zip(b"before", false);
+        let archive = Archive::open(&path, "", &Operation::default()).unwrap();
+        // Same name and size with different CRC, or a different entry count.
+        write_zip(b"after!", extra);
+        let dest = t.path().join(if extra { "count" } else { "crc" });
+        let error = operations::extract(&archive, &extraction(&dest), "", &Operation::default())
+            .unwrap_err();
+        assert_eq!(error.code, "CHANGED");
+        assert!(!dest.join("file.txt").exists());
+        assert_eq!(fs::read_dir(&dest).unwrap().count(), 0);
+    }
+}

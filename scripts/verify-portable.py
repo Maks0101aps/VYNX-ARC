@@ -1,6 +1,6 @@
 import pathlib,zipfile,subprocess,os,time,json,psutil,hashlib,datetime,sys
 root=pathlib.Path(__file__).resolve().parents[1]
-report_path=root/'docs/VERIFICATION.json'
+report_path=pathlib.Path(os.environ.get('VYNX_VERIFY_REPORT',root/'docs/VERIFICATION.json'))
 last_success_path=root/'docs/VERIFICATION_LAST_SUCCESS.json'
 if report_path.exists():
     previous=json.loads(report_path.read_text(encoding='utf-8'))
@@ -14,6 +14,7 @@ def verification_failure(kind,error,traceback):
     report_path.write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
     sys.__excepthook__(kind,error,traceback)
 sys.excepthook=verification_failure
+report_path.write_text(json.dumps({'status':'running','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()})+'\n',encoding='utf-8')
 import tempfile
 scratch=pathlib.Path(os.environ.get('VYNX_VERIFY_SCRATCH',root/'.dev')).resolve()
 app_scratch=pathlib.Path(os.environ.get('VYNX_VERIFY_APP_SCRATCH',scratch)).resolve()
@@ -122,5 +123,5 @@ for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25
 remaining=[p.pid for p in psutil.process_iter(['exe']) if p.info['exe'] and os.path.normcase(p.info['exe'])==os.path.normcase(str(exe.resolve()))]
 assert not remaining,('Verified application left running',remaining)
 result={'status':'passed','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'portable_sha256':hashlib.sha256((root/'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),'application_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':remaining,'process_scope':'Only the executable unpacked by this verifier; unrelated running app instances are excluded'}
-(root/'docs/VERIFICATION.json').write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
+report_path.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(result,indent=2),flush=True)

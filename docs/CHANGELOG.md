@@ -25,7 +25,8 @@
 
 - Migrate Qt, CXX and Rust to the MSVC ABI and deploy app-local VC143 runtime.
 - Streaming transactional ZIP/7Z add, delete and rename with encrypted archives,
-  verified replacement, cancellation cleanup and bounded lock retries.
+  verified replacement and cancellation cleanup. Publication reports the first
+  failure without lock retries or sleeps.
 - Add GUI modification commands and drag-to-add, with read-only explanations.
 - Make the selected GUI creation format authoritative and normalize extensions.
 - Preflight free space for extraction, creation and archive replacement.
@@ -40,6 +41,13 @@
 - Share a non-copyable wiping password buffer across C++ workers/reopen callbacks
   and document Qt/CXX/Rust/backend password lifetimes without claiming full erasure.
 - Bound Mark-of-the-Web reads before allocating, including a growing-stream check.
+- Resolve existing publication parents to extended Windows paths for physical
+  paths longer than 260 characters, preserving ancestor/link checks and no-clobber.
+- Add opt-in publication lifecycle/kernel-handle/Restart Manager diagnostics,
+  sequence and stress runners, and immutable per-run verification evidence.
+- Align CI, local checks and release packaging with fmt, strict Clippy, locked
+  Rust tests, dependency audit, native build and CTest. Correct the format matrix,
+  RAR concurrency diagnosis and MSVC dependency/runtime notices.
 
 ## 0.1.0 - 2026-10-02 (development)
 

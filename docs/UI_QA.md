@@ -46,7 +46,16 @@ fixtures; they do not measure extraction speed or prove a real conflict. The GUI
 smoke separately exercises a real asynchronous conflict and bridge reply.
 The final build adds smoke coverage only; it does not change this presentation.
 
-## Functional regression
+## Current blocker pass (2026-10-03)
+
+Current source validation passes 50 Rust tests and 3 CTest targets. The expanded
+RAR concurrent test covers 120 sequences. Project ZIP replacement still fails
+with and without MOTW after removing retries. TEMP passes do not clear the project
+gate. Failure-time APIs report Pylance using the ZIP; precise causal attribution
+still requires the prepared capture. Current results, package hashes and remaining
+manual gates are in [RELEASE_ACCEPTANCE.md](RELEASE_ACCEPTANCE.md).
+
+## Functional regression (historical 2026-10-02 checkpoint)
 
 - Final release build: **44 Rust tests** and **3 CTest targets passed**:
   presentation (seven behavior checks), native shell smoke and GUI smoke.

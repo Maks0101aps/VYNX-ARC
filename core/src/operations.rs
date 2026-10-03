@@ -326,7 +326,7 @@ pub fn extract(
         fs::create_dir_all(parent)?;
         let _parent_pins = security::pin_ancestors(parent)?;
         security::check_ancestors(parent)?;
-        let mut temp = tempfile::NamedTempFile::new_in(parent)?;
+        let mut temp = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
         copy_checked(
             data,
             temp.as_file_mut(),
@@ -349,10 +349,12 @@ pub fn extract(
             temp.as_file().sync_all()?;
         }
         op.check()?;
+        let publication_path = security::publication_path(&output)?;
         if choice == Conflict::Replace {
-            temp.persist(&output).map_err(|e| ArcError::from(e.error))?;
+            temp.persist(&publication_path)
+                .map_err(|e| ArcError::from(e.error))?;
         } else {
-            temp.persist_noclobber(&output)
+            temp.persist_noclobber(&publication_path)
                 .map_err(|e| ArcError::from(e.error))?;
         }
         Ok(())
@@ -407,6 +409,11 @@ fn keep_both(
 
 #[cfg(windows)]
 pub(crate) fn propagate_zone(source: &Path, output: &Path) -> Result<()> {
+    #[cfg(feature = "publication-diagnostics")]
+    if std::env::var_os("VYNX_DIAGNOSTIC_SKIP_ZONE").is_some() {
+        eprintln!("ZONE_PROPAGATION_DIAGNOSTICALLY_SKIPPED source={source:?} output={output:?}");
+        return Ok(());
+    }
     let source_ads = format!("{}:Zone.Identifier", source.display());
     match File::open(&source_ads) {
         Ok(source) => {
@@ -583,7 +590,7 @@ fn create_internal(
         .unwrap_or(Path::new("."));
     fs::create_dir_all(parent)?;
     let _output_pins = security::pin_ancestors(parent)?;
-    let mut temp = tempfile::NamedTempFile::new_in(parent)?;
+    let mut temp = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
     match format {
         #[cfg(windows)]
         Format::Rar => return Err(ArcError::new("READ_ONLY", "RAR creation is unsupported")),
@@ -673,7 +680,7 @@ fn create_internal(
     if let Some(size) = split {
         return crate::volumes::publish(temp.as_file_mut(), &options.output, size, op);
     }
-    temp.persist_noclobber(&options.output)
+    temp.persist_noclobber(security::publication_path(&options.output)?)
         .map_err(|e| ArcError::from(e.error))?;
     Ok(())
 }

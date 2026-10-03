@@ -50,7 +50,10 @@ The known intermittent ZIP replacement `AccessDenied` recurred during deployed
 verification, including additional runs after successful candidates; the original
 was preserved. No lock retry, security setting or codec behavior was changed to
 force a pass, and the cause is still undiagnosed. This is separate from the UI
-pass. The earlier intermittent native RAR open is also unresolved.
+pass. The earlier native RAR race is addressed by serialized in-process decoder
+lifetimes; see VOLUMES.md. The 2026-10-03 blocker pass removed publication retries,
+fixed physical long-path publication, and retained the unresolved error-5 gate.
+See RELEASE_ACCEPTANCE.md for current results.
 
 Screenshot progress/conflict examples are explicit UI fixtures, not throughput
 measurements or proof of a live conflict. QWidget grabs exclude native frame/Snap

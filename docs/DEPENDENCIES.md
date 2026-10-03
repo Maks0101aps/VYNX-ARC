@@ -9,7 +9,7 @@ from the same SDK. No installed archiver is invoked.
 
 | Dependency | Purpose / version / license | Build and update procedure | Security considerations |
 |---|---|---|---|
-| [Qt](https://doc.qt.io/qt-6/licensing.html) | Widgets, Core, Gui, Concurrent; 6.12.0; LGPLv3 selected | Dynamic MinGW x64 SDK; update SDK version together with compiler and CI, review notices, deploy DLLs with windeployqt | Retain LGPL/GPL texts, replacement/relink rights and source link. No browser engine. No Qt Network module is linked. |
+| [Qt](https://doc.qt.io/qt-6/licensing.html) | Widgets, Core, Gui, Concurrent; 6.12.0; LGPLv3 selected | Dynamic MSVC 2022 x64 SDK; update SDK version together with compiler and CI, review notices, deploy DLLs with windeployqt | Retain LGPL/GPL texts, replacement/relink rights and source link. No browser engine. No Qt Network module is linked. |
 | [CXX](https://github.com/dtolnay/cxx) | Typed Rust/C++ bridge; 1.0.202; MIT OR Apache-2.0 | Cargo cxx and cxx-build exact matching versions; regenerate bridge with Cargo | Result errors map to C++ exceptions; operation functions catch panics; opaque archive and operation handles |
 | [zip](https://github.com/zip-rs/zip2) | ZIP metadata, stream decoding/writing, AES; 8.6.0; MIT | Cargo; change exact version and lockfile, rerun encrypted/corrupt/round-trip tests | Never call ZIP convenience extraction helpers. CRC and size checks run while streaming. ZIPX support depends on actual codec, not extension. |
 | [sevenz-rust2](https://github.com/hasenbanck/sevenz-rust2) | Pure Rust 7Z reading/writing, AES and encrypted headers; 0.23.0; Apache-2.0 | Cargo; update exact version, inspect parser and dictionary bounds, run independent-tool comparisons | Solid decompression can decode skipped files. Default backend has its own allocations; complete allocation-budget audit still required. Password type internally copies UTF-16 without guaranteed zeroization. |
@@ -30,7 +30,8 @@ audit only covers known RustSec advisories, not all native Qt/UnRAR vulnerabilit
 
 The upstream dependency repositories and recent official releases were reviewed
 for maintenance and Windows compatibility. Local builds/tests verify this exact
-Windows GNU configuration. ARM64 and MSVC remain unverified.
+Windows MSVC x64 configuration. Earlier GNU evidence is historical; ARM64 remains
+unverified. See TOOLCHAIN.md for the migration and old GNU linker warning.
 
 Build-only components: CMake 4.4.3 (BSD-3-Clause), Ninja 1.13.2 (Apache-2.0),
 aqtinstall 3.3.0 (MIT), clang-format 23.1.2 (Apache-2.0 with LLVM exception),

@@ -54,6 +54,7 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         ));
     }
     let source_guard = lock_source(&archive.path)?;
+    diagnostic("SOURCE_LOCKED", &archive.path, None);
     let parent = archive
         .path
         .parent()
@@ -154,7 +155,8 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         .ok_or_else(|| ArcError::new("LIMIT", "Replacement estimate overflow"))?;
     disk::preflight(parent, estimate)?;
     op.total(total);
-    let mut replacement = tempfile::NamedTempFile::new_in(parent)?;
+    let mut replacement = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
+    diagnostic("REBUILD_STARTED", &archive.path, Some(replacement.path()));
     let mut zip_metadata = if archive.format == Format::Zip {
         Some(zip::ZipArchive::new(File::open(&archive.path)?)?)
     } else {
@@ -223,11 +225,15 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         )?;
     }
     writer.finish()?;
+    diagnostic("REBUILD_FINISHED", &archive.path, Some(replacement.path()));
     replacement.as_file().sync_all()?;
+    diagnostic("TEMP_SYNCED", &archive.path, Some(replacement.path()));
     op.check()?;
     op.phase("Verifying replacement archive");
+    diagnostic("VERIFY_OPEN", &archive.path, Some(replacement.path()));
     let verified = Archive::open(replacement.path(), password, op)?;
     operations::test(&verified, password, op)?;
+    diagnostic("VERIFY_FINISHED", &archive.path, Some(replacement.path()));
     let wanted: HashSet<_> = planned
         .iter()
         .map(|e| {
@@ -255,44 +261,97 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
             "Replacement manifest differs; original preserved",
         ));
     }
+    drop(verified);
+    diagnostic("VERIFY_DROPPED", &archive.path, Some(replacement.path()));
     #[cfg(windows)]
     operations::propagate_zone(&archive.path, replacement.path())?;
     replacement.as_file().sync_all()?;
     op.check()?;
     security::check_ancestors(&archive.path)?;
+    diagnostic(
+        "FINAL_ANCESTOR_CHECK",
+        &archive.path,
+        Some(replacement.path()),
+    );
     drop(zip_metadata);
+    diagnostic(
+        "METADATA_HANDLES_DROPPED",
+        &archive.path,
+        Some(replacement.path()),
+    );
     drop(source_guard);
+    diagnostic(
+        "SOURCE_GUARD_DROPPED",
+        &archive.path,
+        Some(replacement.path()),
+    );
     // No cancellation after the commit decision: a successful publish is reported
     // as success so the GUI refreshes instead of claiming the old archive survived.
     commit(replacement, &archive.path, op)
 }
 
-fn commit(mut replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
-    for attempt in 0..=10 {
-        op.check()?;
-        match replacement.persist(path) {
-            Ok(_) => return Ok(()),
-            Err(error) => {
-                let transient =
-                    cfg!(windows) && matches!(error.error.raw_os_error(), Some(5 | 32 | 33));
-                if !transient || attempt == 10 {
-                    return Err(ArcError::new(
-                        "REPLACE",
-                        format!(
-                            "Could not replace archive {} (OS error {:?}): {}; original preserved",
-                            path.display(),
-                            error.error.raw_os_error(),
-                            error.error,
-                        ),
-                    ));
-                }
-                replacement = error.file;
-                op.phase("Waiting briefly for the archive lock");
-                std::thread::sleep(std::time::Duration::from_millis(100));
-            }
+fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
+    op.check()?;
+    let publication_path = security::publication_path(path)?;
+    diagnostic("PUBLISH_BEGIN", path, Some(replacement.path()));
+    match replacement.persist(publication_path) {
+        Ok(_) => {
+            diagnostic("PUBLISH_SUCCESS", path, None);
+            Ok(())
+        }
+        Err(error) => {
+            diagnostic("PUBLISH_FAIL", path, Some(error.file.path()));
+            Err(ArcError::new(
+                "REPLACE",
+                format!(
+                    "Could not replace archive {} (OS error {:?}): {}; original preserved",
+                    path.display(),
+                    error.error.raw_os_error(),
+                    error.error,
+                ),
+            ))
         }
     }
-    unreachable!("bounded commit attempts always return")
+}
+
+fn diagnostic(stage: &str, source: &Path, temp: Option<&Path>) {
+    #[cfg(feature = "publication-diagnostics")]
+    {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default();
+        eprintln!(
+            "PUBLICATION time={}.{:09} pid={} stage={stage} source={source:?} temp={temp:?} parent={:?}",
+            now.as_secs(),
+            now.subsec_nanos(),
+            std::process::id(),
+            source.parent()
+        );
+        if matches!(stage, "PUBLISH_BEGIN" | "PUBLISH_FAIL")
+            && !(stage == "PUBLISH_BEGIN"
+                && std::env::var_os("VYNX_DIAGNOSTIC_ON_FAILURE_ONLY").is_some())
+            && let (Some(python), Some(helper), Some(temp)) = (
+                std::env::var_os("VYNX_DIAGNOSTIC_PYTHON"),
+                std::env::var_os("VYNX_DIAGNOSTIC_HELPER"),
+                temp,
+            )
+        {
+            // Synchronous helper snapshots real kernel handles while this process
+            // remains at the publication boundary. No password is transferred.
+            let result = std::process::Command::new(python)
+                .arg(helper)
+                .arg("--pid")
+                .arg(std::process::id().to_string())
+                .arg("--source")
+                .arg(source)
+                .arg("--temp")
+                .arg(temp)
+                .status();
+            eprintln!("PUBLICATION helper={result:?}");
+        }
+    }
+    #[cfg(not(feature = "publication-diagnostics"))]
+    let _ = (stage, source, temp);
 }
 
 fn lock_source(path: &Path) -> Result<File> {
@@ -416,5 +475,68 @@ impl Read for CheckedReader<'_> {
         }
         self.op.advance(n as u64);
         Ok(n)
+    }
+}
+
+#[cfg(test)]
+mod publication_tests {
+    use super::*;
+    use std::io::Write;
+
+    fn staged(parent: &Path) -> tempfile::NamedTempFile {
+        let mut file = tempfile::NamedTempFile::new_in(parent).unwrap();
+        file.write_all(b"replacement").unwrap();
+        file.as_file().sync_all().unwrap();
+        file
+    }
+
+    #[test]
+    fn persist_replaces_flushed_sibling_and_removes_temporary_name() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let replacement = staged(dir.path());
+        let temp = replacement.path().to_owned();
+        commit(replacement, &path, &Operation::default()).unwrap();
+        assert_eq!(std::fs::read(path).unwrap(), b"replacement");
+        assert!(!temp.exists());
+    }
+
+    #[test]
+    fn cancelled_commit_preserves_original_and_cleans_staging() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let replacement = staged(dir.path());
+        let temp = replacement.path().to_owned();
+        let op = Operation::default();
+        op.cancel();
+        assert_eq!(
+            commit(replacement, &path, &op).unwrap_err().code,
+            "CANCELLED"
+        );
+        assert_eq!(std::fs::read(path).unwrap(), b"original");
+        assert!(!temp.exists());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn read_only_commit_reports_first_failure_and_preserves_original() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let original_permissions = std::fs::metadata(&path).unwrap().permissions();
+        let mut read_only = original_permissions.clone();
+        read_only.set_readonly(true);
+        std::fs::set_permissions(&path, read_only).unwrap();
+        let replacement = staged(dir.path());
+        let temp = replacement.path().to_owned();
+        let result = commit(replacement, &path, &Operation::default());
+        std::fs::set_permissions(&path, original_permissions).unwrap();
+        let error = result.unwrap_err();
+        assert_eq!(error.code, "REPLACE");
+        assert!(error.message.contains("OS error Some(5)"));
+        assert_eq!(std::fs::read(path).unwrap(), b"original");
+        assert!(!temp.exists());
     }
 }

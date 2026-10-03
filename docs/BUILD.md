@@ -26,6 +26,13 @@ and typed bridge before linking the GUI. `ctest` exercises the real CXX boundary
 The build directory is `build-msvc`; MSVC runtime DLLs are deployed app-locally.
 No MinGW runtime DLLs are required by the MSVC package.
 
+`scripts/check.ps1` is the mandatory local quality entry point: fmt, Clippy with
+warnings denied, locked workspace tests, cargo audit, native CMake build and CTest.
+Install the pinned `cargo-audit` 0.22.2 beforehand; the check command does not
+install or update tools. CI installs that exact version with `--locked`.
+`build.ps1` delegates to this command, so `build-release.ps1` stops before staging
+or packaging when a mandatory source gate fails.
+
 No script silently installs packages, changes Defender, edits file defaults, or
 modifies global PATH. Tool paths are scoped to the current build process.
 

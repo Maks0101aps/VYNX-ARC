@@ -48,7 +48,8 @@ scripts/build-release.ps1
 Release packaging additionally requires Python for license collection and Inno
 Setup 6 for the installer. `-SkipInstaller` generates only the portable package.
 
-The bundled CLI supports `list`, `extract`, `create`, `test` and `hash`.
+The bundled CLI supports `list`, `extract`, `create`, `test`, `add`, `delete`,
+`rename`, `hash`, `verify`, `hash-entry` and `verify-entry`.
 Run `vynxarc-cli --help`. Password operations currently use the GUI; secrets on
 the command line are intentionally unsupported.
 
@@ -58,6 +59,10 @@ the command line are intentionally unsupported.
 limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md)
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
+
+The latest [release acceptance pass](docs/RELEASE_ACCEPTANCE.md) remains blocked
+at version 0.1.0. Run `scripts/check.ps1` for mandatory local source gates;
+release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;
 see [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) and the packaged `licenses/`

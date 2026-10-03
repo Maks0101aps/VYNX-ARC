@@ -13,6 +13,13 @@ remove the temporary file. A locked-target publication failure preserves the ori
 No cancellation is reported after the final commit decision, so a completed commit
 always refreshes the GUI. Mark-of-the-Web is copied to the replacement.
 
+Publication makes one attempt through pinned `tempfile::NamedTempFile::persist`.
+On Windows this first clears the temporary attribute with `SetFileAttributesW`,
+then calls `MoveFileExW(MOVEFILE_REPLACE_EXISTING)`. Failures are reported without
+retry/sleep masking. The historical location-associated error 5 remains
+unresolved; see [PUBLICATION_DIAGNOSTICS.md](PUBLICATION_DIAGNOSTICS.md).
+Passing stress runs alone do not identify or fix that historical failure.
+
 Outputs are recompressed using the current ZIP/7Z defaults, not a raw block edit.
 ZIP archive comments and file modification dates, and retained 7Z file timestamps
 are preserved. Auxiliary ZIP metadata, directory timestamps and exact compression
