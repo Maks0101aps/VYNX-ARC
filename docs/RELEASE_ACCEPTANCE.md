@@ -3,11 +3,28 @@
 Recorded 2026-10-03 on the existing Windows 11 development workstation.
 Version stays **0.1.0**. No version bump, feature expansion, push or deployment.
 
-Git HEAD: `220fbff9e3cc7ddaa78b3ea8cd1cba17da370b44` on `main`.
-The initial tracked worktree was clean. Recoverable source checkpoint:
-`checkpoint/pre-020-20261003`. The pass's changes remain uncommitted for review.
+Previous pass baseline/checkpoint HEAD:
+`220fbff9e3cc7ddaa78b3ea8cd1cba17da370b44`, retained by
+`checkpoint/pre-020-20261003`. Its initial tracked worktree was clean.
+The resulting implementation and evidence were committed as
+`9e759c0517f7979530ae2d14008163333671fd08` on `main`; that is the actual HEAD
+verified at the start of this final root-cause pass. The previous wording claiming
+those changes were uncommitted was incorrect. History has not been rewritten.
+This pass's diagnostic-script and documentation edits are subsequent working-tree
+changes; no production code or packaged artifact was changed.
 Raw logs/results are local generated evidence under `.dev` and TEMP, not historical
 claims promoted to current acceptance.
+
+## Final root-cause pass
+
+[Current ProcMon capture, stress counts and remaining control](PUBLICATION_ROOT_CAUSE.md).
+Pylance's exact target opens now include **ShareMode: None**. ProcMon confirms
+the denied operation is `SetRenameInformationFile`, not the temporary attribute
+step. Root cause remains **STILL UNKNOWN** under the required acceptance standard:
+the fully closed VS Code absence control was deferred at the user's request to
+keep VS Code open. No publication retry policy or API change was introduced.
+The fresh `.dev` matrix fails; the fresh TEMP matrix passes 100 cycles in every
+category and MOTW state. Final status remains **B — blocked**, version **0.1.0**.
 
 ## ZIP replacement evidence and fixes
 

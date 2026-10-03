@@ -97,9 +97,13 @@ fixtures, verifying the original archive hash after restoration.
 
 ## Exact Process Monitor capture procedure
 
-Automatic capture was not available in this medium-integrity, non-elevated
-session. The Microsoft-signed binary is at `.dev/020-procmon/Procmon64.exe`.
-Use an administrator-authorized session to perform the following manual capture;
+Automatic capture was unavailable in the previous medium-integrity pass.
+The subsequent [final root-cause pass](PUBLICATION_ROOT_CAUSE.md) captured native
+PML, CSV and symbolized stacks after the user accepted UAC. It confirms error 5
+occurs in MoveFileExW's replacement rename and records Pylance target share modes.
+The absence control remains pending because the user requested VS Code stay open.
+The Microsoft-signed binary is at `.dev/020-procmon/Procmon64.exe`.
+Use an administrator-authorized session to perform further captures;
 do not change Defender, indexing, Developer Mode or certificate trust.
 
 1. Open [Microsoft Process Monitor](https://learn.microsoft.com/en-us/sysinternals/downloads/procmon).
@@ -128,8 +132,9 @@ do not change Defender, indexing, Developer Mode or certificate trust.
    before assigning causality. Compare with a TEMP capture using the same sequence.
 
 Publication stays on pinned `tempfile` 3.27.0: SetFileAttributesW followed by
-MoveFileExW(MOVEFILE_REPLACE_EXISTING). The error does not alone identify which
-native call failed. A direct MoveFileEx control omits the attribute step and the
+MoveFileExW(MOVEFILE_REPLACE_EXISTING). The error alone did not identify which
+native call failed; the subsequent captured stack identifies MoveFileExW, with a
+successful preceding attribute step. A direct MoveFileEx control omits that step and the
 full archive lifecycle. Neither ReplaceFileW nor another primitive has been
 substituted to hide the failure. [Microsoft documents extended paths and ACL
 requirements for MoveFileExW](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-movefileexw).
