@@ -29,6 +29,8 @@ class ArchiveModel : public QAbstractTableModel {
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     void load(rust::Vec<vynx::EntryInfo> entries);
     void navigate(const QString &folder);
+    void setSearchMode(bool enabled);
+    bool searchMode() const { return searchMode_; }
     const ArchiveRow &row(int index) const { return rows_.at(index); }
     QString folder() const { return folder_; }
     quint64 totalSize() const;
@@ -40,11 +42,13 @@ class ArchiveModel : public QAbstractTableModel {
     QVector<ArchiveRow> rows_;
     QString folder_;
     quint64 totalSize_ = 0, totalPacked_ = 0;
+    bool searchMode_ = false;
 };
 class ArchiveFilter : public QSortFilterProxyModel {
   public:
     using QSortFilterProxyModel::QSortFilterProxyModel;
 
   protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &parent) const override;
     bool lessThan(const QModelIndex &a, const QModelIndex &b) const override;
 };

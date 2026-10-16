@@ -32,6 +32,16 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
         operationView_->updateProgress(380ULL << 20, 528ULL << 20,
                                        "Project/src/components/README.md", 5000);
         return this;
+    } else if (mode == "search" && archive_) {
+        search_->setText("README");
+        return this;
+    } else if (mode == "preview" && archive_) {
+        search_->setText("README.md");
+        if (filter_->rowCount()) {
+            table_->selectRow(0);
+            QTimer::singleShot(0, this, &MainWindow::previewSelected);
+        }
+        return this;
     } else if (mode == "archive" && archive_)
         navigate("Project");
     else if (mode == "breadcrumb" && archive_)

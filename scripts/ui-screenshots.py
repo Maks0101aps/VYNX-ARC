@@ -40,7 +40,7 @@ try:
             recent = f'recent={archive.as_posix()}\n' if args.recents else ''
             configuration.write_text(f'[General]\ntheme={theme}\nlanguage={language}\nhistoryEnabled=false\n{recent}', encoding='utf-8')
             for scale in (['1'] if args.quick or args.details_only else ['1', '1.25', '1.5', '2']):
-                for state in (['create','extract','conflict','settings','about','operation','breadcrumb'] if args.details_only else ['home', 'archive']):
+                for state in (['create','extract','conflict','settings','about','operation','breadcrumb','search','preview'] if args.details_only else ['home', 'archive']):
                     output = args.output / f'{state}-{theme}-{language}-{scale}.png'
                     env = os.environ.copy()
                     env['QT_SCALE_FACTOR'] = scale

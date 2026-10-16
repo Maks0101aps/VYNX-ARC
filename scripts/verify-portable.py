@@ -1,6 +1,7 @@
 import pathlib,zipfile,subprocess,os,time,json,psutil,hashlib,datetime,sys
 root=pathlib.Path(__file__).resolve().parents[1]
 report_path=pathlib.Path(os.environ.get('VYNX_VERIFY_REPORT',root/'docs/VERIFICATION.json'))
+report_path.parent.mkdir(parents=True,exist_ok=True)
 last_success_path=root/'docs/VERIFICATION_LAST_SUCCESS.json'
 if report_path.exists():
     previous=json.loads(report_path.read_text(encoding='utf-8'))
@@ -108,7 +109,7 @@ assert missing.returncode==1 and b'MISSING_VOLUME' in missing.stderr and parts[1
 hidden.rename(parts[1])
 evidence['split-7z']='Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed'
 print('Independent ZIP/7Z read and packaged format tests passed',flush=True)
-screens=scratch/'verification-captures';screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
+screens=pathlib.Path(os.environ.get('VYNX_VERIFY_CAPTURE_DIR',scratch/'verification-captures'));screens.mkdir(parents=True,exist_ok=True);(app/'data').mkdir(exist_ok=True)
 measure=[]
 for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25'),('light','ru','2')]:
     (app/'data/settings.ini').write_text(f'[General]\ntheme={theme}\nlanguage={lang}\nhistoryEnabled=false\n',encoding='utf-8')

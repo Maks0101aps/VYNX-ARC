@@ -9,6 +9,8 @@ for package in metadata['packages']:
     target=root/'rust'/f"{package['name']}-{package['version']}"
     target.mkdir(parents=True,exist_ok=True)
     found=False
+    if (source/'PATCHES.md').exists():
+        shutil.copy2(source/'PATCHES.md',target/'PATCHES.md')
     for file in source.rglob('*'):
         if file.is_file() and any(file.name.upper().startswith(n) for n in ('LICENSE','COPYING','NOTICE')):
             relative=file.relative_to(source);(target/relative).parent.mkdir(parents=True,exist_ok=True)

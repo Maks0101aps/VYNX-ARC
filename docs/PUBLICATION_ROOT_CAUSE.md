@@ -1,5 +1,10 @@
 # Final ZIP publication root-cause evidence
 
+Historical capture from October 3. On October 16, the same original portable
+package passed project-path verification and all 1,400 stress publications.
+That new result does not establish a causal fix or invalidate this capture.
+See [current improvements](IMPROVEMENTS_2026-10-16.md) for newer evidence.
+
 Recorded 2026-10-03. **B — remains blocked. Root cause: STILL UNKNOWN.**
 Production change in this pass: **NONE**. No retry policy, publication API switch,
 version bump, security-setting change or Pylance-specific product message.

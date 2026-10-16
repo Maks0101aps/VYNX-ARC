@@ -17,6 +17,25 @@ and during decoding. CRC is integrity checking, not authentication. Passwords ar
 ephemeral; application-owned password buffers use zeroization and are never logged.
 Backend allocations and password copies require separate review.
 
+ZIP directory preflight runs before ZipArchive construction on open, decode and
+modification paths. It caps directory bytes at 32 MiB and conservative metadata
+accounting at 256 MiB (1024 bytes per declared entry plus four times directory
+bytes), validates ZIP64 ranges and scans fixed-size entry headers. Offset guessing,
+multi-disk ZIP, ambiguous end records, trailing data and non-contiguous/signed directories are rejected.
+These are explicit compatibility restrictions. See core/src/parser.rs.
+
+The patched 7Z reader caps raw/decoded headers at 16 MiB, cumulative metadata
+accounting at 128 MiB and LZMA/LZMA2/PPMD coder-chain dictionary/arena accounting
+at 64 MiB, with at most eight coders. Limits are checked before affected parser
+and decoder allocations, including encrypted/encoded headers. They are not an
+overall RSS ceiling or a complete audit of every codec allocation. TAR/PAX,
+native RAR allocation budgets, ZIP codec workspaces and CPU budgets remain open.
+
+Text preview decodes with the same stream validation and output limits, accepts
+only UTF-8 text up to 1 MiB and displays it as plain text in a read-only widget.
+It writes no temporary plaintext file and launches no external application.
+For solid archives, decoding unrelated streams can still take significant time.
+
 Sibling temporary output is published after stream/checksum completion; cancellation
 removes unpublished temporary files and preserves pre-existing files. A partially
 completed extraction may contain already completed files; it is not an all-or-nothing

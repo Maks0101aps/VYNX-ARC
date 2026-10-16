@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-16 - local stabilization candidate, still 0.1.0
+
+- Upgrade ZIP to stable 9.0.4 and fail source audit on yanked dependencies.
+- Bound ZIP/ZIP64 metadata before parsing; reject ambiguous end-record fallback.
+- Add documented local 7Z header/metadata/dictionary-chain budget enforcement.
+- Search file names/paths across the archive with full result paths.
+- Add verified read-only UTF-8 text preview without temporary plaintext files.
+- Classify modification errors and offer explicit archive reload, without retries.
+- Name selection actions and separate job orchestration and preview source files.
+- Add cross-process lock checks, bounded parser mutation smoke and packaged CI QA.
+- Prepare clean-Windows installer acceptance; current host Sandbox launch failed.
+
+See [the dated report](IMPROVEMENTS_2026-10-16.md) for evidence and release limits.
+
 ## Unreleased вЂ” work toward 0.2.0
 
 - Separate compact Home and archive workspace into native Widgets pages; move

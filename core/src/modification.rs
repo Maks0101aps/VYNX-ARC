@@ -158,7 +158,7 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
     let mut replacement = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
     diagnostic("REBUILD_STARTED", &archive.path, Some(replacement.path()));
     let mut zip_metadata = if archive.format == Format::Zip {
-        Some(zip::ZipArchive::new(File::open(&archive.path)?)?)
+        Some(crate::parser::open_zip(File::open(&archive.path)?)?)
     } else {
         None
     };
@@ -301,15 +301,7 @@ fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> 
         }
         Err(error) => {
             diagnostic("PUBLISH_FAIL", path, Some(error.file.path()));
-            Err(ArcError::new(
-                "REPLACE",
-                format!(
-                    "Could not replace archive {} (OS error {:?}): {}; original preserved",
-                    path.display(),
-                    error.error.raw_os_error(),
-                    error.error,
-                ),
-            ))
+            Err(modification_error(error.error, path))
         }
     }
 }
@@ -362,7 +354,33 @@ fn lock_source(path: &Path) -> Result<File> {
         use std::os::windows::fs::OpenOptionsExt;
         options.share_mode(1); // Readers permitted; modification/deletion denied.
     }
-    Ok(options.open(path)?)
+    options.open(path).map_err(|e| modification_error(e, path))
+}
+
+fn modification_error(error: std::io::Error, path: &Path) -> ArcError {
+    let (code, advice) = match error.raw_os_error() {
+        Some(32 | 33) => (
+            "ARCHIVE_BUSY",
+            "Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.",
+        ),
+        Some(5) => (
+            "ACCESS_DENIED",
+            "Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.",
+        ),
+        _ => (
+            "REPLACE",
+            "Check available disk space and access to the archive, then reload it before trying again.",
+        ),
+    };
+    ArcError::new(
+        code,
+        format!(
+            "Could not update {} (OS error {:?}): {}. The original archive was not replaced. {advice}",
+            path.display(),
+            error.raw_os_error(),
+            error
+        ),
+    )
 }
 
 enum Sink<'a> {
@@ -534,7 +552,7 @@ mod publication_tests {
         let result = commit(replacement, &path, &Operation::default());
         std::fs::set_permissions(&path, original_permissions).unwrap();
         let error = result.unwrap_err();
-        assert_eq!(error.code, "REPLACE");
+        assert_eq!(error.code, "ACCESS_DENIED");
         assert!(error.message.contains("OS error Some(5)"));
         assert_eq!(std::fs::read(path).unwrap(), b"original");
         assert!(!temp.exists());

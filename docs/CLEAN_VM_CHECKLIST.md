@@ -3,6 +3,16 @@
 This is an executable checklist, not a report of a completed VM test. The current
 workstation has SDKs installed; restricted PATH checks do not replace a clean VM.
 
+For a reproducible automated subset, run `scripts/check-clean-windows.ps1` after
+building both portable and installer artifacts, or use `-PrepareOnly` to inspect
+the generated `.wsb` before launch. The payload is mapped read-only, evidence is
+mapped separately, and guest networking/clipboard are disabled. Review
+`host.json` for launch state and `evidence/results.json` for actual guest results.
+Launch alone is not a pass. The script does not change host virtualization,
+certificates or trust settings. Its same-version reinstall check is not an
+upgrade test from an older version. Signed Explorer visibility, non-elevated
+standard-user execution and reboot cleanup still require manual/VM evidence.
+
 1. Create a Windows 11 x64 VM and take a snapshot before installation. Use a
    normal user, no Rust/Qt/VS/archiver development tools, and leave Developer Mode
    and certificate trust unchanged. Record winver, CPU, RAM and scaling.

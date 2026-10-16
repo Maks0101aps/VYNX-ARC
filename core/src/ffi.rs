@@ -52,6 +52,12 @@ pub mod bridge {
         fn list_entries(archive: &Archive) -> Vec<EntryInfo>;
         fn archive_format(archive: &Archive) -> String;
         fn archive_writable(archive: &Archive) -> bool;
+        fn preview_text(
+            archive: &Archive,
+            id: u64,
+            password: &str,
+            op: &Operation,
+        ) -> Result<String>;
         fn extract_archive(
             archive: &Archive,
             destination: &str,
@@ -115,6 +121,9 @@ fn guarded<T>(f: impl FnOnce() -> Result<T>) -> Result<T> {
             "Unexpected core failure; operation stopped",
         ))
     })
+}
+fn preview_text(archive: &Archive, id: u64, password: &str, op: &Operation) -> Result<String> {
+    guarded(|| crate::preview::text(archive, id, password, op))
 }
 fn hash_entries(
     archive: &Archive,

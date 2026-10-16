@@ -1,6 +1,8 @@
 # 0.2.0 engineering acceptance: B — still blocked
 
 Recorded 2026-10-03 on the existing Windows 11 development workstation.
+This is a historical report. See [October 16 improvements and fresh checks](IMPROVEMENTS_2026-10-16.md)
+for current evidence; the failures below are retained and have not been erased.
 Version stays **0.1.0**. No version bump, feature expansion, push or deployment.
 
 Previous pass baseline/checkpoint HEAD:

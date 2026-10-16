@@ -1,4 +1,17 @@
-# Dependency decisions (2026-10-02)
+# Dependency decisions (updated 2026-10-16)
+
+ZIP moved from yanked 8.6.0 to stable 9.0.4. The maintainer explicitly attributes
+the old-version yanks to security issues in
+[issue 1075](https://github.com/zip-rs/zip2/issues/1075#issuecomment-6209381974),
+including GHSA-vv5m-jxxh-4627, GHSA-4v9h-p7m9-rh26 and GHSA-4684-h2q9-2vcp.
+This is not a claim that every upstream issue was exploitable through VYNX's
+custom extraction paths. ZIP names now use the fallible 9.x decoding API.
+The lockfile also updates ZIP's transitive codec dependencies.
+
+7Z is a local source patch of 0.23.0 because the upstream reader does not expose
+the required application metadata/dictionary budget configuration. Provenance,
+limits and upgrade instructions are in
+[third_party/sevenz-rust2/PATCHES.md](../third_party/sevenz-rust2/PATCHES.md).
 
 Versions are exact in Cargo manifests and Cargo.lock, including an isolated local
 patch for the UnRAR decoder. Qt is pinned to 6.12.0. Rust is pinned to 1.99.0.
@@ -11,8 +24,8 @@ from the same SDK. No installed archiver is invoked.
 |---|---|---|---|
 | [Qt](https://doc.qt.io/qt-6/licensing.html) | Widgets, Core, Gui, Concurrent; 6.12.0; LGPLv3 selected | Dynamic MSVC 2022 x64 SDK; update SDK version together with compiler and CI, review notices, deploy DLLs with windeployqt | Retain LGPL/GPL texts, replacement/relink rights and source link. No browser engine. No Qt Network module is linked. |
 | [CXX](https://github.com/dtolnay/cxx) | Typed Rust/C++ bridge; 1.0.202; MIT OR Apache-2.0 | Cargo cxx and cxx-build exact matching versions; regenerate bridge with Cargo | Result errors map to C++ exceptions; operation functions catch panics; opaque archive and operation handles |
-| [zip](https://github.com/zip-rs/zip2) | ZIP metadata, stream decoding/writing, AES; 8.6.0; MIT | Cargo; change exact version and lockfile, rerun encrypted/corrupt/round-trip tests | Never call ZIP convenience extraction helpers. CRC and size checks run while streaming. ZIPX support depends on actual codec, not extension. |
-| [sevenz-rust2](https://github.com/hasenbanck/sevenz-rust2) | Pure Rust 7Z reading/writing, AES and encrypted headers; 0.23.0; Apache-2.0 | Cargo; update exact version, inspect parser and dictionary bounds, run independent-tool comparisons | Solid decompression can decode skipped files. Default backend has its own allocations; complete allocation-budget audit still required. Password type internally copies UTF-16 without guaranteed zeroization. |
+| [zip](https://github.com/zip-rs/zip2) | ZIP metadata, stream decoding/writing, AES; 9.0.4; MIT | Cargo; change exact version and lockfile, rerun encrypted/corrupt/round-trip tests | Bounded central-directory preflight before backend parsing. Never call convenience extraction helpers. Codec/output limits are separate concerns. |
+| [sevenz-rust2](https://github.com/hasenbanck/sevenz-rust2) | Pure Rust 7Z reading/writing, AES and encrypted headers; patched 0.23.0; Apache-2.0 | Rebase the documented local budget patch on a verified upstream crate; rerun parser regressions and independent readers | Header/metadata/decoder-chain budgets are enforced before affected allocations. These are not a whole-process RSS cap. Backend password copies still need review. |
 | [UnRAR](https://www.rarlab.com/rar_add.htm) | RAR4/RAR5 read-only decoder; 7.23; separate UnRAR license | Vendored official source via `unrarsrc-7.2.7.tar.gz`; source SHA-256 in third_party/unrar-sys/UPSTREAM.json. Bindings are unrar-ng-sys 0.7.7; source package is pinned locally. Review official release/security notes before upgrading. | 7.23 replaces outdated bundled beta source; includes upstream security fixes. No RAR encoder. Output uses RAR_TEST callback bytes, never native extraction paths. Links and large dictionaries blocked. Callback FFI is isolated with SAFETY comments and tests. |
 | [tar](https://github.com/alexcrichton/tar-rs) | TAR streaming; 0.4.46; MIT OR Apache-2.0 | Cargo; update manifest/lock, test long names, sparse metadata and links | Convenience unpack helpers never used. Non-file/non-directory entries blocked. PAX/resource-budget review remains. |
 | [flate2](https://github.com/rust-lang/flate2-rs) | TAR.GZ codec; 1.1.10; MIT OR Apache-2.0 | Cargo; update lock, round-trip/truncation tests | Streaming decode; gzip finalization errors must propagate. |

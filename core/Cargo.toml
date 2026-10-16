@@ -13,7 +13,7 @@ publication-diagnostics = []
 
 [dependencies]
 cxx = "=1.0.202"
-zip = { version = "=8.6.0", default-features = false, features = ["deflate", "aes-crypto", "bzip2", "zstd", "lzma", "xz"] }
+zip = { version = "=9.0.4", default-features = false, features = ["deflate", "aes-crypto", "bzip2", "zstd", "lzma", "xz"] }
 sevenz-rust2 = "=0.23.0"
 sha2 = "=0.11.0"
 crc32fast = "=1.5.2"

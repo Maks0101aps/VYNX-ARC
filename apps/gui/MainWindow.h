@@ -15,6 +15,7 @@ class QListWidget;
 class QSettings;
 class QTimer;
 class QAction;
+class QVBoxLayout;
 class SecretUtf8;
 class BreadcrumbBar;
 class ArchivePage;
@@ -49,6 +50,7 @@ class MainWindow : public QMainWindow {
     void back();
     void up();
     void showProperties();
+    void previewSelected();
     void settings();
     void applyTheme(const QString &theme);
     void updateRecent();
@@ -60,6 +62,7 @@ class MainWindow : public QMainWindow {
     void handleShellWithSecret(quint32 action, const QStringList &paths,
                                const std::shared_ptr<SecretUtf8> &password);
     void beginOperation();
+    void setupOperations(QVBoxLayout *layout);
     void showConflict();
     QString askPassword(bool *accepted);
     std::shared_ptr<SecretUtf8> password_;
@@ -79,6 +82,7 @@ class MainWindow : public QMainWindow {
     QLabel *archiveSummary_;
     QList<QAction *> mutationActions_;
     QAction *renameAction_, *deleteAction_;
+    QAction *hashSelectedAction_, *verifySelectedAction_, *propertiesAction_, *previewAction_;
     QLabel *current_;
     QLabel *rate_;
     QProgressBar *progress_;

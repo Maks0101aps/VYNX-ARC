@@ -8,6 +8,7 @@ qt_standard_project_setup()
 file(GLOB_RECURSE CORE_SOURCES CONFIGURE_DEPENDS core/src/*.rs)
 file(GLOB_RECURSE CLI_SOURCES CONFIGURE_DEPENDS apps/cli/src/*.rs)
 file(GLOB_RECURSE RAR_SOURCES CONFIGURE_DEPENDS third_party/unrar-sys/src/*.rs third_party/unrar-sys/vendor/unrar/*.cpp third_party/unrar-sys/vendor/unrar/*.hpp)
+file(GLOB_RECURSE SEVENZ_SOURCES CONFIGURE_DEPENDS third_party/sevenz-rust2/src/*.rs)
 set(RUST_TARGET_DIR "${CMAKE_SOURCE_DIR}/target")
 if(MSVC)
     set(RUST_LIBRARY "${RUST_TARGET_DIR}/release/vynx_arc_core.lib")
@@ -17,7 +18,7 @@ endif()
 add_custom_command(OUTPUT "${RUST_LIBRARY}"
     COMMAND ${CARGO_EXECUTABLE} build --workspace --release --locked
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
-    DEPENDS ${CORE_SOURCES} ${CLI_SOURCES} ${RAR_SOURCES} apps/cli/Cargo.toml third_party/unrar-sys/build.rs core/build.rs core/Cargo.toml Cargo.toml Cargo.lock
+    DEPENDS ${CORE_SOURCES} ${CLI_SOURCES} ${RAR_SOURCES} ${SEVENZ_SOURCES} third_party/sevenz-rust2/Cargo.toml apps/cli/Cargo.toml third_party/unrar-sys/build.rs core/build.rs core/Cargo.toml Cargo.toml Cargo.lock
     VERBATIM)
 add_custom_target(rust_core DEPENDS "${RUST_LIBRARY}")
 add_library(vynx_core STATIC IMPORTED GLOBAL)
@@ -25,6 +26,8 @@ set_target_properties(vynx_core PROPERTIES IMPORTED_LOCATION "${RUST_LIBRARY}")
 add_dependencies(vynx_core rust_core)
 qt_add_executable(VynxArc WIN32 apps/gui/main.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h apps/gui/MainWindow.cpp apps/gui/MainWindow.h apps/gui/ShellRequest.cpp apps/gui/ShellRequest.h)
 target_sources(VynxArc PRIVATE
+    apps/gui/MainWindowPreview.cpp
+    apps/gui/MainWindowJobs.cpp
     apps/gui/UiCapture.cpp
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h
     apps/gui/dialogs/ExtractDialog.cpp apps/gui/dialogs/ExtractDialog.h
@@ -89,4 +92,4 @@ if(TARGET VynxShellSmoke)
     add_test(NAME shell_smoke COMMAND VynxShellSmoke $<TARGET_FILE:VynxShell>)
 endif()
 add_test(NAME gui_smoke COMMAND VynxArc --smoke-test)
-set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)

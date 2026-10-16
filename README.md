@@ -13,6 +13,10 @@ keyboard shortcuts and drag-to-open. English, Ukrainian and Russian UI,
 system/light/dark appearance, local recent history and portable settings are
 available. No external archiver, browser engine, telemetry or service is used.
 
+Search covers file names and paths throughout the archive and shows each result's
+full path. Double-click a file or press F3 for a read-only UTF-8 preview up to
+1 MiB; binary/larger files must be extracted. Preview creates no plaintext file.
+
 Extraction validates Windows paths and collisions, blocks links/reparse points,
 checks output limits, writes unique temporary files and publishes completed
 streams. Existing files are preserved by default. These protections are tested,
@@ -60,8 +64,10 @@ limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
 
-The latest [release acceptance pass](docs/RELEASE_ACCEPTANCE.md) remains blocked
-at version 0.1.0. Run `scripts/check.ps1` for mandatory local source gates;
+The [current improvement report](docs/IMPROVEMENTS_2026-10-16.md) records the
+October 16 changes and verification. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
+retains historical failures. Stable-release acceptance remains incomplete at
+version 0.1.0. Run `scripts/check.ps1` for mandatory local source gates;
 release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;

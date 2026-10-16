@@ -4,7 +4,6 @@
 #include "ShellRequest.h"
 #include "Theme.h"
 #include "dialogs/AboutDialog.h"
-#include "dialogs/ConflictDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "dialogs/ExtractDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -16,7 +15,6 @@
 #include "widgets/ToastOverlay.h"
 #include <QRegularExpression>
 #include <QStyleHints>
-#include <QtConcurrent>
 #include <QtWidgets>
 
 static QString text(const rust::String &s) {
@@ -81,12 +79,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *hash =
         addAction(operationsMenu, tr("Calculate SHA-256 / CRC32"), {}, [this] { hashFile(); });
     archiveActions_ = {extract, smart, here, named, test, hash};
+    hashSelectedAction_ =
+        addAction(operationsMenu, tr("Hash selected files"), {}, [this] { hashContents(); });
+    verifySelectedAction_ = addAction(operationsMenu, tr("Verify selected file hash…"), {},
+                                      [this] { hashContents(true); });
+    auto *verifyArchive = addAction(operationsMenu, tr("Verify archive file hash…"), {},
+                                    [this] { hashContents(true, true); });
+    previewAction_ = addAction(operationsMenu, tr("Preview text"), QKeySequence("F3"),
+                               [this] { previewSelected(); });
     archiveActions_.append(
-        addAction(operationsMenu, tr("Hash selected files"), {}, [this] { hashContents(); }));
-    archiveActions_.append(addAction(operationsMenu, tr("Verify selected file hash…"), {},
-                                     [this] { hashContents(true); }));
-    archiveActions_.append(addAction(operationsMenu, tr("Verify archive file hash…"), {},
-                                     [this] { hashContents(true, true); }));
+        {hashSelectedAction_, verifySelectedAction_, verifyArchive, previewAction_});
     operationsMenu->addSeparator();
     auto *addFiles = addAction(operationsMenu, tr("Add files…"), QKeySequence("Ctrl+Shift+A"),
                                [this] { chooseModify(0); });
@@ -130,12 +132,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     pages_->addWidget(home);
     auto *properties = addAction(operationsMenu, tr("Properties"), QKeySequence("Alt+Return"),
                                  [this] { showProperties(); });
+    propertiesAction_ = properties;
     archiveActions_.append(properties);
     properties->setEnabled(false);
-    archivePage_ =
-        new ArchivePage(extract, addFiles, test, remove, rename, archiveActions_[6],
-                        {smart, here, named, hash, archiveActions_[6], archiveActions_[7],
-                         archiveActions_[8], addFiles, addFolder, rename, remove, properties});
+    archivePage_ = new ArchivePage(extract, addFiles, test, remove, rename, hashSelectedAction_,
+                                   {smart, here, named, hash, hashSelectedAction_,
+                                    verifySelectedAction_, verifyArchive, previewAction_, addFiles,
+                                    addFolder, rename, remove, properties});
     pages_->addWidget(archivePage_);
     connect(archivePage_->back, &QToolButton::clicked, this, &MainWindow::back);
     connect(archivePage_->up, &QToolButton::clicked, this, &MainWindow::up);
@@ -160,6 +163,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     table_->setColumnWidth(4, 80);
     table_->setColumnWidth(5, 140);
     table_->setColumnHidden(6, true);
+    table_->setColumnHidden(7, true);
+    table_->setColumnWidth(7, 260);
     mutationActions_ = {addFiles, addFolder, rename, remove};
     renameAction_ = rename;
     deleteAction_ = remove;
@@ -168,6 +173,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     statusBar()->addPermanentWidget(archiveSummary_);
     toast_ = new ToastOverlay(central);
     connect(search_, &QLineEdit::textChanged, this, [this](const QString &s) {
+        model_->setSearchMode(!s.isEmpty());
+        table_->setColumnHidden(7, s.isEmpty());
         if (s.contains('*') || s.contains('?'))
             filter_->setFilterRegularExpression(
                 QRegularExpression(QRegularExpression::wildcardToRegularExpression(
@@ -175,13 +182,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                    QRegularExpression::CaseInsensitiveOption));
         else
             filter_->setFilterFixedString(s);
+        updateStatus();
     });
     connect(table_, &QTableView::doubleClicked, this, [this](QModelIndex i) {
         const auto &r = model_->row(filter_->mapToSource(i).row());
         if (r.folder)
             navigate(r.fullPath);
         else
-            showProperties();
+            previewSelected();
     });
     connect(table_->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             [this] { updateStatus(); });
@@ -214,7 +222,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             if (r.folder)
                 navigate(r.fullPath);
             else
-                showProperties();
+                previewSelected();
         }
     });
     table_->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -234,7 +242,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                 navigate(model_->row(filter_->mapToSource(index).row()).fullPath);
                             });
                 menu.addAction(extract);
-                menu.addAction(archiveActions_[6]);
+                menu.addAction(hashSelectedAction_);
+                menu.addAction(previewAction_);
                 if (writableArchive()) {
                     menu.addSeparator();
                     for (auto *a : {addFiles, addFolder, rename, remove})
@@ -261,58 +270,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
     });
 
-    operationView_ = new OperationPanel;
-    operationPanel_ = operationView_;
-    current_ = operationView_->current;
-    rate_ = operationView_->rate;
-    progress_ = operationView_->progress;
-    cancel_ = operationView_->cancel;
-    layout->addWidget(operationPanel_);
-    connect(cancel_, &QPushButton::clicked, this, [this] {
-        if (operation_) {
-            vynx::cancel(**operation_);
-            cancel_->setEnabled(false);
-            current_->setText(tr("Cancelling…"));
-        }
-    });
-    timer_ = new QTimer(this);
-    timer_->setInterval(100);
-    connect(timer_, &QTimer::timeout, this, [this] {
-        if (!operation_)
-            return;
-        auto p = vynx::progress(**operation_);
-        operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed());
-        showConflict();
-    });
-    connect(&watcher_, &QFutureWatcher<QString>::finished, this, [this] {
-        timer_->stop();
-        busy_ = false;
-        operationPanel_->hide();
-        pages_->setEnabled(true);
-        for (auto *a : idleActions_)
-            a->setEnabled(true);
-        for (auto *a : archiveActions_)
-            a->setEnabled(bool(archive_));
-        if (archive_)
-            updateStatus();
-        QString error = watcher_.result();
-        auto success = std::move(success_);
-        auto failure = std::move(failure_);
-        operation_.reset();
-        if (closePending_) {
-            QTimer::singleShot(0, this, [this] { close(); });
-            return;
-        }
-        if (error.isEmpty()) {
-            if (success)
-                success();
-            toast_->notify(tr("Operation completed"));
-            updateStatus();
-        } else if (failure) {
-            failure(error);
-        } else
-            QMessageBox::warning(this, tr("Operation stopped"), error);
-    });
+    setupOperations(layout);
     updateRecent();
     applyTheme(settings_->value("theme", "system").toString());
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
@@ -325,40 +283,6 @@ MainWindow::~MainWindow() {
         vynx::cancel(**operation_);
     watcher_.waitForFinished();
     password_.reset();
-}
-void MainWindow::beginOperation() {
-    shownConflict_ = 0;
-    operation_ = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
-}
-void MainWindow::runJob(const QString &title, std::function<QString()> worker,
-                        std::function<void()> success, std::function<void(QString)> failure) {
-    if (busy_)
-        return;
-    busy_ = true;
-    success_ = std::move(success);
-    failure_ = std::move(failure);
-    pages_->setEnabled(false);
-    for (auto *a : idleActions_)
-        a->setEnabled(false);
-    for (auto *a : archiveActions_)
-        a->setEnabled(false);
-    operationView_->begin(title);
-    cancel_->setEnabled(true);
-    progress_->setRange(0, 0);
-    elapsed_.start();
-    timer_->start();
-    watcher_.setFuture(QtConcurrent::run([worker = std::move(worker)]() mutable {
-        QString result;
-        try {
-            result = worker();
-        } catch (const std::exception &e) {
-            result = QString::fromUtf8(e.what());
-        } catch (...) {
-            result = QStringLiteral("Unexpected worker failure");
-        }
-        worker = {}; // Release job captures even if the QFuture outlives completion.
-        return result;
-    }));
 }
 void MainWindow::chooseOpen() {
     if (busy_)
@@ -470,34 +394,6 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
                               conflict, smart, pw->bytes(), **op);
         return QString();
     });
-}
-void MainWindow::showConflict() {
-    if (!operation_)
-        return;
-    auto request = vynx::conflict_request(**operation_);
-    if (!request.id || request.id == shownConflict_)
-        return;
-    shownConflict_ = request.id;
-    auto op = operation_;
-    auto *dialog = new ConflictDialog(text(request.existing_path), request.existing_size,
-                                      request.existing_modified, text(request.incoming_name),
-                                      request.incoming_size, request.incoming_modified, this);
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowModality(Qt::ApplicationModal);
-    connect(dialog, &ConflictDialog::decision, dialog,
-            [op, id = request.id](quint8 choice, bool all) {
-                vynx::reply_conflict(**op, id, choice, all);
-            });
-    connect(dialog, &QDialog::finished, dialog,
-            [op, id = request.id] { vynx::reply_conflict(**op, id, 0, false); });
-    connect(&watcher_, &QFutureWatcher<QString>::finished, dialog, &QDialog::reject);
-    auto *cancelTimer = new QTimer(dialog);
-    connect(cancelTimer, &QTimer::timeout, dialog, [dialog, op] {
-        if (vynx::cancelled(**op))
-            dialog->reject();
-    });
-    cancelTimer->start(100);
-    dialog->open();
 }
 void MainWindow::testArchive() {
     if (busy_ || !archive_)
@@ -675,8 +571,10 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
 void MainWindow::navigate(const QString &folder) {
     if (busy_ || !archive_)
         return;
-    if (folder == model_->folder())
+    if (folder == model_->folder()) {
+        search_->clear();
         return;
+    }
     history_.append(model_->folder());
     model_->navigate(folder);
     search_->clear();
@@ -771,6 +669,24 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
         },
         [this, path, pw] {
             QTimer::singleShot(0, this, [this, path, pw] { openWithSecret(path, pw); });
+        },
+        [this, path, pw](QString error) {
+            QString message = error;
+            if (error.startsWith("ARCHIVE_BUSY:"))
+                message = tr("Another application is using this archive. Close it, reload the "
+                             "archive, and run the operation again.");
+            else if (error.startsWith("ACCESS_DENIED:"))
+                message = tr("Access was denied. Check permissions and the read-only attribute, "
+                             "then reload the archive before trying again.");
+            QMessageBox report(QMessageBox::Warning, tr("Archive was not updated"), message,
+                               QMessageBox::Close, this);
+            report.setTextFormat(Qt::PlainText);
+            if (message != error)
+                report.setDetailedText(error);
+            auto *reload = report.addButton(tr("Reload archive"), QMessageBox::AcceptRole);
+            report.exec();
+            if (report.clickedButton() == reload)
+                QTimer::singleShot(0, this, [this, path, pw] { openWithSecret(path, pw); });
         });
 }
 void MainWindow::back() {
@@ -887,9 +803,10 @@ void MainWindow::updateStatus() {
     bool regular = false;
     for (const auto &index : rows)
         regular |= !model_->row(filter_->mapToSource(index).row()).folder;
-    archiveActions_[6]->setEnabled(!busy_ && regular);
-    archiveActions_[7]->setEnabled(!busy_ && regular && rows.size() == 1);
-    archiveActions_.last()->setEnabled(!busy_ && rows.size() == 1);
+    hashSelectedAction_->setEnabled(!busy_ && regular);
+    verifySelectedAction_->setEnabled(!busy_ && regular && rows.size() == 1);
+    previewAction_->setEnabled(!busy_ && regular && rows.size() == 1);
+    propertiesAction_->setEnabled(!busy_ && rows.size() == 1);
     auto summary = text(vynx::archive_format(**archive_));
     if (!writableArchive())
         summary += tr(" · read only");
@@ -1108,6 +1025,22 @@ bool MainWindow::smokeTest() {
             restored.readAll() != "real GUI bridge roundtrip")
             return false;
         restored.close();
+        bool previewSeen = false;
+        QTimer previewCloser;
+        connect(&previewCloser, &QTimer::timeout, this, [&] {
+            for (auto *viewer : findChildren<QPlainTextEdit *>()) {
+                if (viewer->isVisible() && viewer->isReadOnly()) {
+                    previewSeen = viewer->toPlainText() == "real GUI bridge roundtrip";
+                    viewer->window()->close();
+                }
+            }
+        });
+        previewCloser.start(20);
+        previewSelected();
+        loop.exec();
+        previewCloser.stop();
+        if (busy_ || !previewSeen)
+            return false;
         // Exercise the real asynchronous conflict dialog and bridge reply.
         beginOperation();
         auto conflictOp = operation_;

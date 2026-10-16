@@ -100,6 +100,10 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <source>Folder</source>
             <translation>Папка</translation>
         </message>
+        <message>
+            <source>Path</source>
+            <translation>Путь</translation>
+        </message>
     </context>
     <context>
         <name>ArchivePage</name>
@@ -169,6 +173,10 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <location filename="../../apps/gui/pages/ArchivePage.cpp" line="81" />
             <source>Archive contents</source>
             <translation>Содержимое архива</translation>
+        </message>
+        <message>
+            <source>Search entire archive</source>
+            <translation>Поиск по всему архиву</translation>
         </message>
     </context>
     <context>
@@ -1217,6 +1225,34 @@ Explorer integration is not installed by this development build.</source>
             <location filename="../../apps/gui/UiCapture.cpp" line="28" />
             <source>Extracting Project.7z</source>
             <translation>Распаковка Project.7z</translation>
+        </message>
+        <message>
+            <source>Preview text</source>
+            <translation>Просмотреть текст</translation>
+        </message>
+        <message>
+            <source>Text preview</source>
+            <translation>Просмотр текста</translation>
+        </message>
+        <message>
+            <source>Archive was not updated</source>
+            <translation>Архив не обновлён</translation>
+        </message>
+        <message>
+            <source>Reload archive</source>
+            <translation>Перечитать архив</translation>
+        </message>
+        <message>
+            <source>Another application is using this archive. Close it, reload the archive, and run the operation again.</source>
+            <translation>Другая программа использует этот архив. Закройте её, перечитайте архив и повторите операцию.</translation>
+        </message>
+        <message>
+            <source>Access was denied. Check permissions and the read-only attribute, then reload the archive before trying again.</source>
+            <translation>Отказано в доступе. Проверьте разрешения и атрибут «только чтение», затем перечитайте архив перед повторной попыткой.</translation>
+        </message>
+        <message>
+            <source>Reading text preview…</source>
+            <translation>Чтение текста…</translation>
         </message>
     </context>
     <context>

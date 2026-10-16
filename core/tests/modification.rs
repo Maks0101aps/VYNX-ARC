@@ -211,7 +211,10 @@ fn locked_original_rejects_replacement_without_data_loss() {
         &Operation::default(),
     )
     .unwrap_err();
-    assert_eq!(error.code, "REPLACE");
+    assert!(
+        matches!(error.code, "ARCHIVE_BUSY" | "ACCESS_DENIED"),
+        "{error}"
+    );
     assert_eq!(fs::read(&a.path).unwrap(), before);
 }
 #[cfg(windows)]

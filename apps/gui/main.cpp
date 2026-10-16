@@ -73,7 +73,10 @@ int main(int argc, char **argv) {
                                [&window, target, mode] { *target = window.prepareCapture(mode); });
         }
         QTimer::singleShot(1800, &window, [target, output, &app] {
-            app.exit(*target && (*target)->grab().save(output) ? 0 : 1);
+            auto *capture = QApplication::activeModalWidget();
+            if (!capture)
+                capture = target->data();
+            app.exit(capture && capture->grab().save(output) ? 0 : 1);
         });
     }
     if (app.arguments().size() > 1 && !app.arguments()[1].startsWith("--")) {

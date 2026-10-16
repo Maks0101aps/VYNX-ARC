@@ -107,7 +107,7 @@ impl Archive {
                 entries = crate::rar::list(&path, password, op)?;
             }
             Format::Zip => {
-                let mut zip = zip::ZipArchive::new(file)?;
+                let mut zip = crate::parser::open_zip(file)?;
                 if zip.len() > max_entries {
                     return Err(ArcError::new("LIMIT", "Too many entries"));
                 }
@@ -116,7 +116,7 @@ impl Archive {
                     let f = zip.by_index_raw(i)?;
                     entries.push(Entry {
                         id: i as u64,
-                        name: f.name().to_owned(),
+                        name: f.name()?.into_owned(),
                         size: f.size(),
                         packed: f.compressed_size(),
                         directory: f.is_dir(),
@@ -215,7 +215,7 @@ impl Archive {
                 crate::rar::streams(&self.path, password, &self.entries, op, consume)?;
             }
             Format::Zip => {
-                let mut zip = zip::ZipArchive::new(file)?;
+                let mut zip = crate::parser::open_zip(file)?;
                 if zip.len() != self.entries.len() {
                     return Err(ArcError::new(
                         "CHANGED",
@@ -232,7 +232,7 @@ impl Archive {
                     } else {
                         zip.by_index_decrypt(entry.id as usize, password.as_bytes())?
                     };
-                    if f.name() != entry.name
+                    if f.name()? != entry.name
                         || f.size() != entry.size
                         || entry.crc.is_some_and(|crc| crc != f.crc32())
                     {

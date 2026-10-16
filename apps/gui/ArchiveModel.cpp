@@ -17,7 +17,7 @@ QString displaySize(quint64 bytes) {
 int ArchiveModel::rowCount(const QModelIndex &parent) const {
     return parent.isValid() ? 0 : rows_.size();
 }
-int ArchiveModel::columnCount(const QModelIndex &parent) const { return parent.isValid() ? 0 : 7; }
+int ArchiveModel::columnCount(const QModelIndex &parent) const { return parent.isValid() ? 0 : 8; }
 QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::TextAlignmentRole)
         return int((section >= 1 && section <= 3 ? Qt::AlignRight : Qt::AlignLeft) |
@@ -25,7 +25,7 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation orientation, int 
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
         return {};
     const QStringList columns{tr("Name"), tr("Size"),     tr("Packed"), tr("Ratio"),
-                              tr("Type"), tr("Modified"), tr("CRC32")};
+                              tr("Type"), tr("Modified"), tr("CRC32"),  tr("Path")};
     return columns.value(section);
 }
 QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
@@ -80,11 +80,14 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
                                : QStringLiteral("—");
     case 6:
         return r.crc;
+    case 7:
+        return r.fullPath;
     default:
         return {};
     }
 }
 void ArchiveModel::load(rust::Vec<vynx::EntryInfo> entries) {
+    searchMode_ = false;
     entries_ = std::move(entries);
     totalSize_ = totalPacked_ = 0;
     auto add = [](quint64 a, quint64 b) {
@@ -98,6 +101,12 @@ void ArchiveModel::load(rust::Vec<vynx::EntryInfo> entries) {
     navigate({});
 }
 quint64 ArchiveModel::totalSize() const { return totalSize_; }
+void ArchiveModel::setSearchMode(bool enabled) {
+    if (searchMode_ == enabled)
+        return;
+    searchMode_ = enabled;
+    navigate(folder_);
+}
 void ArchiveModel::navigate(const QString &folder) {
     beginResetModel();
     folder_ = folder;
@@ -105,17 +114,19 @@ void ArchiveModel::navigate(const QString &folder) {
     QHash<QString, int> folders;
     const QString prefix = folder.isEmpty() ? QString() : folder + "/";
     for (const auto &e : entries_) {
+        if (searchMode_ && e.directory)
+            continue;
         QString full = text(e.name);
         full.replace('\\', '/');
-        if (!full.startsWith(prefix))
+        if (!searchMode_ && !full.startsWith(prefix))
             continue;
-        QString relative = full.mid(prefix.size());
+        QString relative = searchMode_ ? full : full.mid(prefix.size());
         if (relative.endsWith('/'))
             relative.chop(1);
         if (relative.isEmpty())
             continue;
         int slash = relative.indexOf('/');
-        if (slash >= 0 || e.directory) {
+        if (!searchMode_ && (slash >= 0 || e.directory)) {
             QString name = slash >= 0 ? relative.left(slash) : relative;
             if (!folders.contains(name)) {
                 folders.insert(name, rows_.size());
@@ -130,7 +141,8 @@ void ArchiveModel::navigate(const QString &folder) {
             rows_[folders.value(name)].packed += e.packed;
         } else {
             ArchiveRow r;
-            r.name = relative;
+            r.name = searchMode_ ? relative.section('/', -1) : relative;
+            r.folder = e.directory;
             r.fullPath = full;
             r.id = e.id;
             r.size = e.size;
@@ -149,6 +161,11 @@ void ArchiveModel::navigate(const QString &folder) {
         }
     }
     endResetModel();
+}
+bool ArchiveFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
+    const auto pattern = filterRegularExpression();
+    return sourceModel()->index(row, 0, parent).data().toString().contains(pattern) ||
+           sourceModel()->index(row, 7, parent).data().toString().contains(pattern);
 }
 quint64 ArchiveModel::totalPacked() const { return totalPacked_; }
 bool ArchiveFilter::lessThan(const QModelIndex &a, const QModelIndex &b) const {

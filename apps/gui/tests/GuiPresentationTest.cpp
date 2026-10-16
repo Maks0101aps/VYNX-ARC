@@ -11,6 +11,44 @@
 class GuiPresentationTest : public QObject {
     Q_OBJECT
   private slots:
+    void globalSearchPreservesPathsAndFolder() {
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+        rust::Vec<vynx::EntryInfo> entries;
+        for (int i = 0; i < 4; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = i == 0   ? "one/readme.txt"
+                         : i == 1 ? "two/readme.txt"
+                         : i == 2 ? "two/image.png"
+                                  : "empty/";
+            entry.directory = i == 3;
+            entries.push_back(std::move(entry));
+        }
+        model.load(std::move(entries));
+        model.navigate("one");
+        model.setSearchMode(true);
+        filter.setFilterFixedString("readme");
+        QCOMPARE(filter.rowCount(), 2);
+        QSet<QString> paths;
+        for (int i = 0; i < filter.rowCount(); ++i) {
+            const auto &row = model.row(filter.mapToSource(filter.index(i, 0)).row());
+            QCOMPARE(row.name, QString("readme.txt"));
+            QCOMPARE(row.memberIds.size(), 1);
+            paths.insert(filter.index(i, 7).data().toString());
+        }
+        QCOMPARE(paths, QSet<QString>({"one/readme.txt", "two/readme.txt"}));
+        filter.setFilterFixedString("two/");
+        QCOMPARE(filter.rowCount(), 2);
+        filter.setFilterRegularExpression(
+            QRegularExpression("readme\\.txt$", QRegularExpression::CaseInsensitiveOption));
+        QCOMPARE(filter.rowCount(), 2);
+        filter.setFilterFixedString("");
+        model.setSearchMode(false);
+        QCOMPARE(model.folder(), QString("one"));
+        QCOMPARE(model.rowCount(), 1);
+    }
     void initTestCase() {
         const auto fontId = QFontDatabase::addApplicationFont(qEnvironmentVariable("SystemRoot") +
                                                               "/Fonts/segoeui.ttf");

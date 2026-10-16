@@ -5,6 +5,8 @@ pub mod ffi;
 pub mod hashing;
 pub mod modification;
 pub mod operations;
+pub mod parser;
+pub mod preview;
 #[cfg(windows)]
 pub mod rar;
 pub mod security;

@@ -100,6 +100,10 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <source>Folder</source>
             <translation>Папка</translation>
         </message>
+        <message>
+            <source>Path</source>
+            <translation>Шлях</translation>
+        </message>
     </context>
     <context>
         <name>ArchivePage</name>
@@ -169,6 +173,10 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <location filename="../../apps/gui/pages/ArchivePage.cpp" line="81" />
             <source>Archive contents</source>
             <translation>Вміст архіву</translation>
+        </message>
+        <message>
+            <source>Search entire archive</source>
+            <translation>Пошук у всьому архіві</translation>
         </message>
     </context>
     <context>
@@ -1217,6 +1225,34 @@ Explorer integration is not installed by this development build.</source>
             <location filename="../../apps/gui/UiCapture.cpp" line="28" />
             <source>Extracting Project.7z</source>
             <translation>Розпакування Project.7z</translation>
+        </message>
+        <message>
+            <source>Preview text</source>
+            <translation>Переглянути текст</translation>
+        </message>
+        <message>
+            <source>Text preview</source>
+            <translation>Перегляд тексту</translation>
+        </message>
+        <message>
+            <source>Archive was not updated</source>
+            <translation>Архів не оновлено</translation>
+        </message>
+        <message>
+            <source>Reload archive</source>
+            <translation>Перечитати архів</translation>
+        </message>
+        <message>
+            <source>Another application is using this archive. Close it, reload the archive, and run the operation again.</source>
+            <translation>Інша програма використовує цей архів. Закрийте її, перечитайте архів і повторіть операцію.</translation>
+        </message>
+        <message>
+            <source>Access was denied. Check permissions and the read-only attribute, then reload the archive before trying again.</source>
+            <translation>Відмовлено в доступі. Перевірте дозволи й атрибут «лише читання», потім перечитайте архів перед повторною спробою.</translation>
+        </message>
+        <message>
+            <source>Reading text preview…</source>
+            <translation>Читання тексту…</translation>
         </message>
     </context>
     <context>

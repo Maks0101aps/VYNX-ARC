@@ -27,8 +27,8 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
     breadcrumb = new BreadcrumbBar;
     navigation->addWidget(breadcrumb, 3);
     search = new QLineEdit;
-    search->setPlaceholderText(tr("Search filenames"));
-    search->setAccessibleName(tr("Search filenames"));
+    search->setPlaceholderText(tr("Search entire archive"));
+    search->setAccessibleName(tr("Search entire archive"));
     search->setClearButtonEnabled(true);
     search->setMinimumWidth(170);
     search->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
