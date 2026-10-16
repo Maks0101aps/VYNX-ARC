@@ -2,6 +2,7 @@
 #include "ShellRequest.h"
 #include <QApplication>
 #include <QFile>
+#include <QImageReader>
 #include <QLocale>
 #include <QMessageBox>
 #include <QPointer>
@@ -10,6 +11,7 @@
 #include <QTranslator>
 int main(int argc, char **argv) {
     QApplication app(argc, argv);
+    QImageReader::setAllocationLimit(64);
     app.setApplicationName("VYNX ARC");
     app.setOrganizationName("VYNX");
     app.setApplicationVersion(VYNX_VERSION);

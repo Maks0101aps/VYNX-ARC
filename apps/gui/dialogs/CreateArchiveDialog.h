@@ -11,7 +11,7 @@ class CreateArchiveDialog : public QDialog {
   public:
     CreateArchiveDialog(const QStringList &initial, int initialFormat, QWidget *parent = nullptr);
     QListWidget *inputs;
-    QComboBox *format, *split;
+    QComboBox *format, *split, *preset, *resource;
     QLineEdit *output, *password;
     QGroupBox *advanced;
     QSpinBox *customSplit;

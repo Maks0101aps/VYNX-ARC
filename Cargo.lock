@@ -770,12 +770,14 @@ dependencies = [
 
 [[package]]
 name = "vynx-arc-core"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
+ "bzip2",
  "crc32fast",
  "cxx",
  "cxx-build",
  "flate2",
+ "lzma-rust2 0.22.0",
  "sevenz-rust2",
  "sha2",
  "tar",
@@ -783,11 +785,12 @@ dependencies = [
  "unrar-ng-sys",
  "zeroize",
  "zip",
+ "zstd",
 ]
 
 [[package]]
 name = "vynxarc-cli"
-version = "0.1.0"
+version = "0.4.0"
 dependencies = [
  "vynx-arc-core",
  "zeroize",

@@ -25,6 +25,19 @@ SettingsDialog::SettingsDialog(const QString &themeId, const QString &languageId
     theme->setCurrentIndex(qMax(0, QStringList{"system", "light", "dark"}.indexOf(themeId)));
     appearanceForm->addRow(tr("Appearance"), theme);
     tabs->addTab(appearance, tr("Appearance"));
+    auto *performance = new QWidget;
+    auto *performanceForm = new QFormLayout(performance);
+    resource = new QComboBox;
+    resource->setObjectName("defaultResourceMode");
+    resource->addItems({tr("Eco"), tr("Balanced"), tr("Maximum")});
+    resource->setCurrentIndex(1);
+    performanceForm->addRow(tr("Default resources"), resource);
+    auto *explanation = new QLabel(
+        tr("Eco reduces CPU and memory use. Balanced suits everyday work. Maximum uses more "
+           "resources when the codec supports it. Changes apply to new operations."));
+    explanation->setWordWrap(true);
+    performanceForm->addRow(explanation);
+    tabs->addTab(performance, tr("Performance"));
     auto *security = new QWidget;
     auto *securityLayout = new QVBoxLayout(security);
     auto *notice = new QLabel(

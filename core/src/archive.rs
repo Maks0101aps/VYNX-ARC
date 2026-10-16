@@ -14,6 +14,14 @@ pub enum Format {
     SevenZ,
     Tar,
     TarGz,
+    Gzip,
+    Xz,
+    Bzip2,
+    Zstd,
+    Lzma,
+    TarXz,
+    TarBz2,
+    TarZst,
     #[cfg(windows)]
     Rar,
 }
@@ -24,13 +32,35 @@ impl Format {
             Self::SevenZ => "7Z",
             Self::Tar => "TAR",
             Self::TarGz => "TAR.GZ",
+            Self::Gzip => "GZIP",
+            Self::Xz => "XZ",
+            Self::Bzip2 => "BZIP2",
+            Self::Zstd => "ZSTD",
+            Self::Lzma => "LZMA",
+            Self::TarXz => "TAR.XZ",
+            Self::TarBz2 => "TAR.BZ2",
+            Self::TarZst => "TAR.ZST",
             #[cfg(windows)]
             Self::Rar => "RAR",
         }
     }
     pub fn for_output(path: &Path) -> Result<Self> {
         let name = path.to_string_lossy().to_lowercase();
-        if name.ends_with(".zip") {
+        if name.ends_with(".tar.xz") {
+            Ok(Self::TarXz)
+        } else if name.ends_with(".tar.bz2") {
+            Ok(Self::TarBz2)
+        } else if name.ends_with(".tar.zst") {
+            Ok(Self::TarZst)
+        } else if name.ends_with(".xz") {
+            Ok(Self::Xz)
+        } else if name.ends_with(".bz2") {
+            Ok(Self::Bzip2)
+        } else if name.ends_with(".zst") {
+            Ok(Self::Zstd)
+        } else if name.ends_with(".lzma") {
+            Ok(Self::Lzma)
+        } else if name.ends_with(".zip") {
             Ok(Self::Zip)
         } else if name.ends_with(".7z") {
             Ok(Self::SevenZ)
@@ -38,8 +68,13 @@ impl Format {
             Ok(Self::TarGz)
         } else if name.ends_with(".tar") {
             Ok(Self::Tar)
+        } else if name.ends_with(".gz") {
+            Ok(Self::Gzip)
         } else {
-            Err(ArcError::new("FORMAT", "Choose ZIP, 7Z, TAR, or TAR.GZ"))
+            Err(ArcError::new(
+                "FORMAT",
+                "Choose a supported archive or compressed-stream extension",
+            ))
         }
     }
 }
@@ -81,10 +116,25 @@ pub fn detect(file: &mut (impl Read + Seek)) -> Result<Format> {
         return Ok(Format::Rar);
     }
     if header[..n].starts_with(&[0x1f, 0x8b]) {
-        return Ok(Format::TarGz);
+        return Ok(Format::Gzip);
+    }
+    if header[..n].starts_with(b"\xfd7zXZ\0") {
+        return Ok(Format::Xz);
+    }
+    if header[..n].starts_with(b"BZh") {
+        return Ok(Format::Bzip2);
+    }
+    if header[..n].starts_with(&[0x28, 0xb5, 0x2f, 0xfd]) {
+        return Ok(Format::Zstd);
     }
     if n >= 512 && (&header[257..262] == b"ustar" || header.iter().all(|x| *x == 0)) {
         return Ok(Format::Tar);
+    }
+    if n >= 13 && header[0] < 225 {
+        let dictionary = u32::from_le_bytes(header[1..5].try_into().expect("header"));
+        if dictionary >= 4096 && (dictionary.is_power_of_two() || dictionary.count_ones() == 2) {
+            return Ok(Format::Lzma);
+        }
     }
     Err(ArcError::new(
         "FORMAT",
@@ -94,11 +144,34 @@ pub fn detect(file: &mut (impl Read + Seek)) -> Result<Format> {
 
 impl Archive {
     pub fn open(path: &Path, password: &str, op: &Operation) -> Result<Self> {
+        let _priority = crate::priority::WorkerPriority::enter(op.settings().resource);
         op.phase("Reading archive metadata");
         let mut file = crate::volumes::Reader::open(path)?;
         let physical_size = file.len();
         let path = file.path().to_owned();
-        let format = detect(&mut file)?;
+        let mut format = detect(&mut file)?;
+        if crate::compressed::is_stream(format) {
+            let mut decoder = crate::compressed::decoder(file, format, op, physical_size)?;
+            let mut header = [0; 512];
+            let mut read = 0;
+            while read < header.len() {
+                let n = decoder.read(&mut header[read..])?;
+                if n == 0 {
+                    break;
+                }
+                read += n;
+            }
+            if read == 512 && &header[257..262] == b"ustar" {
+                format = match format {
+                    Format::Gzip => Format::TarGz,
+                    Format::Xz => Format::TarXz,
+                    Format::Bzip2 => Format::TarBz2,
+                    Format::Zstd => Format::TarZst,
+                    _ => format,
+                };
+            }
+            file = crate::volumes::Reader::open(&path)?;
+        }
         let mut entries = Vec::new();
         let max_entries = Policy::default().max_entries;
         match format {
@@ -159,18 +232,18 @@ impl Archive {
                     });
                 }
             }
-            Format::Tar | Format::TarGz => {
-                let source: Box<dyn Read> = if format == Format::TarGz {
-                    Box::new(flate2::read::GzDecoder::new(file))
-                } else {
-                    Box::new(file)
-                };
-                for (i, f) in tar::Archive::new(source).entries()?.enumerate() {
+            Format::Tar | Format::TarGz | Format::TarXz | Format::TarBz2 | Format::TarZst => {
+                let source = crate::compressed::decoder(file, format, op, physical_size)?;
+                let mut tar = tar::Archive::new(source);
+                for (i, f) in tar.entries()?.enumerate() {
                     op.check()?;
                     if i >= max_entries {
                         return Err(ArcError::new("LIMIT", "Too many entries"));
                     }
                     let f = f?;
+                    if f.size() > Policy::default().max_file_bytes {
+                        return Err(ArcError::new("LIMIT", "TAR entry exceeds file-size limit"));
+                    }
                     let kind = f.header().entry_type();
                     let name = f
                         .path()?
@@ -187,6 +260,45 @@ impl Archive {
                         ..Default::default()
                     });
                 }
+                std::io::copy(&mut tar.into_inner(), &mut std::io::sink())?;
+            }
+            Format::Gzip | Format::Xz | Format::Bzip2 | Format::Zstd | Format::Lzma => {
+                let mut reader = crate::compressed::decoder(file, format, op, physical_size)?;
+                let mut crc = crc32fast::Hasher::new();
+                let mut size = 0u64;
+                let mut buffer = [0; 128 * 1024];
+                loop {
+                    op.check()?;
+                    let n = reader.read(&mut buffer)?;
+                    if n == 0 {
+                        break;
+                    }
+                    size += n as u64;
+                    if size > Policy::default().max_file_bytes
+                        || size
+                            > physical_size
+                                .saturating_mul(Policy::default().max_ratio)
+                                .max(1 << 20)
+                    {
+                        return Err(ArcError::new(
+                            "LIMIT",
+                            "Decoded stream exceeds file or expansion-ratio safety limit",
+                        ));
+                    }
+                    crc.update(&buffer[..n]);
+                }
+                let name = path
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("data")
+                    .to_owned();
+                crate::security::validate_name(&name)?;
+                entries.push(Entry {
+                    name,
+                    size,
+                    crc: Some(crc.finalize()),
+                    ..Default::default()
+                });
             }
         }
         Ok(Self {
@@ -249,7 +361,7 @@ impl Archive {
                         "Archive entry count changed since opening",
                     ));
                 }
-                reader.set_thread_count(2);
+                reader.set_thread_count(op.settings().effective(Format::SevenZ)?.workers as u32);
                 let mut callback_error = None;
                 let indexed: std::collections::HashMap<_, _> =
                     self.entries.iter().map(|e| (e.name.as_str(), e)).collect();
@@ -281,14 +393,11 @@ impl Archive {
                     })
                     .map_err(|e| callback_error.unwrap_or_else(|| e.into()))?;
             }
-            Format::Tar | Format::TarGz => {
-                let source: Box<dyn Read> = if self.format == Format::TarGz {
-                    Box::new(flate2::read::GzDecoder::new(file))
-                } else {
-                    Box::new(file)
-                };
+            Format::Tar | Format::TarGz | Format::TarXz | Format::TarBz2 | Format::TarZst => {
+                let source = crate::compressed::decoder(file, self.format, op, self.physical_size)?;
                 let mut count = 0usize;
-                for (i, f) in tar::Archive::new(source).entries()?.enumerate() {
+                let mut tar = tar::Archive::new(source);
+                for (i, f) in tar.entries()?.enumerate() {
                     op.check()?;
                     let mut f = f?;
                     let entry = self
@@ -305,6 +414,23 @@ impl Archive {
                 }
                 if count != self.entries.len() {
                     return Err(ArcError::new("CHANGED", "Archive was truncated"));
+                }
+                std::io::copy(&mut tar.into_inner(), &mut std::io::sink())?;
+            }
+            Format::Gzip | Format::Xz | Format::Bzip2 | Format::Zstd | Format::Lzma => {
+                let mut reader =
+                    crate::compressed::decoder(file, self.format, op, self.physical_size)?;
+                let entry = self
+                    .entries
+                    .first()
+                    .ok_or_else(|| ArcError::new("CORRUPT", "Missing compressed stream"))?;
+                let mut checked = crate::compressed::CrcReader::new(&mut reader);
+                consume(entry, &mut checked)?;
+                if Some(checked.crc()) != entry.crc {
+                    return Err(ArcError::new(
+                        "CHANGED",
+                        "Compressed stream changed since opening",
+                    ));
                 }
             }
         }

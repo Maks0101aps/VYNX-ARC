@@ -7,6 +7,6 @@ class SettingsDialog : public QDialog {
   public:
     SettingsDialog(const QString &themeId, const QString &languageId, bool remember,
                    QWidget *parent = nullptr);
-    QComboBox *theme, *language;
+    QComboBox *theme, *language, *resource;
     QCheckBox *history;
 };

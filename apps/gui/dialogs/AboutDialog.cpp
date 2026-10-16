@@ -15,8 +15,9 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
 #else
     layout->addWidget(new QLabel(tr("Debug build · development milestone")));
 #endif
-    auto *details = new QLabel(tr("Offline archive operations. No telemetry.\nRead ZIP, 7Z, RAR, "
-                                  "TAR and TAR.GZ.\nCreate ZIP, 7Z, TAR and TAR.GZ."));
+    auto *details = new QLabel(tr("Offline archive operations. No telemetry.\nZIP, 7Z, read-only "
+                                  "RAR, TAR and compressed streams.\n"
+                                  "File preview, external opening and batch extraction."));
     details->setWordWrap(true);
     layout->addWidget(details);
     auto *source = new QLabel("<a href=\"https://github.com/Maks0101aps/VYNX-ARC\">" +

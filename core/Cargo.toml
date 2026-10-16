@@ -1,6 +1,6 @@
 [package]
 name = "vynx-arc-core"
-version = "0.1.0"
+version = "0.4.0"
 edition = "2024"
 license = "MIT"
 
@@ -21,6 +21,9 @@ tempfile = "=3.27.0"
 zeroize = "=1.9.0"
 tar = "=0.4.46"
 flate2 = "=1.1.10"
+bzip2 = "=0.6.1"
+zstd = { version = "=0.14.2", features = ["zstdmt"] }
+lzma-rust2 = "=0.22.0"
 
 [target.'cfg(windows)'.dependencies]
 unrar-ng-sys = { version = "=0.7.7", default-features = false, features = ["std"] }

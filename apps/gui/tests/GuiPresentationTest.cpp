@@ -1,16 +1,114 @@
 #include "../ArchiveModel.h"
+#include "../ExternalFiles.h"
+#include "../OperationQueue.h"
 #include "../Theme.h"
+#include "../dialogs/BatchExtractDialog.h"
 #include "../dialogs/CreateArchiveDialog.h"
+#include "../dialogs/PreviewDialog.h"
 #include "../pages/ArchivePage.h"
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
 #include "../widgets/OperationPanel.h"
+#include <QDesktopServices>
+#include <QImageReader>
 #include <QtTest>
 #include <QtWidgets>
+#include <memory>
 
 class GuiPresentationTest : public QObject {
     Q_OBJECT
+    QList<QUrl> openedUrls_;
+  public slots:
+    void captureUrl(const QUrl &url) { openedUrls_.append(url); }
   private slots:
+    void viewerDecodesTextImagesAndHexWithoutExecutingContent() {
+        QImageReader::setAllocationLimit(64);
+        auto content = PreviewDialog::decode("<script>hello</script>\nhello");
+        QVERIFY(content.text);
+        PreviewDialog dialog("readme.html", content, false);
+        QCOMPARE(dialog.findChild<QPlainTextEdit *>("textPreview")->toPlainText(),
+                 QString("<script>hello</script>\nhello"));
+        auto *query = dialog.findChild<QLineEdit *>("previewSearch");
+        query->setText("hello");
+        QMetaObject::invokeMethod(query, "returnPressed");
+        QCOMPARE(dialog.findChild<QPlainTextEdit *>("textPreview")->textCursor().selectedText(),
+                 QString("hello"));
+        const auto utf16 = PreviewDialog::decode(QByteArray::fromHex("fffe480069000a00"));
+        QVERIFY(utf16.text);
+        QCOMPARE(*utf16.text, QString("Hi\n"));
+        QVERIFY(!PreviewDialog::decode(QByteArray::fromHex("c3")).text);
+        QVERIFY(!PreviewDialog::decode(QByteArray::fromHex("fffe4800ff")).text);
+        const auto binary = PreviewDialog::decode(QByteArray::fromHex("0001ff"));
+        QVERIFY(!binary.text);
+        PreviewDialog hex("binary.bin", binary, false);
+        QVERIFY(hex.findChild<QPlainTextEdit *>("hexPreview")->toPlainText().contains("00 01 ff"));
+        QImage image(48, 32, QImage::Format_RGB32);
+        image.fill(Qt::blue);
+        QByteArray png;
+        QBuffer buffer(&png);
+        buffer.open(QIODevice::WriteOnly);
+        QVERIFY(image.save(&buffer, "PNG"));
+        auto decoded = PreviewDialog::decode(png);
+        QCOMPARE(decoded.image.size(), QSize(48, 32));
+        PreviewDialog picture("image.png", decoded, true);
+        QVERIFY(picture.findChild<QGraphicsView *>("imagePreview"));
+        auto oversized = png;
+        // Valid PNG IHDR with an impossible size: reader must never allocate its pixels.
+        oversized[16] = 1;
+        const auto rejected = PreviewDialog::decode(oversized);
+        QVERIFY(rejected.image.isNull());
+    }
+    void externalViewsUseOwnedFilesAndSkipLiveCleanup() {
+        QTemporaryDir root;
+        QVERIFY(root.isValid());
+        const auto cacheRoot = root.path() + "/cache";
+        QString path;
+        QDesktopServices::setUrlHandler("file", this, "captureUrl");
+        {
+            ExternalFiles files(cacheRoot);
+            path = files.create();
+            QVERIFY(!path.isEmpty());
+            QFile file(path + "/readme.txt");
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write("hello");
+            file.close();
+            QVERIFY(files.open(file.fileName()));
+            QCOMPARE(openedUrls_.last().toLocalFile(), file.fileName());
+            QVERIFY(!files.open(root.path() + "/outside.txt"));
+            QFile marker(path + "/.vynx-view");
+            QVERIFY(marker.open(QIODevice::ReadWrite));
+            QVERIFY(marker.setFileTime(QDateTime::currentDateTimeUtc().addDays(-8),
+                                       QFileDevice::FileModificationTime));
+            marker.close();
+            ExternalFiles another(cacheRoot);
+            QVERIFY(QDir(path).exists());
+        }
+        QDesktopServices::unsetUrlHandler("file");
+        ExternalFiles cleaned(cacheRoot);
+        QVERIFY(!QDir(path).exists());
+        QVERIFY(ExternalFiles::allowed("photo.PNG"));
+        QVERIFY(!ExternalFiles::allowed("photo.png.exe"));
+        QVERIFY(!ExternalFiles::allowed("link.url"));
+        QVERIFY(!ExternalFiles::allowed("script.html"));
+        QVERIFY(!ExternalFiles::allowed("document.docm"));
+    }
+    void batchNamesAndQueueReorderingAreDeterministic() {
+        const auto paths = batchDestinations(
+            {"C:/one/Project.tar.xz", "C:/two/project.zip", "C:/three/CON.zip"}, "C:/Output");
+        QCOMPARE(QFileInfo(paths[0]).fileName(), QString("Project"));
+        QCOMPARE(QFileInfo(paths[1]).fileName(), QString("project (2)"));
+        QCOMPARE(QFileInfo(paths[2]).fileName(), QString("_CON"));
+        OperationQueue queue;
+        auto first = queue.enqueue("first", [] {});
+        auto second = queue.enqueue("second", [] {});
+        auto third = queue.enqueue("third", [] {});
+        QVERIFY(queue.move(third, -1));
+        QVERIFY(queue.move(third, -1));
+        QVERIFY(!queue.move(third, -1));
+        QCOMPARE(queue.take()->id, third);
+        QCOMPARE(queue.take()->id, first);
+        QCOMPARE(queue.take()->id, second);
+    }
     void globalSearchPreservesPathsAndFolder() {
         ArchiveModel model;
         ArchiveFilter filter;
@@ -48,6 +146,35 @@ class GuiPresentationTest : public QObject {
         model.setSearchMode(false);
         QCOMPARE(model.folder(), QString("one"));
         QCOMPARE(model.rowCount(), 1);
+    }
+    void queuedRequestsAreOrderedAndCancellable() {
+        OperationQueue queue;
+        QStringList started;
+        const auto first = queue.enqueue("first", [&] { started << "first"; });
+        const auto second = queue.enqueue("second", [&] { started << "second"; });
+        queue.enqueue("third", [&] { started << "third"; });
+        QVERIFY(first != second);
+        QVERIFY(queue.cancel(second));
+        auto job = queue.take();
+        QVERIFY(job);
+        job->start();
+        job = queue.take();
+        QVERIFY(job);
+        job->start();
+        QVERIFY(!queue.take());
+        QCOMPARE(started, QStringList({"first", "third"}));
+        auto owner = std::make_shared<int>(1);
+        std::weak_ptr<int> retained = owner;
+        const auto pending = queue.enqueue("captured", [owner] {});
+        owner.reset();
+        QVERIFY(!retained.expired());
+        QVERIFY(queue.cancel(pending));
+        QVERIFY(retained.expired());
+        for (int i = 0; i < 32; ++i)
+            QVERIFY(queue.enqueue("bounded", [] {}));
+        QVERIFY(!queue.enqueue("overflow", [] {}));
+        queue.clear();
+        QCOMPARE(queue.size(), size_t(0));
     }
     void initTestCase() {
         const auto fontId = QFontDatabase::addApplicationFont(qEnvironmentVariable("SystemRoot") +
@@ -200,6 +327,20 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!panel.rate->text().contains("remaining"));
         panel.updateProgress(20, 0, "unknown total", 9000);
         QVERIFY(!panel.rate->text().contains("remaining"));
+    }
+    void effectivePresetAndCancellationAreVisible() {
+        CreateArchiveDialog dialog({}, 0);
+        dialog.preset->setCurrentIndex(0);
+        QVERIFY(dialog.findChild<QLabel *>("effectiveCompression")->text().contains("Store"));
+        dialog.format->setCurrentIndex(5);
+        QVERIFY(dialog.preset->currentIndex() != 0);
+        dialog.resource->setCurrentIndex(0);
+        QVERIFY(dialog.findChild<QLabel *>("effectiveCompression")->text().contains("2 MiB"));
+        OperationPanel panel;
+        panel.begin("Working");
+        panel.updateProgress(100, 0, "file", 5000, "Verifying", {}, true);
+        QCOMPARE(panel.progress->maximum(), 0);
+        QVERIFY(!panel.cancel->isEnabled());
     }
     void vectorIconsFollowTheme() {
         auto icon = Icons::get("folder");

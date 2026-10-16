@@ -8,6 +8,6 @@
 6. Shell integration, localization and installer.
 7. Malformed-input tests, audit, benchmarks, clean-machine acceptance.
 
-The supplied master brief is the V1 acceptance contract. Version 0.1.0 is a
+The supplied master brief is the V1 acceptance contract. Version 0.4.0 is a
 development milestone, never a claim that all V1 requirements are complete.
 Track evidence and gaps in IMPLEMENTATION_STATUS.md.

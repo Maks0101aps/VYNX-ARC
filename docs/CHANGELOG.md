@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.4.0 development - 2026-10-16
+
+- Add verified bounded file content and external materialization to the Rust/CXX API.
+- Replace text-only GUI preview with searchable UTF-8/UTF-16 text, raster image
+  zoom/fit and bounded Hex tabs; keep HTML/SVG passive and never execute content.
+- Add explicit OS-associated opening of supported document/media types through
+  read-only, ZoneId=3 temporary copies; manage owned cache lifetimes with locks.
+- Add batch extraction with per-archive destinations, shared optional password,
+  explicit conflict policies and continued dispatch after individual failures.
+- Add queue pause/resume, reordering, cancel-all and readable error details;
+  capture creation settings before queuing and release secrets on cancellation.
+- Exercise real batch dispatch, paused queues, corrupt/encrypted materialization,
+  viewer limits, Unicode decoding, image limits and OS URL dispatch interception.
+- Update GUI, CLI, Cargo packages, installer and Explorer identity to 0.4.0.
+
+See [MILESTONE_0_4.md](MILESTONE_0_4.md) for current evidence and boundaries.
+
+## 2026-10-16 - product development increment, still 0.1.0
+
+- Integrate stream formats GZIP/XZ/BZIP2/ZSTD/LZMA and TAR.XZ/TAR.BZ2/TAR.ZST
+  while retaining the current ZIP 9.0.4 and patched 7Z parser protections.
+- Add real compression presets and codec-aware resource profiles to creation,
+  plus default resource preferences and CLI controls.
+- Add a bounded operation queue dock, multi-archive opening, pending-job
+  cancellation and completed-history cleanup.
+- Show operation phases, effective configuration and cancellation state; reset
+  rate/ETA when a phase changes.
+- Validate new streams with independent Python encoders/decoders, encrypted
+  Store archives, all-format text preview and real asynchronous GUI queue tests.
+
+See [PRODUCT_DEVELOPMENT.md](PRODUCT_DEVELOPMENT.md) for usage and evidence.
+
 ## 2026-10-16 - local stabilization candidate, still 0.1.0
 
 - Upgrade ZIP to stable 9.0.4 and fail source audit on yanked dependencies.

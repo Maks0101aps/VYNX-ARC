@@ -18,6 +18,9 @@ use zeroize::Zeroizing;
 pub struct Operation(Arc<State>);
 #[derive(Default)]
 struct State {
+    settings: Mutex<crate::settings::Settings>,
+    stage: Mutex<String>,
+    details: Mutex<String>,
     cancelled: AtomicBool,
     done: AtomicU64,
     total: AtomicU64,
@@ -45,8 +48,27 @@ pub struct Progress {
     pub done: u64,
     pub total: u64,
     pub current: String,
+    pub phase: String,
+    pub details: String,
+    pub cancelled: bool,
 }
 impl Operation {
+    pub fn configure(&self, settings: crate::settings::Settings) {
+        *self.0.settings.lock().expect("settings lock") = settings;
+    }
+    pub fn settings(&self) -> crate::settings::Settings {
+        *self.0.settings.lock().expect("settings lock")
+    }
+    pub fn stage(&self, stage: &str) {
+        if let Ok(mut s) = self.0.stage.lock() {
+            *s = stage.to_owned();
+        }
+    }
+    pub fn details(&self, details: String) {
+        if let Ok(mut s) = self.0.details.lock() {
+            *s = details;
+        }
+    }
     pub fn cancel(&self) {
         self.0.cancelled.store(true, Ordering::Relaxed);
         self.0.conflict_ready.notify_all();
@@ -75,6 +97,9 @@ impl Operation {
             done: self.0.done.load(Ordering::Relaxed),
             total: self.0.total.load(Ordering::Relaxed),
             current: self.0.current.lock().map(|v| v.clone()).unwrap_or_default(),
+            phase: self.0.stage.lock().map(|v| v.clone()).unwrap_or_default(),
+            details: self.0.details.lock().map(|v| v.clone()).unwrap_or_default(),
+            cancelled: self.0.cancelled.load(Ordering::Relaxed),
         }
     }
     pub fn advance(&self, n: u64) {
@@ -199,6 +224,13 @@ pub fn extract(
     password: &str,
     op: &Operation,
 ) -> Result<PathBuf> {
+    let priority = crate::priority::WorkerPriority::enter(op.settings().resource);
+    op.details(format!(
+        "7Z decoder worker limit {}; {}",
+        op.settings().effective(Format::SevenZ)?.workers,
+        priority.description()
+    ));
+    op.stage("Extracting and verifying files");
     op.check()?;
     let total = archive.validate(&options.policy)?;
     if options.selected.len() > options.policy.max_entries {
@@ -440,6 +472,8 @@ pub(crate) fn propagate_zone(source: &Path, output: &Path) -> Result<()> {
 }
 
 pub fn test(archive: &Archive, password: &str, op: &Operation) -> Result<()> {
+    let _priority = crate::priority::WorkerPriority::enter(op.settings().resource);
+    op.stage("Verifying decoded streams");
     let policy = Policy::default();
     op.total(archive.validate(&policy)?);
     let mut actual = 0u64;
@@ -522,6 +556,13 @@ fn create_internal(
     split: Option<u64>,
     op: &Operation,
 ) -> Result<()> {
+    let effective = op.settings().effective(format)?;
+    let priority = crate::priority::WorkerPriority::enter(op.settings().resource);
+    op.details(format!(
+        "{}; {}",
+        effective.details(),
+        priority.description()
+    ));
     if let Some(size) = split {
         if size < 64 * 1024 {
             return Err(ArcError::new(
@@ -551,8 +592,11 @@ fn create_internal(
             "Output extension must match the selected format",
         ));
     }
-    if !options.password.is_empty() && matches!(format, Format::Tar | Format::TarGz) {
-        return Err(ArcError::new("ENCRYPTION", "TAR cannot be encrypted"));
+    if !options.password.is_empty() && !matches!(format, Format::Zip | Format::SevenZ) {
+        return Err(ArcError::new(
+            "ENCRYPTION",
+            "This format does not support encryption",
+        ));
     }
     security::check_ancestors(&options.output)?;
     if options.output.exists() {
@@ -562,6 +606,7 @@ fn create_internal(
         ));
     }
     op.phase("Scanning input files");
+    op.stage("Scanning input files");
     let mut sources = Vec::new();
     for input in &options.inputs {
         security::check_ancestors(input)?;
@@ -573,6 +618,12 @@ fn create_internal(
         collect(&path, name.into(), &mut sources, op)?;
     }
     let entries: Vec<_> = sources.iter().map(|(e, _)| e.clone()).collect();
+    if crate::compressed::is_stream(format) && (sources.len() != 1 || sources[0].0.directory) {
+        return Err(ArcError::new(
+            "INPUT",
+            "Standalone compression requires exactly one regular file; use compressed TAR for folders",
+        ));
+    }
     let policy = Policy {
         max_ratio: u64::MAX,
         ..Default::default()
@@ -591,13 +642,19 @@ fn create_internal(
     fs::create_dir_all(parent)?;
     let _output_pins = security::pin_ancestors(parent)?;
     let mut temp = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
+    op.stage("Compressing files");
     match format {
         #[cfg(windows)]
         Format::Rar => return Err(ArcError::new("READ_ONLY", "RAR creation is unsupported")),
         Format::Zip => {
             let mut writer = zip::ZipWriter::new(temp.as_file_mut());
             let base = zip::write::SimpleFileOptions::default()
-                .compression_method(zip::CompressionMethod::Deflated);
+                .compression_method(if effective.codec == "Store" {
+                    zip::CompressionMethod::Stored
+                } else {
+                    zip::CompressionMethod::Deflated
+                })
+                .compression_level((effective.codec != "Store").then_some(effective.level as i64));
             let file_options = if options.password.is_empty() {
                 base
             } else {
@@ -627,16 +684,29 @@ fn create_internal(
         }
         Format::SevenZ => {
             let mut writer = sevenz_rust2::ArchiveWriter::new(temp.as_file_mut())?;
+            use sevenz_rust2::*;
+            let compression = if effective.codec == "Copy" {
+                EncoderConfiguration::new(EncoderMethod::COPY)
+            } else {
+                let mut options = encoder_options::Lzma2Options::from_level_mt(
+                    effective.level,
+                    effective.threads,
+                    effective.dictionary as u64,
+                );
+                options.set_dictionary_size(effective.dictionary);
+                EncoderConfiguration::new(EncoderMethod::LZMA2).with_options(options.into())
+            };
+            let mut methods = vec![compression];
             if !options.password.is_empty() {
-                use sevenz_rust2::*;
-                writer.set_content_methods(vec![
+                methods.insert(
+                    0,
                     EncoderConfiguration::new(EncoderMethod::AES256_SHA256).with_options(
                         encoder_options::AesEncoderOptions::new(options.password.as_str().into())
                             .into(),
                     ),
-                    EncoderConfiguration::new(EncoderMethod::LZMA2),
-                ]);
+                );
             }
+            writer.set_content_methods(methods);
             for (entry, path) in &sources {
                 op.check()?;
                 op.phase(&entry.name);
@@ -661,13 +731,46 @@ fn create_internal(
             if format == Format::TarGz {
                 let mut gzip = flate2::write::GzEncoder::new(
                     temp.as_file_mut(),
-                    flate2::Compression::default(),
+                    flate2::Compression::new(effective.level),
                 );
                 write_tar(&mut gzip, &sources, op)?;
                 gzip.finish()?;
             } else {
                 write_tar(temp.as_file_mut(), &sources, op)?;
             }
+        }
+        Format::Gzip
+        | Format::Xz
+        | Format::Bzip2
+        | Format::Zstd
+        | Format::Lzma
+        | Format::TarXz
+        | Format::TarBz2
+        | Format::TarZst => {
+            crate::compressed::encode(
+                temp.as_file_mut(),
+                format,
+                &effective,
+                crate::compressed::is_stream(format).then_some(sources[0].0.size),
+                |target| {
+                    if crate::compressed::is_stream(format) {
+                        let mut reader = CountReader {
+                            file: File::open(&sources[0].1)?,
+                            op,
+                        };
+                        op.phase(&sources[0].0.name);
+                        if std::io::copy(&mut reader, target)? != sources[0].0.size {
+                            return Err(ArcError::new(
+                                "CHANGED",
+                                "Input size changed during compression",
+                            ));
+                        }
+                        Ok(())
+                    } else {
+                        write_tar(target, &sources, op)
+                    }
+                },
+            )?;
         }
     }
     temp.as_file().sync_all()?;
@@ -678,8 +781,10 @@ fn create_internal(
     op.check()?;
     security::check_ancestors(&options.output)?;
     if let Some(size) = split {
+        op.stage("Publishing verified volumes");
         return crate::volumes::publish(temp.as_file_mut(), &options.output, size, op);
     }
+    op.stage("Publishing verified archive");
     temp.persist_noclobber(security::publication_path(&options.output)?)
         .map_err(|e| ArcError::from(e.error))?;
     Ok(())

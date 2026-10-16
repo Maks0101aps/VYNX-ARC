@@ -1,4 +1,5 @@
 pub mod archive;
+pub mod compressed;
 pub mod disk;
 pub mod error;
 pub mod ffi;
@@ -7,9 +8,11 @@ pub mod modification;
 pub mod operations;
 pub mod parser;
 pub mod preview;
+mod priority;
 #[cfg(windows)]
 pub mod rar;
 pub mod security;
+pub mod settings;
 pub mod timestamps;
 pub mod volumes;
 

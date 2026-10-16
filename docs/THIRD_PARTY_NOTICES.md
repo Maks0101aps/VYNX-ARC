@@ -17,6 +17,9 @@ Rust dependency graph.
 | tempfile | 3.27.0 | MIT OR Apache-2.0 | https://github.com/Stebalien/tempfile |
 | zeroize | 1.9.0 | MIT OR Apache-2.0 | https://github.com/RustCrypto/utils |
 | tar | 0.4.46 | MIT OR Apache-2.0 | https://github.com/alexcrichton/tar-rs |
+| bzip2 | 0.6.1 | MIT OR Apache-2.0 | https://github.com/trifectatechfoundation/bzip2-rs |
+| zstd | 0.14.2 | BSD-3-Clause | https://github.com/gyscos/zstd-rs |
+| lzma-rust2 | 0.22.0 | Apache-2.0 | https://github.com/hasenbanck/lzma-rust2 |
 | flate2 | 1.1.10 | MIT OR Apache-2.0 | https://github.com/rust-lang/flate2-rs |
 
 Qt is dynamically linked. Users may replace its compatible DLLs and build the

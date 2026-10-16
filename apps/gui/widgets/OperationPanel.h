@@ -11,10 +11,14 @@ class OperationPanel : public QWidget {
     QProgressBar *progress;
     QPushButton *cancel;
     void begin(const QString &title);
-    void updateProgress(quint64 done, quint64 total, const QString &path, qint64 elapsed);
+    void updateProgress(quint64 done, quint64 total, const QString &path, qint64 elapsed,
+                        const QString &phase = {}, const QString &details = {},
+                        bool cancelling = false);
 
   private:
     QLabel *title_;
+    QLabel *phase_, *details_;
+    QString previousPhase_;
     quint64 previousDone_ = 0, previousTotal_ = 0;
     qint64 previousTime_ = 0, startTime_ = 0;
     double speed_ = 0;

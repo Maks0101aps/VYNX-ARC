@@ -1,5 +1,6 @@
 #pragma once
 #include "ArchiveModel.h"
+#include "OperationQueue.h"
 #include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QMainWindow>
@@ -12,11 +13,15 @@ class QPushButton;
 class QLabel;
 class QStackedWidget;
 class QListWidget;
+class QListWidgetItem;
+class QDockWidget;
+class QMenu;
 class QSettings;
 class QTimer;
 class QAction;
 class QVBoxLayout;
 class SecretUtf8;
+class ExternalFiles;
 class BreadcrumbBar;
 class ArchivePage;
 class OperationPanel;
@@ -39,6 +44,13 @@ class MainWindow : public QMainWindow {
 
   private:
     void chooseOpen();
+    void chooseBatchExtract();
+    bool enqueueRequest(const QString &title, std::function<void()> start,
+                        const QString &details = {});
+    void enqueueBatch(const QStringList &paths, const QString &destination, quint8 conflict,
+                      const std::shared_ptr<SecretUtf8> &password);
+    void movePending(int direction);
+    bool queuePaused_ = false;
     void chooseCreate(const QStringList &initial = {}, int initialFormat = 0);
     void chooseModify(int kind, const QStringList &sources = {}, bool folders = false);
     bool writableArchive() const;
@@ -51,6 +63,8 @@ class MainWindow : public QMainWindow {
     void up();
     void showProperties();
     void previewSelected();
+    void openSelectedExternally();
+    std::unique_ptr<ExternalFiles> externalFiles_;
     void settings();
     void applyTheme(const QString &theme);
     void updateRecent();
@@ -62,7 +76,14 @@ class MainWindow : public QMainWindow {
     void handleShellWithSecret(quint32 action, const QStringList &paths,
                                const std::shared_ptr<SecretUtf8> &password);
     void beginOperation();
-    void setupOperations(QVBoxLayout *layout);
+    void setupOperations(QVBoxLayout *layout, QMenu *viewMenu);
+    void startNextQueued();
+    void updateQueue();
+    OperationQueue queue_;
+    QListWidget *queueView_;
+    QDockWidget *queueDock_;
+    QAction *cancelPending_;
+    QListWidgetItem *runningItem_ = nullptr;
     void showConflict();
     QString askPassword(bool *accepted);
     std::shared_ptr<SecretUtf8> password_;
@@ -82,7 +103,8 @@ class MainWindow : public QMainWindow {
     QLabel *archiveSummary_;
     QList<QAction *> mutationActions_;
     QAction *renameAction_, *deleteAction_;
-    QAction *hashSelectedAction_, *verifySelectedAction_, *propertiesAction_, *previewAction_;
+    QAction *hashSelectedAction_, *verifySelectedAction_, *propertiesAction_, *previewAction_,
+        *externalAction_;
     QLabel *current_;
     QLabel *rate_;
     QProgressBar *progress_;

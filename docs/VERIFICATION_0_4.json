@@ -1,0 +1,173 @@
+{
+  "version": "0.4.0",
+  "status": "development_milestone_validated",
+  "timestamp_utc": "2026-10-16T12:27:04.765363+00:00",
+  "base_commit": "9731d740e26931f998109f085401850104958f7a",
+  "working_tree": "Validation snapshot captured before the 0.4.0 commit and v0.4.0 tag; consult Git history for publication state.",
+  "source_gates": {
+    "rust_tests_passed": 74,
+    "ctest_targets_passed": 3,
+    "qt_report_passed_including_init_cleanup": 15,
+    "rustfmt": "passed",
+    "clippy_warnings_denied": "passed",
+    "cargo_audit_deny_yanked": "passed"
+  },
+  "portable": {
+    "status": "passed",
+    "timestamp_utc": "2026-10-16T12:26:12.671716+00:00",
+    "portable_sha256": "556d590175b41a13a0e6981425580b615c49be5b619032717d974a9d85d52525",
+    "application_sha256": "4ab02cb4faabe66ff26ea5c534f84be8ceec364f5b8b1932acd3ae4152f4463b",
+    "isolated_environment": "PATH only Windows and System32; all developer Qt variables removed",
+    "archive_verification": {
+      "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+      "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+      "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+      "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+      "tar.xz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+      "tar.bz2": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+      "tar.zst": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+      "gz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+      "xz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+      "bz2": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+      "zst": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+      "lzma": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+      "rar-repeated": "10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)",
+      "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+    },
+    "memory_samples": [
+      {
+        "theme": "light",
+        "language": "en",
+        "scale": "1",
+        "working_set_bytes": 43913216
+      },
+      {
+        "theme": "dark",
+        "language": "en",
+        "scale": "1",
+        "working_set_bytes": 43855872
+      },
+      {
+        "theme": "dark",
+        "language": "uk",
+        "scale": "1.25",
+        "working_set_bytes": 44343296
+      },
+      {
+        "theme": "light",
+        "language": "ru",
+        "scale": "2",
+        "working_set_bytes": 44298240
+      }
+    ],
+    "remaining_processes": [],
+    "process_scope": "Only the executable unpacked by this verifier; unrelated running app instances are excluded"
+  },
+  "artifacts_sha256": {
+    "VYNX-ARC-Explorer-x64.msix": "7fb06bb9fb9fa16492cbe7538506f052c57417cfb648548ed78bc4e92f43e5db",
+    "VYNX-ARC-Portable-x64.zip": "556d590175b41a13a0e6981425580b615c49be5b619032717d974a9d85d52525",
+    "VYNX-ARC-Setup-x64.exe": "11a99a533d6adea3e619f784f04352b685ae57ea3df20db519d7d14b37e275ed"
+  },
+  "mutation_smoke": {
+    "status": "passed",
+    "cases": 512,
+    "cli_sha256": "fbfb9bd34524217be836c40ec72839536b41e45879accdbc955ea376f35ab3aa",
+    "scope": "Mutation smoke, not coverage-guided fuzzing or a security certification"
+  },
+  "cross_process_lock_checks": {
+    "status": "passed",
+    "checks": 6,
+    "same_cli_as_final_package": true
+  },
+  "publication_stress": {
+    "status": "passed",
+    "publications": 1400,
+    "categories": 8,
+    "cli_sha256": "fbfb9bd34524217be836c40ec72839536b41e45879accdbc955ea376f35ab3aa",
+    "original_preserved": true
+  },
+  "ui_captures_before_queue_layout_fix": {
+    "screenshots-uk": 32,
+    "screenshots-ru": 32,
+    "screenshots-narrow": 32
+  },
+  "final_queue_captures": {
+    "en": {
+      "application_sha256": "4ab02cb4faabe66ff26ea5c534f84be8ceec364f5b8b1932acd3ae4152f4463b",
+      "screenshot_count": 2,
+      "requested_window_size": "620x440",
+      "states": [
+        "queue"
+      ]
+    },
+    "ru": {
+      "application_sha256": "4ab02cb4faabe66ff26ea5c534f84be8ceec364f5b8b1932acd3ae4152f4463b",
+      "screenshot_count": 2,
+      "requested_window_size": "620x440",
+      "states": [
+        "queue"
+      ]
+    },
+    "uk": {
+      "application_sha256": "4ab02cb4faabe66ff26ea5c534f84be8ceec364f5b8b1932acd3ae4152f4463b",
+      "screenshot_count": 2,
+      "requested_window_size": null,
+      "states": [
+        "queue"
+      ]
+    }
+  },
+  "limitations": [
+    "Unsigned development packages; not complete V1 acceptance.",
+    "External file URL dispatch was intercepted in tests; third-party handler behavior is not qualified.",
+    "Native image decoder limits are not an OS sandbox.",
+    "Queue history is not persistent.",
+    "External temporary copies can remain on disk; see SECURITY_MODEL.md."
+  ],
+  "changed_build_inputs_sha256": {
+    "CMakeLists.txt": "92b6c85ddec9895f12dcdf41f97d3c500ae56a4597f96763871496921f8c6f8e",
+    "Cargo.lock": "cb5af112fcd1c5f6218b69bcea21c1ab543068ca2c754d95a5f6220a854c8249",
+    "apps/cli/Cargo.toml": "7ffa7f186e5a7fc2b7b1c4101ea38c4339daf42281a68959ff5afbf13386e2f2",
+    "apps/cli/src/main.rs": "5342c4d5fa64001fca32e085058afcfbbc47d44fe367ec7b41c71b5575e8572f",
+    "apps/gui/ExternalFiles.cpp": "a1ac46c723bb71bed761b5e5ac4e8d72d65bc8cb363c5f011124f0d2ab1b215e",
+    "apps/gui/ExternalFiles.h": "fa42832fc974743a4c87b3333ffd1436ab2bf0fc60682b18f7cb2144c1c46b8c",
+    "apps/gui/FormatUtils.h": "dbb6a12c4bf4d2f232306eb7506faae9095f4b7b024e416599f90971150797db",
+    "apps/gui/MainWindow.cpp": "7d63ae728bdb24c1193d35fb9ba548cb0b3f472a16b56507974a78701ac59c4b",
+    "apps/gui/MainWindow.h": "03e7f4fb6866ac547412bead68aae99297df804983fc114b0be826289d776f27",
+    "apps/gui/MainWindowBatch.cpp": "73a8d69a51484abcb0a74e9d9bdb5c71dab9cea40bc0d365e1c7346b86ca39d7",
+    "apps/gui/MainWindowJobs.cpp": "b9eb5c8121aa58165f20713e7057eeeecdaf32a7031bbc7bce192f35a60878f9",
+    "apps/gui/MainWindowPreview.cpp": "13dac0e71688133fa05df98690af6f8c14e3d0a5024c0c976a6861d0b09473a1",
+    "apps/gui/OperationQueue.h": "02e1dfadba026a7e6296b4d8bad236e016a3b6d8a2abbd8cbb54fd7b8aea74d4",
+    "apps/gui/UiCapture.cpp": "7d165964233783ab8eca6574e5d9c9bc79abc0e1c629312898b18854ac4db877",
+    "apps/gui/dialogs/AboutDialog.cpp": "ec4c701998c2dbcfbe7ddfe886cc821d0bd2eb97fd1130a2f4086243796754c0",
+    "apps/gui/dialogs/BatchExtractDialog.cpp": "61a109145d5356de6b077e1df3e38f2d9970a4550f4f742eb2d691da9dfec9fc",
+    "apps/gui/dialogs/BatchExtractDialog.h": "cbaa8a2f44aa43f20ff7bee0925173dd39345110eeafc096670e576330a00260",
+    "apps/gui/dialogs/CreateArchiveDialog.cpp": "b79f20654bc0de07a6abe6b5b961aa0cbcf9fd6df0fe21cf920c132f14856b22",
+    "apps/gui/dialogs/CreateArchiveDialog.h": "2e786c535c3951793988fa36be72f6c288812162b859dfa8e72274d5203d1276",
+    "apps/gui/dialogs/PreviewDialog.cpp": "eec473bd4545bb2c6cb5318d224ff3dda06044c8784485f1e0e0ff10254a475d",
+    "apps/gui/dialogs/PreviewDialog.h": "16ef7b909beb005c94bb1aa9cf0a7674bc1fee4f2278958b4e053fc65fccb349",
+    "apps/gui/dialogs/SettingsDialog.cpp": "6d170479ffdb4cd181b0e430f40798391bf155f5e5bf96a21a2ab26555691daf",
+    "apps/gui/dialogs/SettingsDialog.h": "5199058a375f0794e529af0da77b90b89b4636f80c6e44b271ff6964916cbcf9",
+    "apps/gui/main.cpp": "8a6efff8d239d9df81d89da16f5ab987509d5c787df92c184c45062bcf5ab2c3",
+    "apps/gui/tests/GuiPresentationTest.cpp": "433df7fc1baae2780fb8cc89bbbcb515993594f67c6d6c4db1803be3eed7a0a4",
+    "apps/gui/widgets/OperationPanel.cpp": "3ef17c7cf724a3b31d3ae4830f110cd1666e1f94dd52ac57aefb6d19960fce90",
+    "apps/gui/widgets/OperationPanel.h": "2d833c426b3fdffca7cf74ed73412fcc41438ecd6750ff4aaddf73d59153adc2",
+    "apps/shell/ShellCommand.cpp": "91d0a7de3c3157db4d8530655f5a27dc8ecfc6f27d76dedda43291e9710f4e42",
+    "assets/translations/vynx_ru.ts": "97cfcda715cea5031739c7a42be81aa17067b0f9554aa507c2bce3b25256436d",
+    "assets/translations/vynx_uk.ts": "8ba4be57a4ebac6c04dc1910bbeea6e01adcc4dac3d23c37ec6a228c74355530",
+    "core/Cargo.toml": "3e4f29e2f82c98c3eb91f78ff912b8f3e5e6edee6a1008403381128861e81c29",
+    "core/src/archive.rs": "632bf23a778aa688cde6775dc380a0f08fea274ca838879b0e1d30bdb213fe03",
+    "core/src/compressed.rs": "d902f1688f7a52a81286f41a249c6edcbb80ccbec37ffad5d11e555f23960bee",
+    "core/src/ffi.rs": "05103ab9ed6881923c555d72d0e1a8c9d451fa3b0a9595b0916261b455f24a56",
+    "core/src/lib.rs": "e5d81cc32966e85de3df31720fa406b360666b55a1c26735f2baaf32173f5209",
+    "core/src/operations.rs": "6262910e1b4989a80c9ed25dc0e4e1b7bbd9c8b7954369cec92e1ee4b59b20e2",
+    "core/src/preview.rs": "b4fce68f481a8578dcf326386ae62eb16202a5d8de99e9e6a3c78e07e4fc8123",
+    "core/src/priority.rs": "fe149ef68cba40417e08ca13225138bd678ef2dbe92cbf68773cafe5d5c52977",
+    "core/src/settings.rs": "84a26fcc8dd079c9ac97b8e69dbec9686ee66f56d234df62152425df036b4033",
+    "core/tests/development.rs": "248c8aebb8db89b5ce0849fcac52402b2731208c59b405a73669d9652fb9999a",
+    "core/tests/preview.rs": "ea70b55c9454954b07fe4123e2a453c94a1aef819db942a3ce26bb27b60d28bf",
+    "core/tests/viewer.rs": "9349f15e3bcb3dd7dd0e660a688dfd0817a0deede7bd54dca9b03f7cad0aba76",
+    "installer/VynxArc.iss": "a387d4ecb9c3b985c44fa6b32115d158d5c1d0fd8e2fd5abfd6bb17234354764",
+    "installer/identity/AppxManifest.xml": "145631e57c61b48c6dabd1bf5e1130e47653f59c286f14d58df81c1f21e121b3"
+  }
+}

@@ -3,7 +3,10 @@ use vynx_arc_core::{operations, preview, *};
 
 #[test]
 fn preview_is_verified_plain_text_and_never_publishes_plaintext() {
-    for ext in ["zip", "7z", "tar", "tar.gz"] {
+    for ext in [
+        "zip", "7z", "tar", "tar.gz", "gz", "xz", "bz2", "zst", "lzma", "tar.xz", "tar.bz2",
+        "tar.zst",
+    ] {
         let t = tempfile::tempdir().unwrap();
         let input = t.path().join("readme.txt");
         fs::write(&input, "<b>Текст</b>\nhello\tworld").unwrap();

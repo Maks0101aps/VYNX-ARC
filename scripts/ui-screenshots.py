@@ -7,6 +7,9 @@ import subprocess
 import tempfile
 import time
 import psutil
+import struct
+import zlib
+import hashlib
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--app', required=True, type=pathlib.Path)
@@ -17,6 +20,7 @@ parser.add_argument('--details-only',action='store_true')
 parser.add_argument('--workspace-content',action='store_true')
 parser.add_argument('--language', choices=['en', 'uk', 'ru'])
 parser.add_argument('--recents', action='store_true')
+parser.add_argument('--state', action='append', choices=['home','archive','create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'])
 args = parser.parse_args()
 app = args.app.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
@@ -25,6 +29,15 @@ source = scratch / 'Project'
 (source / 'src/components').mkdir(parents=True)
 (source / 'README.md').write_text('VYNX ARC visual QA\n', encoding='utf-8')
 (source / 'src/components/main.cpp').write_text('int main() { return 0; }\n')
+# Deterministic raster/binary fixtures go through the real archive and preview pipeline.
+def png_chunk(kind, data):
+    return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
+width, height = 480, 240
+raster = b''.join(b'\x00' + bytes(v for x in range(width) for v in (32 + x * 190 // width, 75 + y * 125 // height, 220)) for y in range(height))
+png = b'\x89PNG\r\n\x1a\n' + png_chunk(b'IHDR', struct.pack('>IIBBBBB', width, height, 8, 2, 0, 0, 0))
+png += png_chunk(b'IDAT', zlib.compress(raster)) + png_chunk(b'IEND', b'')
+(source / 'cover.png').write_bytes(png)
+(source / 'sample.bin').write_bytes(bytes(range(256)) * 4)
 archive = scratch / 'Project.zip'
 subprocess.run([str(app / 'vynxarc-cli.exe'), 'create', str(archive), str(source)], check=True, capture_output=True)
 configuration = app / 'data/settings.ini'
@@ -39,8 +52,8 @@ try:
         for language in ([args.language] if args.language else ['en'] if args.quick else ['en', 'uk', 'ru']):
             recent = f'recent={archive.as_posix()}\n' if args.recents else ''
             configuration.write_text(f'[General]\ntheme={theme}\nlanguage={language}\nhistoryEnabled=false\n{recent}', encoding='utf-8')
-            for scale in (['1'] if args.quick or args.details_only else ['1', '1.25', '1.5', '2']):
-                for state in (['create','extract','conflict','settings','about','operation','breadcrumb','search','preview'] if args.details_only else ['home', 'archive']):
+            for scale in (['1'] if args.quick or args.details_only or args.state else ['1', '1.25', '1.5', '2']):
+                for state in (args.state or (['create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'] if args.details_only else ['home', 'archive'])):
                     output = args.output / f'{state}-{theme}-{language}-{scale}.png'
                     env = os.environ.copy()
                     env['QT_SCALE_FACTOR'] = scale
@@ -51,7 +64,7 @@ try:
                     if state != 'home':
                         command.append(str(archive))
                     command += ['--capture', str(output.resolve())]
-                    if args.details_only or (args.workspace_content and state=='archive'):
+                    if args.details_only or args.state or (args.workspace_content and state=='archive'):
                         command += ['--capture-ui',state]
                     if args.window_size:
                         command += ['--capture-size', args.window_size]
@@ -74,3 +87,7 @@ finally:
     else:
         configuration.write_bytes(original)
 (args.output / 'samples.json').write_text(json.dumps(samples, indent=2) + '\n', encoding='utf-8')
+(args.output / 'manifest.json').write_text(json.dumps({
+    'application_sha256': hashlib.sha256((app/'VynxArc.exe').read_bytes()).hexdigest(),
+    'screenshot_count': len(samples), 'requested_window_size': args.window_size,
+    'states': sorted({sample['state'] for sample in samples})}, indent=2) + '\n', encoding='utf-8')

@@ -34,8 +34,14 @@ from the same SDK. No installed archiver is invoked.
 | [tempfile](https://github.com/Stebalien/tempfile) | Exclusive temporary creation and publication; 3.27.0; MIT OR Apache-2.0 | Cargo; test cancellation, conflicts and replace failures | Unique sibling temp files; default publication is no-clobber. RAII cleanup owns only files it created. |
 | [zeroize](https://github.com/RustCrypto/utils) | Rust-owned secret buffers; 1.9.0; MIT OR Apache-2.0 | Cargo; review copies across each UI/FFI boundary | GUI strings and backend-created password copies are not yet comprehensively zeroized. Never persisted or logged. |
 
-Transitive components include RustCrypto AES/digest utilities, lzma-rust2,
-libbz2-rs-sys, zstd/zstd-sys and zlib-rs. Cargo.lock is authoritative for exact
+Direct codec dependencies now include bzip2 0.6.1 (MIT OR Apache-2.0),
+zstd 0.14.2 with zstdmt (MIT), and lzma-rust2 0.22.0 (Apache-2.0). They
+provide standalone streams and compressed TAR. Codec upgrades require independent
+Python decoder/encoder interoperability and truncation/cancellation tests.
+Resource profiles bound codec settings; they are not process memory quotas.
+
+Transitive components include RustCrypto AES/digest utilities,
+libbz2-rs-sys, zstd-sys and zlib-rs. Cargo.lock is authoritative for exact
 versions. Release `licenses/CARGO_LICENSES.json` lists license IDs and sources;
 the collection script copies upstream copyright/license texts including nested
 native components. Re-run cargo audit after any dependency changes. A clean

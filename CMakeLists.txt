@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(VynxArc VERSION 0.1.0 LANGUAGES CXX)
+project(VynxArc VERSION 0.4.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.12 REQUIRED COMPONENTS Widgets Concurrent Test LinguistTools)
@@ -26,7 +26,11 @@ set_target_properties(vynx_core PROPERTIES IMPORTED_LOCATION "${RUST_LIBRARY}")
 add_dependencies(vynx_core rust_core)
 qt_add_executable(VynxArc WIN32 apps/gui/main.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h apps/gui/MainWindow.cpp apps/gui/MainWindow.h apps/gui/ShellRequest.cpp apps/gui/ShellRequest.h)
 target_sources(VynxArc PRIVATE
+    apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
+    apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h
     apps/gui/MainWindowPreview.cpp
+    apps/gui/MainWindowBatch.cpp
+    apps/gui/dialogs/BatchExtractDialog.cpp apps/gui/dialogs/BatchExtractDialog.h
     apps/gui/MainWindowJobs.cpp
     apps/gui/UiCapture.cpp
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h
@@ -73,6 +77,9 @@ install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" DESTINATION .)
 install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
 enable_testing()
 add_executable(VynxPresentationTests
+    apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
+    apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h
+    apps/gui/dialogs/BatchExtractDialog.cpp apps/gui/dialogs/BatchExtractDialog.h
     apps/gui/tests/GuiPresentationTest.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h
     apps/gui/Theme.cpp apps/gui/widgets/IconProvider.cpp
     apps/gui/widgets/BreadcrumbBar.cpp apps/gui/widgets/BreadcrumbBar.h
@@ -86,10 +93,10 @@ if(WIN32)
     target_compile_options(VynxPresentationTests PRIVATE /utf-8)
 endif()
 set_target_properties(VynxPresentationTests PROPERTIES WIN32_EXECUTABLE FALSE)
-add_test(NAME presentation COMMAND VynxPresentationTests -o -,txt)
+add_test(NAME presentation COMMAND VynxPresentationTests -o presentation-tests.txt,txt)
 set_tests_properties(presentation PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 if(TARGET VynxShellSmoke)
     add_test(NAME shell_smoke COMMAND VynxShellSmoke $<TARGET_FILE:VynxShell>)
 endif()
 add_test(NAME gui_smoke COMMAND VynxArc --smoke-test)
-set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 60)
+set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 60)

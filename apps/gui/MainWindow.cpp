@@ -1,9 +1,11 @@
 #include "MainWindow.h"
+#include "ExternalFiles.h"
 #include "FormatUtils.h"
 #include "SecretUtf8.h"
 #include "ShellRequest.h"
 #include "Theme.h"
 #include "dialogs/AboutDialog.h"
+#include "dialogs/BatchExtractDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "dialogs/ExtractDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -25,6 +27,7 @@ static std::string utf8(const QString &s) {
     return std::string(b.constData(), size_t(b.size()));
 }
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
+    externalFiles_ = std::make_unique<ExternalFiles>();
     setWindowTitle(tr("VYNX ARC"));
     setWindowIcon(QIcon(":/assets/icons/vynx-arc.png"));
     resize(1060, 720);
@@ -49,7 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         addAction(fileMenu, tr("&Open archive…"), QKeySequence::Open, [this] { chooseOpen(); });
     auto *create =
         addAction(fileMenu, tr("&Create archive…"), QKeySequence::New, [this] { chooseCreate(); });
-    idleActions_ = {open, create};
+    idleActions_ = {};
+    addAction(fileMenu, tr("Batch extraction..."), QKeySequence("Ctrl+Shift+E"),
+              [this] { chooseBatchExtract(); });
     fileMenu->addSeparator();
     addAction(fileMenu, tr("Close archive"), QKeySequence("Ctrl+W"), [this] {
         if (busy_)
@@ -85,10 +90,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                       [this] { hashContents(true); });
     auto *verifyArchive = addAction(operationsMenu, tr("Verify archive file hash…"), {},
                                     [this] { hashContents(true, true); });
-    previewAction_ = addAction(operationsMenu, tr("Preview text"), QKeySequence("F3"),
+    previewAction_ = addAction(operationsMenu, tr("Preview file"), QKeySequence("F3"),
                                [this] { previewSelected(); });
-    archiveActions_.append(
-        {hashSelectedAction_, verifySelectedAction_, verifyArchive, previewAction_});
+    externalAction_ = addAction(operationsMenu, tr("Open externally..."),
+                                QKeySequence("Ctrl+Return"), [this] { openSelectedExternally(); });
+    archiveActions_.append({hashSelectedAction_, verifySelectedAction_, verifyArchive,
+                            previewAction_, externalAction_});
     operationsMenu->addSeparator();
     auto *addFiles = addAction(operationsMenu, tr("Add files…"), QKeySequence("Ctrl+Shift+A"),
                                [this] { chooseModify(0); });
@@ -270,7 +277,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
     });
 
-    setupOperations(layout);
+    setupOperations(layout, viewMenu);
     updateRecent();
     applyTheme(settings_->value("theme", "system").toString());
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
@@ -279,19 +286,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 }
 MainWindow::~MainWindow() {
+    queue_.clear();
     if (operation_)
         vynx::cancel(**operation_);
     watcher_.waitForFinished();
     password_.reset();
 }
 void MainWindow::chooseOpen() {
-    if (busy_)
-        return;
-    QString p = QFileDialog::getOpenFileName(
-        this, tr("Open archive"), {},
-        tr("Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz);;All files (*)"));
-    if (!p.isEmpty())
-        openPath(p);
+    const auto paths =
+        QFileDialog::getOpenFileNames(this, tr("Open archives"), {},
+                                      tr("Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz *.gz "
+                                         "*.xz *.bz2 *.zst *.lzma);;All files (*)"));
+    for (const auto &path : paths)
+        openPath(path);
 }
 QString MainWindow::askPassword(bool *accepted) {
     return QInputDialog::getText(this, tr("Archive password"),
@@ -303,8 +310,10 @@ void MainWindow::openWithPassword(const QString &path, const QString &password) 
     openWithSecret(path, secret(password));
 }
 void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &pw) {
-    if (busy_)
+    if (busy_) {
+        handleShellWithSecret(1, {path}, pw);
         return;
+    }
     beginOperation();
     auto op = operation_;
     auto result = std::make_shared<std::shared_ptr<rust::Box<vynx::Archive>>>();
@@ -531,9 +540,9 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
         });
 }
 void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
-    if (busy_)
-        return;
     CreateArchiveDialog d(initial, initialFormat, this);
+    d.resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
+    d.preset->setCurrentIndex(qBound(0, settings_->value("compressionPreset", 2).toInt(), 3));
     auto *inputs = d.inputs;
     auto *format = d.format;
     auto *output = d.output;
@@ -554,19 +563,31 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
                                   1ULL << 30, 4ULL << 30,   quint64(customSplit->value()) << 20};
     const auto volumeSize =
         selectedFormat == 1 && advanced->isChecked() ? splitSizes[split->currentIndex()] : 0;
-    beginOperation();
-    auto op = operation_;
-    runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
-        if (volumeSize)
-            vynx::create_split_archive(
-                out, rust::Slice<const rust::String>(sources->data(), sources->size()), volumeSize,
-                pw->bytes(), **op);
-        else
-            vynx::create_archive_as(
-                out, rust::Slice<const rust::String>(sources->data(), sources->size()),
-                selectedFormat, pw->bytes(), **op);
-        return QString();
-    });
+    const auto preset = uint8_t(d.preset->currentIndex());
+    const auto resource = uint8_t(d.resource->currentIndex());
+    settings_->setValue("resourceMode", resource);
+    settings_->setValue("compressionPreset", preset);
+    auto createJob = [this, sources, out, pw, selectedFormat, volumeSize, preset, resource] {
+        beginOperation();
+        auto op = operation_;
+        vynx::configure_operation(**op, preset, resource);
+        runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
+            if (volumeSize)
+                vynx::create_split_archive(
+                    out, rust::Slice<const rust::String>(sources->data(), sources->size()),
+                    volumeSize, pw->bytes(), **op);
+            else
+                vynx::create_archive_as(
+                    out, rust::Slice<const rust::String>(sources->data(), sources->size()),
+                    selectedFormat, pw->bytes(), **op);
+            return QString();
+        });
+    };
+    if (runningItem_ && !busy_)
+        createJob();
+    else
+        enqueueRequest(tr("Create %1").arg(QFileInfo(output->text()).fileName()),
+                       std::move(createJob));
 }
 void MainWindow::navigate(const QString &folder) {
     if (busy_ || !archive_)
@@ -582,6 +603,7 @@ void MainWindow::navigate(const QString &folder) {
     updateStatus();
     table_->setFocus();
 }
+
 bool MainWindow::writableArchive() const {
     if (!archive_)
         return false;
@@ -703,8 +725,24 @@ void MainWindow::handleShellRequest(quint32 action, const QStringList &paths) {
 }
 void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
                                        const std::shared_ptr<SecretUtf8> &pw) {
-    if (busy_ || paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
+    if (paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
         return;
+    if (busy_) {
+        const auto title = tr("Requested operation — %1").arg(QFileInfo(paths.first()).fileName());
+        const auto id = queue_.enqueue(
+            title, [this, action, paths, pw] { handleShellWithSecret(action, paths, pw); });
+        if (!id) {
+            toast_->notify(tr("Operation queue is full"));
+            return;
+        }
+        auto *item = new QListWidgetItem(tr("Pending — %1").arg(title), queueView_);
+        item->setData(Qt::UserRole, id);
+        item->setData(Qt::UserRole + 1, title);
+        item->setToolTip(paths.join('\n'));
+        queueDock_->show();
+        updateQueue();
+        return;
+    }
     if (action == 1) {
         openPath(paths.first());
         if (paths.size() > 1) {
@@ -805,6 +843,8 @@ void MainWindow::updateStatus() {
         regular |= !model_->row(filter_->mapToSource(index).row()).folder;
     hashSelectedAction_->setEnabled(!busy_ && regular);
     verifySelectedAction_->setEnabled(!busy_ && regular && rows.size() == 1);
+    externalAction_->setEnabled(!busy_ && rows.size() == 1 &&
+                                !model_->row(filter_->mapToSource(rows.first()).row()).folder);
     previewAction_->setEnabled(!busy_ && regular && rows.size() == 1);
     propertiesAction_->setEnabled(!busy_ && rows.size() == 1);
     auto summary = text(vynx::archive_format(**archive_));
@@ -876,6 +916,7 @@ void MainWindow::settings() {
     SettingsDialog d(settings_->value("theme", "system").toString(),
                      settings_->value("language", "en").toString(),
                      settings_->value("historyEnabled", true).toBool(), this);
+    d.resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
     auto *theme = d.theme;
     auto *language = d.language;
     auto *history = d.history;
@@ -883,6 +924,7 @@ void MainWindow::settings() {
     if (d.exec() == QDialog::Accepted) {
         settings_->setValue("language", languages[language->currentIndex()]);
         settings_->setValue("theme", ids[theme->currentIndex()]);
+        settings_->setValue("resourceMode", d.resource->currentIndex());
         settings_->setValue("historyEnabled", history->isChecked());
         if (!history->isChecked())
             settings_->remove("recent");
@@ -928,13 +970,20 @@ void MainWindow::closeEvent(QCloseEvent *e) {
             return;
         }
         vynx::cancel(**operation_);
+        queue_.clear();
         closePending_ = true;
         e->ignore();
         return;
     }
+    closePending_ = true;
+    queue_.clear();
     e->accept();
 }
 bool MainWindow::smokeTest() {
+    const auto smokeFailure = [](int line) {
+        qWarning("GUI smoke failed at source line %d", line);
+        return false;
+    };
     try {
         QByteArray shellData;
         QDataStream shellStream(&shellData, QIODevice::WriteOnly);
@@ -952,28 +1001,28 @@ bool MainWindow::smokeTest() {
         auto shellRequest = decodeShellRequest(shellData);
         if (shellRequest.action != 7 || shellRequest.paths.size() != 1000 ||
             shellRequest.paths.last() != shellPath)
-            return false;
+            return smokeFailure(__LINE__);
         try {
             decodeShellRequest(shellData + 'x');
-            return false;
+            return smokeFailure(__LINE__);
         } catch (const std::exception &) {
         }
         if (outputForFormat("archive.zip", 1) != "archive.7z" ||
             outputForFormat("archive.tar.gz", 0) != "archive.zip")
-            return false;
+            return smokeFailure(__LINE__);
         applyTheme("light");
         if (qApp->palette().color(QPalette::Window).lightness() < 200)
-            return false;
+            return smokeFailure(__LINE__);
         applyTheme("dark");
         if (qApp->palette().color(QPalette::Window).lightness() > 80)
-            return false;
+            return smokeFailure(__LINE__);
         applyTheme("system");
         const bool systemDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
         if ((qApp->palette().color(QPalette::Window).lightness() < 80) != systemDark)
-            return false;
+            return smokeFailure(__LINE__);
         QTemporaryDir temp;
         if (!temp.isValid())
-            return false;
+            return smokeFailure(__LINE__);
         settings_ =
             std::make_unique<QSettings>(temp.path() + "/settings.ini", QSettings::IniFormat);
         settings_->setValue("historyEnabled", false);
@@ -981,7 +1030,7 @@ bool MainWindow::smokeTest() {
         QDir().mkpath(source + "/nested");
         QFile input(source + "/nested/дані.txt");
         if (!input.open(QIODevice::WriteOnly))
-            return false;
+            return smokeFailure(__LINE__);
         input.write("real GUI bridge roundtrip");
         input.close();
         auto op = vynx::new_operation();
@@ -1000,30 +1049,30 @@ bool MainWindow::smokeTest() {
                              Qt::NoModifier);
         dragEnterEvent(&drag);
         if (!drag.isAccepted())
-            return false;
+            return smokeFailure(__LINE__);
         QDropEvent drop(QPointF(20, 20), Qt::CopyAction, &droppedArchive, Qt::LeftButton,
                         Qt::NoModifier);
         dropEvent(&drop);
         if (!drop.isAccepted())
-            return false;
+            return smokeFailure(__LINE__);
         loop.exec();
         if (busy_ || !archive_ || model_->rowCount() != 1 || !model_->row(0).folder)
-            return false;
+            return smokeFailure(__LINE__);
         navigate("source/nested");
         if (model_->rowCount() != 1 || model_->row(0).name != "дані.txt")
-            return false;
+            return smokeFailure(__LINE__);
         search_->setText("ДАНІ");
         if (filter_->rowCount() != 1)
-            return false;
+            return smokeFailure(__LINE__);
         table_->selectAll();
         if (table_->selectionModel()->selectedRows().size() != 1)
-            return false;
+            return smokeFailure(__LINE__);
         vynx::test_archive(**archive_, "", *op);
         vynx::extract_archive(**archive_, utf8(temp.path() + "/out"), {}, 0, false, "", *op);
         QFile restored(temp.path() + "/out/source/nested/дані.txt");
         if (!restored.open(QIODevice::ReadOnly) ||
             restored.readAll() != "real GUI bridge roundtrip")
-            return false;
+            return smokeFailure(__LINE__);
         restored.close();
         bool previewSeen = false;
         QTimer previewCloser;
@@ -1040,7 +1089,7 @@ bool MainWindow::smokeTest() {
         loop.exec();
         previewCloser.stop();
         if (busy_ || !previewSeen)
-            return false;
+            return smokeFailure(__LINE__);
         // Exercise the real asynchronous conflict dialog and bridge reply.
         beginOperation();
         auto conflictOp = operation_;
@@ -1071,7 +1120,7 @@ bool MainWindow::smokeTest() {
         loop.exec();
         answer.stop();
         if (busy_ || !conflictDialogSeen || vynx::conflict_request(**conflictOp).id)
-            return false;
+            return smokeFailure(__LINE__);
         rust::Vec<rust::String> rename;
         rename.push_back("source/nested/дані.txt");
         vynx::modify_archive(**archive_, 2,
@@ -1080,16 +1129,16 @@ bool MainWindow::smokeTest() {
         openPath(archivePath);
         loop.exec();
         if (busy_ || !archive_)
-            return false;
+            return smokeFailure(__LINE__);
         navigate("source/nested");
         if (model_->rowCount() != 1 || model_->row(0).name != "renamed.txt")
-            return false;
+            return smokeFailure(__LINE__);
         rust::Vec<quint64> hashIds;
         hashIds.push_back(model_->row(0).memberIds.front());
         auto hashes = vynx::hash_entries(
             **archive_, rust::Slice<const quint64>(hashIds.data(), hashIds.size()), "", *op);
         if (hashes.size() != 1 || hashes[0].sha256.size() != 64 || hashes[0].crc32.size() != 8)
-            return false;
+            return smokeFailure(__LINE__);
         vynx::verify_entry_hash(**archive_, hashIds[0], hashes[0].sha256, "", *op);
         auto jobSecret = secret("private");
         std::weak_ptr<SecretUtf8> secretLifetime = jobSecret;
@@ -1107,7 +1156,64 @@ bool MainWindow::smokeTest() {
         jobSecret.reset();
         loop.exec();
         if (busy_ || !secretLifetime.expired())
-            return false;
+            return smokeFailure(__LINE__);
+        // Exercise real dispatch, visible state and pending cancellation while a job runs.
+        beginOperation();
+        runJob(tr("Queue control"), [] { return QString(); });
+        handleShellRequest(5, {archivePath});
+        auto *firstQueued = queueView_->item(queueView_->count() - 1);
+        handleShellRequest(5, {temp.path() + "/must-not-run.zip"});
+        auto *cancelledQueued = queueView_->item(queueView_->count() - 1);
+        handleShellRequest(5, {archivePath});
+        auto *lastQueued = queueView_->item(queueView_->count() - 1);
+        if (queue_.size() != 3 || !firstQueued->text().startsWith(tr("Pending")))
+            return smokeFailure(__LINE__);
+        queueView_->setCurrentItem(cancelledQueued);
+        cancelPending_->trigger();
+        if (queue_.size() != 2 || !cancelledQueued->text().startsWith(tr("Cancelled")))
+            return smokeFailure(__LINE__);
+        QElapsedTimer queueDeadline;
+        queueDeadline.start();
+        do {
+            QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+            loop.exec();
+        } while ((busy_ || queue_.size()) && queueDeadline.elapsed() < 15000);
+        if (busy_ || queue_.size())
+            return smokeFailure(__LINE__);
+        if (!firstQueued->text().startsWith(tr("Completed")) ||
+            !lastQueued->text().startsWith(tr("Completed")))
+            return smokeFailure(__LINE__);
+        // Real batch dispatch: paused jobs do not start, one failure does not stop siblings.
+        auto *pauseQueue = findChild<QAction *>("pauseQueue");
+        if (!pauseQueue)
+            return smokeFailure(__LINE__);
+        pauseQueue->setChecked(true);
+        const QStringList batchPaths{archivePath, temp.path() + "/missing.zip", archivePath};
+        const auto batchRoot = temp.path() + "/batch";
+        const auto batchOutputs = batchDestinations(batchPaths, batchRoot);
+        enqueueBatch(batchPaths, batchRoot, 4, secret({}));
+        QCoreApplication::processEvents();
+        if (busy_ || queue_.size() != 3 || QDir(batchRoot).exists())
+            return smokeFailure(__LINE__);
+        pauseQueue->setChecked(false);
+        queueDeadline.restart();
+        do {
+            QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+            loop.exec();
+        } while ((busy_ || queue_.size()) && queueDeadline.elapsed() < 15000);
+        if (busy_ || queue_.size())
+            return smokeFailure(__LINE__);
+        for (const auto index : {0, 2}) {
+            QFile file(batchOutputs[index] + "/source/nested/renamed.txt");
+            if (!file.open(QIODevice::ReadOnly) || file.readAll() != "real GUI bridge roundtrip")
+                return smokeFailure(__LINE__);
+        }
+        bool batchFailureRecorded = false;
+        for (int i = 0; i < queueView_->count(); ++i)
+            batchFailureRecorded |= queueView_->item(i)->text().startsWith(tr("Stopped")) &&
+                                    queueView_->item(i)->toolTip().contains("missing.zip");
+        if (!batchFailureRecorded)
+            return smokeFailure(__LINE__);
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;
         for (quint64 i = 0; i < 100000; ++i) {
@@ -1120,19 +1226,19 @@ bool MainWindow::smokeTest() {
         model_->load(std::move(many));
         search_->clear();
         if (model_->rowCount() != 100000)
-            return false;
+            return smokeFailure(__LINE__);
         auto clone = vynx::clone_operation(*op);
         vynx::cancel(*clone);
         try {
             vynx::hash_archive_file(utf8(archivePath), *op);
-            return false;
+            return smokeFailure(__LINE__);
         } catch (const std::exception &e) {
             if (!QString::fromUtf8(e.what()).contains("CANCELLED"))
-                return false;
+                return smokeFailure(__LINE__);
         }
         return true;
     } catch (const std::exception &e) {
         qWarning("GUI smoke failure: %s", e.what());
-        return false;
+        return smokeFailure(__LINE__);
     }
 }

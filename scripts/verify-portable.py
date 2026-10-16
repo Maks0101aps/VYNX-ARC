@@ -36,9 +36,10 @@ run([exe,'--smoke-test']);print('Isolated deployed GUI smoke passed',flush=True)
 run([cli,'--help']);print('Isolated deployed CLI passed',flush=True)
 work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=work_scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)
 (source/'README.md').write_text('# Archive verification\nReal test files for VYNX ARC.\n',encoding='utf-8');(source/'src/дані.txt').write_text('Перевірка архівів — справжні байти.\n',encoding='utf-8');(source/'empty.txt').write_bytes(b'')
-import py7zr
+import py7zr,tarfile,io,gzip,bz2,lzma
+from backports import zstd
 evidence={}
-for ext in ['zip','7z','tar','tar.gz']:
+for ext in ['zip','7z','tar','tar.gz','tar.xz','tar.bz2','tar.zst']:
     output=work/f'Project.{ext}'
     if output.exists():output.unlink()
     run([cli,'create',output,source]);run([cli,'test',output]);run([cli,'list',output])
@@ -49,6 +50,11 @@ for ext in ['zip','7z','tar','tar.gz']:
         independent=pathlib.Path(tempfile.mkdtemp(prefix='python-7z-',dir=work))
         with py7zr.SevenZipFile(output) as z:z.extractall(independent)
         assert (independent/'Project/src/дані.txt').read_bytes()==(source/'src/дані.txt').read_bytes()
+    if ext.startswith('tar'):
+        data=output.read_bytes()
+        if ext=='tar.zst':data=zstd.decompress(data)
+        with tarfile.open(fileobj=io.BytesIO(data),mode='r:*') as archive:
+            assert archive.extractfile('Project/src/дані.txt').read()==(source/'src/дані.txt').read_bytes()
     dest=work/('extracted-'+ext);dest.mkdir(exist_ok=True)
     result=subprocess.run([str(cli),'extract',str(output),'--output',str(dest),'--replace'],env=env,capture_output=True,startupinfo=startup,timeout=30)
     assert result.returncode==0,(ext,result.stderr)
@@ -59,6 +65,22 @@ for ext in ['zip','7z','tar','tar.gz']:
     assert not (smart_dest/'Project/Project').exists()
     evidence[ext]='CLI roundtrip matches' + ('; opened by an independent Python reader' if ext in ['zip','7z'] else '')
     evidence[ext]+='; Smart Extract avoids duplicate archive-root nesting'
+payload=work/'payload.txt';payload.write_bytes(('Streaming payload — дані\n'*100).encode('utf-8'))
+codecs={'gz':(gzip.compress,gzip.decompress),'xz':(lzma.compress,lzma.decompress),
+        'bz2':(bz2.compress,bz2.decompress),'zst':(zstd.compress,zstd.decompress),
+        'lzma':(lambda data:lzma.compress(data,format=lzma.FORMAT_ALONE),lzma.decompress)}
+for ext,(compress,decompress) in codecs.items():
+    output=work/f'payload.txt.{ext}'
+    run([cli,'create',output,payload,'--preset','fast','--resource','eco'])
+    assert decompress(output.read_bytes())==payload.read_bytes(),ext
+    run([cli,'test',output]);run([cli,'list',output])
+    destination=work/f'stream-{ext}'
+    run([cli,'extract',output,'--output',destination])
+    assert (destination/'payload.txt').read_bytes()==payload.read_bytes()
+    foreign=work/f'foreign.txt.{ext}';foreign.write_bytes(compress(payload.read_bytes()))
+    run([cli,'test',foreign]);run([cli,'extract',foreign,'--output',work/f'foreign-{ext}'])
+    assert (work/f'foreign-{ext}'/'foreign.txt').read_bytes()==payload.read_bytes()
+    evidence[ext]='Independent Python read of VYNX output and VYNX extraction of Python output match source bytes'
 rar_cases=['test_read_format_rar_binary_data.rar','test_read_format_rar5_stored.rar',
            'test_rar_multivolume_single_file.part1.rar',
            'test_read_format_rar5_multiarchive_solid.part01.rar']

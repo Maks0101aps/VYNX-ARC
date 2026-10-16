@@ -52,6 +52,14 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <source>License notices are included with the packaged application.</source>
             <translation>Ліцензії включені до пакета програми.</translation>
         </message>
+        <message>
+            <source>Offline archive operations. No telemetry.
+ZIP, 7Z, read-only RAR, TAR and compressed streams.
+File preview, external opening and batch extraction.</source>
+            <translation>Робота з архівами без мережі й телеметрії.
+ZIP, 7Z, RAR лише для читання, TAR і стиснені потоки.
+Перегляд файлів, відкриття в інших програмах і пакетне розпакування.</translation>
+        </message>
     </context>
     <context>
         <name>ArchiveModel</name>
@@ -373,6 +381,42 @@ Create ZIP, 7Z, TAR and TAR.GZ.</source>
             <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="112" />
             <source>Choose source files and an output archive.</source>
             <translation>Виберіть вхідні файли та шлях нового архіву.</translation>
+        </message>
+        <message>
+            <source>Store / None</source>
+            <translation>Без стиснення</translation>
+        </message>
+        <message>
+            <source>Fast</source>
+            <translation>Швидко</translation>
+        </message>
+        <message>
+            <source>Balanced</source>
+            <translation>Збалансовано</translation>
+        </message>
+        <message>
+            <source>Maximum</source>
+            <translation>Максимум</translation>
+        </message>
+        <message>
+            <source>Eco</source>
+            <translation>Економний</translation>
+        </message>
+        <message>
+            <source>Resources</source>
+            <translation>Ресурси</translation>
+        </message>
+        <message>
+            <source>Effective settings</source>
+            <translation>Застосовані параметри</translation>
+        </message>
+        <message>
+            <source>This format compresses one file. Use TAR.XZ, TAR.BZ2 or TAR.ZST for folders.</source>
+            <translation>Цей формат стискає один файл. Для папок оберіть TAR.XZ, TAR.BZ2 або TAR.ZST.</translation>
+        </message>
+        <message>
+            <source>Choose exactly one file, or select a TAR format for folders and multiple files.</source>
+            <translation>Оберіть один файл або формат TAR для папок і кількох файлів.</translation>
         </message>
     </context>
     <context>
@@ -1254,6 +1298,174 @@ Explorer integration is not installed by this development build.</source>
             <source>Reading text preview…</source>
             <translation>Читання тексту…</translation>
         </message>
+        <message>
+            <source>Open archives</source>
+            <translation>Відкрити архіви</translation>
+        </message>
+        <message>
+            <source>Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz *.gz *.xz *.bz2 *.zst *.lzma);;All files (*)</source>
+            <translation>Архіви (*.zip *.7z *.rar *.tar *.tar.gz *.tgz *.gz *.xz *.bz2 *.zst *.lzma);;Усі файли (*)</translation>
+        </message>
+        <message>
+            <source>Operation queue</source>
+            <translation>Черга операцій</translation>
+        </message>
+        <message>
+            <source>Add archives…</source>
+            <translation>Додати архіви…</translation>
+        </message>
+        <message>
+            <source>Cancel pending</source>
+            <translation>Скасувати очікування</translation>
+        </message>
+        <message>
+            <source>Cancel selected pending operation</source>
+            <translation>Скасувати вибрану операцію, що очікує</translation>
+        </message>
+        <message>
+            <source>Clear completed</source>
+            <translation>Очистити завершені</translation>
+        </message>
+        <message>
+            <source>Operation queue is full</source>
+            <translation>Черга операцій заповнена</translation>
+        </message>
+        <message>
+            <source>Pending — %1</source>
+            <translation>Очікує — %1</translation>
+        </message>
+        <message>
+            <source>Running — %1</source>
+            <translation>Виконується — %1</translation>
+        </message>
+        <message>
+            <source>Completed — %1</source>
+            <translation>Завершено — %1</translation>
+        </message>
+        <message>
+            <source>Stopped — %1</source>
+            <translation>Зупинено — %1</translation>
+        </message>
+        <message>
+            <source>Cancelled — %1</source>
+            <translation>Скасовано — %1</translation>
+        </message>
+        <message>
+            <source>Requested operation — %1</source>
+            <translation>Операція — %1</translation>
+        </message>
+        <message>
+            <source>Pending</source>
+            <translation>Очікує</translation>
+        </message>
+        <message>
+            <source>Completed</source>
+            <translation>Завершено</translation>
+        </message>
+        <message>
+            <source>Cancelled</source>
+            <translation>Скасовано</translation>
+        </message>
+        <message>
+            <source>Queue control</source>
+            <translation>Перевірка черги</translation>
+        </message>
+        <message>
+            <source>Extracting and verifying files</source>
+            <translation>Розпакування й перевірка файлів</translation>
+        </message>
+        <message>
+            <source>7Z decoder worker limit 2</source>
+            <translation>До 2 потоків декодування 7Z</translation>
+        </message>
+        <message>
+            <source>Batch extraction...</source>
+            <translation>Пакетне розпакування...</translation>
+        </message>
+        <message>
+            <source>Preview file</source>
+            <translation>Перегляд файлу</translation>
+        </message>
+        <message>
+            <source>Open externally...</source>
+            <translation>Відкрити в іншій програмі...</translation>
+        </message>
+        <message>
+            <source>Create %1</source>
+            <translation>Створити %1</translation>
+        </message>
+        <message>
+            <source>Stopped</source>
+            <translation>Зупинено</translation>
+        </message>
+        <message>
+            <source>Batch extraction</source>
+            <translation>Пакетне розпакування</translation>
+        </message>
+        <message>
+            <source>The queue supports up to 32 pending jobs. Remove some requests and try again.</source>
+            <translation>У черзі може очікувати до 32 завдань. Скасуйте частину запитів і спробуйте знову.</translation>
+        </message>
+        <message>
+            <source>Extract %1</source>
+            <translation>Розпакувати %1</translation>
+        </message>
+        <message>
+            <source>Batch job stopped. See the queue for details.</source>
+            <translation>Пакетне завдання зупинено. Подробиці — у черзі.</translation>
+        </message>
+        <message>
+            <source>Pause queue</source>
+            <translation>Призупинити чергу</translation>
+        </message>
+        <message>
+            <source>Resume queue</source>
+            <translation>Продовжити чергу</translation>
+        </message>
+        <message>
+            <source>Move up</source>
+            <translation>Вище</translation>
+        </message>
+        <message>
+            <source>Move down</source>
+            <translation>Нижче</translation>
+        </message>
+        <message>
+            <source>Cancel all pending</source>
+            <translation>Скасувати всі очікування</translation>
+        </message>
+        <message>
+            <source>Reading file preview...</source>
+            <translation>Читання файлу для перегляду...</translation>
+        </message>
+        <message>
+            <source>Open externally</source>
+            <translation>Відкрити в іншій програмі</translation>
+        </message>
+        <message>
+            <source>This file type cannot be opened directly. Extract it to a chosen folder instead.</source>
+            <translation>Цей тип файлів не можна відкрити безпосередньо. Розпакуйте файл в обрану папку.</translation>
+        </message>
+        <message>
+            <source>Open %1 in its associated application? A read-only temporary copy will be saved on this computer. Edits will not be saved back to the archive. Copies older than seven days are cleaned at startup; the external application may keep its own copies.</source>
+            <translation>Відкрити %1 у пов’язаній програмі? На комп’ютері буде збережено тимчасову копію лише для читання. Зміни не повертаються до архіву. Копії старші за сім днів видаляються під час запуску; інша програма може зберігати власні копії.</translation>
+        </message>
+        <message>
+            <source>Could not create a private temporary folder.</source>
+            <translation>Не вдалося створити приватну тимчасову папку.</translation>
+        </message>
+        <message>
+            <source>Preparing external file...</source>
+            <translation>Підготовка тимчасового файлу...</translation>
+        </message>
+        <message>
+            <source>Windows could not open this file. Check its default application or extract it manually.</source>
+            <translation>Windows не вдалося відкрити цей файл. Перевірте типову програму або розпакуйте його вручну.</translation>
+        </message>
+        <message>
+            <source>Operation details</source>
+            <translation>Подробиці операції</translation>
+        </message>
     </context>
     <context>
         <name>OperationPanel</name>
@@ -1281,6 +1493,38 @@ Explorer integration is not installed by this development build.</source>
             <location filename="../../apps/gui/widgets/OperationPanel.cpp" line="73" />
             <source> · ~%1 s remaining</source>
             <translation> · залишилося ~%1 с</translation>
+        </message>
+        <message>
+            <source>Cancelling…</source>
+            <translation>Скасування…</translation>
+        </message>
+        <message>
+            <source>Extracting and verifying files</source>
+            <translation>Розпакування й перевірка файлів</translation>
+        </message>
+        <message>
+            <source>Verifying decoded streams</source>
+            <translation>Перевірка даних</translation>
+        </message>
+        <message>
+            <source>Scanning input files</source>
+            <translation>Пошук вихідних файлів</translation>
+        </message>
+        <message>
+            <source>Compressing files</source>
+            <translation>Стиснення файлів</translation>
+        </message>
+        <message>
+            <source>Publishing verified volumes</source>
+            <translation>Збереження перевірених томів</translation>
+        </message>
+        <message>
+            <source>Publishing verified archive</source>
+            <translation>Збереження перевіреного архіву</translation>
+        </message>
+        <message>
+            <source>Reading verified content</source>
+            <translation>Читання перевіреного вмісту</translation>
         </message>
     </context>
     <context>
@@ -1340,6 +1584,30 @@ Explorer integration requires a signed identity package.</source>
             <source>Security</source>
             <translation>Безпека</translation>
         </message>
+        <message>
+            <source>Eco</source>
+            <translation>Економний</translation>
+        </message>
+        <message>
+            <source>Balanced</source>
+            <translation>Збалансовано</translation>
+        </message>
+        <message>
+            <source>Maximum</source>
+            <translation>Максимум</translation>
+        </message>
+        <message>
+            <source>Default resources</source>
+            <translation>Ресурси за замовчуванням</translation>
+        </message>
+        <message>
+            <source>Performance</source>
+            <translation>Продуктивність</translation>
+        </message>
+        <message>
+            <source>Eco reduces CPU and memory use. Balanced suits everyday work. Maximum uses more resources when the codec supports it. Changes apply to new operations.</source>
+            <translation>Економний режим зменшує використання процесора й пам’яті. Збалансований підходить для щоденної роботи. Максимум використовує більше ресурсів, якщо це підтримує кодек. Зміни діють для нових операцій.</translation>
+        </message>
     </context>
     <context>
         <name>ToastOverlay</name>
@@ -1347,6 +1615,148 @@ Explorer integration requires a signed identity package.</source>
             <location filename="../../apps/gui/widgets/ToastOverlay.cpp" line="8" />
             <source>Notification</source>
             <translation>Сповіщення</translation>
+        </message>
+    </context>
+    <context>
+        <name>BatchExtractDialog</name>
+        <message>
+            <source>Batch extraction</source>
+            <translation>Пакетне розпакування</translation>
+        </message>
+        <message>
+            <source>Extract each archive into its own folder. Failed archives are reported in the queue; remaining jobs continue.</source>
+            <translation>Кожен архів розпаковується в окрему папку. Помилки показуються в черзі; решта завдань продовжують виконуватися.</translation>
+        </message>
+        <message>
+            <source>Add archives...</source>
+            <translation>Додати архіви...</translation>
+        </message>
+        <message>
+            <source>Remove selected</source>
+            <translation>Прибрати вибрані</translation>
+        </message>
+        <message>
+            <source>Choose archives</source>
+            <translation>Оберіть архіви</translation>
+        </message>
+        <message>
+            <source>Archives (*.zip *.7z *.rar *.tar *.tgz *.gz *.xz *.bz2 *.zst *.lzma *.001);;All files (*)</source>
+            <translation>Архіви (*.zip *.7z *.rar *.tar *.tgz *.gz *.xz *.bz2 *.zst *.lzma *.001);;Усі файли (*)</translation>
+        </message>
+        <message>
+            <source>Browse...</source>
+            <translation>Огляд...</translation>
+        </message>
+        <message>
+            <source>Extraction destination</source>
+            <translation>Папка розпакування</translation>
+        </message>
+        <message>
+            <source>Destination</source>
+            <translation>Папка призначення</translation>
+        </message>
+        <message>
+            <source>Keep both</source>
+            <translation>Зберегти обидва</translation>
+        </message>
+        <message>
+            <source>Skip existing</source>
+            <translation>Пропустити наявні</translation>
+        </message>
+        <message>
+            <source>Replace existing</source>
+            <translation>Замінити наявні</translation>
+        </message>
+        <message>
+            <source>Stop on conflict</source>
+            <translation>Зупинити при конфлікті</translation>
+        </message>
+        <message>
+            <source>Existing files</source>
+            <translation>Наявні файли</translation>
+        </message>
+        <message>
+            <source>Shared password, if needed</source>
+            <translation>Спільний пароль, якщо потрібен</translation>
+        </message>
+        <message>
+            <source>Add to queue</source>
+            <translation>Додати до черги</translation>
+        </message>
+        <message>
+            <source>Choose archives and a destination folder.</source>
+            <translation>Оберіть архіви й папку призначення.</translation>
+        </message>
+    </context>
+    <context>
+        <name>PreviewDialog</name>
+        <message>
+            <source>Image dimensions exceed the preview limit.</source>
+            <translation>Розміри зображення перевищують обмеження перегляду.</translation>
+        </message>
+        <message>
+            <source>The image could not be decoded. Hex view is available.</source>
+            <translation>Не вдалося прочитати зображення. Доступний перегляд Hex.</translation>
+        </message>
+        <message>
+            <source>File preview</source>
+            <translation>Перегляд файлу</translation>
+        </message>
+        <message>
+            <source>%1 bytes. Read-only preview; content is never executed.</source>
+            <translation>%1 байт. Перегляд лише для читання; вміст не виконується.</translation>
+        </message>
+        <message>
+            <source>Find in text</source>
+            <translation>Знайти в тексті</translation>
+        </message>
+        <message>
+            <source>Previous</source>
+            <translation>Попереднє</translation>
+        </message>
+        <message>
+            <source>Next</source>
+            <translation>Наступне</translation>
+        </message>
+        <message>
+            <source>Text</source>
+            <translation>Текст</translation>
+        </message>
+        <message>
+            <source>Fit</source>
+            <translation>Вмістити</translation>
+        </message>
+        <message>
+            <source>100%</source>
+            <translation>100%</translation>
+        </message>
+        <message>
+            <source>Zoom in</source>
+            <translation>Збільшити</translation>
+        </message>
+        <message>
+            <source>Zoom out</source>
+            <translation>Зменшити</translation>
+        </message>
+        <message>
+            <source>%1 x %2 pixels</source>
+            <translation>%1 x %2 пікселів</translation>
+        </message>
+        <message>
+            <source>Image</source>
+            <translation>Зображення</translation>
+        </message>
+        <message>
+            <source>Hex (first 64 KiB)</source>
+            <translation>Hex (перші 64 КіБ)</translation>
+        </message>
+        <message>
+            <source>Binary or unsupported text encoding. Use Hex or extract the file.</source>
+            <translation>Двійкові дані або непідтримуване кодування тексту. Скористайтеся Hex або розпакуйте файл.</translation>
+        </message>
+        <message>
+            <source>Open externally...</source>
+            <translation>Відкрити в іншій програмі...</translation>
         </message>
     </context>
 </TS>

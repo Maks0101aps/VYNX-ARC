@@ -1,6 +1,6 @@
 # Format capability matrix
 
-Current 0.1.0 development capabilities; 0.2.0 acceptance remains blocked.
+Current 0.4.0 development capabilities.
 Yes describes implemented behavior, not qualification of every possible codec.
 
 | Format | Browse | Test | Extract | Create | Modify | Encrypted read | Encrypted write | Multi-volume read | Multi-volume create | Known limits |
@@ -13,6 +13,8 @@ Yes describes implemented behavior, not qualification of every possible codec.
 | RAR multipart | Yes (Windows) | Yes (Windows) | Yes (Windows) | No | No | Backend-supported encrypted RAR | No | Yes, RAR4/RAR5 | No | Start at first part; exact missing-volume path; encrypted multipart combinations not independently qualified |
 | TAR | Yes | Yes | Yes | Yes | No | No | No | No | No | Stream scanning; regular files/directories only |
 | TAR.GZ / TGZ | Yes | Yes | Yes | Yes | No | No | No | No | No | Stream decoding for metadata; regular files/directories only |
+| TAR.XZ / TAR.BZ2 / TAR.ZST | Yes | Yes | Yes | Yes | No | No | No | No | No | Stream scanning; regular files/directories only |
+| GZIP / XZ / BZIP2 / ZSTD / LZMA | Yes (one entry) | Yes | Yes | Yes (one regular file) | No | No | No | No | No | Name derived from container filename; metadata browsing decodes the stream; no archive-level encryption |
 
 Browse reads metadata. Test decodes regular-file streams and enforces policy and
 available checksums; it is not a content authenticity check. Link-containing
@@ -26,6 +28,11 @@ Signatures identify manually opened archives. Split-7Z filenames select the
 numbered reader before signature detection. Split creation stages/verifies the
 whole archive before publishing parts; see [VOLUMES.md](VOLUMES.md).
 
-Unsupported: standalone GZIP/XZ/BZIP2/ZSTD/LZMA, TAR.XZ/TAR.BZ2/TAR.ZST,
-CAB/ISO/WIM/CPIO/AR, split ZIP, and RAR creation/modification. ZIPX compatibility
+Unsupported: CAB/ISO/WIM/CPIO/AR, split ZIP, and RAR creation/modification. ZIPX compatibility
 is codec-specific and is not advertised broadly.
+
+Compressed TAR is identified by decoded USTAR metadata. Stream formats accept
+exactly one regular input file; use a compressed TAR for folders or multiple
+files. Resource modes constrain supported codecs and worker counts, not total
+process memory. Compression presets apply to new archive creation; ZIP/7Z
+modification retains its existing rebuild policy.

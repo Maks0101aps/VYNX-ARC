@@ -1,21 +1,31 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains a working **0.1.0
+archive core connected through CXX. This repository contains a working **0.4.0
 development milestone**. The supplied master brief remains the V1 contract;
 this milestone does not satisfy the full contract.
 
-Open, browse, search, select, test and extract ZIP, 7Z, RAR4/RAR5, TAR and TAR.GZ.
-Create ZIP, 7Z, TAR and TAR.GZ, including AES-encrypted ZIP and encrypted 7Z
-filenames. Operations run asynchronously with progress and cancellation.
+Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
+TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
+Create all of these except RAR, including AES-encrypted ZIP and encrypted 7Z
+filenames. Choose Store/Fast/Balanced/Maximum compression and
+Eco/Balanced/Maximum resource modes. Operations run asynchronously with
+progress and cancellation; additional archive requests enter a visible FIFO queue.
 The browser uses Qt model/view, with folder navigation, sortable columns,
 keyboard shortcuts and drag-to-open. English, Ukrainian and Russian UI,
 system/light/dark appearance, local recent history and portable settings are
 available. No external archiver, browser engine, telemetry or service is used.
 
-Search covers file names and paths throughout the archive and shows each result's
-full path. Double-click a file or press F3 for a read-only UTF-8 preview up to
-1 MiB; binary/larger files must be extracted. Preview creates no plaintext file.
+Search covers names and paths throughout the archive. Double-click a file or
+press F3 for read-only text (UTF-8/UTF-16 with BOM), raster image or Hex preview.
+The viewer reads up to 16 MiB, displays text up to 4 MiB and the first 64 KiB
+in Hex. Internal preview creates no plaintext file. Ctrl+Enter offers external
+opening of supported document/media types through a verified read-only temporary
+copy, with explicit confirmation. Executables, scripts and shortcuts are excluded.
+
+File > Batch extraction (Ctrl+Shift+E) queues archives into separate destination
+folders. Pause/resume, reorder or cancel pending jobs in View > Operation queue;
+double-click a row for error details. New creation requests can also be queued.
 
 Extraction validates Windows paths and collisions, blocks links/reparse points,
 checks output limits, writes unique temporary files and publishes completed
@@ -64,10 +74,12 @@ limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
 
-The [current improvement report](docs/IMPROVEMENTS_2026-10-16.md) records the
-October 16 changes and verification. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
+The [0.4 milestone report](docs/MILESTONE_0_4.md) records the current feature
+increment and verification. The [previous product report](docs/PRODUCT_DEVELOPMENT.md)
+records the preceding format/resource work. The earlier [improvement report](docs/IMPROVEMENTS_2026-10-16.md)
+records the preceding parser, preview and dependency changes. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
 retains historical failures. Stable-release acceptance remains incomplete at
-version 0.1.0. Run `scripts/check.ps1` for mandatory local source gates;
+version 0.4.0. Run `scripts/check.ps1` for mandatory local source gates;
 release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;

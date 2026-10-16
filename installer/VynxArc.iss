@@ -7,7 +7,7 @@
 [Setup]
 AppId={{957C2CE0-1072-43F7-98E5-4930AF16C309}
 AppName=VYNX ARC
-AppVersion=0.1.0
+AppVersion=0.4.0
 AppPublisher=VYNX ARC contributors
 AppPublisherURL=https://github.com/Maks0101aps/VYNX-ARC
 DefaultDirName={localappdata}\Programs\VYNX ARC
@@ -48,6 +48,11 @@ Root: HKCU; Subkey: "Software\Classes\.zip\OpenWithProgids"; ValueType: none; Va
 Root: HKCU; Subkey: "Software\Classes\.7z\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.tar\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.tgz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.gz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.xz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.bz2\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.zst\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.lzma\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
 
 [Run]
 #ifdef SignedIdentity

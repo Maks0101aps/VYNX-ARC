@@ -31,10 +31,30 @@ and decoder allocations, including encrypted/encoded headers. They are not an
 overall RSS ceiling or a complete audit of every codec allocation. TAR/PAX,
 native RAR allocation budgets, ZIP codec workspaces and CPU budgets remain open.
 
-Text preview decodes with the same stream validation and output limits, accepts
-only UTF-8 text up to 1 MiB and displays it as plain text in a read-only widget.
-It writes no temporary plaintext file and launches no external application.
-For solid archives, decoding unrelated streams can still take significant time.
+Internal preview returns at most 16 MiB of verified entry bytes and publishes no
+plaintext on disk. Text accepts strict UTF-8 or BOM-marked UTF-16 up to 4 MiB;
+HTML is displayed literally. Hex displays at most 64 KiB. Only PNG/JPEG/BMP/GIF/
+WebP raster decoders are used, with at most 16 million pixels, 16384 pixels per
+axis and a 64 MiB Qt image allocation limit. This is not an OS decoder sandbox.
+The legacy Rust text-only API retains its 1 MiB UTF-8 contract. Solid archives
+and other validated streams may still take substantial time to decode.
+
+External opening is a separate explicit action with confirmation. The selected
+regular file (at most 256 MiB) is streamed into a unique per-user temporary
+folder, verified before publication, marked read-only, and given Windows
+ZoneId=3. Only an allowlist of document/image/media extensions can be dispatched;
+executables, scripts, shortcuts, HTML, SVG and macro Office extensions are excluded.
+Read-only attributes are advisory, not an application sandbox; an external
+handler may make copies, access networks or have vulnerabilities. Changes are
+never imported back into the archive.
+
+External copies remain under AppLocalDataLocation/OpenFiles after shutdown so
+handlers do not lose their source immediately. On startup, owned flat directories
+older than seven days are cleaned only when their owner lock can be acquired.
+Live sessions and directories containing links/subdirectories are skipped.
+Filesystem sharing errors can defer cleanup. Passwords are not stored there;
+decrypted file content is, as the opening confirmation explains. No secure
+physical erasure or hostile-local-process race guarantee is claimed.
 
 Sibling temporary output is published after stream/checksum completion; cancellation
 removes unpublished temporary files and preserves pre-existing files. A partially

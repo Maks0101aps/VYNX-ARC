@@ -1,4 +1,5 @@
 #include "CreateArchiveDialog.h"
+#include "../ArchiveModel.h"
 #include "../FormatUtils.h"
 #include <QtWidgets>
 CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initialFormat,
@@ -27,7 +28,8 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     connect(remove, &QPushButton::clicked, this,
             [this] { delete inputs->takeItem(inputs->currentRow()); });
     format = new QComboBox;
-    format->addItems({"ZIP", "7Z", "TAR", "TAR.GZ"});
+    format->addItems({"ZIP", "7Z", "TAR", "TAR.GZ", "GZIP", "XZ", "BZIP2", "ZSTD", "LZMA", "TAR.XZ",
+                      "TAR.BZ2", "TAR.ZST"});
     format->setCurrentIndex(initialFormat);
     output = new QLineEdit;
     output->setPlaceholderText(tr("Archive name or full path"));
@@ -42,11 +44,59 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     outLine->addWidget(save);
     form->addRow(tr("Output archive"), outLine);
     form->addRow(tr("Format"), format);
-    auto *compression = new QLabel(tr("Format default"));
-    compression->setObjectName("muted");
-    form->addRow(tr("Compression"), compression);
+    auto *sourceHint = new QLabel(
+        tr("This format compresses one file. Use TAR.XZ, TAR.BZ2 or TAR.ZST for folders."));
+    sourceHint->setWordWrap(true);
+    sourceHint->setMaximumWidth(480);
+    sourceHint->setMinimumHeight(sourceHint->heightForWidth(480));
+    form->addRow(sourceHint);
+    auto updateSources = [this, folder, sourceHint] {
+        const bool standalone = format->currentIndex() >= 4 && format->currentIndex() <= 8;
+        folder->setEnabled(!standalone);
+        sourceHint->setVisible(standalone);
+    };
+    connect(format, &QComboBox::currentIndexChanged, this, updateSources);
+    updateSources();
+    preset = new QComboBox;
+    preset->setObjectName("compressionPreset");
+    preset->addItems({tr("Store / None"), tr("Fast"), tr("Balanced"), tr("Maximum")});
+    preset->setCurrentIndex(2);
+    resource = new QComboBox;
+    resource->setObjectName("resourceMode");
+    resource->addItems({tr("Eco"), tr("Balanced"), tr("Maximum")});
+    resource->setCurrentIndex(1);
+    form->addRow(tr("Compression"), preset);
+    form->addRow(tr("Resources"), resource);
+    auto *effective = new QLabel;
+    effective->setObjectName("effectiveCompression");
+    effective->setWordWrap(true);
+    effective->setMaximumWidth(480);
+    form->addRow(tr("Effective settings"), effective);
+    auto refresh = [this, effective] {
+        if (format->currentIndex() == 2)
+            preset->setCurrentIndex(0);
+        if (format->currentIndex() >= 5 && preset->currentIndex() == 0)
+            preset->setCurrentIndex(2);
+        auto *model = qobject_cast<QStandardItemModel *>(preset->model());
+        if (model)
+            model->item(0)->setEnabled(format->currentIndex() < 5);
+        preset->setEnabled(format->currentIndex() != 2);
+        try {
+            auto s = vynx::compression_details(uint8_t(format->currentIndex()),
+                                               uint8_t(preset->currentIndex()),
+                                               uint8_t(resource->currentIndex()));
+            effective->setText(QString::fromUtf8(s.data(), qsizetype(s.size())));
+        } catch (const std::exception &e) {
+            effective->setText(QString::fromUtf8(e.what()));
+        }
+    };
+    connect(format, &QComboBox::currentIndexChanged, this, refresh);
+    connect(preset, &QComboBox::currentIndexChanged, this, refresh);
+    connect(resource, &QComboBox::currentIndexChanged, this, refresh);
+    refresh();
     connect(save, &QPushButton::clicked, this, [this] {
-        const QStringList extensions{"zip", "7z", "tar", "tar.gz"};
+        const QStringList extensions{"zip", "7z",  "tar",  "tar.gz", "gz",      "xz",
+                                     "bz2", "zst", "lzma", "tar.xz", "tar.bz2", "tar.zst"};
         auto p = QFileDialog::getSaveFileName(this, tr("Create archive"),
                                               "Archive." + extensions[format->currentIndex()],
                                               tr("All files (*)"));
@@ -125,6 +175,13 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
         if (inputs->count() == 0 || output->text().isEmpty()) {
             QMessageBox::information(this, tr("Create archive"),
                                      tr("Choose source files and an output archive."));
+            return;
+        }
+        if (format->currentIndex() >= 4 && format->currentIndex() <= 8 &&
+            (inputs->count() != 1 || !QFileInfo(inputs->item(0)->text()).isFile())) {
+            QMessageBox::information(this, tr("Create archive"),
+                                     tr("Choose exactly one file, or select a TAR format for "
+                                        "folders and multiple files."));
             return;
         }
         output->setText(outputForFormat(output->text(), format->currentIndex()));

@@ -34,7 +34,7 @@ def main():
     source = args.output / 'source.txt'
     source.write_text('UTF-8 test текст\n' * 100, encoding='utf-8')
     seeds = []
-    for ext in ['zip', '7z', 'tar', 'tar.gz']:
+    for ext in ['zip', '7z', 'tar', 'tar.gz', 'gz', 'xz', 'bz2', 'zst', 'lzma', 'tar.xz', 'tar.bz2', 'tar.zst']:
         path = args.output / f'seed.{ext}'
         subprocess.run([str(cli), 'create', str(path), str(source)], check=True, capture_output=True, timeout=15)
         seeds.append(path.read_bytes())
@@ -52,8 +52,11 @@ def main():
             for _ in range(rng.randrange(1, 12)):
                 data[rng.randrange(len(data))] = rng.randrange(256)
             # Keep 7Z CRCs valid in half the mutations to exercise deeper parsing.
-            if index % 8 == 1 and len(data) > 32:
-                data[28:32] = binascii.crc32(data[32:]).to_bytes(4, 'little')
+            if index % 2 == 1 and len(data) > 32 and data.startswith(b'7z\xbc\xaf\x27\x1c'):
+                offset=int.from_bytes(data[12:20],'little')+32
+                size=int.from_bytes(data[20:28],'little')
+                if offset+size <= len(data):
+                    data[28:32] = binascii.crc32(data[offset:offset+size]).to_bytes(4, 'little')
                 data[8:12] = binascii.crc32(data[12:32]).to_bytes(4, 'little')
         path = args.output / f'case-{index:04}.bin'
         path.write_bytes(data)
