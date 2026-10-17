@@ -29,6 +29,8 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
             result[key] = spec[key];
     for (const auto &key : {QString("sources"), QString("names")}) {
         QJsonArray values;
+        if (spec[key].toArray().size() > 10000)
+            result["incompleteSpec"] = true;
         for (const auto &value : spec[key].toArray()) {
             if (values.size() >= 10000)
                 break;
@@ -37,9 +39,9 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
         }
         result[key] = values;
     }
-    for (const auto &key : {QString("smart"), QString("needsPassword")})
+    for (const auto &key : {QString("smart"), QString("needsPassword"), QString("incompleteSpec")})
         if (spec[key].isBool())
-            result[key] = spec[key];
+            result[key] = result[key].toBool() || spec[key].toBool();
     return result;
 }
 QJsonArray JobJournal::sourceSnapshot(const QJsonObject &spec) {

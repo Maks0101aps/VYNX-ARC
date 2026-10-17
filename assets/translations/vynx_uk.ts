@@ -1830,6 +1830,10 @@ Explorer integration is not installed by this development build.</source>
             <source>Retained edits are available in View &gt; Working copies.</source>
             <translation>Збережені правки доступні в меню «Вигляд &gt; Робочі копії».</translation>
         </message>
+        <message>
+            <source>This selection is too large to restore completely. Repeat it from the archive tab.</source>
+            <translation>Виділення завелике для повного відновлення. Повторіть операцію у вкладці архіву.</translation>
+        </message>
     </context>
     <context>
         <name>OperationPanel</name>

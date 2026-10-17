@@ -27,6 +27,14 @@ void MainWindow::bindSession(const std::shared_ptr<ArchiveSession> &next) {
     QSignalBlocker blocker(search_);
     search_->setText(session_->search);
     table_->setModel(session_->filter);
+    // Qt also replaces the headers' selection models. Retain every model still
+    // used by a child view, and release unshared models left by setModel.
+    QSet<QItemSelectionModel *> used{table_->selectionModel()};
+    for (auto *view : table_->findChildren<QAbstractItemView *>())
+        used.insert(view->selectionModel());
+    for (auto *selection : table_->findChildren<QItemSelectionModel *>())
+        if (!used.contains(selection))
+            delete selection;
     connect(table_->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             [this] { updateStatus(); });
     if (!session_->headerState.isEmpty())

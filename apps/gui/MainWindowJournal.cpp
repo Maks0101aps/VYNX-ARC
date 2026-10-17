@@ -118,6 +118,12 @@ void MainWindow::retrySelectedJob() {
     const auto record = journal_.record(item->data(Qt::UserRole + 3).toString());
     auto spec = record["spec"].toObject();
     const auto kind = spec["kind"].toString();
+    if (spec["incompleteSpec"].toBool()) {
+        QMessageBox::information(this, tr("Retry operation"),
+                                 tr("This selection is too large to restore completely. Repeat it "
+                                    "from the archive tab."));
+        return;
+    }
     if (!QStringList{"create", "extract", "test", "shell", "open", "modify"}.contains(kind)) {
         QMessageBox::information(this, tr("Retry operation"),
                                  tr("Repeat this action from its archive tab. Edited files are "
@@ -363,7 +369,8 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
         },
         [this, kind, paths, pw] {
             if (kind == "modify")
-                reloadArchive(paths.first(), pw);
+                QTimer::singleShot(0, this,
+                                   [this, path = paths.first(), pw] { reloadArchive(path, pw); });
         },
         [this](const QString &) {
             toast_->notify(tr("Operation stopped. Review details in the queue."));

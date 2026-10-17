@@ -261,6 +261,26 @@ class GuiPresentationTest : public QObject {
         QVERIFY(recovered.setEnabled(false));
         QVERIFY(!QFile::exists(path));
     }
+    void largeJournalSelectionsCannotSilentlyBecomePartialRetries() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QString id;
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(path, true));
+            QJsonArray names;
+            for (int i = 0; i < 10001; ++i)
+                names.append(QString("file-%1").arg(i));
+            id = journal.add("Large selection", QJsonObject{{"kind", "extract"}, {"names", names}});
+            QVERIFY(!id.isEmpty());
+            QVERIFY(journal.record(id)["spec"].toObject()["incompleteSpec"].toBool());
+        }
+        JobJournal recovered;
+        QVERIFY(recovered.open(path, true));
+        const auto spec = recovered.record(id)["spec"].toObject();
+        QVERIFY(spec["incompleteSpec"].toBool());
+        QCOMPARE(spec["names"].toArray().size(), 10000);
+    }
     void journalRejectsDamageAndDetectsSourceChanges() {
         QTemporaryDir root;
         const auto path = root.path() + "/jobs.json";

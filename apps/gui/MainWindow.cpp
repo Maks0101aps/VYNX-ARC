@@ -1389,6 +1389,12 @@ bool MainWindow::smokeTest() {
                        secret("private"));
         loop.exec();
         auto encryptedSession = session_;
+        const auto selectionModels = table_->findChildren<QItemSelectionModel *>().size();
+        for (int i = 0; i < 60; ++i)
+            activateSession(i % sessions_.size());
+        activateSession(sessions_.indexOf(encryptedSession));
+        if (table_->findChildren<QItemSelectionModel *>().size() > selectionModels)
+            return smokeFailure(__LINE__);
         if (sessions_.size() != 3 || encryptedSession->password->bytes() != "private" ||
             secondSession == firstSession)
             return smokeFailure(__LINE__);
@@ -1444,6 +1450,23 @@ bool MainWindow::smokeTest() {
             return smokeFailure(__LINE__);
         closeSession(sessions_.indexOf(encryptedSession));
         closeSession(sessions_.indexOf(secondSession));
+        // A callback may start another job; finishing the old job cannot clear its owner.
+        beginOperation();
+        runJob(
+            tr("Session ownership test"), [] { return QString(); },
+            [this] {
+                beginOperation();
+                runJob(tr("Session ownership test"), [] { return QString(); });
+            });
+        loop.exec();
+        QElapsedTimer handoffDeadline;
+        handoffDeadline.start();
+        while (operations_.busy && handoffDeadline.elapsed() < 10000) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+            QThread::msleep(1);
+        }
+        if (operations_.busy || session_->busy)
+            return smokeFailure(__LINE__);
         // The GUI edit workflow uses the same transactional bridge as normal saves.
         const auto editingId = session_->model->row(0).id;
         prepareEdit(editingId, "source/nested/renamed.txt", false);

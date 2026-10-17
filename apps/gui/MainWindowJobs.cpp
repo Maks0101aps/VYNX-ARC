@@ -179,6 +179,7 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         auto success = std::move(success_);
         auto failure = std::move(failure_);
         operations_.operation.reset();
+        operations_.owner.reset();
         if (closePending_) {
             QTimer::singleShot(0, this, [this] { close(); });
             return;
@@ -192,7 +193,6 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
             failure(error);
         } else
             QMessageBox::warning(this, tr("Operation stopped"), error);
-        operations_.owner.reset();
         activateSession(tabs_->currentIndex());
         saveWorkspace();
         if (owner && owner->closeWhenIdle)
