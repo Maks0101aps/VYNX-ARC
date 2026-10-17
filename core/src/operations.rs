@@ -684,29 +684,7 @@ fn create_internal(
         }
         Format::SevenZ => {
             let mut writer = sevenz_rust2::ArchiveWriter::new(temp.as_file_mut())?;
-            use sevenz_rust2::*;
-            let compression = if effective.codec == "Copy" {
-                EncoderConfiguration::new(EncoderMethod::COPY)
-            } else {
-                let mut options = encoder_options::Lzma2Options::from_level_mt(
-                    effective.level,
-                    effective.threads,
-                    effective.dictionary as u64,
-                );
-                options.set_dictionary_size(effective.dictionary);
-                EncoderConfiguration::new(EncoderMethod::LZMA2).with_options(options.into())
-            };
-            let mut methods = vec![compression];
-            if !options.password.is_empty() {
-                methods.insert(
-                    0,
-                    EncoderConfiguration::new(EncoderMethod::AES256_SHA256).with_options(
-                        encoder_options::AesEncoderOptions::new(options.password.as_str().into())
-                            .into(),
-                    ),
-                );
-            }
-            writer.set_content_methods(methods);
+            writer.set_content_methods(seven_methods(&effective, options.password.as_str()));
             for (entry, path) in &sources {
                 op.check()?;
                 op.phase(&entry.name);
@@ -840,4 +818,31 @@ pub fn hash_file(path: &Path, op: &Operation) -> Result<String> {
     }
     let hex: String = sha.finalize().iter().map(|v| format!("{v:02x}")).collect();
     Ok(format!("SHA-256: {hex}\nCRC32: {:08x}", crc.finalize()))
+}
+
+pub(crate) fn seven_methods(
+    effective: &crate::settings::Effective,
+    password: &str,
+) -> Vec<sevenz_rust2::EncoderConfiguration> {
+    use sevenz_rust2::*;
+    let compression = if effective.codec == "Copy" {
+        EncoderConfiguration::new(EncoderMethod::COPY)
+    } else {
+        let mut options = encoder_options::Lzma2Options::from_level_mt(
+            effective.level,
+            effective.threads,
+            effective.dictionary as u64,
+        );
+        options.set_dictionary_size(effective.dictionary);
+        EncoderConfiguration::new(EncoderMethod::LZMA2).with_options(options.into())
+    };
+    let mut methods = vec![compression];
+    if !password.is_empty() {
+        methods.insert(
+            0,
+            EncoderConfiguration::new(EncoderMethod::AES256_SHA256)
+                .with_options(encoder_options::AesEncoderOptions::new(password.into()).into()),
+        );
+    }
+    methods
 }

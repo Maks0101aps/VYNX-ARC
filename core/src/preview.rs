@@ -35,6 +35,12 @@ fn read_into(
         ));
     }
     op.stage("Reading verified content");
+    if archive.format == crate::Format::Zip {
+        op.total(selected.size);
+        return archive.zip_entry(id, password, op, |entry, data| {
+            copy_checked(data, target, entry, op, &policy, &mut 0)
+        });
+    }
     op.total(archive.entries.iter().map(|e| e.size).sum());
     let mut actual = 0;
     let mut found = false;

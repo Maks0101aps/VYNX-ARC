@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "EditStore.h"
 #include "ExternalFiles.h"
 #include "FormatUtils.h"
 #include "SecretUtf8.h"
@@ -18,6 +19,7 @@
 #include <QRegularExpression>
 #include <QStyleHints>
 #include <QtWidgets>
+#include <atomic>
 
 static QString text(const rust::String &s) {
     return QString::fromUtf8(s.data(), qsizetype(s.size()));
@@ -27,7 +29,17 @@ static std::string utf8(const QString &s) {
     return std::string(b.constData(), size_t(b.size()));
 }
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    externalFiles_ = std::make_unique<ExternalFiles>();
+    session_ = std::make_shared<ArchiveSession>();
+    sessions_.append(session_);
+    if (QCoreApplication::arguments().contains("--smoke-test") ||
+        QCoreApplication::arguments().contains("--capture")) {
+        transientStorage_ = std::make_unique<QTemporaryDir>();
+        edits_ = std::make_unique<EditStore>(transientStorage_->path() + "/WorkingCopies");
+        externalFiles_ = std::make_unique<ExternalFiles>(transientStorage_->path() + "/Views");
+    } else {
+        edits_ = std::make_unique<EditStore>();
+        externalFiles_ = std::make_unique<ExternalFiles>();
+    }
     setWindowTitle(tr("VYNX ARC"));
     setWindowIcon(QIcon(":/assets/icons/vynx-arc.png"));
     resize(1060, 720);
@@ -56,19 +68,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     addAction(fileMenu, tr("Batch extraction..."), QKeySequence("Ctrl+Shift+E"),
               [this] { chooseBatchExtract(); });
     fileMenu->addSeparator();
-    addAction(fileMenu, tr("Close archive"), QKeySequence("Ctrl+W"), [this] {
-        if (busy_)
-            return;
-        archive_.reset();
-        password_.reset();
-        archivePath_.clear();
-        pages_->setCurrentIndex(0);
-        setWindowTitle(tr("VYNX ARC"));
-        for (auto *a : archiveActions_)
-            a->setEnabled(false);
-        statusBar()->clearMessage();
-        archiveSummary_->clear();
-    });
+    addAction(fileMenu, tr("Close archive"), QKeySequence("Ctrl+W"),
+              [this] { closeSession(tabs_->currentIndex()); });
     addAction(fileMenu, tr("Exit"), QKeySequence::Quit, [this] { close(); });
     auto *operationsMenu = menuBar()->addMenu(tr("&Archive"));
     auto *extract = addAction(operationsMenu, tr("Extract…"), QKeySequence("Ctrl+E"),
@@ -96,6 +97,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                 QKeySequence("Ctrl+Return"), [this] { openSelectedExternally(); });
     archiveActions_.append({hashSelectedAction_, verifySelectedAction_, verifyArchive,
                             previewAction_, externalAction_});
+    editAction_ = addAction(operationsMenu, tr("Edit working copy..."),
+                            QKeySequence("Ctrl+Shift+Return"), [this] { editSelected(); });
+    archiveActions_.append(editAction_);
     operationsMenu->addSeparator();
     auto *addFiles = addAction(operationsMenu, tr("Add files…"), QKeySequence("Ctrl+Shift+A"),
                                [this] { chooseModify(0); });
@@ -110,6 +114,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         a->setEnabled(false);
     auto *viewMenu = menuBar()->addMenu(tr("&View"));
     addAction(viewMenu, tr("Settings…"), QKeySequence("Ctrl+,"), [this] { settings(); });
+    auto *workingCopies = addAction(viewMenu, tr("Working copies..."), QKeySequence("Ctrl+Shift+W"),
+                                    [this] { showWorkingCopies(); });
+    addAction(viewMenu, tr("Temporary files..."), {}, [this] { showTemporaryFiles(); });
     auto *help = menuBar()->addMenu(tr("&Help"));
     addAction(help, tr("About VYNX ARC"), {}, [this] {
         AboutDialog dialog(this);
@@ -121,6 +128,24 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->setContentsMargins(16, 12, 16, 12);
     layout->setSpacing(12);
     setCentralWidget(central);
+    tabs_ = new QTabBar;
+    tabs_->setObjectName("archiveTabs");
+    tabs_->setTabsClosable(true);
+    tabs_->setExpanding(false);
+    tabs_->addTab(tr("New archive"));
+    tabs_->hide();
+    layout->addWidget(tabs_);
+    connect(tabs_, &QTabBar::currentChanged, this, &MainWindow::activateSession);
+    connect(tabs_, &QTabBar::tabCloseRequested, this, &MainWindow::closeSession);
+    for (const auto &key : {QString("Ctrl+Tab"), QString("Ctrl+Shift+Tab")}) {
+        auto *shortcut = new QShortcut(QKeySequence(key), this);
+        connect(shortcut, &QShortcut::activated, this, [this, key] {
+            const int count = tabs_->count();
+            if (count)
+                tabs_->setCurrentIndex(
+                    (tabs_->currentIndex() + (key.contains("Shift") ? count - 1 : 1)) % count);
+        });
+    }
     pages_ = new QStackedWidget;
     layout->addWidget(pages_, 1);
     auto *home = new HomePage(open, create);
@@ -153,20 +178,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     search_ = archivePage_->search;
     table_ = archivePage_->table;
     connect(breadcrumb_, &BreadcrumbBar::navigateRequested, this, &MainWindow::navigate);
-    model_ = new ArchiveModel(this);
-    filter_ = new ArchiveFilter(this);
-    filter_->setSourceModel(model_);
-    filter_->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    filter_->setFilterKeyColumn(0);
-    table_->setModel(filter_);
+    session_->filter->setSourceModel(session_->model);
+    session_->filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    session_->filter->setFilterKeyColumn(0);
+    table_->setModel(session_->filter);
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     table_->sortByColumn(0, Qt::AscendingOrder);
     table_->setColumnWidth(1, 100);
     table_->setColumnWidth(2, 100);
     table_->setColumnWidth(
-        3, qMax(70, table_->fontMetrics().horizontalAdvance(
-                        model_->headerData(3, Qt::Horizontal, Qt::DisplayRole).toString()) +
-                        28));
+        3,
+        qMax(70, table_->fontMetrics().horizontalAdvance(
+                     session_->model->headerData(3, Qt::Horizontal, Qt::DisplayRole).toString()) +
+                     28));
     table_->setColumnWidth(4, 80);
     table_->setColumnWidth(5, 140);
     table_->setColumnHidden(6, true);
@@ -180,19 +204,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     statusBar()->addPermanentWidget(archiveSummary_);
     toast_ = new ToastOverlay(central);
     connect(search_, &QLineEdit::textChanged, this, [this](const QString &s) {
-        model_->setSearchMode(!s.isEmpty());
+        session_->model->setSearchMode(!s.isEmpty());
         table_->setColumnHidden(7, s.isEmpty());
         if (s.contains('*') || s.contains('?'))
-            filter_->setFilterRegularExpression(
+            session_->filter->setFilterRegularExpression(
                 QRegularExpression(QRegularExpression::wildcardToRegularExpression(
                                        s, QRegularExpression::UnanchoredWildcardConversion),
                                    QRegularExpression::CaseInsensitiveOption));
         else
-            filter_->setFilterFixedString(s);
+            session_->filter->setFilterFixedString(s);
         updateStatus();
     });
     connect(table_, &QTableView::doubleClicked, this, [this](QModelIndex i) {
-        const auto &r = model_->row(filter_->mapToSource(i).row());
+        const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
         if (r.folder)
             navigate(r.fullPath);
         else
@@ -225,7 +249,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(enter, &QShortcut::activated, this, [this] {
         const auto rows = table_->selectionModel()->selectedRows();
         if (rows.size() == 1) {
-            const auto &r = model_->row(filter_->mapToSource(rows.first()).row());
+            const auto &r = session_->model->row(session_->filter->mapToSource(rows.first()).row());
             if (r.folder)
                 navigate(r.fullPath);
             else
@@ -243,10 +267,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                 QMenu menu;
                 const auto rows = table_->selectionModel()->selectedRows();
                 if (rows.size() == 1 &&
-                    model_->row(filter_->mapToSource(rows.first()).row()).folder)
+                    session_->model->row(session_->filter->mapToSource(rows.first()).row()).folder)
                     connect(menu.addAction(tr("Open folder")), &QAction::triggered, this,
                             [this, index] {
-                                navigate(model_->row(filter_->mapToSource(index).row()).fullPath);
+                                navigate(
+                                    session_->model->row(session_->filter->mapToSource(index).row())
+                                        .fullPath);
                             });
                 menu.addAction(extract);
                 menu.addAction(hashSelectedAction_);
@@ -262,8 +288,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             });
     auto *columns = viewMenu->addMenu(tr("Columns"));
     for (int c = 1; c < 7; ++c) {
-        auto *a =
-            columns->addAction(model_->headerData(c, Qt::Horizontal, Qt::DisplayRole).toString());
+        auto *a = columns->addAction(
+            session_->model->headerData(c, Qt::Horizontal, Qt::DisplayRole).toString());
         a->setCheckable(true);
         a->setChecked(!table_->isColumnHidden(c));
         connect(a, &QAction::toggled, this,
@@ -278,8 +304,40 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 
     setupOperations(layout, viewMenu);
+    setupJournal();
+    auto *editStatus = new QTimer(this);
+    editStatus->setInterval(2000);
+    connect(editStatus, &QTimer::timeout, this, [this, workingCopies] {
+        int changed = 0;
+        QSet<QString> changedArchives;
+        for (const auto &value : edits_->records()) {
+            const auto record = value.toObject();
+            if (record["state"] == "needs-review" || record["state"] == "preparing" ||
+                EditStore::fingerprint(record["file"].toString()) !=
+                    record["fingerprint"].toString()) {
+                ++changed;
+                changedArchives.insert(archiveIdentity(record["archive"].toString()));
+            }
+        }
+        workingCopies->setText(changed ? tr("Working copies (%1 changed)...").arg(changed)
+                                       : tr("Working copies..."));
+        for (int i = 0; i < sessions_.size(); ++i) {
+            const auto &path = sessions_[i]->path;
+            if (!path.isEmpty())
+                tabs_->setTabText(
+                    i, QFileInfo(path).fileName() +
+                           (changedArchives.contains(archiveIdentity(path)) ? " *" : ""));
+        }
+    });
+    editStatus->start();
+    QTimer::singleShot(1000, this, [this] {
+        if (!QCoreApplication::arguments().contains("--capture") &&
+            !QCoreApplication::arguments().contains("--smoke-test") && !edits_->records().isEmpty())
+            toast_->notify(tr("Retained edits are available in View > Working copies."));
+    });
     updateRecent();
     applyTheme(settings_->value("theme", "system").toString());
+    QTimer::singleShot(500, this, &MainWindow::restoreWorkspace);
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
         if (settings_->value("theme", "system") == "system")
             applyTheme("system");
@@ -287,10 +345,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 }
 MainWindow::~MainWindow() {
     queue_.clear();
-    if (operation_)
-        vynx::cancel(**operation_);
-    watcher_.waitForFinished();
-    password_.reset();
+    for (const auto &reader : readers_) {
+        if (reader->operation)
+            vynx::cancel(**reader->operation);
+        reader->watcher().waitForFinished();
+    }
+    readers_.clear();
+    if (operations_.operation)
+        vynx::cancel(**operations_.operation);
+    operations_.watcher().waitForFinished();
+    session_->password.reset();
 }
 void MainWindow::chooseOpen() {
     const auto paths =
@@ -309,30 +373,52 @@ void MainWindow::openPath(const QString &path) { openWithPassword(path, {}); }
 void MainWindow::openWithPassword(const QString &path, const QString &password) {
     openWithSecret(path, secret(password));
 }
-void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &pw) {
-    if (busy_) {
+void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &pw,
+                                bool reload) {
+    if (operations_.busy) {
         handleShellWithSecret(1, {path}, pw);
         return;
     }
+    const auto identity = archiveIdentity(path);
+    for (int i = 0; i < sessions_.size(); ++i) {
+        if (!sessions_[i]->path.isEmpty() && archiveIdentity(sessions_[i]->path) == identity) {
+            activateSession(i);
+            if (!reload && sessions_[i]->archive)
+                return;
+            break;
+        }
+    }
+    if (!session_->path.isEmpty() && archiveIdentity(session_->path) != identity) {
+        auto next = std::make_shared<ArchiveSession>();
+        sessions_.append(next);
+        const QSignalBlocker blocker(tabs_);
+        tabs_->addTab(QFileInfo(path).fileName());
+        bindSession(next);
+        tabs_->setCurrentIndex(sessions_.size() - 1);
+    }
+    session_->path = path;
+    tabs_->show();
+    tabs_->setTabText(tabs_->currentIndex(), QFileInfo(path).fileName());
     beginOperation();
-    auto op = operation_;
+    activeSpec_ = QJsonObject{{"kind", "open"}, {"sources", QJsonArray{path}}};
+    auto op = operations_.operation;
     auto result = std::make_shared<std::shared_ptr<rust::Box<vynx::Archive>>>();
-    auto entries = std::make_shared<rust::Vec<vynx::EntryInfo>>();
+    auto prepared = std::make_shared<std::shared_ptr<PreparedArchive>>();
     auto p = utf8(path);
     runJob(
         tr("Opening archive…"),
-        [op, result, entries, p, pw] {
+        [op, result, prepared, p, pw] {
             *result = std::make_shared<rust::Box<vynx::Archive>>(
                 vynx::open_archive(p, pw->bytes(), **op));
-            *entries = vynx::list_entries(***result);
+            *prepared = ArchiveModel::prepare(vynx::list_entries(***result));
             return QString();
         },
-        [this, result, entries, path, pw] {
-            password_ = pw;
-            archive_ = *result;
-            archivePath_ = path;
-            model_->load(std::move(*entries));
-            history_.clear();
+        [this, result, prepared, path, pw] {
+            session_->password = pw;
+            session_->archive = *result;
+            session_->path = path;
+            session_->model->loadPrepared(*prepared);
+            session_->history.clear();
             search_->clear();
             pages_->setCurrentIndex(1);
             setWindowTitle(tr("%1 — VYNX ARC").arg(QFileInfo(path).fileName()));
@@ -363,14 +449,14 @@ void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<Secre
         });
 }
 void MainWindow::chooseExtract(bool smart, bool here, bool named) {
-    if (busy_ || !archive_)
+    if (operations_.busy || session_->busy || !session_->archive)
         return;
-    QString defaultDest = QFileInfo(archivePath_).absolutePath();
+    QString defaultDest = QFileInfo(session_->path).absolutePath();
     if (named)
-        defaultDest += "/" + QFileInfo(archivePath_).completeBaseName();
+        defaultDest += "/" + QFileInfo(session_->path).completeBaseName();
     const auto selectedRows = table_->selectionModel()->selectedRows();
     ExtractDialog dialog(defaultDest, !selectedRows.isEmpty(), smart, here,
-                         password_ ? password_->text() : QString(), this);
+                         session_->password ? session_->password->text() : QString(), this);
     auto *destination = dialog.destination;
     auto *scope = dialog.scope;
     auto *conflicts = dialog.conflicts;
@@ -383,21 +469,38 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     auto ids = std::make_shared<rust::Vec<quint64>>();
     if (scope->currentIndex() == 1) {
         for (auto i : selectedRows) {
-            const auto &r = model_->row(filter_->mapToSource(i).row());
+            const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
             for (auto id : r.memberIds)
                 ids->push_back(id);
         }
     }
     auto pw = secret(password->text());
     password->clear();
-    password_ = pw;
+    session_->password = pw;
     auto dest = utf8(destination->text());
     const quint8 policies[] = {3, 2, 1, 4, 5, 0};
     auto conflict = policies[conflicts->currentIndex()];
     smart = smartBox->isChecked();
     beginOperation();
-    auto op = operation_;
-    auto archive = archive_;
+    QJsonArray selectedNames;
+    if (scope->currentIndex() == 1)
+        for (const auto &entry : vynx::list_entries(**session_->archive)) {
+            for (auto id : *ids)
+                if (entry.id == id)
+                    selectedNames.append(
+                        QString::fromUtf8(entry.name.data(), qsizetype(entry.name.size())));
+        }
+    activeSpec_ = QJsonObject{{"kind", "extract"},
+                              {"sources", QJsonArray{session_->path}},
+                              {"destination", destination->text()},
+                              {"conflict", int(conflict)},
+                              {"smart", smart},
+                              {"names", selectedNames},
+                              {"resource", settings_->value("resourceMode", 1).toInt()},
+                              {"needsPassword", !pw->bytes().empty()}};
+
+    auto op = operations_.operation;
+    auto archive = session_->archive;
     runJob(tr("Extracting…"), [archive, op, ids, dest, pw, conflict, smart] {
         vynx::extract_archive(**archive, dest, rust::Slice<const quint64>(ids->data(), ids->size()),
                               conflict, smart, pw->bytes(), **op);
@@ -405,15 +508,16 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     });
 }
 void MainWindow::testArchive() {
-    if (busy_ || !archive_)
+    if (operations_.busy || session_->busy || !session_->archive)
         return;
     bool ok = true;
     QString pw = askPassword(&ok);
     if (!ok)
         return;
     beginOperation();
-    auto archive = archive_;
-    auto op = operation_;
+    activeSpec_ = QJsonObject{{"kind", "test"}, {"sources", QJsonArray{session_->path}}};
+    auto archive = session_->archive;
+    auto op = operations_.operation;
     auto p = secret(pw);
     pw.fill(QChar(0));
     runJob(
@@ -425,11 +529,11 @@ void MainWindow::testArchive() {
         [this] { toast_->notify(tr("All archive streams decoded successfully.")); });
 }
 void MainWindow::hashFile() {
-    if (busy_ || !archive_)
+    if (operations_.busy || session_->busy || !session_->archive)
         return;
     beginOperation();
-    auto op = operation_;
-    auto p = utf8(archivePath_);
+    auto op = operations_.operation;
+    auto p = utf8(session_->path);
     auto result = std::make_shared<QString>();
     runJob(
         tr("Hashing archive file…"),
@@ -455,12 +559,12 @@ void MainWindow::hashFile() {
         });
 }
 void MainWindow::hashContents(bool verify, bool wholeArchive) {
-    if (busy_ || !archive_)
+    if (operations_.busy || session_->busy || !session_->archive)
         return;
     auto ids = std::make_shared<rust::Vec<quint64>>();
     if (!wholeArchive) {
         for (const auto &index : table_->selectionModel()->selectedRows()) {
-            const auto &row = model_->row(filter_->mapToSource(index).row());
+            const auto &row = session_->model->row(session_->filter->mapToSource(index).row());
             if (row.folder)
                 continue;
             for (auto id : row.memberIds)
@@ -483,10 +587,10 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
         expected = utf8(value.trimmed());
     }
     beginOperation();
-    auto op = operation_;
-    auto archive = archive_;
-    auto path = utf8(archivePath_);
-    auto pw = password_ ? password_ : secret({});
+    auto op = operations_.operation;
+    auto archive = session_->archive;
+    auto path = utf8(session_->path);
+    auto pw = session_->password ? session_->password : secret({});
     auto result = std::make_shared<QString>();
     runJob(
         tr("Calculating hashes…"),
@@ -567,9 +671,22 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     const auto resource = uint8_t(d.resource->currentIndex());
     settings_->setValue("resourceMode", resource);
     settings_->setValue("compressionPreset", preset);
-    auto createJob = [this, sources, out, pw, selectedFormat, volumeSize, preset, resource] {
+    QJsonArray sourcePaths;
+    for (int i = 0; i < inputs->count(); ++i)
+        sourcePaths.append(inputs->item(i)->text());
+    const QJsonObject createSpec{{"kind", "create"},
+                                 {"sources", sourcePaths},
+                                 {"destination", output->text()},
+                                 {"format", int(selectedFormat)},
+                                 {"volumeSize", double(volumeSize)},
+                                 {"preset", int(preset)},
+                                 {"resource", int(resource)},
+                                 {"needsPassword", !pw->bytes().empty()}};
+    auto createJob = [this, sources, out, pw, selectedFormat, volumeSize, preset, resource,
+                      createSpec] {
         beginOperation();
-        auto op = operation_;
+        activeSpec_ = createSpec;
+        auto op = operations_.operation;
         vynx::configure_operation(**op, preset, resource);
         runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
             if (volumeSize)
@@ -583,34 +700,34 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
             return QString();
         });
     };
-    if (runningItem_ && !busy_)
+    if (runningItem_ && !operations_.busy)
         createJob();
     else
         enqueueRequest(tr("Create %1").arg(QFileInfo(output->text()).fileName()),
-                       std::move(createJob));
+                       std::move(createJob), output->text(), createSpec);
 }
 void MainWindow::navigate(const QString &folder) {
-    if (busy_ || !archive_)
+    if (session_->busy || !session_->archive)
         return;
-    if (folder == model_->folder()) {
+    if (folder == session_->model->folder()) {
         search_->clear();
         return;
     }
-    history_.append(model_->folder());
-    model_->navigate(folder);
+    session_->history.append(session_->model->folder());
+    session_->model->navigate(folder);
     search_->clear();
-    breadcrumb_->setPath(QFileInfo(archivePath_).fileName(), folder);
+    breadcrumb_->setPath(QFileInfo(session_->path).fileName(), folder);
     updateStatus();
     table_->setFocus();
 }
 
 bool MainWindow::writableArchive() const {
-    if (!archive_)
+    if (!session_->archive)
         return false;
-    return vynx::archive_writable(**archive_);
+    return vynx::archive_writable(**session_->archive);
 }
 void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders) {
-    if (busy_ || !archive_)
+    if (operations_.busy || session_->busy || !session_->archive)
         return;
     if (!writableArchive()) {
         statusBar()->showMessage(
@@ -627,7 +744,7 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
             names = QFileDialog::getOpenFileNames(this, tr("Source files"));
     } else if (kind != 0) {
         for (const auto &index : table_->selectionModel()->selectedRows())
-            names.append(model_->row(filter_->mapToSource(index).row()).fullPath);
+            names.append(session_->model->row(session_->filter->mapToSource(index).row()).fullPath);
     }
     if (names.isEmpty()) {
         statusBar()->showMessage(tr("Select files or folders first."), 6000);
@@ -656,13 +773,22 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
            "only after completion.\nDuplicate paths are rejected. Contents are recompressed.")
             .arg(operation)
             .arg(names.size())
-            .arg(model_->folder().isEmpty() ? "/" : model_->folder()));
+            .arg(session_->model->folder().isEmpty() ? "/" : session_->model->folder()));
     summary->setTextFormat(Qt::PlainText);
     summary->setWordWrap(true);
     form->addRow(summary);
-    auto *password = new QLineEdit(password_ ? password_->text() : QString());
+    auto *password = new QLineEdit(session_->password ? session_->password->text() : QString());
     password->setEchoMode(QLineEdit::Password);
     form->addRow(tr("Password, if needed"), password);
+    auto *preset = new QComboBox;
+    preset->addItems({tr("Store / None"), tr("Fast"), tr("Balanced"), tr("Maximum")});
+    preset->setCurrentIndex(qBound(0, settings_->value("compressionPreset", 2).toInt(), 3));
+    auto *resource = new QComboBox;
+    resource->addItems({tr("Eco"), tr("Balanced"), tr("Maximum")});
+    resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
+    form->addRow(tr("Compression"), preset);
+    form->addRow(tr("Resources"), resource);
+
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText(operation);
     form->addRow(buttons);
@@ -673,14 +799,29 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
     auto values = std::make_shared<rust::Vec<rust::String>>();
     for (const auto &name : names)
         values->push_back(utf8(name));
-    auto archive = archive_;
-    const auto path = archivePath_;
-    const auto destination = utf8(model_->folder());
+    auto archive = session_->archive;
+    const auto path = session_->path;
+    const auto destination = utf8(session_->model->folder());
     const auto renamed = utf8(newName);
     const auto pw = secret(password->text());
     password->clear();
     beginOperation();
-    auto op = operation_;
+    activeSpec_ = QJsonObject{{"kind", "modify"},
+                              {"sources", QJsonArray{path}},
+                              {"action", kind},
+                              {"names", QJsonArray::fromStringList(names)},
+                              {"newName", newName},
+                              {"folder", session_->model->folder()},
+                              {"preset", 2},
+                              {"resource", settings_->value("resourceMode", 1).toInt()},
+                              {"needsPassword", !pw->bytes().empty()}};
+
+    auto op = operations_.operation;
+    vynx::configure_operation(**op, uint8_t(preset->currentIndex()),
+                              uint8_t(resource->currentIndex()));
+    activeSpec_["preset"] = preset->currentIndex();
+    activeSpec_["resource"] = resource->currentIndex();
+
     runJob(
         operation,
         [archive, values, kind, destination, renamed, pw, op] {
@@ -690,7 +831,7 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
             return QString();
         },
         [this, path, pw] {
-            QTimer::singleShot(0, this, [this, path, pw] { openWithSecret(path, pw); });
+            QTimer::singleShot(0, this, [this, path, pw] { reloadArchive(path, pw); });
         },
         [this, path, pw](QString error) {
             QString message = error;
@@ -708,15 +849,15 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
             auto *reload = report.addButton(tr("Reload archive"), QMessageBox::AcceptRole);
             report.exec();
             if (report.clickedButton() == reload)
-                QTimer::singleShot(0, this, [this, path, pw] { openWithSecret(path, pw); });
+                QTimer::singleShot(0, this, [this, path, pw] { reloadArchive(path, pw); });
         });
 }
 void MainWindow::back() {
-    if (busy_ || history_.isEmpty())
+    if (session_->busy || session_->history.isEmpty())
         return;
-    QString folder = history_.takeLast();
-    model_->navigate(folder);
-    breadcrumb_->setPath(QFileInfo(archivePath_).fileName(), folder);
+    QString folder = session_->history.takeLast();
+    session_->model->navigate(folder);
+    breadcrumb_->setPath(QFileInfo(session_->path).fileName(), folder);
     search_->clear();
     updateStatus();
 }
@@ -727,20 +868,15 @@ void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
                                        const std::shared_ptr<SecretUtf8> &pw) {
     if (paths.isEmpty() || paths.size() > 10000 || action < 1 || action > 8)
         return;
-    if (busy_) {
+    if (operations_.busy) {
         const auto title = tr("Requested operation — %1").arg(QFileInfo(paths.first()).fileName());
-        const auto id = queue_.enqueue(
-            title, [this, action, paths, pw] { handleShellWithSecret(action, paths, pw); });
-        if (!id) {
-            toast_->notify(tr("Operation queue is full"));
-            return;
-        }
-        auto *item = new QListWidgetItem(tr("Pending — %1").arg(title), queueView_);
-        item->setData(Qt::UserRole, id);
-        item->setData(Qt::UserRole + 1, title);
-        item->setToolTip(paths.join('\n'));
-        queueDock_->show();
-        updateQueue();
+        enqueueRequest(
+            title, [this, action, paths, pw] { handleShellWithSecret(action, paths, pw); },
+            paths.join('\n'),
+            QJsonObject{{"kind", "shell"},
+                        {"action", int(action)},
+                        {"sources", QJsonArray::fromStringList(paths)},
+                        {"needsPassword", !pw->bytes().empty()}});
         return;
     }
     if (action == 1) {
@@ -754,7 +890,7 @@ void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
             list->setModel(new QStringListModel(paths, list));
             layout->addWidget(list);
             connect(list, &QListView::doubleClicked, this, [this](const QModelIndex &index) {
-                if (!busy_)
+                if (!operations_.busy)
                     openPath(index.data().toString());
             });
             dialog->resize(680, 350);
@@ -767,7 +903,7 @@ void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
         return;
     }
     beginOperation();
-    auto op = operation_;
+    auto op = operations_.operation;
     auto values = std::make_shared<rust::Vec<rust::String>>();
     for (const auto &path : paths)
         values->push_back(utf8(path));
@@ -822,58 +958,64 @@ void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
         });
 }
 void MainWindow::up() {
-    QString folder = model_->folder();
+    QString folder = session_->model->folder();
     if (folder.isEmpty())
         return;
     int slash = folder.lastIndexOf('/');
     navigate(slash < 0 ? QString() : folder.left(slash));
 }
 void MainWindow::updateStatus() {
-    if (!archive_)
+    if (!session_->archive)
         return;
     const auto rows = table_->selectionModel()->selectedRows();
-    archivePage_->back->setEnabled(!busy_ && !history_.isEmpty());
-    archivePage_->up->setEnabled(!busy_ && !model_->folder().isEmpty());
+    archivePage_->back->setEnabled(!session_->busy && !session_->history.isEmpty());
+    archivePage_->up->setEnabled(!session_->busy && !session_->model->folder().isEmpty());
     for (auto *action : mutationActions_)
-        action->setEnabled(!busy_ && writableArchive());
-    renameAction_->setEnabled(!busy_ && writableArchive() && rows.size() == 1);
-    deleteAction_->setEnabled(!busy_ && writableArchive() && !rows.isEmpty());
+        action->setEnabled(!operations_.busy && !session_->busy && writableArchive());
+    renameAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
+                              rows.size() == 1);
+    deleteAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
+                              !rows.isEmpty());
     bool regular = false;
     for (const auto &index : rows)
-        regular |= !model_->row(filter_->mapToSource(index).row()).folder;
-    hashSelectedAction_->setEnabled(!busy_ && regular);
-    verifySelectedAction_->setEnabled(!busy_ && regular && rows.size() == 1);
-    externalAction_->setEnabled(!busy_ && rows.size() == 1 &&
-                                !model_->row(filter_->mapToSource(rows.first()).row()).folder);
-    previewAction_->setEnabled(!busy_ && regular && rows.size() == 1);
-    propertiesAction_->setEnabled(!busy_ && rows.size() == 1);
-    auto summary = text(vynx::archive_format(**archive_));
+        regular |= !session_->model->row(session_->filter->mapToSource(index).row()).folder;
+    hashSelectedAction_->setEnabled(!operations_.busy && regular);
+    verifySelectedAction_->setEnabled(!operations_.busy && regular && rows.size() == 1);
+    externalAction_->setEnabled(
+        !operations_.busy && rows.size() == 1 &&
+        !session_->model->row(session_->filter->mapToSource(rows.first()).row()).folder);
+    editAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() && regular &&
+                            rows.size() == 1);
+    previewAction_->setEnabled(!session_->busy && regular && rows.size() == 1);
+    propertiesAction_->setEnabled(!session_->busy && rows.size() == 1);
+    auto summary = text(vynx::archive_format(**session_->archive));
     if (!writableArchive())
         summary += tr(" · read only");
-    auto packed = model_->totalPacked();
-    auto total = model_->totalSize();
+    auto packed = session_->model->totalPacked();
+    auto total = session_->model->totalSize();
     if (packed)
         summary += tr(" · %1 packed").arg(displaySize(packed));
     if (packed && total && packed <= total)
         summary += tr(" · %1% saved").arg(qRound(100.0 * (1 - double(packed) / double(total))));
     archiveSummary_->setText(summary);
     if (rows.isEmpty())
-        statusBar()->showMessage(
-            tr("%1 items · %2").arg(filter_->rowCount()).arg(displaySize(model_->totalSize())));
+        statusBar()->showMessage(tr("%1 items · %2")
+                                     .arg(session_->filter->rowCount())
+                                     .arg(displaySize(session_->model->totalSize())));
     else {
         quint64 size = 0;
         for (auto i : rows)
-            size += model_->row(filter_->mapToSource(i).row()).size;
+            size += session_->model->row(session_->filter->mapToSource(i).row()).size;
         statusBar()->showMessage(tr("%1 selected · %2").arg(rows.size()).arg(displaySize(size)));
     }
 }
 void MainWindow::showProperties() {
-    if (busy_ || !archive_)
+    if (session_->busy || !session_->archive)
         return;
     const auto rows = table_->selectionModel()->selectedRows();
     if (rows.size() != 1)
         return;
-    const auto &row = model_->row(filter_->mapToSource(rows.first()).row());
+    const auto &row = session_->model->row(session_->filter->mapToSource(rows.first()).row());
     QDialog dialog(this);
     dialog.setWindowTitle(tr("Properties"));
     dialog.setMinimumWidth(360);
@@ -926,6 +1068,12 @@ void MainWindow::settings() {
         settings_->setValue("theme", ids[theme->currentIndex()]);
         settings_->setValue("resourceMode", d.resource->currentIndex());
         settings_->setValue("historyEnabled", history->isChecked());
+        if (!journal_.setEnabled(history->isChecked()))
+            QMessageBox::warning(
+                this, tr("Queue history"),
+                tr("Could not update queue history settings. Close other instances and retry."));
+        if (!history->isChecked())
+            settings_->remove("workspace");
         if (!history->isChecked())
             settings_->remove("recent");
         updateRecent();
@@ -937,14 +1085,14 @@ void MainWindow::applyTheme(const QString &theme) {
     table_->viewport()->update();
 }
 void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
-    if (!busy_ && e->mimeData()->hasUrls())
+    if (!operations_.busy && e->mimeData()->hasUrls())
         e->acceptProposedAction();
 }
 void MainWindow::dropEvent(QDropEvent *e) {
-    if (busy_)
+    if (operations_.busy)
         return;
     const auto urls = e->mimeData()->urls();
-    if (archive_) {
+    if (session_->archive) {
         QStringList sources;
         for (const auto &url : urls) {
             if (!url.isLocalFile())
@@ -956,25 +1104,36 @@ void MainWindow::dropEvent(QDropEvent *e) {
         return;
     }
     if (urls.size() == 1 && urls.first().isLocalFile()) {
-        password_.reset();
+        session_->password.reset();
         openPath(urls.first().toLocalFile());
         e->acceptProposedAction();
     }
 }
 void MainWindow::closeEvent(QCloseEvent *e) {
-    if (busy_) {
+    if (operations_.busy) {
         if (QMessageBox::question(this, tr("Operation in progress"),
                                   tr("Cancel the operation and close after it stops?")) !=
             QMessageBox::Yes) {
             e->ignore();
             return;
         }
-        vynx::cancel(**operation_);
+        vynx::cancel(**operations_.operation);
         queue_.clear();
         closePending_ = true;
         e->ignore();
         return;
     }
+    if (!edits_->records().isEmpty() && !QCoreApplication::arguments().contains("--smoke-test") &&
+        !QCoreApplication::arguments().contains("--capture") &&
+        QMessageBox::question(this, tr("Working copies"),
+                              tr("Keep working copies on disk and close? They can be recovered "
+                                 "from View > Working copies next time."),
+                              QMessageBox::Yes | QMessageBox::No,
+                              QMessageBox::Yes) != QMessageBox::Yes) {
+        e->ignore();
+        return;
+    }
+    saveWorkspace();
     closePending_ = true;
     queue_.clear();
     e->accept();
@@ -1041,7 +1200,8 @@ bool MainWindow::smokeTest() {
                              rust::Slice<const rust::String>(inputs.data(), inputs.size()), "",
                              *op);
         QEventLoop loop;
-        connect(&watcher_, &QFutureWatcher<QString>::finished, &loop, &QEventLoop::quit);
+        connect(&operations_.watcher(), &QFutureWatcher<QString>::finished, &loop,
+                &QEventLoop::quit);
         QTimer::singleShot(10000, &loop, &QEventLoop::quit);
         QMimeData droppedArchive;
         droppedArchive.setUrls({QUrl::fromLocalFile(archivePath)});
@@ -1056,19 +1216,21 @@ bool MainWindow::smokeTest() {
         if (!drop.isAccepted())
             return smokeFailure(__LINE__);
         loop.exec();
-        if (busy_ || !archive_ || model_->rowCount() != 1 || !model_->row(0).folder)
+        if (operations_.busy || !session_->archive || session_->model->rowCount() != 1 ||
+            !session_->model->row(0).folder)
             return smokeFailure(__LINE__);
         navigate("source/nested");
-        if (model_->rowCount() != 1 || model_->row(0).name != "дані.txt")
+        if (session_->model->rowCount() != 1 || session_->model->row(0).name != "дані.txt")
             return smokeFailure(__LINE__);
         search_->setText("ДАНІ");
-        if (filter_->rowCount() != 1)
+        if (session_->filter->rowCount() != 1)
             return smokeFailure(__LINE__);
         table_->selectAll();
         if (table_->selectionModel()->selectedRows().size() != 1)
             return smokeFailure(__LINE__);
-        vynx::test_archive(**archive_, "", *op);
-        vynx::extract_archive(**archive_, utf8(temp.path() + "/out"), {}, 0, false, "", *op);
+        vynx::test_archive(**session_->archive, "", *op);
+        vynx::extract_archive(**session_->archive, utf8(temp.path() + "/out"), {}, 0, false, "",
+                              *op);
         QFile restored(temp.path() + "/out/source/nested/дані.txt");
         if (!restored.open(QIODevice::ReadOnly) ||
             restored.readAll() != "real GUI bridge roundtrip")
@@ -1088,12 +1250,12 @@ bool MainWindow::smokeTest() {
         previewSelected();
         loop.exec();
         previewCloser.stop();
-        if (busy_ || !previewSeen)
+        if (operations_.busy || !previewSeen)
             return smokeFailure(__LINE__);
         // Exercise the real asynchronous conflict dialog and bridge reply.
         beginOperation();
-        auto conflictOp = operation_;
-        auto conflictArchive = archive_;
+        auto conflictOp = operations_.operation;
+        auto conflictArchive = session_->archive;
         bool conflictDialogSeen = false;
         QTimer answer;
         connect(&answer, &QTimer::timeout, this, [&] {
@@ -1119,27 +1281,28 @@ bool MainWindow::smokeTest() {
         });
         loop.exec();
         answer.stop();
-        if (busy_ || !conflictDialogSeen || vynx::conflict_request(**conflictOp).id)
+        if (operations_.busy || !conflictDialogSeen || vynx::conflict_request(**conflictOp).id)
             return smokeFailure(__LINE__);
         rust::Vec<rust::String> rename;
         rename.push_back("source/nested/дані.txt");
-        vynx::modify_archive(**archive_, 2,
+        vynx::modify_archive(**session_->archive, 2,
                              rust::Slice<const rust::String>(rename.data(), rename.size()),
                              "source/nested/renamed.txt", "", "", *op);
-        openPath(archivePath);
+        openWithSecret(archivePath, secret({}), true);
         loop.exec();
-        if (busy_ || !archive_)
+        if (operations_.busy || session_->busy || !session_->archive)
             return smokeFailure(__LINE__);
         navigate("source/nested");
-        if (model_->rowCount() != 1 || model_->row(0).name != "renamed.txt")
+        if (session_->model->rowCount() != 1 || session_->model->row(0).name != "renamed.txt")
             return smokeFailure(__LINE__);
         rust::Vec<quint64> hashIds;
-        hashIds.push_back(model_->row(0).memberIds.front());
-        auto hashes = vynx::hash_entries(
-            **archive_, rust::Slice<const quint64>(hashIds.data(), hashIds.size()), "", *op);
+        hashIds.push_back(session_->model->row(0).memberIds.front());
+        auto hashes =
+            vynx::hash_entries(**session_->archive,
+                               rust::Slice<const quint64>(hashIds.data(), hashIds.size()), "", *op);
         if (hashes.size() != 1 || hashes[0].sha256.size() != 64 || hashes[0].crc32.size() != 8)
             return smokeFailure(__LINE__);
-        vynx::verify_entry_hash(**archive_, hashIds[0], hashes[0].sha256, "", *op);
+        vynx::verify_entry_hash(**session_->archive, hashIds[0], hashes[0].sha256, "", *op);
         auto jobSecret = secret("private");
         std::weak_ptr<SecretUtf8> secretLifetime = jobSecret;
         const auto encryptedPath = utf8(temp.path() + "/encrypted.zip");
@@ -1147,7 +1310,7 @@ bool MainWindow::smokeTest() {
                              rust::Slice<const rust::String>(inputs.data(), inputs.size()),
                              jobSecret->bytes(), *op);
         beginOperation();
-        auto passwordOp = operation_;
+        auto passwordOp = operations_.operation;
         runJob(tr("Testing archive…"), [jobSecret, encryptedPath, passwordOp] {
             auto encrypted = vynx::open_archive(encryptedPath, jobSecret->bytes(), **passwordOp);
             vynx::test_archive(*encrypted, jobSecret->bytes(), **passwordOp);
@@ -1155,7 +1318,7 @@ bool MainWindow::smokeTest() {
         });
         jobSecret.reset();
         loop.exec();
-        if (busy_ || !secretLifetime.expired())
+        if (operations_.busy || !secretLifetime.expired())
             return smokeFailure(__LINE__);
         // Exercise real dispatch, visible state and pending cancellation while a job runs.
         beginOperation();
@@ -1177,8 +1340,8 @@ bool MainWindow::smokeTest() {
         do {
             QTimer::singleShot(10000, &loop, &QEventLoop::quit);
             loop.exec();
-        } while ((busy_ || queue_.size()) && queueDeadline.elapsed() < 15000);
-        if (busy_ || queue_.size())
+        } while ((operations_.busy || queue_.size()) && queueDeadline.elapsed() < 15000);
+        if (operations_.busy || queue_.size())
             return smokeFailure(__LINE__);
         if (!firstQueued->text().startsWith(tr("Completed")) ||
             !lastQueued->text().startsWith(tr("Completed")))
@@ -1193,15 +1356,15 @@ bool MainWindow::smokeTest() {
         const auto batchOutputs = batchDestinations(batchPaths, batchRoot);
         enqueueBatch(batchPaths, batchRoot, 4, secret({}));
         QCoreApplication::processEvents();
-        if (busy_ || queue_.size() != 3 || QDir(batchRoot).exists())
+        if (operations_.busy || queue_.size() != 3 || QDir(batchRoot).exists())
             return smokeFailure(__LINE__);
         pauseQueue->setChecked(false);
         queueDeadline.restart();
         do {
             QTimer::singleShot(10000, &loop, &QEventLoop::quit);
             loop.exec();
-        } while ((busy_ || queue_.size()) && queueDeadline.elapsed() < 15000);
-        if (busy_ || queue_.size())
+        } while ((operations_.busy || queue_.size()) && queueDeadline.elapsed() < 15000);
+        if (operations_.busy || queue_.size())
             return smokeFailure(__LINE__);
         for (const auto index : {0, 2}) {
             QFile file(batchOutputs[index] + "/source/nested/renamed.txt");
@@ -1214,6 +1377,153 @@ bool MainWindow::smokeTest() {
                                     queueView_->item(i)->toolTip().contains("missing.zip");
         if (!batchFailureRecorded)
             return smokeFailure(__LINE__);
+        // Three real documents retain independent state while the write lane is busy.
+        auto firstSession = session_;
+        const auto secondPath = temp.path() + "/second.zip";
+        if (!QFile::copy(archivePath, secondPath))
+            return smokeFailure(__LINE__);
+        openPath(secondPath);
+        loop.exec();
+        auto secondSession = session_;
+        openWithSecret(QString::fromUtf8(encryptedPath.data(), qsizetype(encryptedPath.size())),
+                       secret("private"));
+        loop.exec();
+        auto encryptedSession = session_;
+        if (sessions_.size() != 3 || encryptedSession->password->bytes() != "private" ||
+            secondSession == firstSession)
+            return smokeFailure(__LINE__);
+        activateSession(sessions_.indexOf(firstSession));
+        navigate("source/nested");
+        search_->setText("renamed.txt");
+        table_->selectRow(0);
+        activateSession(sessions_.indexOf(secondSession));
+        search_->setText("source/nested");
+        activateSession(sessions_.indexOf(firstSession));
+        if (search_->text() != "renamed.txt" ||
+            table_->selectionModel()->selectedRows().size() != 1)
+            return smokeFailure(__LINE__);
+        const int tabCount = tabs_->count();
+        openPath(archivePath);
+        if (tabs_->count() != tabCount)
+            return smokeFailure(__LINE__);
+        auto release = std::make_shared<std::atomic<bool>>(false);
+        beginOperation();
+        runJob(tr("Session ownership test"), [release] {
+            QElapsedTimer deadline;
+            deadline.start();
+            while (!release->load() && deadline.elapsed() < 5000)
+                QThread::msleep(1);
+            return QString();
+        });
+        activateSession(sessions_.indexOf(secondSession));
+        search_->setText("renamed.txt");
+        table_->selectRow(0);
+        if (!archivePage_->isEnabled() || !firstSession->busy) {
+            release->store(true);
+            return smokeFailure(__LINE__);
+        }
+        previewSeen = false;
+        previewCloser.start(20);
+        previewSelected();
+        QElapsedTimer readDeadline;
+        readDeadline.start();
+        while (!readers_.isEmpty() && readDeadline.elapsed() < 4000) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+            QThread::msleep(1);
+        }
+        previewCloser.stop();
+        release->store(true);
+        if (!previewSeen || !readers_.isEmpty())
+            return smokeFailure(__LINE__);
+        if (operations_.busy)
+            loop.exec();
+        if (session_ != secondSession || firstSession->busy)
+            return smokeFailure(__LINE__);
+        activateSession(sessions_.indexOf(firstSession));
+        if (search_->text() != "renamed.txt")
+            return smokeFailure(__LINE__);
+        closeSession(sessions_.indexOf(encryptedSession));
+        closeSession(sessions_.indexOf(secondSession));
+        // The GUI edit workflow uses the same transactional bridge as normal saves.
+        const auto editingId = session_->model->row(0).id;
+        prepareEdit(editingId, "source/nested/renamed.txt", false);
+        loop.exec();
+        if (operations_.busy || edits_->records().size() != 1)
+            return smokeFailure(__LINE__);
+        const auto edit = edits_->records()[0].toObject();
+        const auto editKey = edit["id"].toString();
+        QFile working(edit["file"].toString());
+#ifdef Q_OS_WIN
+        // A separate editor process writes the copy; the GUI must reread its bytes.
+        QString quotedPath = working.fileName();
+        quotedPath.replace("'", "''");
+        const auto script =
+            QString("[IO.File]::WriteAllBytes('%1',[Convert]::FromBase64String('%2'))")
+                .arg(quotedPath, QString::fromLatin1(QByteArray("GUI edited content").toBase64()));
+        const auto encoded =
+            QByteArray(reinterpret_cast<const char *>(script.utf16()), script.size() * 2)
+                .toBase64();
+        QProcess editor;
+        editor.setCreateProcessArgumentsModifier(
+            [](QProcess::CreateProcessArguments *args) { args->flags |= 0x08000000; });
+        editor.start(qEnvironmentVariable("SystemRoot") +
+                         "/System32/WindowsPowerShell/v1.0/powershell.exe",
+                     {"-NoLogo", "-NoProfile", "-NonInteractive", "-EncodedCommand",
+                      QString::fromLatin1(encoded)});
+        if (!editor.waitForFinished(10000) || editor.exitCode() != 0)
+            return smokeFailure(__LINE__);
+#else
+        if (!working.open(QIODevice::WriteOnly))
+            return smokeFailure(__LINE__);
+        working.write("GUI edited content");
+        working.close();
+#endif
+        auto beforeReload = session_->archive;
+        saveWorkingCopy(editKey, secret({}));
+        loop.exec();
+        QElapsedTimer reloadDeadline;
+        reloadDeadline.start();
+        while ((session_->archive == beforeReload || operations_.busy || queue_.size()) &&
+               reloadDeadline.elapsed() < 10000) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
+            QThread::msleep(1);
+        }
+        if (session_->archive == beforeReload || operations_.busy ||
+            session_->model->searchMode() != !search_->text().isEmpty() ||
+            edits_->record(editKey)["state"] != "saved")
+            return smokeFailure(__LINE__);
+        auto verifyEdited = vynx::open_archive(utf8(archivePath), "", *op);
+        auto editedBytes = vynx::preview_bytes(*verifyEdited, editingId, "", *op);
+        if (QByteArray(reinterpret_cast<const char *>(editedBytes.data()),
+                       qsizetype(editedBytes.size())) != "GUI edited content")
+            return smokeFailure(__LINE__);
+        if (!working.open(QIODevice::WriteOnly))
+            return smokeFailure(__LINE__);
+        working.write("unsaved second edit");
+        working.close();
+        rust::Vec<rust::String> externalRename;
+        externalRename.push_back("source/nested/renamed.txt");
+        vynx::modify_archive(*verifyEdited, 2, {externalRename.data(), externalRename.size()},
+                             "source/nested/external.txt", "", "", *op);
+        const auto changedHash = text(vynx::hash_archive_file(utf8(archivePath), *op));
+        QTimer editErrorCloser;
+        connect(&editErrorCloser, &QTimer::timeout, this, [this] {
+            for (auto *message : findChildren<QMessageBox *>())
+                if (message->isVisible())
+                    message->accept();
+        });
+        editErrorCloser.start(20);
+        saveWorkingCopy(editKey, secret({}));
+        loop.exec();
+        editErrorCloser.stop();
+        if (edits_->record(editKey)["state"] != "needs-review" ||
+            text(vynx::hash_archive_file(utf8(archivePath), *op)) != changedHash)
+            return smokeFailure(__LINE__);
+        if (!working.open(QIODevice::ReadOnly) || working.readAll() != "unsaved second edit")
+            return smokeFailure(__LINE__);
+        working.close();
+        if (!edits_->discard(editKey))
+            return smokeFailure(__LINE__);
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;
         for (quint64 i = 0; i < 100000; ++i) {
@@ -1223,9 +1533,9 @@ bool MainWindow::smokeTest() {
             e.size = i;
             many.push_back(std::move(e));
         }
-        model_->load(std::move(many));
+        session_->model->load(std::move(many));
         search_->clear();
-        if (model_->rowCount() != 100000)
+        if (session_->model->rowCount() != 100000)
             return smokeFailure(__LINE__);
         auto clone = vynx::clone_operation(*op);
         vynx::cancel(*clone);

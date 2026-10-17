@@ -86,19 +86,98 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
         return {};
     }
 }
-void ArchiveModel::load(rust::Vec<vynx::EntryInfo> entries) {
-    searchMode_ = false;
-    entries_ = std::move(entries);
-    totalSize_ = totalPacked_ = 0;
+static QVector<ArchiveRow> folderRows(const QVector<ArchiveRow> &flat, const QString &folder,
+                                      const QCollator &collator) {
+    QVector<ArchiveRow> rows;
+    QHash<QString, int> folders;
+    const QString prefix = folder.isEmpty() ? QString() : folder + "/";
+    for (const auto &entry : flat) {
+        if (!entry.fullPath.startsWith(prefix))
+            continue;
+        const auto relative = entry.fullPath.mid(prefix.size());
+        if (relative.isEmpty())
+            continue;
+        const auto slash = relative.indexOf('/');
+        if (slash >= 0 || entry.folder) {
+            const auto name = slash >= 0 ? relative.left(slash) : relative;
+            if (!folders.contains(name)) {
+                ArchiveRow row;
+                row.name = name;
+                row.fullPath = prefix + name;
+                row.folder = true;
+                row.sortKey = collator.sortKey(name);
+                folders.insert(name, rows.size());
+                rows.append(row);
+            }
+            auto &row = rows[folders.value(name)];
+            row.memberIds.append(entry.id);
+            row.size += entry.size;
+            row.packed += entry.packed;
+        } else
+            rows.append(entry);
+    }
+    return rows;
+}
+std::shared_ptr<PreparedArchive> ArchiveModel::prepare(rust::Vec<vynx::EntryInfo> entries) {
+    auto prepared = std::make_shared<PreparedArchive>();
+    prepared->flat.reserve(qsizetype(entries.size()));
+    bool directories = false, nested = false;
     auto add = [](quint64 a, quint64 b) {
         return b > std::numeric_limits<quint64>::max() - a ? std::numeric_limits<quint64>::max()
                                                            : a + b;
     };
-    for (const auto &entry : entries_) {
-        totalSize_ = add(totalSize_, entry.size);
-        totalPacked_ = add(totalPacked_, entry.packed);
+    for (const auto &entry : entries) {
+        ArchiveRow row;
+        row.fullPath = text(entry.name);
+        row.fullPath.replace('\\', '/');
+        if (row.fullPath.endsWith('/'))
+            row.fullPath.chop(1);
+        row.name = row.fullPath.section('/', -1);
+        row.sortKey = prepared->collator.sortKey(row.name);
+        row.id = entry.id;
+        row.folder = entry.directory;
+        row.size = entry.size;
+        row.packed = entry.packed;
+        row.crc = text(entry.crc);
+        row.modified = text(entry.modified);
+        row.memberIds = {entry.id};
+        if (entry.modified_known && !row.modified.startsWith("1980-01-01") &&
+            entry.modified_unix <= quint64(std::numeric_limits<qint64>::max()) &&
+            QDateTime::fromSecsSinceEpoch(qint64(entry.modified_unix)).isValid()) {
+            row.modifiedKnown = true;
+            row.modifiedTime = qint64(entry.modified_unix);
+        }
+        prepared->totalSize = add(prepared->totalSize, entry.size);
+        prepared->totalPacked = add(prepared->totalPacked, entry.packed);
+        directories |= row.folder;
+        nested |= row.fullPath.contains('/');
+        prepared->flat.append(std::move(row));
     }
-    navigate({});
+    if (!directories)
+        prepared->search = prepared->flat;
+    else {
+        prepared->search.reserve(prepared->flat.size());
+        for (const auto &row : prepared->flat)
+            if (!row.folder)
+                prepared->search.append(row);
+    }
+    prepared->root = (!directories && !nested) ? prepared->flat
+                                               : folderRows(prepared->flat, {}, prepared->collator);
+    return prepared;
+}
+void ArchiveModel::load(rust::Vec<vynx::EntryInfo> entries) {
+    loadPrepared(prepare(std::move(entries)));
+}
+void ArchiveModel::loadPrepared(std::shared_ptr<PreparedArchive> prepared) {
+    beginResetModel();
+    prepared_ = std::move(prepared);
+    folderCache_.clear();
+    folder_.clear();
+    searchMode_ = false;
+    totalSize_ = prepared_->totalSize;
+    totalPacked_ = prepared_->totalPacked;
+    rows_ = prepared_->root;
+    endResetModel();
 }
 quint64 ArchiveModel::totalSize() const { return totalSize_; }
 void ArchiveModel::setSearchMode(bool enabled) {
@@ -110,78 +189,59 @@ void ArchiveModel::setSearchMode(bool enabled) {
 void ArchiveModel::navigate(const QString &folder) {
     beginResetModel();
     folder_ = folder;
-    rows_.clear();
-    QHash<QString, int> folders;
-    const QString prefix = folder.isEmpty() ? QString() : folder + "/";
-    for (const auto &e : entries_) {
-        if (searchMode_ && e.directory)
-            continue;
-        QString full = text(e.name);
-        full.replace('\\', '/');
-        if (!searchMode_ && !full.startsWith(prefix))
-            continue;
-        QString relative = searchMode_ ? full : full.mid(prefix.size());
-        if (relative.endsWith('/'))
-            relative.chop(1);
-        if (relative.isEmpty())
-            continue;
-        int slash = relative.indexOf('/');
-        if (!searchMode_ && (slash >= 0 || e.directory)) {
-            QString name = slash >= 0 ? relative.left(slash) : relative;
-            if (!folders.contains(name)) {
-                folders.insert(name, rows_.size());
-                ArchiveRow r;
-                r.name = name;
-                r.fullPath = prefix + name;
-                r.folder = true;
-                rows_.append(r);
-            }
-            rows_[folders.value(name)].memberIds.append(e.id);
-            rows_[folders.value(name)].size += e.size;
-            rows_[folders.value(name)].packed += e.packed;
-        } else {
-            ArchiveRow r;
-            r.name = searchMode_ ? relative.section('/', -1) : relative;
-            r.folder = e.directory;
-            r.fullPath = full;
-            r.id = e.id;
-            r.size = e.size;
-            r.packed = e.packed;
-            r.crc = text(e.crc);
-            r.modified = text(e.modified);
-            if (e.modified_known && !r.modified.startsWith("1980-01-01")) {
-                if (e.modified_unix <= quint64(std::numeric_limits<qint64>::max()) &&
-                    QDateTime::fromSecsSinceEpoch(qint64(e.modified_unix)).isValid()) {
-                    r.modifiedTime = qint64(e.modified_unix);
-                    r.modifiedKnown = true;
-                }
-            }
-            r.memberIds = {e.id};
-            rows_.append(r);
-        }
+    if (!prepared_)
+        rows_.clear();
+    else if (searchMode_)
+        rows_ = prepared_->search;
+    else if (folder.isEmpty())
+        rows_ = prepared_->root;
+    else if (const auto *cached = folderCache_.object(folder))
+        rows_ = *cached;
+    else {
+        rows_ = folderRows(prepared_->flat, folder, prepared_->collator);
+        qsizetype cost = rows_.size();
+        for (const auto &row : rows_)
+            cost += row.memberIds.size();
+        if (cost <= folderCache_.maxCost())
+            folderCache_.insert(folder, new QVector<ArchiveRow>(rows_), int(cost));
     }
     endResetModel();
 }
 bool ArchiveFilter::filterAcceptsRow(int row, const QModelIndex &parent) const {
-    const auto pattern = filterRegularExpression();
-    return sourceModel()->index(row, 0, parent).data().toString().contains(pattern) ||
-           sourceModel()->index(row, 7, parent).data().toString().contains(pattern);
+    if (literalMode_ && literal_.isEmpty())
+        return true;
+    if (const auto *model = qobject_cast<const ArchiveModel *>(sourceModel())) {
+        const auto &entry = model->row(row);
+        if (literalMode_)
+            return entry.name.contains(literal_, filterCaseSensitivity()) ||
+                   entry.fullPath.contains(literal_, filterCaseSensitivity());
+        const auto pattern = filterRegularExpression();
+        return entry.name.contains(pattern) || entry.fullPath.contains(pattern);
+    }
+    return QSortFilterProxyModel::filterAcceptsRow(row, parent);
 }
 quint64 ArchiveModel::totalPacked() const { return totalPacked_; }
 bool ArchiveFilter::lessThan(const QModelIndex &a, const QModelIndex &b) const {
-    bool af = sourceModel()->data(a.siblingAtColumn(0), Qt::UserRole).toBool();
-    bool bf = sourceModel()->data(b.siblingAtColumn(0), Qt::UserRole).toBool();
-    if (af != bf)
-        return sortOrder() == Qt::AscendingOrder ? af : !af;
-    if (a.column() == 1 || a.column() == 2)
-        return sourceModel()->data(a, Qt::UserRole).toULongLong() <
-               sourceModel()->data(b, Qt::UserRole).toULongLong();
+    const auto *model = qobject_cast<const ArchiveModel *>(sourceModel());
+    if (!model)
+        return QSortFilterProxyModel::lessThan(a, b);
+    const auto &left = model->row(a.row());
+    const auto &right = model->row(b.row());
+    if (left.folder != right.folder)
+        return sortOrder() == Qt::AscendingOrder ? left.folder : !left.folder;
+    if (a.column() == 1)
+        return left.size < right.size;
+    if (a.column() == 2)
+        return left.packed < right.packed;
     if (a.column() == 3)
-        return sourceModel()->data(a, Qt::UserRole).toDouble() <
-               sourceModel()->data(b, Qt::UserRole).toDouble();
+        return (left.size ? 1.0 - double(left.packed) / double(left.size) : 0.0) <
+               (right.size ? 1.0 - double(right.packed) / double(right.size) : 0.0);
     if (a.column() == 5)
-        return sourceModel()->data(a, Qt::UserRole).toLongLong() <
-               sourceModel()->data(b, Qt::UserRole).toLongLong();
-    return QString::localeAwareCompare(sourceModel()->data(a).toString(),
-                                       sourceModel()->data(b).toString()) < 0;
+        return (left.modifiedKnown ? left.modifiedTime : std::numeric_limits<qint64>::min()) <
+               (right.modifiedKnown ? right.modifiedTime : std::numeric_limits<qint64>::min());
+    if (a.column() == 0)
+        return left.sortKey && right.sortKey
+                   ? left.sortKey->compare(*right.sortKey) < 0
+                   : QString::localeAwareCompare(left.name, right.name) < 0;
+    return QSortFilterProxyModel::lessThan(a, b);
 }

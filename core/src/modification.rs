@@ -11,6 +11,12 @@ use std::{
 };
 
 pub enum Change {
+    Replace {
+        name: String,
+        input: PathBuf,
+        expected_archive_hash: String,
+        expected_input_hash: String,
+    },
     Add {
         inputs: Vec<PathBuf>,
         folder: String,
@@ -35,6 +41,16 @@ fn under(name: &str, prefix: &str) -> bool {
 /// The source is held against write/delete while streaming. A final pathname
 /// publication still has the documented hostile-local-process race limitation.
 pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation) -> Result<()> {
+    modify_with_receipt(archive, change, password, op).map(|_| ())
+}
+/// The replacement digest is computed before publication. No cancellable
+/// post-commit work may turn a completed save into an apparent failure.
+pub fn modify_with_receipt(
+    archive: &Archive,
+    change: &Change,
+    password: &str,
+    op: &Operation,
+) -> Result<String> {
     op.check()?;
     if !matches!(archive.format, Format::Zip | Format::SevenZ)
         || crate::volumes::first_part(&archive.path).is_some()
@@ -45,7 +61,10 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         ));
     }
     let policy = Policy::default();
-    archive.validate(&policy)?;
+    let source_total = archive.validate(&policy)?;
+    let _priority = crate::priority::WorkerPriority::enter(op.settings().resource);
+    let effective = op.settings().effective(archive.format)?;
+    op.details(effective.details());
     security::check_ancestors(&archive.path)?;
     if archive.entries.iter().any(|e| e.encrypted) && password.is_empty() {
         return Err(ArcError::new(
@@ -54,6 +73,31 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         ));
     }
     let source_guard = lock_source(&archive.path)?;
+    let mut edit_guard = None;
+    if let Change::Replace {
+        input,
+        expected_archive_hash,
+        expected_input_hash,
+        ..
+    } = change
+    {
+        security::check_ancestors(input)?;
+        edit_guard = Some(lock_source(input)?);
+        if !input.is_file() || input.metadata()?.len() > crate::preview::MAX_EXTERNAL_BYTES {
+            return Err(ArcError::new(
+                "LIMIT",
+                "Edited file exceeds 256 MiB or is not a regular file",
+            ));
+        }
+        if operations::hash_file(&archive.path, op)? != *expected_archive_hash
+            || operations::hash_file(input, op)? != *expected_input_hash
+        {
+            return Err(ArcError::new(
+                "CHANGED",
+                "Archive or edited file changed. Keep the working copy and reload before saving.",
+            ));
+        }
+    }
     diagnostic("SOURCE_LOCKED", &archive.path, None);
     let parent = archive
         .path
@@ -71,6 +115,17 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         .collect::<Result<_>>()?;
     let available_names: HashSet<_> = normalized.iter().map(String::as_str).collect();
     let (deletes, rename) = match change {
+        Change::Replace { name, .. } => {
+            let name = security::validate_name(name)?;
+            if !archive
+                .entries
+                .iter()
+                .any(|e| e.name == name && !e.directory)
+            {
+                return Err(ArcError::new("SELECTION", "Edited entry no longer exists"));
+            }
+            (vec![], None)
+        }
         Change::Delete { names } => {
             if names.is_empty() {
                 return Err(ArcError::new("SELECTION", "Select entries to delete"));
@@ -140,6 +195,12 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         } else {
             name
         };
+        if let Change::Replace { name, input, .. } = change
+            && entry.name == *name
+        {
+            entry.size = input.metadata()?.len();
+            entry.crc = None;
+        }
         retained.insert(e.id, entry.clone());
         planned.push(entry);
     }
@@ -154,7 +215,20 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         .and_then(|n| n.checked_add(archive.physical_size))
         .ok_or_else(|| ArcError::new("LIMIT", "Replacement estimate overflow"))?;
     disk::preflight(parent, estimate)?;
-    op.total(total);
+    op.stage("Rebuilding archive");
+    let extra = match change {
+        Change::Replace { input, .. } => input.metadata()?.len(),
+        _ => additions
+            .iter()
+            .filter(|(e, _)| !e.directory)
+            .map(|(e, _)| e.size)
+            .sum(),
+    };
+    op.total(
+        source_total
+            .checked_add(extra)
+            .ok_or_else(|| ArcError::new("LIMIT", "Rebuild progress overflow"))?,
+    );
     let mut replacement = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
     diagnostic("REBUILD_STARTED", &archive.path, Some(replacement.path()));
     let mut zip_metadata = if archive.format == Format::Zip {
@@ -179,7 +253,7 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
     } else {
         None
     };
-    let mut writer = Sink::new(replacement.as_file_mut(), archive.format, password)?;
+    let mut writer = Sink::new(replacement.as_file_mut(), archive.format, password, op)?;
     if let (Sink::Zip(w), Some(z)) = (&mut writer, &zip_metadata) {
         w.set_raw_comment(z.comment().to_vec().into())?;
     }
@@ -205,7 +279,24 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
                 .as_ref()
                 .and_then(|m| m.get(&security::validate_name(&old.name).ok()?))
                 .cloned();
-            writer.add(new, data, password, date, seven, op, &write_policy)?;
+            if let Change::Replace { name, input, .. } = change {
+                if old.name == *name {
+                    operations::copy_checked(data, &mut std::io::sink(), old, op, &policy, &mut 0)?;
+                    writer.add(
+                        new,
+                        &mut File::open(input)?,
+                        password,
+                        date,
+                        seven,
+                        op,
+                        &write_policy,
+                    )?;
+                } else {
+                    writer.add(new, data, password, date, seven, op, &write_policy)?;
+                }
+            } else {
+                writer.add(new, data, password, date, seven, op, &write_policy)?;
+            }
         } else {
             let mut actual = 0;
             operations::copy_checked(data, &mut std::io::sink(), old, op, &policy, &mut actual)?;
@@ -233,6 +324,27 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
     diagnostic("VERIFY_OPEN", &archive.path, Some(replacement.path()));
     let verified = Archive::open(replacement.path(), password, op)?;
     operations::test(&verified, password, op)?;
+    if let Change::Replace {
+        name,
+        expected_input_hash,
+        ..
+    } = change
+    {
+        let entry = verified
+            .entries
+            .iter()
+            .find(|e| e.name == *name)
+            .ok_or_else(|| ArcError::new("VERIFY", "Replaced entry missing"))?;
+        let hashes = crate::hashing::entries(&verified, &[entry.id], password, op)?;
+        if hashes.first().is_none_or(|h| {
+            format!("SHA-256: {}\nCRC32: {}", h.sha256, h.crc32) != *expected_input_hash
+        }) {
+            return Err(ArcError::new(
+                "VERIFY",
+                "Replacement content differs; original preserved",
+            ));
+        }
+    }
     diagnostic("VERIFY_FINISHED", &archive.path, Some(replacement.path()));
     let wanted: HashSet<_> = planned
         .iter()
@@ -279,6 +391,11 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
         &archive.path,
         Some(replacement.path()),
     );
+    let receipt = if matches!(change, Change::Replace { .. }) {
+        operations::hash_file(replacement.path(), op)?
+    } else {
+        String::new()
+    };
     drop(source_guard);
     diagnostic(
         "SOURCE_GUARD_DROPPED",
@@ -287,7 +404,10 @@ pub fn modify(archive: &Archive, change: &Change, password: &str, op: &Operation
     );
     // No cancellation after the commit decision: a successful publish is reported
     // as success so the GUI refreshes instead of claiming the old archive survived.
-    commit(replacement, &archive.path, op)
+    drop(edit_guard);
+    op.stage("Publishing verified archive");
+    commit(replacement, &archive.path, op)?;
+    Ok(receipt)
 }
 
 fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
@@ -388,19 +508,15 @@ enum Sink<'a> {
     Seven(sevenz_rust2::ArchiveWriter<&'a mut File>),
 }
 impl<'a> Sink<'a> {
-    fn new(file: &'a mut File, format: Format, password: &str) -> Result<Self> {
+    fn new(file: &'a mut File, format: Format, password: &str, op: &Operation) -> Result<Self> {
         if format == Format::Zip {
             return Ok(Self::Zip(Box::new(zip::ZipWriter::new(file))));
         }
         let mut writer = sevenz_rust2::ArchiveWriter::new(file)?;
-        if !password.is_empty() {
-            use sevenz_rust2::*;
-            writer.set_content_methods(vec![
-                EncoderConfiguration::new(EncoderMethod::AES256_SHA256)
-                    .with_options(encoder_options::AesEncoderOptions::new(password.into()).into()),
-                EncoderConfiguration::new(EncoderMethod::LZMA2),
-            ]);
-        }
+        writer.set_content_methods(operations::seven_methods(
+            &op.settings().effective(format)?,
+            password,
+        ));
         Ok(Self::Seven(writer))
     }
     #[allow(clippy::too_many_arguments)]
@@ -418,7 +534,15 @@ impl<'a> Sink<'a> {
         match self {
             Self::Zip(writer) => {
                 let mut base = zip::write::SimpleFileOptions::default()
-                    .compression_method(zip::CompressionMethod::Deflated);
+                    .compression_method(if op.settings().preset == crate::settings::Preset::Store {
+                        zip::CompressionMethod::Stored
+                    } else {
+                        zip::CompressionMethod::Deflated
+                    })
+                    .compression_level(
+                        (op.settings().preset != crate::settings::Preset::Store)
+                            .then_some(op.settings().effective(Format::Zip)?.level as i64),
+                    );
                 if let Some(date) = date {
                     base = base.last_modified_time(date);
                 }

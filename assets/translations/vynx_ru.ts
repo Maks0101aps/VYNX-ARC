@@ -783,7 +783,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Extract</source>
-            <translation type="vanished">Распаковать</translation>
+            <translation>Распаковать</translation>
         </message>
         <message>
             <source>More</source>
@@ -804,7 +804,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Cancel</source>
-            <translation type="vanished">Отмена</translation>
+            <translation>Отмена</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="266" />
@@ -869,7 +869,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Destination</source>
-            <translation type="vanished">Назначение</translation>
+            <translation>Назначение</translation>
         </message>
         <message>
             <source>Extraction destination</source>
@@ -897,7 +897,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Stop on conflict</source>
-            <translation type="vanished">Остановить при конфликте</translation>
+            <translation>Остановить при конфликте</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="686" />
@@ -914,7 +914,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Existing files</source>
-            <translation type="vanished">Существующие файлы</translation>
+            <translation>Существующие файлы</translation>
         </message>
         <message>
             <source>Smart Extract: avoid redundant nesting</source>
@@ -999,7 +999,7 @@ Checksums were verified where provided by the backend.</source>
         </message>
         <message>
             <source>Replace if newer</source>
-            <translation type="vanished">Заменить, если новее</translation>
+            <translation>Заменить, если новее</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="1089" />
@@ -1043,7 +1043,7 @@ Modified: %6</source>
         </message>
         <message>
             <source>Keep both</source>
-            <translation type="vanished">Сохранить оба</translation>
+            <translation>Сохранить оба</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="555" />
@@ -1465,6 +1465,370 @@ Explorer integration is not installed by this development build.</source>
         <message>
             <source>Operation details</source>
             <translation>Подробности операции</translation>
+        </message>
+        <message>
+            <source>Edit working copy...</source>
+            <translation>Редактировать рабочую копию...</translation>
+        </message>
+        <message>
+            <source>Working copies...</source>
+            <translation>Рабочие копии...</translation>
+        </message>
+        <message>
+            <source>Temporary files...</source>
+            <translation>Временные файлы...</translation>
+        </message>
+        <message>
+            <source>New archive</source>
+            <translation>Новый архив</translation>
+        </message>
+        <message>
+            <source>Working copies (%1 changed)...</source>
+            <translation>Рабочие копии (изменено: %1)...</translation>
+        </message>
+        <message>
+            <source>Store / None</source>
+            <translation>Без сжатия</translation>
+        </message>
+        <message>
+            <source>Fast</source>
+            <translation>Быстро</translation>
+        </message>
+        <message>
+            <source>Balanced</source>
+            <translation>Сбалансированно</translation>
+        </message>
+        <message>
+            <source>Maximum</source>
+            <translation>Максимум</translation>
+        </message>
+        <message>
+            <source>Eco</source>
+            <translation>Экономный</translation>
+        </message>
+        <message>
+            <source>Compression</source>
+            <translation>Сжатие</translation>
+        </message>
+        <message>
+            <source>Resources</source>
+            <translation>Ресурсы</translation>
+        </message>
+        <message>
+            <source>Queue history</source>
+            <translation>История заданий</translation>
+        </message>
+        <message>
+            <source>Could not update queue history settings. Close other instances and retry.</source>
+            <translation>Не удалось изменить настройки истории. Закройте другие экземпляры и повторите.</translation>
+        </message>
+        <message>
+            <source>Working copies</source>
+            <translation>Рабочие копии</translation>
+        </message>
+        <message>
+            <source>Keep working copies on disk and close? They can be recovered from View &gt; Working copies next time.</source>
+            <translation>Оставить рабочие копии на диске и закрыть? Они будут доступны в меню «Вид &gt; Рабочие копии» при следующем запуске.</translation>
+        </message>
+        <message>
+            <source>Session ownership test</source>
+            <translation>Проверка принадлежности операции</translation>
+        </message>
+        <message>
+            <source>Edit working copy</source>
+            <translation>Редактировать рабочую копию</translation>
+        </message>
+        <message>
+            <source>This file type cannot be edited directly. Extract it to a chosen folder instead.</source>
+            <translation>Этот тип файла нельзя редактировать напрямую. Распакуйте его в выбранную папку.</translation>
+        </message>
+        <message>
+            <source>Create an editable copy of %1? Decrypted content and its source path will remain on this computer until you discard the working copy. Changes return to ZIP/7Z only when you explicitly save them.</source>
+            <translation>Создать редактируемую копию %1? Расшифрованное содержимое и путь к источнику останутся на компьютере до удаления копии. Правки попадут в ZIP/7Z только после явного сохранения.</translation>
+        </message>
+        <message>
+            <source>Could not allocate a working copy. Close another instance or discard unused copies (limit 32).</source>
+            <translation>Не удалось создать рабочую копию. Закройте другой экземпляр или удалите ненужные копии (лимит 32).</translation>
+        </message>
+        <message>
+            <source>Preparing editable copy...</source>
+            <translation>Подготовка рабочей копии...</translation>
+        </message>
+        <message>
+            <source>Windows could not launch an editor. The copy is available in View &gt; Working copies.</source>
+            <translation>Windows не удалось запустить редактор. Копия доступна в меню «Вид &gt; Рабочие копии».</translation>
+        </message>
+        <message>
+            <source>Working copy created. Save changes from View &gt; Working copies.</source>
+            <translation>Рабочая копия создана. Сохраняйте правки через «Вид &gt; Рабочие копии».</translation>
+        </message>
+        <message>
+            <source>Save %1 in archive</source>
+            <translation>Сохранить %1 в архив</translation>
+        </message>
+        <message>
+            <source>Saving working copy...</source>
+            <translation>Сохранение рабочей копии...</translation>
+        </message>
+        <message>
+            <source>The archive was saved, but recovery metadata could not be updated. Keep the copy and reload its source before another save.</source>
+            <translation>Архив сохранён, но данные восстановления не обновлены. Сохраните копию и перечитайте источник перед следующим сохранением.</translation>
+        </message>
+        <message>
+            <source>Changes were not saved</source>
+            <translation>Изменения не сохранены</translation>
+        </message>
+        <message>
+            <source>The working copy is retained. Reload the source or export the file before retrying.</source>
+            <translation>Рабочая копия сохранена. Перечитайте источник или экспортируйте файл перед повтором.</translation>
+        </message>
+        <message>
+            <source>Reloading archive...</source>
+            <translation>Перечитывание архива...</translation>
+        </message>
+        <message>
+            <source>Checking edit source...</source>
+            <translation>Проверка источника правки...</translation>
+        </message>
+        <message>
+            <source>Source reloaded. Review the working copy before saving.</source>
+            <translation>Источник перечитан. Проверьте рабочую копию перед сохранением.</translation>
+        </message>
+        <message>
+            <source>Working copies contain plaintext and source paths until discarded. Saving is explicit; external applications may keep their own copies.</source>
+            <translation>Рабочие копии содержат открытые данные и пути к источникам до удаления. Сохранение выполняется явно; внешние приложения могут хранить свои копии.</translation>
+        </message>
+        <message>
+            <source>Archive</source>
+            <translation>Архив</translation>
+        </message>
+        <message>
+            <source>Entry</source>
+            <translation>Запись</translation>
+        </message>
+        <message>
+            <source>State</source>
+            <translation>Состояние</translation>
+        </message>
+        <message>
+            <source>Review required</source>
+            <translation>Нужна проверка</translation>
+        </message>
+        <message>
+            <source>Preparation interrupted / export available copy</source>
+            <translation>Подготовка прервана / экспортируйте доступную копию</translation>
+        </message>
+        <message>
+            <source>Changed / verify before saving</source>
+            <translation>Изменён / проверьте перед сохранением</translation>
+        </message>
+        <message>
+            <source>Saved</source>
+            <translation>Сохранено</translation>
+        </message>
+        <message>
+            <source>Working copy</source>
+            <translation>Рабочая копия</translation>
+        </message>
+        <message>
+            <source>Open copy</source>
+            <translation>Открыть копию</translation>
+        </message>
+        <message>
+            <source>Save in archive...</source>
+            <translation>Сохранить в архив...</translation>
+        </message>
+        <message>
+            <source>Reload source...</source>
+            <translation>Перечитать источник...</translation>
+        </message>
+        <message>
+            <source>Export file...</source>
+            <translation>Экспортировать файл...</translation>
+        </message>
+        <message>
+            <source>Discard...</source>
+            <translation>Удалить копию...</translation>
+        </message>
+        <message>
+            <source>Discard working copy</source>
+            <translation>Удалить рабочую копию</translation>
+        </message>
+        <message>
+            <source>Delete this working copy and its unsaved changes? The archive is not changed.</source>
+            <translation>Удалить эту рабочую копию и несохранённые правки? Архив останется прежним.</translation>
+        </message>
+        <message>
+            <source>The copy is locked or contains unexpected files. Close the editor and try again.</source>
+            <translation>Копия заблокирована или содержит посторонние файлы. Закройте редактор и повторите.</translation>
+        </message>
+        <message>
+            <source>Export working copy</source>
+            <translation>Экспортировать рабочую копию</translation>
+        </message>
+        <message>
+            <source>Exporting working copy...</source>
+            <translation>Экспорт рабочей копии...</translation>
+        </message>
+        <message>
+            <source>Temporary files</source>
+            <translation>Временные файлы</translation>
+        </message>
+        <message>
+            <source>Location</source>
+            <translation>Расположение</translation>
+        </message>
+        <message>
+            <source>Temporary views: %1. Working copies: %2 (managed separately and never removed here).</source>
+            <translation>Временный просмотр: %1. Рабочие копии: %2 (управляются отдельно и здесь не удаляются).</translation>
+        </message>
+        <message>
+            <source>Delete selected copy...</source>
+            <translation>Удалить выбранную копию...</translation>
+        </message>
+        <message>
+            <source>Refresh</source>
+            <translation>Обновить</translation>
+        </message>
+        <message>
+            <source>Delete temporary copy</source>
+            <translation>Удалить временную копию</translation>
+        </message>
+        <message>
+            <source>Delete this temporary view? Close any external application using it first. The archive and editable working copies are not changed.</source>
+            <translation>Удалить копию для просмотра? Сначала закройте использующее её приложение. Архив и рабочие копии не изменятся.</translation>
+        </message>
+        <message>
+            <source>The copy is in use or cannot be safely removed. Close the other application and retry.</source>
+            <translation>Копия используется или не может быть безопасно удалена. Закройте другое приложение и повторите.</translation>
+        </message>
+        <message>
+            <source>Review / retry...</source>
+            <translation>Проверить / повторить...</translation>
+        </message>
+        <message>
+            <source>Export report...</source>
+            <translation>Экспортировать отчёт...</translation>
+        </message>
+        <message>
+            <source>The request did not start. Review its parameters.</source>
+            <translation>Задание не запущено. Проверьте параметры.</translation>
+        </message>
+        <message>
+            <source>Failed</source>
+            <translation>Ошибка</translation>
+        </message>
+        <message>
+            <source>Interrupted - review required</source>
+            <translation>Прервано — нужна проверка</translation>
+        </message>
+        <message>
+            <source>Running</source>
+            <translation>Выполняется</translation>
+        </message>
+        <message>
+            <source>Queue history is unavailable. Jobs will run in memory only.</source>
+            <translation>История заданий недоступна. Задания сохраняются только в памяти.</translation>
+        </message>
+        <message>
+            <source>%1 - %2</source>
+            <translation>%1 — %2</translation>
+        </message>
+        <message>
+            <source>Completed: %1 | Errors: %2 | Pending/review: %3</source>
+            <translation>Завершено: %1 · Ошибки: %2 · Ожидание/проверка: %3</translation>
+        </message>
+        <message>
+            <source>Batch %1: %2 total, %3 completed, %4 stopped, %5 remaining</source>
+            <translation>Пакет %1: всего %2, готово %3, остановлено %4, осталось %5</translation>
+        </message>
+        <message>
+            <source>Could not save queue history. See operation details.</source>
+            <translation>Не удалось сохранить историю. См. подробности операции.</translation>
+        </message>
+        <message>
+            <source>Export operation report</source>
+            <translation>Экспортировать отчёт об операциях</translation>
+        </message>
+        <message>
+            <source>JSON files (*.json)</source>
+            <translation>Файлы JSON (*.json)</translation>
+        </message>
+        <message>
+            <source>Retry operation</source>
+            <translation>Повторить операцию</translation>
+        </message>
+        <message>
+            <source>Repeat this action from its archive tab. Edited files are managed in Working copies.</source>
+            <translation>Повторите действие во вкладке архива. Правки доступны в разделе «Рабочие копии».</translation>
+        </message>
+        <message>
+            <source>Review and retry</source>
+            <translation>Проверить и повторить</translation>
+        </message>
+        <message>
+            <source>Review parameters before starting a new attempt.</source>
+            <translation>Проверьте параметры перед новой попыткой.</translation>
+        </message>
+        <message>
+            <source>A source changed or is missing. Review the current files carefully; the new attempt will use their current content.</source>
+            <translation>Источник изменён или отсутствует. Проверьте файлы: новая попытка использует их текущее содержимое.</translation>
+        </message>
+        <message>
+            <source>Sources (one path per line)</source>
+            <translation>Источники (один путь на строку)</translation>
+        </message>
+        <message>
+            <source>Skip existing</source>
+            <translation>Пропускать существующие</translation>
+        </message>
+        <message>
+            <source>Replace existing</source>
+            <translation>Заменять существующие</translation>
+        </message>
+        <message>
+            <source>Ask</source>
+            <translation>Спрашивать</translation>
+        </message>
+        <message>
+            <source>Requested change</source>
+            <translation>Запрошенное изменение</translation>
+        </message>
+        <message>
+            <source>Input paths</source>
+            <translation>Исходные пути</translation>
+        </message>
+        <message>
+            <source>Archive entries</source>
+            <translation>Записи архива</translation>
+        </message>
+        <message>
+            <source>Destination in archive</source>
+            <translation>Папка в архиве</translation>
+        </message>
+        <message>
+            <source>Start new attempt</source>
+            <translation>Начать новую попытку</translation>
+        </message>
+        <message>
+            <source>Operation stopped. Review details in the queue.</source>
+            <translation>Операция остановлена. Подробности доступны в очереди.</translation>
+        </message>
+        <message>
+            <source>Cancel this archive's operation and close its tab after it stops?</source>
+            <translation>Отменить операцию этого архива и закрыть вкладку после остановки?</translation>
+        </message>
+        <message>
+            <source>Restore workspace</source>
+            <translation>Восстановить вкладки</translation>
+        </message>
+        <message>
+            <source>Restore %1 previously open archives? Passwords will be requested again.</source>
+            <translation>Восстановить открытые ранее архивы (%1)? Пароли будут запрошены снова.</translation>
+        </message>
+        <message>
+            <source>Retained edits are available in View &gt; Working copies.</source>
+            <translation>Сохранённые правки доступны в меню «Вид &gt; Рабочие копии».</translation>
         </message>
     </context>
     <context>

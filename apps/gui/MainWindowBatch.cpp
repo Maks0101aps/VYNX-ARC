@@ -25,6 +25,7 @@ void MainWindow::chooseBatchExtract() {
 void MainWindow::enqueueBatch(const QStringList &paths, const QString &destination, quint8 conflict,
                               const std::shared_ptr<SecretUtf8> &pw) {
     const auto destinations = batchDestinations(paths, destination);
+    const auto batchId = QUuid::createUuid().toString(QUuid::WithoutBraces);
     for (int i = 0; i < paths.size(); ++i) {
         const auto path = paths[i];
         const auto output = destinations[i];
@@ -33,7 +34,7 @@ void MainWindow::enqueueBatch(const QStringList &paths, const QString &destinati
             title,
             [this, path, output, conflict, pw, title] {
                 beginOperation();
-                auto op = operation_;
+                auto op = operations_.operation;
                 runJob(
                     title,
                     [path, output, conflict, pw, op] {
@@ -49,6 +50,14 @@ void MainWindow::enqueueBatch(const QStringList &paths, const QString &destinati
                         Q_UNUSED(error);
                     });
             },
-            path + "\n" + output);
+            path + "\n" + output,
+            QJsonObject{{"kind", "extract"},
+                        {"batchId", batchId},
+                        {"sources", QJsonArray{path}},
+                        {"destination", output},
+                        {"conflict", int(conflict)},
+                        {"smart", false},
+                        {"needsPassword", !pw->bytes().empty()},
+                        {"resource", settings_->value("resourceMode", 1).toInt()}});
     }
 }

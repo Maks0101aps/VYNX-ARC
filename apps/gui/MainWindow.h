@@ -1,8 +1,12 @@
 #pragma once
 #include "ArchiveModel.h"
+#include "ArchiveSession.h"
+#include "JobJournal.h"
+#include "OperationController.h"
 #include "OperationQueue.h"
 #include <QElapsedTimer>
 #include <QFutureWatcher>
+#include <QJsonObject>
 #include <QMainWindow>
 #include <functional>
 #include <memory>
@@ -16,12 +20,15 @@ class QListWidget;
 class QListWidgetItem;
 class QDockWidget;
 class QMenu;
+class QTabBar;
+class QTemporaryDir;
 class QSettings;
 class QTimer;
 class QAction;
 class QVBoxLayout;
 class SecretUtf8;
 class ExternalFiles;
+class EditStore;
 class BreadcrumbBar;
 class ArchivePage;
 class OperationPanel;
@@ -43,14 +50,35 @@ class MainWindow : public QMainWindow {
     void closeEvent(QCloseEvent *event) override;
 
   private:
+    std::shared_ptr<ArchiveSession> session_;
+    QVector<std::shared_ptr<ArchiveSession>> sessions_;
+    OperationController operations_;
+    QVector<std::shared_ptr<OperationController>> readers_;
+    QTabBar *tabs_ = nullptr;
+    void bindSession(const std::shared_ptr<ArchiveSession> &session);
+    void activateSession(int index);
+    void closeSession(int index);
+    void updateSessionUi();
+    void saveWorkspace();
+    void restoreWorkspace();
+    QString archiveIdentity(const QString &path) const;
     void chooseOpen();
     void chooseBatchExtract();
     bool enqueueRequest(const QString &title, std::function<void()> start,
-                        const QString &details = {});
+                        const QString &details = {}, const QJsonObject &spec = {});
     void enqueueBatch(const QStringList &paths, const QString &destination, quint8 conflict,
                       const std::shared_ptr<SecretUtf8> &password);
     void movePending(int direction);
     bool queuePaused_ = false;
+    JobJournal journal_;
+    QJsonObject activeSpec_;
+    QString journalWarning_;
+    void setupJournal();
+    void syncJournal();
+    void retrySelectedJob();
+    void dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8> &password);
+    void exportJobReport();
+    QLabel *queueSummary_ = nullptr;
     void chooseCreate(const QStringList &initial = {}, int initialFormat = 0);
     void chooseModify(int kind, const QStringList &sources = {}, bool folders = false);
     bool writableArchive() const;
@@ -64,7 +92,17 @@ class MainWindow : public QMainWindow {
     void showProperties();
     void previewSelected();
     void openSelectedExternally();
+    std::unique_ptr<QTemporaryDir> transientStorage_;
     std::unique_ptr<ExternalFiles> externalFiles_;
+    std::unique_ptr<EditStore> edits_;
+    void editSelected();
+    void prepareEdit(quint64 id, const QString &name, bool launch);
+    void showWorkingCopies();
+    void saveWorkingCopy(const QString &id, const std::shared_ptr<SecretUtf8> &password);
+    void reloadWorkingSource(const QString &id, const std::shared_ptr<SecretUtf8> &password);
+    void reloadArchive(const QString &path, const std::shared_ptr<SecretUtf8> &password);
+    void showTemporaryFiles();
+    QAction *editAction_;
     void settings();
     void applyTheme(const QString &theme);
     void updateRecent();
@@ -72,7 +110,8 @@ class MainWindow : public QMainWindow {
     void runJob(const QString &title, std::function<QString()> worker,
                 std::function<void()> success = {}, std::function<void(QString)> failure = {});
     void openWithPassword(const QString &path, const QString &password);
-    void openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &password);
+    void openWithSecret(const QString &path, const std::shared_ptr<SecretUtf8> &password,
+                        bool reload = false);
     void handleShellWithSecret(quint32 action, const QStringList &paths,
                                const std::shared_ptr<SecretUtf8> &password);
     void beginOperation();
@@ -86,14 +125,7 @@ class MainWindow : public QMainWindow {
     QListWidgetItem *runningItem_ = nullptr;
     void showConflict();
     QString askPassword(bool *accepted);
-    std::shared_ptr<SecretUtf8> password_;
-    QString archivePath_;
-    QStringList history_;
-    std::shared_ptr<rust::Box<vynx::Archive>> archive_;
-    std::shared_ptr<rust::Box<vynx::Operation>> operation_;
     std::unique_ptr<QSettings> settings_;
-    ArchiveModel *model_;
-    ArchiveFilter *filter_;
     QTableView *table_;
     QLineEdit *search_;
     BreadcrumbBar *breadcrumb_;
@@ -112,14 +144,12 @@ class MainWindow : public QMainWindow {
     QWidget *operationPanel_;
     QStackedWidget *pages_;
     QListWidget *recent_;
-    QFutureWatcher<QString> watcher_;
     QTimer *timer_;
     QElapsedTimer elapsed_;
     QList<QAction *> archiveActions_;
     QList<QAction *> idleActions_;
     std::function<void()> success_;
     std::function<void(QString)> failure_;
-    bool busy_ = false;
     bool closePending_ = false;
     quint64 shownConflict_ = 0;
 };

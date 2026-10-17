@@ -783,7 +783,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Extract</source>
-            <translation type="vanished">Розпакувати</translation>
+            <translation>Розпакувати</translation>
         </message>
         <message>
             <source>More</source>
@@ -804,7 +804,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Cancel</source>
-            <translation type="vanished">Скасувати</translation>
+            <translation>Скасувати</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="266" />
@@ -869,7 +869,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Destination</source>
-            <translation type="vanished">Призначення</translation>
+            <translation>Призначення</translation>
         </message>
         <message>
             <source>Extraction destination</source>
@@ -897,7 +897,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Stop on conflict</source>
-            <translation type="vanished">Зупинити при конфлікті</translation>
+            <translation>Зупинити при конфлікті</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="686" />
@@ -914,7 +914,7 @@ Drop an archive anywhere in this window.</source>
         </message>
         <message>
             <source>Existing files</source>
-            <translation type="vanished">Наявні файли</translation>
+            <translation>Наявні файли</translation>
         </message>
         <message>
             <source>Smart Extract: avoid redundant nesting</source>
@@ -999,7 +999,7 @@ Checksums were verified where provided by the backend.</source>
         </message>
         <message>
             <source>Replace if newer</source>
-            <translation type="vanished">Замінити, якщо новіший</translation>
+            <translation>Замінити, якщо новіший</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="1089" />
@@ -1043,7 +1043,7 @@ Modified: %6</source>
         </message>
         <message>
             <source>Keep both</source>
-            <translation type="vanished">Зберегти обидва</translation>
+            <translation>Зберегти обидва</translation>
         </message>
         <message>
             <location filename="../../apps/gui/MainWindow.cpp" line="555" />
@@ -1465,6 +1465,370 @@ Explorer integration is not installed by this development build.</source>
         <message>
             <source>Operation details</source>
             <translation>Подробиці операції</translation>
+        </message>
+        <message>
+            <source>Edit working copy...</source>
+            <translation>Редагувати робочу копію...</translation>
+        </message>
+        <message>
+            <source>Working copies...</source>
+            <translation>Робочі копії...</translation>
+        </message>
+        <message>
+            <source>Temporary files...</source>
+            <translation>Тимчасові файли...</translation>
+        </message>
+        <message>
+            <source>New archive</source>
+            <translation>Новий архів</translation>
+        </message>
+        <message>
+            <source>Working copies (%1 changed)...</source>
+            <translation>Робочі копії (змінено: %1)...</translation>
+        </message>
+        <message>
+            <source>Store / None</source>
+            <translation>Без стиснення</translation>
+        </message>
+        <message>
+            <source>Fast</source>
+            <translation>Швидко</translation>
+        </message>
+        <message>
+            <source>Balanced</source>
+            <translation>Збалансовано</translation>
+        </message>
+        <message>
+            <source>Maximum</source>
+            <translation>Максимум</translation>
+        </message>
+        <message>
+            <source>Eco</source>
+            <translation>Економний</translation>
+        </message>
+        <message>
+            <source>Compression</source>
+            <translation>Стиснення</translation>
+        </message>
+        <message>
+            <source>Resources</source>
+            <translation>Ресурси</translation>
+        </message>
+        <message>
+            <source>Queue history</source>
+            <translation>Історія завдань</translation>
+        </message>
+        <message>
+            <source>Could not update queue history settings. Close other instances and retry.</source>
+            <translation>Не вдалося змінити налаштування історії. Закрийте інші примірники та повторіть.</translation>
+        </message>
+        <message>
+            <source>Working copies</source>
+            <translation>Робочі копії</translation>
+        </message>
+        <message>
+            <source>Keep working copies on disk and close? They can be recovered from View &gt; Working copies next time.</source>
+            <translation>Залишити робочі копії на диску та закрити? Вони будуть доступні в меню «Вигляд &gt; Робочі копії» після запуску.</translation>
+        </message>
+        <message>
+            <source>Session ownership test</source>
+            <translation>Перевірка належності операції</translation>
+        </message>
+        <message>
+            <source>Edit working copy</source>
+            <translation>Редагувати робочу копію</translation>
+        </message>
+        <message>
+            <source>This file type cannot be edited directly. Extract it to a chosen folder instead.</source>
+            <translation>Цей тип файлу не можна редагувати напряму. Розпакуйте його у вибрану теку.</translation>
+        </message>
+        <message>
+            <source>Create an editable copy of %1? Decrypted content and its source path will remain on this computer until you discard the working copy. Changes return to ZIP/7Z only when you explicitly save them.</source>
+            <translation>Створити редаговану копію %1? Розшифрований вміст і шлях до джерела залишаться на комп'ютері до видалення копії. Правки потраплять у ZIP/7Z лише після явного збереження.</translation>
+        </message>
+        <message>
+            <source>Could not allocate a working copy. Close another instance or discard unused copies (limit 32).</source>
+            <translation>Не вдалося створити робочу копію. Закрийте інший примірник або видаліть непотрібні копії (ліміт 32).</translation>
+        </message>
+        <message>
+            <source>Preparing editable copy...</source>
+            <translation>Підготовка робочої копії...</translation>
+        </message>
+        <message>
+            <source>Windows could not launch an editor. The copy is available in View &gt; Working copies.</source>
+            <translation>Windows не вдалося запустити редактор. Копія доступна в меню «Вигляд &gt; Робочі копії».</translation>
+        </message>
+        <message>
+            <source>Working copy created. Save changes from View &gt; Working copies.</source>
+            <translation>Робочу копію створено. Зберігайте правки через «Вигляд &gt; Робочі копії».</translation>
+        </message>
+        <message>
+            <source>Save %1 in archive</source>
+            <translation>Зберегти %1 в архів</translation>
+        </message>
+        <message>
+            <source>Saving working copy...</source>
+            <translation>Збереження робочої копії...</translation>
+        </message>
+        <message>
+            <source>The archive was saved, but recovery metadata could not be updated. Keep the copy and reload its source before another save.</source>
+            <translation>Архів збережено, але дані відновлення не оновлено. Залиште копію та перечитайте джерело перед наступним збереженням.</translation>
+        </message>
+        <message>
+            <source>Changes were not saved</source>
+            <translation>Зміни не збережено</translation>
+        </message>
+        <message>
+            <source>The working copy is retained. Reload the source or export the file before retrying.</source>
+            <translation>Робочу копію збережено. Перечитайте джерело або експортуйте файл перед повтором.</translation>
+        </message>
+        <message>
+            <source>Reloading archive...</source>
+            <translation>Повторне читання архіву...</translation>
+        </message>
+        <message>
+            <source>Checking edit source...</source>
+            <translation>Перевірка джерела правки...</translation>
+        </message>
+        <message>
+            <source>Source reloaded. Review the working copy before saving.</source>
+            <translation>Джерело перечитано. Перевірте робочу копію перед збереженням.</translation>
+        </message>
+        <message>
+            <source>Working copies contain plaintext and source paths until discarded. Saving is explicit; external applications may keep their own copies.</source>
+            <translation>Робочі копії містять відкриті дані та шляхи до джерел до видалення. Збереження виконується явно; зовнішні програми можуть зберігати власні копії.</translation>
+        </message>
+        <message>
+            <source>Archive</source>
+            <translation>Архів</translation>
+        </message>
+        <message>
+            <source>Entry</source>
+            <translation>Запис</translation>
+        </message>
+        <message>
+            <source>State</source>
+            <translation>Стан</translation>
+        </message>
+        <message>
+            <source>Review required</source>
+            <translation>Потрібна перевірка</translation>
+        </message>
+        <message>
+            <source>Preparation interrupted / export available copy</source>
+            <translation>Підготовку перервано / експортуйте доступну копію</translation>
+        </message>
+        <message>
+            <source>Changed / verify before saving</source>
+            <translation>Змінено / перевірте перед збереженням</translation>
+        </message>
+        <message>
+            <source>Saved</source>
+            <translation>Збережено</translation>
+        </message>
+        <message>
+            <source>Working copy</source>
+            <translation>Робоча копія</translation>
+        </message>
+        <message>
+            <source>Open copy</source>
+            <translation>Відкрити копію</translation>
+        </message>
+        <message>
+            <source>Save in archive...</source>
+            <translation>Зберегти в архів...</translation>
+        </message>
+        <message>
+            <source>Reload source...</source>
+            <translation>Перечитати джерело...</translation>
+        </message>
+        <message>
+            <source>Export file...</source>
+            <translation>Експортувати файл...</translation>
+        </message>
+        <message>
+            <source>Discard...</source>
+            <translation>Видалити копію...</translation>
+        </message>
+        <message>
+            <source>Discard working copy</source>
+            <translation>Видалити робочу копію</translation>
+        </message>
+        <message>
+            <source>Delete this working copy and its unsaved changes? The archive is not changed.</source>
+            <translation>Видалити цю робочу копію та незбережені правки? Архів залишиться без змін.</translation>
+        </message>
+        <message>
+            <source>The copy is locked or contains unexpected files. Close the editor and try again.</source>
+            <translation>Копію заблоковано або вона містить сторонні файли. Закрийте редактор і повторіть.</translation>
+        </message>
+        <message>
+            <source>Export working copy</source>
+            <translation>Експортувати робочу копію</translation>
+        </message>
+        <message>
+            <source>Exporting working copy...</source>
+            <translation>Експорт робочої копії...</translation>
+        </message>
+        <message>
+            <source>Temporary files</source>
+            <translation>Тимчасові файли</translation>
+        </message>
+        <message>
+            <source>Location</source>
+            <translation>Розташування</translation>
+        </message>
+        <message>
+            <source>Temporary views: %1. Working copies: %2 (managed separately and never removed here).</source>
+            <translation>Тимчасовий перегляд: %1. Робочі копії: %2 (керуються окремо й тут не видаляються).</translation>
+        </message>
+        <message>
+            <source>Delete selected copy...</source>
+            <translation>Видалити вибрану копію...</translation>
+        </message>
+        <message>
+            <source>Refresh</source>
+            <translation>Оновити</translation>
+        </message>
+        <message>
+            <source>Delete temporary copy</source>
+            <translation>Видалити тимчасову копію</translation>
+        </message>
+        <message>
+            <source>Delete this temporary view? Close any external application using it first. The archive and editable working copies are not changed.</source>
+            <translation>Видалити копію для перегляду? Спочатку закрийте програму, яка її використовує. Архів і робочі копії не зміняться.</translation>
+        </message>
+        <message>
+            <source>The copy is in use or cannot be safely removed. Close the other application and retry.</source>
+            <translation>Копія використовується або її неможливо безпечно видалити. Закрийте іншу програму та повторіть.</translation>
+        </message>
+        <message>
+            <source>Review / retry...</source>
+            <translation>Перевірити / повторити...</translation>
+        </message>
+        <message>
+            <source>Export report...</source>
+            <translation>Експортувати звіт...</translation>
+        </message>
+        <message>
+            <source>The request did not start. Review its parameters.</source>
+            <translation>Завдання не запущено. Перевірте параметри.</translation>
+        </message>
+        <message>
+            <source>Failed</source>
+            <translation>Помилка</translation>
+        </message>
+        <message>
+            <source>Interrupted - review required</source>
+            <translation>Перервано — потрібна перевірка</translation>
+        </message>
+        <message>
+            <source>Running</source>
+            <translation>Виконується</translation>
+        </message>
+        <message>
+            <source>Queue history is unavailable. Jobs will run in memory only.</source>
+            <translation>Історія завдань недоступна. Завдання зберігаються лише в пам'яті.</translation>
+        </message>
+        <message>
+            <source>%1 - %2</source>
+            <translation>%1 — %2</translation>
+        </message>
+        <message>
+            <source>Completed: %1 | Errors: %2 | Pending/review: %3</source>
+            <translation>Завершено: %1 · Помилки: %2 · Очікування/перевірка: %3</translation>
+        </message>
+        <message>
+            <source>Batch %1: %2 total, %3 completed, %4 stopped, %5 remaining</source>
+            <translation>Пакет %1: загалом %2, готово %3, зупинено %4, залишилося %5</translation>
+        </message>
+        <message>
+            <source>Could not save queue history. See operation details.</source>
+            <translation>Не вдалося зберегти історію. Див. подробиці операції.</translation>
+        </message>
+        <message>
+            <source>Export operation report</source>
+            <translation>Експортувати звіт про операції</translation>
+        </message>
+        <message>
+            <source>JSON files (*.json)</source>
+            <translation>Файли JSON (*.json)</translation>
+        </message>
+        <message>
+            <source>Retry operation</source>
+            <translation>Повторити операцію</translation>
+        </message>
+        <message>
+            <source>Repeat this action from its archive tab. Edited files are managed in Working copies.</source>
+            <translation>Повторіть дію у вкладці архіву. Правки доступні в розділі «Робочі копії».</translation>
+        </message>
+        <message>
+            <source>Review and retry</source>
+            <translation>Перевірити та повторити</translation>
+        </message>
+        <message>
+            <source>Review parameters before starting a new attempt.</source>
+            <translation>Перевірте параметри перед новою спробою.</translation>
+        </message>
+        <message>
+            <source>A source changed or is missing. Review the current files carefully; the new attempt will use their current content.</source>
+            <translation>Джерело змінено або відсутнє. Перевірте файли: нова спроба використає їхній поточний вміст.</translation>
+        </message>
+        <message>
+            <source>Sources (one path per line)</source>
+            <translation>Джерела (один шлях у рядку)</translation>
+        </message>
+        <message>
+            <source>Skip existing</source>
+            <translation>Пропускати наявні</translation>
+        </message>
+        <message>
+            <source>Replace existing</source>
+            <translation>Замінювати наявні</translation>
+        </message>
+        <message>
+            <source>Ask</source>
+            <translation>Запитувати</translation>
+        </message>
+        <message>
+            <source>Requested change</source>
+            <translation>Запитана зміна</translation>
+        </message>
+        <message>
+            <source>Input paths</source>
+            <translation>Вхідні шляхи</translation>
+        </message>
+        <message>
+            <source>Archive entries</source>
+            <translation>Записи архіву</translation>
+        </message>
+        <message>
+            <source>Destination in archive</source>
+            <translation>Тека в архіві</translation>
+        </message>
+        <message>
+            <source>Start new attempt</source>
+            <translation>Почати нову спробу</translation>
+        </message>
+        <message>
+            <source>Operation stopped. Review details in the queue.</source>
+            <translation>Операцію зупинено. Подробиці доступні в черзі.</translation>
+        </message>
+        <message>
+            <source>Cancel this archive's operation and close its tab after it stops?</source>
+            <translation>Скасувати операцію цього архіву та закрити вкладку після зупинки?</translation>
+        </message>
+        <message>
+            <source>Restore workspace</source>
+            <translation>Відновити вкладки</translation>
+        </message>
+        <message>
+            <source>Restore %1 previously open archives? Passwords will be requested again.</source>
+            <translation>Відновити відкриті раніше архіви (%1)? Паролі буде запитано знову.</translation>
+        </message>
+        <message>
+            <source>Retained edits are available in View &gt; Working copies.</source>
+            <translation>Збережені правки доступні в меню «Вигляд &gt; Робочі копії».</translation>
         </message>
     </context>
     <context>

@@ -49,6 +49,7 @@ class OperationQueue {
     }
     void clear() { pending_.clear(); }
     size_t size() const { return pending_.size(); }
+    quint64 frontId() const { return pending_.empty() ? 0 : pending_.front().id; }
 
   private:
     std::deque<Job> pending_;

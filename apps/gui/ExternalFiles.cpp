@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonObject>
 #include <QLockFile>
 #include <QSet>
 #include <QStandardPaths>
@@ -80,8 +81,8 @@ int ExternalFiles::cleanup() {
         if (!plainDirectory(path))
             continue;
         QFile marker(path + "/.vynx-view");
-        if (!marker.open(QIODevice::ReadOnly) ||
-            marker.readAll() != "VYNX ARC external view v1\n" ||
+        if (marker.size() > 64 || QFileInfo(marker).isSymLink() ||
+            !marker.open(QIODevice::ReadOnly) || marker.read(64) != "VYNX ARC external view v1\n" ||
             QFileInfo(marker).lastModified().toUTC() > deadline)
             continue;
         marker.close();
@@ -114,4 +115,66 @@ int ExternalFiles::cleanup() {
         }
     }
     return removed;
+}
+
+QJsonArray ExternalFiles::items() const {
+    QJsonArray result;
+    if (root_.isEmpty() || !plainDirectory(root_))
+        return result;
+    for (const auto &info :
+         QDir(root_).entryInfoList({"view-*"}, QDir::Dirs | QDir::NoDotAndDotDot)) {
+        if (!plainDirectory(info.absoluteFilePath()))
+            continue;
+        QFile marker(info.absoluteFilePath() + "/.vynx-view");
+        if (marker.size() > 64 || QFileInfo(marker).isSymLink() ||
+            !marker.open(QIODevice::ReadOnly) || marker.read(64) != "VYNX ARC external view v1\n")
+            continue;
+        quint64 bytes = 0;
+        for (const auto &file :
+             QDir(info.absoluteFilePath()).entryInfoList(QDir::Files | QDir::NoDotAndDotDot))
+            if (!file.fileName().startsWith('.') && !file.isSymLink())
+                bytes += quint64(file.size());
+        result.append(QJsonObject{{"directory", info.absoluteFilePath()},
+                                  {"bytes", double(bytes)},
+                                  {"created", info.birthTime().toString(Qt::ISODate)}});
+        if (result.size() >= 1000)
+            break;
+    }
+    return result;
+}
+bool ExternalFiles::remove(const QString &directory) {
+    if (root_.isEmpty() || QFileInfo(directory).absolutePath() != root_ ||
+        !plainDirectory(directory))
+        return false;
+    QFile marker(directory + "/.vynx-view");
+    if (marker.size() > 64 || QFileInfo(marker).isSymLink() || !marker.open(QIODevice::ReadOnly) ||
+        marker.read(64) != "VYNX ARC external view v1\n")
+        return false;
+    marker.close();
+    for (auto it = sessions_.begin(); it != sessions_.end(); ++it)
+        if (it->path == directory) {
+            sessions_.erase(it);
+            break;
+        }
+    QLockFile lock(directory + "/.owner.lock");
+    lock.setStaleLockTime(0);
+    if (!lock.tryLock())
+        return false;
+    const auto files = QDir(directory).entryInfoList(QDir::AllEntries | QDir::Hidden |
+                                                     QDir::System | QDir::NoDotAndDotDot);
+    for (const auto &file : files)
+        if (!file.isFile() || file.isSymLink())
+            return false;
+    for (const auto &file : files) {
+        if (file.fileName() == ".owner.lock" || file.fileName() == ".vynx-view")
+            continue;
+        QFile payload(file.absoluteFilePath());
+        payload.setPermissions(payload.permissions() | QFileDevice::WriteOwner);
+        if (!payload.remove())
+            return false;
+    }
+    if (!QFile::remove(directory + "/.vynx-view"))
+        return false;
+    lock.unlock();
+    return QDir(root_).rmdir(QFileInfo(directory).fileName());
 }

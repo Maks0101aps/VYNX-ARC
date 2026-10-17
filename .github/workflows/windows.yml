@@ -34,6 +34,8 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/check-publication-locks.py --cli target/release/vynxarc-cli.exe --output .dev/ci-locks
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/check-interrupted-rebuild.py --cli target/release/vynxarc-cli.exe --output .dev/ci-interrupted
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/fuzz-parsers.py --cli target/release/vynxarc-cli.exe --cases 64 --output .dev/ci-fuzz
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Preserve verification reports
@@ -44,6 +46,8 @@ jobs:
           path: |
             .dev/ci-portable.json
             .dev/ci-locks/results.json
+            .dev/ci-interrupted/results.json
+            build-msvc/presentation-tests.txt
             .dev/ci-fuzz/results.json
             .dev/ci-fuzz/case-*.bin
           include-hidden-files: true

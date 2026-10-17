@@ -1,4 +1,5 @@
 #pragma once
+#include <QJsonArray>
 #include <QString>
 #include <memory>
 #include <vector>
@@ -12,6 +13,8 @@ class ExternalFiles {
     QString create();
     bool open(const QString &path) const;
     int cleanup();
+    QJsonArray items() const;
+    bool remove(const QString &directory);
     QString root() const { return root_; }
 
   private:

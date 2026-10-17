@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "dialogs/ConflictDialog.h"
+#include "pages/ArchivePage.h"
 #include "widgets/OperationPanel.h"
 #include "widgets/ToastOverlay.h"
 #include <QtConcurrent>
@@ -27,6 +28,9 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     queueView_->setAccessibleName(tr("Operation queue"));
     queueView_->setMinimumHeight(100);
     queueLayout->addWidget(queueView_);
+    queueSummary_ = new QLabel;
+    queueSummary_->setWordWrap(true);
+    queueLayout->addWidget(queueSummary_);
     auto *controls = new QToolBar;
     controls->setObjectName("queueControls");
     controls->setToolButtonStyle(Qt::ToolButtonTextOnly);
@@ -43,10 +47,14 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     pause->setCheckable(true);
     connect(pause, &QAction::toggled, this, [this, pause](bool paused) {
         queuePaused_ = paused;
+        settings_->setValue("queuePaused", paused);
         pause->setText(paused ? tr("Resume queue") : tr("Pause queue"));
         if (!paused)
             QTimer::singleShot(0, this, &MainWindow::startNextQueued);
     });
+    if (!QCoreApplication::arguments().contains("--smoke-test") &&
+        !QCoreApplication::arguments().contains("--capture"))
+        pause->setChecked(settings_->value("queuePaused", false).toBool());
     auto *up = controls->addAction(tr("Move up"));
     auto *down = controls->addAction(tr("Move down"));
     connect(up, &QAction::triggered, this, [this] { movePending(-1); });
@@ -59,11 +67,28 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
             if (item != runningItem_ && !item->data(Qt::UserRole + 2).toBool()) {
                 item->setText(tr("Cancelled — %1").arg(item->data(Qt::UserRole + 1).toString()));
                 item->setData(Qt::UserRole + 2, true);
+                item->setData(Qt::UserRole + 5, "cancelled");
             }
         }
         updateQueue();
     });
+    auto *openOutput = controls->addAction(tr("Open folder"));
+    connect(openOutput, &QAction::triggered, this, [this] {
+        const auto *item = queueView_->currentItem();
+        if (!item)
+            return;
+        const auto spec = item->data(Qt::UserRole + 4).toJsonObject();
+        const QFileInfo output(spec["destination"].toString());
+        const auto folder =
+            spec["kind"] == "create" ? output.absolutePath() : output.absoluteFilePath();
+        if (!spec["destination"].toString().isEmpty() && QDir(folder).exists())
+            QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
+    });
     auto *clearFinished = controls->addAction(tr("Clear completed"));
+    auto *retry = controls->addAction(tr("Review / retry..."));
+    connect(retry, &QAction::triggered, this, &MainWindow::retrySelectedJob);
+    auto *report = controls->addAction(tr("Export report..."));
+    connect(report, &QAction::triggered, this, &MainWindow::exportJobReport);
     queueLayout->addWidget(controls);
     queueDock_->setWidget(queuePanel);
     addDockWidget(Qt::BottomDockWidgetArea, queueDock_);
@@ -88,19 +113,23 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         if (item && queue_.cancel(item->data(Qt::UserRole).toULongLong())) {
             item->setText(tr("Cancelled — %1").arg(item->data(Qt::UserRole + 1).toString()));
             item->setData(Qt::UserRole + 2, true);
+            item->setData(Qt::UserRole + 5, "cancelled");
             updateQueue();
         }
     });
     connect(clearFinished, &QAction::triggered, this, [this] {
         QSignalBlocker blocker(queueView_);
         for (int i = queueView_->count() - 1; i >= 0; --i)
-            if (queueView_->item(i)->data(Qt::UserRole + 2).toBool())
+            if (queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
+                queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted") {
+                journal_.remove(queueView_->item(i)->data(Qt::UserRole + 3).toString());
                 delete queueView_->takeItem(i);
+            }
         updateQueue();
     });
     connect(cancel_, &QPushButton::clicked, this, [this] {
-        if (operation_) {
-            vynx::cancel(**operation_);
+        if (operations_.operation) {
+            vynx::cancel(**operations_.operation);
             cancel_->setEnabled(false);
             current_->setText(tr("Cancelling…"));
         }
@@ -108,25 +137,30 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     timer_ = new QTimer(this);
     timer_->setInterval(100);
     connect(timer_, &QTimer::timeout, this, [this] {
-        if (!operation_)
+        if (!operations_.operation)
             return;
-        auto p = vynx::progress(**operation_);
+        auto p = vynx::progress(**operations_.operation);
         operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed(),
                                        text(p.phase), text(p.details), p.cancelled);
         showConflict();
     });
-    connect(&watcher_, &QFutureWatcher<QString>::finished, this, [this] {
+    connect(&operations_.watcher(), &QFutureWatcher<QString>::finished, this, [this] {
         timer_->stop();
-        busy_ = false;
+        operations_.busy = false;
+        const auto owner = operations_.owner;
+        if (owner)
+            owner->busy = false;
+        if (owner)
+            bindSession(owner);
         operationPanel_->hide();
-        pages_->setEnabled(true);
+        archivePage_->setEnabled(true);
         for (auto *a : idleActions_)
             a->setEnabled(true);
         for (auto *a : archiveActions_)
-            a->setEnabled(bool(archive_));
-        if (archive_)
+            a->setEnabled(bool(session_->archive));
+        if (session_->archive)
             updateStatus();
-        QString error = watcher_.result();
+        QString error = operations_.watcher().result();
         if (runningItem_) {
             if (!error.isEmpty())
                 runningItem_->setToolTip(runningItem_->toolTip() + "\n" + error);
@@ -135,12 +169,16 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
                                                                  : tr("Stopped — %1");
             runningItem_->setText(status.arg(runningItem_->data(Qt::UserRole + 1).toString()));
             runningItem_->setData(Qt::UserRole + 2, true);
+            runningItem_->setData(Qt::UserRole + 5, error.isEmpty()                  ? "completed"
+                                                    : error.startsWith("CANCELLED:") ? "cancelled"
+                                                                                     : "failed");
+            runningItem_->setData(Qt::UserRole + 6, error);
             runningItem_ = nullptr;
             updateQueue();
         }
         auto success = std::move(success_);
         auto failure = std::move(failure_);
-        operation_.reset();
+        operations_.operation.reset();
         if (closePending_) {
             QTimer::singleShot(0, this, [this] { close(); });
             return;
@@ -154,59 +192,82 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
             failure(error);
         } else
             QMessageBox::warning(this, tr("Operation stopped"), error);
+        operations_.owner.reset();
+        activateSession(tabs_->currentIndex());
+        saveWorkspace();
+        if (owner && owner->closeWhenIdle)
+            closeSession(sessions_.indexOf(owner));
         QTimer::singleShot(0, this, &MainWindow::startNextQueued);
     });
 }
 void MainWindow::beginOperation() {
     shownConflict_ = 0;
-    operation_ = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
-    vynx::configure_operation(**operation_, 2,
-                              uint8_t(qBound(0, settings_->value("resourceMode", 1).toInt(), 2)));
+    if (activeSpec_.isEmpty())
+        activeSpec_ = QJsonObject{{"kind", "read"}, {"sources", QJsonArray{session_->path}}};
+    operations_.operation = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
+    vynx::configure_operation(
+        **operations_.operation, uint8_t(qBound(0, activeSpec_["preset"].toInt(2), 3)),
+        uint8_t(qBound(
+            0, activeSpec_["resource"].toInt(settings_->value("resourceMode", 1).toInt()), 2)));
 }
 void MainWindow::runJob(const QString &title, std::function<QString()> worker,
                         std::function<void()> success, std::function<void(QString)> failure) {
-    if (busy_)
+    if (operations_.busy)
         return;
-    busy_ = true;
+    operations_.busy = true;
+    operations_.owner.reset();
+    const auto sources = activeSpec_["sources"].toArray();
+    if (!sources.isEmpty() && activeSpec_["kind"] != "create") {
+        const auto path = sources.first().toString();
+        for (const auto &candidate : sessions_)
+            if (!candidate->path.isEmpty() &&
+                archiveIdentity(candidate->path) == archiveIdentity(path)) {
+                operations_.owner = candidate;
+                break;
+            }
+    }
+    if (operations_.owner)
+        operations_.owner->busy = true;
     if (!runningItem_) {
         runningItem_ = new QListWidgetItem(queueView_);
         runningItem_->setData(Qt::UserRole + 1, title);
     }
+    if (!activeSpec_.isEmpty())
+        runningItem_->setData(Qt::UserRole + 4, activeSpec_);
+    if (!runningItem_->data(Qt::UserRole + 3).toString().isEmpty())
+        journal_.updateSpec(runningItem_->data(Qt::UserRole + 3).toString(),
+                            runningItem_->data(Qt::UserRole + 4).toJsonObject());
+    activeSpec_ = {};
     runningItem_->setData(Qt::UserRole + 2, false);
+    runningItem_->setData(Qt::UserRole + 5, "running");
     runningItem_->setText(tr("Running — %1").arg(runningItem_->data(Qt::UserRole + 1).toString()));
     updateQueue();
     success_ = std::move(success);
     failure_ = std::move(failure);
-    pages_->setEnabled(false);
+    archivePage_->setEnabled(!session_->busy);
     for (auto *a : idleActions_)
         a->setEnabled(false);
     for (auto *a : archiveActions_)
         a->setEnabled(false);
+    if (session_->archive)
+        updateStatus();
     operationView_->begin(title);
     cancel_->setEnabled(true);
     progress_->setRange(0, 0);
     elapsed_.start();
     timer_->start();
-    watcher_.setFuture(QtConcurrent::run([worker = std::move(worker)]() mutable {
-        QString result;
-        try {
-            result = worker();
-        } catch (const std::exception &e) {
-            result = QString::fromUtf8(e.what());
-        } catch (...) {
-            result = QStringLiteral("Unexpected worker failure");
-        }
-        worker = {}; // Release job captures even if the QFuture outlives completion.
-        return result;
-    }));
+    operations_.start(std::move(worker));
 }
 void MainWindow::updateQueue() {
     QSignalBlocker blocker(queueView_);
     int completed = 0;
     for (int i = 0; i < queueView_->count(); ++i)
-        completed += queueView_->item(i)->data(Qt::UserRole + 2).toBool();
+        completed += queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
+                     queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted";
     for (int i = 0; i < queueView_->count() && completed > 64;) {
-        if (queueView_->item(i)->data(Qt::UserRole + 2).toBool()) {
+        if (queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
+            queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted") {
+            journal_.remove(queueView_->item(i)->data(Qt::UserRole + 3).toString());
             delete queueView_->takeItem(i);
             --completed;
         } else
@@ -216,10 +277,28 @@ void MainWindow::updateQueue() {
     cancelPending_->setEnabled(item && item != runningItem_ &&
                                item->data(Qt::UserRole).toULongLong() != 0 &&
                                !item->data(Qt::UserRole + 2).toBool());
+    syncJournal();
 }
+
 void MainWindow::startNextQueued() {
-    if (busy_ || closePending_ || queuePaused_)
+    if (operations_.busy || closePending_ || queuePaused_)
         return;
+    const auto front = queue_.frontId();
+    for (int i = 0; i < queueView_->count(); ++i) {
+        auto *item = queueView_->item(i);
+        if (item->data(Qt::UserRole).toULongLong() != front)
+            continue;
+        const auto sources = item->data(Qt::UserRole + 4).toJsonObject()["sources"].toArray();
+        if (sources.isEmpty())
+            break;
+        for (const auto &candidate : sessions_)
+            if (candidate->busy && !candidate->path.isEmpty() &&
+                archiveIdentity(candidate->path) == archiveIdentity(sources.first().toString())) {
+                QTimer::singleShot(100, this, &MainWindow::startNextQueued);
+                return;
+            }
+        break;
+    }
     auto next = queue_.take();
     if (!next)
         return;
@@ -228,17 +307,23 @@ void MainWindow::startNextQueued() {
             runningItem_ = queueView_->item(i);
             break;
         }
+    if (runningItem_)
+        activeSpec_ = runningItem_->data(Qt::UserRole + 4).toJsonObject();
     next->start();
-    if (!busy_ && runningItem_) {
+    if (!operations_.busy && runningItem_) {
         runningItem_->setText(tr("Stopped — %1").arg(next->title));
         runningItem_->setData(Qt::UserRole + 2, true);
+        runningItem_->setData(Qt::UserRole + 5, "failed");
+        runningItem_->setData(Qt::UserRole + 6,
+                              tr("The request did not start. Review its parameters."));
+        activeSpec_ = {};
         runningItem_ = nullptr;
         updateQueue();
         QTimer::singleShot(0, this, &MainWindow::startNextQueued);
     }
 }
 bool MainWindow::enqueueRequest(const QString &title, std::function<void()> start,
-                                const QString &details) {
+                                const QString &details, const QJsonObject &spec) {
     const auto id = queue_.enqueue(title, std::move(start));
     if (!id) {
         toast_->notify(tr("Operation queue is full"));
@@ -248,6 +333,8 @@ bool MainWindow::enqueueRequest(const QString &title, std::function<void()> star
     item->setData(Qt::UserRole, id);
     item->setData(Qt::UserRole + 1, title);
     item->setToolTip(details);
+    item->setData(Qt::UserRole + 4, spec);
+    item->setData(Qt::UserRole + 5, "pending");
     queueDock_->show();
     updateQueue();
     QTimer::singleShot(0, this, &MainWindow::startNextQueued);
@@ -275,13 +362,19 @@ void MainWindow::movePending(int direction) {
     updateQueue();
 }
 void MainWindow::showConflict() {
-    if (!operation_)
+    if (!operations_.operation)
         return;
-    auto request = vynx::conflict_request(**operation_);
+    auto request = vynx::conflict_request(**operations_.operation);
     if (!request.id || request.id == shownConflict_)
         return;
     shownConflict_ = request.id;
-    auto op = operation_;
+    if (runningItem_) {
+        runningItem_->setData(Qt::UserRole + 5, "decision");
+        runningItem_->setText(tr("Review required") + " - " +
+                              runningItem_->data(Qt::UserRole + 1).toString());
+        updateQueue();
+    }
+    auto op = operations_.operation;
     auto *dialog = new ConflictDialog(text(request.existing_path), request.existing_size,
                                       request.existing_modified, text(request.incoming_name),
                                       request.incoming_size, request.incoming_modified, this);
@@ -291,9 +384,18 @@ void MainWindow::showConflict() {
             [op, id = request.id](quint8 choice, bool all) {
                 vynx::reply_conflict(**op, id, choice, all);
             });
+    connect(dialog, &QDialog::finished, this, [this, op] {
+        if (operations_.operation == op && runningItem_ &&
+            runningItem_->data(Qt::UserRole + 5) == "decision") {
+            runningItem_->setData(Qt::UserRole + 5, "running");
+            runningItem_->setText(
+                tr("Running — %1").arg(runningItem_->data(Qt::UserRole + 1).toString()));
+            updateQueue();
+        }
+    });
     connect(dialog, &QDialog::finished, dialog,
             [op, id = request.id] { vynx::reply_conflict(**op, id, 0, false); });
-    connect(&watcher_, &QFutureWatcher<QString>::finished, dialog, &QDialog::reject);
+    connect(&operations_.watcher(), &QFutureWatcher<QString>::finished, dialog, &QDialog::reject);
     auto *cancelTimer = new QTimer(dialog);
     connect(cancelTimer, &QTimer::timeout, dialog, [dialog, op] {
         if (vynx::cancelled(**op))

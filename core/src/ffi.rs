@@ -76,6 +76,15 @@ pub mod bridge {
             password: &str,
             op: &Operation,
         ) -> Result<String>;
+        fn replace_entry(
+            archive: &Archive,
+            name: &str,
+            input: &str,
+            archive_hash: &str,
+            input_hash: &str,
+            password: &str,
+            op: &Operation,
+        ) -> Result<String>;
         fn extract_archive(
             archive: &Archive,
             destination: &str,
@@ -158,6 +167,30 @@ fn materialize_entry(
             .map(|p| p.to_string_lossy().into_owned())
     })
 }
+fn replace_entry(
+    archive: &Archive,
+    name: &str,
+    input: &str,
+    archive_hash: &str,
+    input_hash: &str,
+    password: &str,
+    op: &Operation,
+) -> Result<String> {
+    guarded(|| {
+        crate::modification::modify_with_receipt(
+            archive,
+            &crate::modification::Change::Replace {
+                name: name.into(),
+                input: input.into(),
+                expected_archive_hash: archive_hash.into(),
+                expected_input_hash: input_hash.into(),
+            },
+            password,
+            op,
+        )
+    })
+}
+
 fn hash_entries(
     archive: &Archive,
     selected: &[u64],

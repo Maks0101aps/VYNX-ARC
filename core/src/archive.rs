@@ -314,6 +314,42 @@ impl Archive {
     }
 
     /// Decode data through a caller-controlled bounded stream consumer; never use backend extraction helpers.
+    /// Read one ZIP payload after validating the selected member identity.
+    /// The caller validates the complete path/metadata policy; unrelated payloads
+    /// are not decoded and their integrity is not claimed by a selected view.
+    pub fn zip_entry(
+        &self,
+        id: u64,
+        password: &str,
+        op: &Operation,
+        consume: impl FnOnce(&Entry, &mut dyn Read) -> Result<()>,
+    ) -> Result<()> {
+        op.check()?;
+        let entry = self
+            .entries
+            .iter()
+            .find(|e| e.id == id && !e.directory)
+            .ok_or_else(|| ArcError::new("SELECTION", "Unknown regular entry"))?;
+        let file = crate::volumes::Reader::open(&self.path)?;
+        let mut zip = crate::parser::open_zip(file)?;
+        if zip.len() != self.entries.len() {
+            return Err(ArcError::new("CHANGED", "Archive changed since opening"));
+        }
+        let mut data = if password.is_empty() {
+            zip.by_index(id as usize)?
+        } else {
+            zip.by_index_decrypt(id as usize, password.as_bytes())?
+        };
+        if data.name()? != entry.name
+            || data.size() != entry.size
+            || entry.crc.is_some_and(|crc| crc != data.crc32())
+        {
+            return Err(ArcError::new("CHANGED", "Archive changed since opening"));
+        }
+        consume(entry, &mut data)?;
+        op.check()
+    }
+
     pub fn streams(
         &self,
         password: &str,

@@ -6,21 +6,70 @@
 #include <QtWidgets>
 
 void MainWindow::previewSelected() {
-    if (busy_ || !archive_)
+    if (session_->busy || !session_->archive)
         return;
     const auto selection = table_->selectionModel()->selectedRows();
     if (selection.size() != 1)
         return;
-    const auto &row = model_->row(filter_->mapToSource(selection.first()).row());
+    const auto &row = session_->model->row(session_->filter->mapToSource(selection.first()).row());
     if (row.folder)
         return;
     const auto id = row.id;
     const auto name = row.fullPath;
-    auto archive = archive_;
-    auto pw = password_ ? password_ : secret({});
+    auto archive = session_->archive;
+    auto pw = session_->password ? session_->password : secret({});
     auto result = std::make_shared<PreviewContent>();
+    if (operations_.busy) {
+        auto reader = std::make_shared<OperationController>();
+        reader->owner = session_;
+        reader->operation = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
+        auto readOp = reader->operation;
+        vynx::configure_operation(
+            **readOp, 2, uint8_t(qBound(0, settings_->value("resourceMode", 1).toInt(), 2)));
+        reader->owner->busy = true;
+        readers_.append(reader);
+        auto *progress =
+            new QProgressDialog(tr("Reading file preview..."), tr("Cancel"), 0, 0, this);
+        progress->setWindowModality(Qt::NonModal);
+        progress->setMinimumDuration(0);
+        connect(progress, &QProgressDialog::canceled, this, [readOp] { vynx::cancel(**readOp); });
+        std::weak_ptr<OperationController> weak = reader;
+        connect(&reader->watcher(), &QFutureWatcher<QString>::finished, this,
+                [this, weak, progress, result, name] {
+                    auto completed = weak.lock();
+                    if (!completed)
+                        return;
+                    const auto error = completed->watcher().result();
+                    progress->close();
+                    progress->deleteLater();
+                    completed->owner->busy = false;
+                    if (completed->owner == session_)
+                        updateSessionUi();
+                    readers_.removeAll(completed);
+                    if (completed->owner->closeWhenIdle) {
+                        closeSession(sessions_.indexOf(completed->owner));
+                        return;
+                    }
+                    if (!error.isEmpty()) {
+                        if (!error.startsWith("CANCELLED:"))
+                            QMessageBox::warning(this, tr("Operation stopped"), error);
+                        return;
+                    }
+                    PreviewDialog dialog(name, *result, false, this);
+                    dialog.exec();
+                });
+        reader->start([archive, pw, readOp, result, id] {
+            auto bytes = vynx::preview_bytes(**archive, id, pw->bytes(), **readOp);
+            *result = PreviewDialog::decode(
+                QByteArray(reinterpret_cast<const char *>(bytes.data()), qsizetype(bytes.size())));
+            return vynx::cancelled(**readOp) ? QStringLiteral("CANCELLED: Preview cancelled")
+                                             : QString();
+        });
+        updateSessionUi();
+        return;
+    }
     beginOperation();
-    auto op = operation_;
+    auto op = operations_.operation;
     runJob(
         tr("Reading file preview..."),
         [archive, pw, op, result, id] {
@@ -37,12 +86,12 @@ void MainWindow::previewSelected() {
         });
 }
 void MainWindow::openSelectedExternally() {
-    if (busy_ || !archive_)
+    if (operations_.busy || !session_->archive)
         return;
     const auto selection = table_->selectionModel()->selectedRows();
     if (selection.size() != 1)
         return;
-    const auto &row = model_->row(filter_->mapToSource(selection.first()).row());
+    const auto &row = session_->model->row(session_->filter->mapToSource(selection.first()).row());
     if (row.folder)
         return;
     if (!ExternalFiles::allowed(row.fullPath)) {
@@ -70,11 +119,11 @@ void MainWindow::openSelectedExternally() {
         return;
     }
     const auto id = row.id;
-    auto archive = archive_;
-    auto pw = password_ ? password_ : secret({});
+    auto archive = session_->archive;
+    auto pw = session_->password ? session_->password : secret({});
     auto path = std::make_shared<QString>();
     beginOperation();
-    auto op = operation_;
+    auto op = operations_.operation;
     runJob(
         tr("Preparing external file..."),
         [archive, pw, op, id, directory, path] {

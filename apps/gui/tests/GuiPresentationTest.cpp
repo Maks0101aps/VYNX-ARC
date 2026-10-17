@@ -1,5 +1,7 @@
 #include "../ArchiveModel.h"
+#include "../EditStore.h"
 #include "../ExternalFiles.h"
+#include "../JobJournal.h"
 #include "../OperationQueue.h"
 #include "../Theme.h"
 #include "../dialogs/BatchExtractDialog.h"
@@ -11,8 +13,11 @@
 #include "../widgets/OperationPanel.h"
 #include <QDesktopServices>
 #include <QImageReader>
+#include <QJsonDocument>
+#include <QSaveFile>
 #include <QtTest>
 #include <QtWidgets>
+#include <cmath>
 #include <memory>
 
 class GuiPresentationTest : public QObject {
@@ -21,6 +26,70 @@ class GuiPresentationTest : public QObject {
   public slots:
     void captureUrl(const QUrl &url) { openedUrls_.append(url); }
   private slots:
+    void performance100kReport() {
+        const auto path = qEnvironmentVariable("VYNX_UI_BENCH_REPORT");
+        if (path.isEmpty())
+            QSKIP("Opt-in performance corpus; run benchmark tooling");
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+        filter.setFilterCaseSensitivity(Qt::CaseInsensitive);
+        rust::Vec<vynx::EntryInfo> entries;
+        for (quint64 i = 0; i < 100000; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = QString("group%1/file_%2.txt")
+                             .arg(i / 1000, 3, 10, QChar('0'))
+                             .arg(i, 6, 10, QChar('0'))
+                             .toStdString();
+            entry.size = 1024;
+            entries.push_back(std::move(entry));
+        }
+        QElapsedTimer timer;
+        timer.start();
+        model.load(std::move(entries));
+        const auto prepareMs = double(timer.nsecsElapsed()) / 1e6;
+        QTableView view;
+        view.setModel(&filter);
+        view.setSortingEnabled(true);
+        view.sortByColumn(0, Qt::AscendingOrder);
+        view.resize(1060, 720);
+        view.show();
+        QCoreApplication::processEvents();
+        QList<double> samples;
+        QJsonArray raw;
+        for (int i = 0; i < 23; ++i) {
+            timer.restart();
+            model.setSearchMode(true);
+            filter.setFilterFixedString(QString("file_%1").arg(i % 10, 2, 10, QChar('0')));
+            const auto count = filter.rowCount();
+            QVERIFY(count > 0);
+            QCoreApplication::processEvents();
+            const auto ms = double(timer.nsecsElapsed()) / 1e6;
+            if (i >= 3) {
+                samples.append(ms);
+                raw.append(ms);
+            }
+            filter.setFilterFixedString("");
+            model.setSearchMode(false);
+            QCoreApplication::processEvents();
+        }
+        std::sort(samples.begin(), samples.end());
+        QSaveFile output(path);
+        QVERIFY(output.open(QIODevice::WriteOnly));
+        const auto json =
+            QJsonDocument(
+                QJsonObject{{"scope", "synthetic 100000-member model, sorting and visible table; "
+                                      "not codec throughput"},
+                            {"prepare_ms", prepareMs},
+                            {"samples_ms", raw},
+                            {"median_ms", samples[samples.size() / 2]},
+                            {"p95_ms", samples[int(std::ceil(samples.size() * .95)) - 1]}})
+                .toJson();
+        QCOMPARE(output.write(json), json.size());
+        QVERIFY(output.commit());
+    }
+
     void viewerDecodesTextImagesAndHexWithoutExecutingContent() {
         QImageReader::setAllocationLimit(64);
         auto content = PreviewDialog::decode("<script>hello</script>\nhello");
@@ -108,6 +177,144 @@ class GuiPresentationTest : public QObject {
         QCOMPARE(queue.take()->id, third);
         QCOMPARE(queue.take()->id, first);
         QCOMPARE(queue.take()->id, second);
+    }
+    void workingCopiesPersistAndNeverJoinDisposableCleanup() {
+        QTemporaryDir root;
+        const auto work = root.path() + "/edits";
+        QString id;
+        {
+            EditStore store(work);
+            QVERIFY(store.available());
+            id = store.reserve("archive.zip", "nested/note.txt");
+            QVERIFY(!id.isEmpty());
+            QFile file(store.directory(id) + "/note.txt");
+            QVERIFY(file.open(QIODevice::WriteOnly));
+            file.write("unsaved content");
+            file.close();
+            QVERIFY(store.update(id, QJsonObject{{"file", file.fileName()},
+                                                 {"state", "ready"},
+                                                 {"archiveHash", "baseline"},
+                                                 {"baseHash", "entry baseline"}}));
+            QVERIFY(store.validPayload(store.record(id)));
+            EditStore other(work);
+            QVERIFY(!other.available());
+            ExternalFiles disposable(root.path() + "/views");
+            disposable.cleanup();
+            QVERIFY(QFile::exists(file.fileName()));
+        }
+        EditStore recovered(work);
+        QCOMPARE(recovered.records().size(), 1);
+        QVERIFY(recovered.validPayload(recovered.record(id)));
+        QFile file(recovered.record(id)["file"].toString());
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QCOMPARE(file.readAll(), QByteArray("unsaved content"));
+        file.close();
+        const auto outside = root.path() + "/outside.txt";
+        QFile external(outside);
+        QVERIFY(external.open(QIODevice::WriteOnly));
+        external.write("keep");
+        external.close();
+        QVERIFY(recovered.update(id, QJsonObject{{"file", outside}}));
+        QVERIFY(!recovered.validPayload(recovered.record(id)));
+        QVERIFY(recovered.discard(id));
+        QVERIFY(QFile::exists(outside));
+        QCOMPARE(recovered.records().size(), 0);
+    }
+    void temporaryViewsHaveExplicitOwnedCleanup() {
+        QTemporaryDir root;
+        ExternalFiles files(root.path() + "/views");
+        const auto path = files.create();
+        QVERIFY(!path.isEmpty());
+        QFile file(path + "/readme.txt");
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("view");
+        file.close();
+        QCOMPARE(files.items().size(), 1);
+        QVERIFY(!files.remove(root.path()));
+        QVERIFY(files.remove(path));
+        QCOMPARE(files.items().size(), 0);
+    }
+    void journalRecoveryIsExplicitAndNeverSerializesPasswords() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QString id;
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(path, true));
+            id = journal.add("Create",
+                             QJsonObject{{"kind", "create"},
+                                         {"sources", QJsonArray{root.path() + "/source.txt"}},
+                                         {"password", "TOP-SECRET"},
+                                         {"credentials", QJsonObject{{"key", "TOP-SECRET"}}}});
+            QVERIFY(!id.isEmpty());
+            QVERIFY(journal.setState(id, "running"));
+            QVERIFY(journal.setState(id, "decision"));
+            QFile file(path);
+            QVERIFY(file.open(QIODevice::ReadOnly));
+            QVERIFY(!file.readAll().contains("TOP-SECRET"));
+            JobJournal second;
+            QVERIFY(!second.open(path, true));
+        }
+        JobJournal recovered;
+        QVERIFY(recovered.open(path, true));
+        QCOMPARE(recovered.record(id)["state"].toString(), QString("interrupted"));
+        QVERIFY(recovered.setEnabled(false));
+        QVERIFY(!QFile::exists(path));
+    }
+    void journalRejectsDamageAndDetectsSourceChanges() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QFile source(root.path() + "/source.txt");
+        QVERIFY(source.open(QIODevice::WriteOnly));
+        source.write("one");
+        source.close();
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(path, true));
+            auto id =
+                journal.add("Extract", QJsonObject{{"kind", "extract"},
+                                                   {"sources", QJsonArray{source.fileName()}}});
+            QVERIFY(JobJournal::sourcesUnchanged(journal.record(id)));
+            QVERIFY(source.open(QIODevice::WriteOnly));
+            source.write("changed source");
+            source.close();
+            QVERIFY(!JobJournal::sourcesUnchanged(journal.record(id)));
+            QVERIFY(journal.setState(id, "failed", "Original failure"));
+            QVERIFY(!journal.setState(id, "fake-success"));
+        }
+        QFile damaged(path);
+        QVERIFY(damaged.open(QIODevice::WriteOnly));
+        damaged.write("{broken");
+        damaged.close();
+        JobJournal rejected;
+        QVERIFY(!rejected.open(path, true));
+        QVERIFY(damaged.open(QIODevice::ReadOnly));
+        QCOMPARE(damaged.readAll(), QByteArray("{broken"));
+    }
+    void journalSurvivesARealKilledProcess() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QProcess child;
+        auto environment = QProcessEnvironment::systemEnvironment();
+        environment.insert("VYNX_JOURNAL_TEST_CHILD", path);
+        child.setProcessEnvironment(environment);
+        child.start(QCoreApplication::applicationFilePath(), {});
+        QVERIFY(child.waitForStarted());
+        QTRY_VERIFY_WITH_TIMEOUT(QFile::exists(path + ".ready"), 10000);
+        child.kill();
+        QVERIFY(child.waitForFinished());
+        JobJournal recovered;
+        QVERIFY(recovered.open(path, true));
+        QCOMPARE(recovered.records().size(), 1);
+        QCOMPARE(recovered.records()[0].toObject()["state"].toString(), QString("interrupted"));
+        EditStore edits(path + ".edits");
+        QVERIFY(edits.available());
+        QCOMPARE(edits.records().size(), 1);
+        const auto record = edits.records()[0].toObject();
+        QVERIFY(edits.validPayload(record));
+        QFile payload(record["file"].toString());
+        QVERIFY(payload.open(QIODevice::ReadOnly));
+        QCOMPARE(payload.readAll(), QByteArray("unsaved after process kill"));
     }
     void globalSearchPreservesPathsAndFolder() {
         ArchiveModel model;
@@ -353,5 +560,35 @@ class GuiPresentationTest : public QObject {
         QVERIFY(light != dark);
     }
 };
-QTEST_MAIN(GuiPresentationTest)
+int main(int argc, char **argv) {
+    QApplication application(argc, argv);
+    const auto childPath = qEnvironmentVariable("VYNX_JOURNAL_TEST_CHILD");
+    if (!childPath.isEmpty()) {
+        JobJournal journal;
+        if (!journal.open(childPath, true))
+            return 2;
+        const auto id = journal.add(
+            "Interrupted write",
+            QJsonObject{{"kind", "create"}, {"sources", QJsonArray{childPath + ".source"}}});
+        if (!journal.setState(id, "running"))
+            return 3;
+        EditStore edits(childPath + ".edits");
+        const auto key = edits.reserve("archive.zip", "note.txt");
+        QFile payload(edits.directory(key) + "/note.txt");
+        if (!payload.open(QIODevice::WriteOnly))
+            return 5;
+        payload.write("unsaved after process kill");
+        payload.close();
+        if (!edits.update(key, QJsonObject{{"file", payload.fileName()}, {"state", "ready"}}))
+            return 6;
+        QFile ready(childPath + ".ready");
+        if (!ready.open(QIODevice::WriteOnly))
+            return 4;
+        ready.write("ready");
+        ready.close();
+        return application.exec();
+    }
+    GuiPresentationTest test;
+    return QTest::qExec(&test, argc, argv);
+}
 #include "GuiPresentationTest.moc"
