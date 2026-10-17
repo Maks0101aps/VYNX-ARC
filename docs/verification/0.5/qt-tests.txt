@@ -1,0 +1,42 @@
+********* Start testing of GuiPresentationTest *********
+Config: Using QtTest library 6.12.0, Qt 6.12.0 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+QWARN  : GuiPresentationTest::initTestCase() QFontDatabase: Cannot find font directory C:/Users/Maksi/AppData/Local/VynxArcDev/QtMSVC/lib/fonts.
+Note that Qt no longer ships fonts. Deploy some (from https://dejavu-fonts.github.io/ for example) or switch to fontconfig.
+PASS   : GuiPresentationTest::initTestCase()
+SKIP   : GuiPresentationTest::performance100kReport() Opt-in performance corpus; run benchmark tooling
+C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\gui\tests\GuiPresentationTest.cpp(32) : failure location
+PASS   : GuiPresentationTest::viewerDecodesTextImagesAndHexWithoutExecutingContent()
+PASS   : GuiPresentationTest::externalViewsUseOwnedFilesAndSkipLiveCleanup()
+PASS   : GuiPresentationTest::batchNamesAndQueueReorderingAreDeterministic()
+PASS   : GuiPresentationTest::workingCopiesPersistAndNeverJoinDisposableCleanup()
+PASS   : GuiPresentationTest::temporaryViewsHaveExplicitOwnedCleanup()
+PASS   : GuiPresentationTest::journalRecoveryIsExplicitAndNeverSerializesPasswords()
+PASS   : GuiPresentationTest::largeJournalSelectionsCannotSilentlyBecomePartialRetries()
+PASS   : GuiPresentationTest::journalRejectsDamageAndDetectsSourceChanges()
+PASS   : GuiPresentationTest::journalSurvivesARealKilledProcess()
+PASS   : GuiPresentationTest::globalSearchPreservesPathsAndFolder()
+PASS   : GuiPresentationTest::queuedRequestsAreOrderedAndCancellable()
+PASS   : GuiPresentationTest::numericAndTimestampSorting()
+PASS   : GuiPresentationTest::unknownAndDosEpochDates()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::breadcrumbNavigationAndCollapse() This plugin does not support propagateSizeHints()
+PASS   : GuiPresentationTest::breadcrumbNavigationAndCollapse()
+QWARN  : GuiPresentationTest::commandAvailabilityAndSharedActions() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::commandAvailabilityAndSharedActions() This plugin does not support propagateSizeHints()
+PASS   : GuiPresentationTest::commandAvailabilityAndSharedActions()
+QWARN  : GuiPresentationTest::authoritativeCreateFormat() This plugin does not support propagateSizeHints()
+QWARN  : GuiPresentationTest::authoritativeCreateFormat() This plugin does not support propagateSizeHints()
+PASS   : GuiPresentationTest::authoritativeCreateFormat()
+QWARN  : GuiPresentationTest::etaRequiresProgressAndResets() This plugin does not support propagateSizeHints()
+PASS   : GuiPresentationTest::etaRequiresProgressAndResets()
+QWARN  : GuiPresentationTest::effectivePresetAndCancellationAreVisible() This plugin does not support propagateSizeHints()
+PASS   : GuiPresentationTest::effectivePresetAndCancellationAreVisible()
+PASS   : GuiPresentationTest::vectorIconsFollowTheme()
+PASS   : GuiPresentationTest::cleanupTestCase()
+Totals: 21 passed, 0 failed, 1 skipped, 0 blacklisted, 323ms
+********* Finished testing of GuiPresentationTest *********

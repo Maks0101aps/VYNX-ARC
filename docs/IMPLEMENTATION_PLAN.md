@@ -1,5 +1,8 @@
 # Implementation plan
 
+The 0.5 milestone and its remaining qualification boundaries are recorded in [ROADMAP_0_5.md](ROADMAP_0_5.md).
+See MILESTONE_0_5.md for verified capabilities; unchecked qualification items remain unperformed.
+
 1. Build Rust / Qt / CXX and developer scripts.
 2. Secure real ZIP / 7Z / TAR browsing, testing, extraction and creation.
 3. Model/view browser, asynchronous workers, truthful progress and cancellation.
@@ -8,6 +11,6 @@
 6. Shell integration, localization and installer.
 7. Malformed-input tests, audit, benchmarks, clean-machine acceptance.
 
-The supplied master brief is the V1 acceptance contract. Version 0.4.0 is a
+The supplied master brief is the V1 acceptance contract. Version 0.5.0 is a
 development milestone, never a claim that all V1 requirements are complete.
 Track evidence and gaps in IMPLEMENTATION_STATUS.md.

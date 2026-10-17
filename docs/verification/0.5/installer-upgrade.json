@@ -1,0 +1,22 @@
+{
+  "environment": "Windows 11 development host, isolated per-user install directory; no previous ARC installation or Open With registration",
+  "setup_0_4_sha256": "11a99a533d6adea3e619f784f04352b685ae57ea3df20db519d7d14b37e275ed",
+  "old_install_exit": 0,
+  "directory": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.5\\installer-upgrade\\installed",
+  "settings_preexisting": false,
+  "settings_path": "C:\\Users\\Maksi\\AppData\\Roaming\\VYNX\\VYNX ARC.ini",
+  "old_deployed_gui_smoke": "passed",
+  "initial_harness_correction": "CLI --version is unsupported; test now reads the version from --help. Initial upgrade passed its installer/settings/hash assertions.",
+  "upgrade_exit": 0,
+  "version": "0.5.0",
+  "settings_preserved_by_upgrade": true,
+  "new_deployed_gui_smoke": "passed",
+  "new_installed_capture": "installed-0.5.png",
+  "setup_0_5_sha256": "755f7d0195c4ce59d68c7fa1e38e76a8fb3a7e9d100ab7e538a41e5c9f124143",
+  "uninstall_exit": 0,
+  "uninstall_executable": "unins001.exe",
+  "uninstall_registration_removed": true,
+  "settings_retained_by_uninstall": true,
+  "status": "passed",
+  "uninstaller_harness_correction": "Use the registered UninstallString; upgrade selected unins001.exe rather than unins000.exe."
+}

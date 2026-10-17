@@ -1,0 +1,17 @@
+{
+  "scope": "Visible synthetic 100000-entry model benchmark; 10ms sampled process RSS and CPU; primary latency report remains ui-baseline/current.json",
+  "cases": [
+    {
+      "name": "baseline",
+      "sampled_peak_rss_bytes": 101089280,
+      "sampled_cpu_seconds": 12.09375,
+      "exe_sha256": "37544cad5707392db2befb506c430f78cf85056f6198d3bf07ec0310b2e89124"
+    },
+    {
+      "name": "current",
+      "sampled_peak_rss_bytes": 99827712,
+      "sampled_cpu_seconds": 2.734375,
+      "exe_sha256": "fb94a254424f1c422d5ab3da7adb2735d8e91610d1c60f202586298231fe8dbc"
+    }
+  ]
+}

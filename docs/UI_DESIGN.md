@@ -1,62 +1,35 @@
-# Windows desktop UI pass
+# Desktop interface
 
-Baseline source: `36451d7`; recoverable screenshot-runner checkpoint: `1c7acaa`.
-The baseline build passed 41 Rust tests and both existing native/GUI tests.
-48 real Widget captures were recorded before UI changes in `.dev/ui-baseline`:
-Home/archive, light/dark, English/Ukrainian/Russian, 100/125/150/200% scale.
+The current product is a native Qt Widgets archive workspace. Historical screenshot
+counts and UI-only milestones are recorded in their dated reports; current acceptance
+belongs to [MILESTONE_0_5.md](MILESTONE_0_5.md).
 
-## Presentation components
+- Archive tabs keep folder, query, selection, columns and scroll separately. Ctrl+Tab,
+  Ctrl+Shift+Tab and Ctrl+W switch/close tabs. Duplicate paths activate the existing
+  tab. Busy owners cannot be edited; other tabs remain navigable and previewable.
+- ArchivePage has responsive toolbars, a breadcrumb and archive-wide name/path search.
+  F3/double click previews; Ctrl+Enter creates a confirmed read-only external copy.
+  Ctrl+Shift+Return creates a separate editable working copy.
+- View > Working copies (Ctrl+Shift+W) shows source, entry, state and retained errors.
+  Changes are marked with an asterisk on their archive tab. Save, reload source,
+  export and discard are explicit. The toolbar overflows in narrow layouts.
+- View > Temporary files shows disposable viewing copies and their byte totals.
+  Editable copies are listed separately and cannot be removed by this cleanup.
+- The queue supports pause, reorder, cancellation, detailed errors, review/retry and
+  JSON report export. Restored jobs are interrupted, never automatically replayed.
+  Batch totals distinguish completed/stopped/remaining operations.
+- Compression and resource selectors apply to creation and ZIP/7Z rebuilds. Displayed
+  limits reflect backend settings. OperationPanel displays phase, bytes, speed and
+  cautious ETA; terminal results remain in the queue.
+- Themes and EN/UK/RU translations cover product controls. The screenshot runner uses
+  explicit fixtures in isolated storage and records application hashes. Qt scale
+  captures do not prove a change to the Windows desktop's physical DPI setting.
 
-- HomePage: compact identity, primary Open, secondary Create, clear drop target,
-  bounded recents with a delegate for filename/path and context actions.
-- ArchivePage: vector Back/Up, interactive BreadcrumbBar, responsive search,
-  common QAction controls and overflow. Writable actions are selection-aware;
-  read-only archives show an explicit status and hide toolbar mutations.
-- ArchiveModel: numeric packed/ratio sorting, timestamp sorting and locale display,
-  cached totals and folder selection sizes. Name stretches; narrow windows hide
-  secondary columns unless the user explicitly selects them in Columns.
-- OperationPanel: separate job/path, bytes, smoothed speed and cautious ETA. ETA
-  waits for at least three seconds and 1% progress and resets on totals/rewinds.
-- ToastOverlay: transient completion/copy notices; persistent archive statistics
-  remain in the status bar. Critical failures and decisions still use dialogs.
-- Create/Extract/Conflict/Settings/About dialogs own their presentation. MainWindow
-  retains archive state, worker ownership, conflict replies and operation orchestration.
-- Theme centralizes surface/text/border/selection colors. Original cached vector
-  icons retain the VYNX identity; Qt Widgets/model-view and the native frame remain.
+Working copies retain decrypted content and source paths on disk until discarded.
+The consent dialog explains this before preparing a copy. Executables, scripts,
+shortcuts and active web content remain excluded from direct external opening/editing.
+External applications may create their own copies outside VYNX's management.
 
-Ordinary files open Properties on double-click/Enter; they are not launched.
-Folder navigation, shortcuts, drag/drop, password handling, path protection and
-codec operations retain the existing core. The only Rust change is exposing
-existing timestamp value/validity through the typed presentation bridge.
-About reads project version metadata and Qt runtime/build versions.
-
-## Honest limits
-
-Compression displays the actual format default. There are no simulated Fast/
-Maximum selectors or unsupported method/thread/solid controls. Backend presets
-are a separate remaining task. Advanced creation currently exposes real 7Z split
-sizes and password support for ZIP/7Z.
-
-Archive pages remain disabled while a worker owns mutable application state,
-preserving the previous safe ownership model. This pass does not introduce a
-parallel operation queue or claim broader cryptographic password erasure.
-
-ZIP's default DOS epoch is conservatively displayed as unknown. The archive
-metadata cannot distinguish a deliberately supplied 1980-01-01 timestamp from
-that default; such legitimate dates are also hidden. Other known timestamps,
-including an explicitly known Unix epoch, remain representable and sortable.
-
-The known intermittent ZIP replacement `AccessDenied` recurred during deployed
-verification, including additional runs after successful candidates; the original
-was preserved. No lock retry, security setting or codec behavior was changed to
-force a pass, and the cause is still undiagnosed. This is separate from the UI
-pass. The earlier native RAR race is addressed by serialized in-process decoder
-lifetimes; see VOLUMES.md. The 2026-10-03 blocker pass removed publication retries,
-fixed physical long-path publication, and retained the unresolved error-5 gate.
-See RELEASE_ACCEPTANCE.md for current results.
-
-Screenshot progress/conflict examples are explicit UI fixtures, not throughput
-measurements or proof of a live conflict. QWidget grabs exclude native frame/Snap
-behavior; screen-reader and clean-VM/Explorer acceptance remain manual checks.
-Final screenshots, settled-memory evidence, regression scope and remaining manual
-acceptance are recorded in UI_QA.md and UI_MEMORY.json.
+ZIP's default DOS epoch is displayed as unknown; legitimate 1980-01-01 timestamps
+cannot be distinguished from this format default. Status indicators use metadata
+fingerprints; a save always rechecks cryptographic digests and current source locks.

@@ -1,0 +1,11 @@
+{
+  "application_sha256": "3b77a1fc1a59895527cbcc1e8d18b7b9e02f95b050232152e0cef5a2a8a4da10",
+  "screenshot_count": 24,
+  "requested_window_size": "620x440",
+  "states": [
+    "operation",
+    "queue",
+    "search",
+    "tabs"
+  ]
+}

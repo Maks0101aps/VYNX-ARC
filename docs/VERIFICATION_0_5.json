@@ -1,0 +1,857 @@
+{
+  "version": "0.5.0",
+  "status": "development_milestone_validated",
+  "timestamp_utc": "2026-10-17T08:16:16.007569+00:00",
+  "code_commit": "fdbb0f52abe80e802f6fd5a69741e843cc905680",
+  "base_tag": "v0.4.0",
+  "release_tag": "v0.5.0",
+  "publication_note": "Tag targets the subsequent verification-documentation commit, retaining this product source. See Git refs for publication state.",
+  "host": [
+    {
+      "Name": "AMD Ryzen 5 7500F 6-Core Processor             ",
+      "NumberOfLogicalProcessors": 12
+    },
+    {
+      "Caption": "Майкрософт Windows 11 Pro",
+      "BuildNumber": "26200",
+      "OSArchitecture": "64-bit"
+    },
+    {
+      "TotalPhysicalMemory": 33934004224
+    }
+  ],
+  "source_gates": {
+    "rustfmt": "passed",
+    "clippy_warnings_denied": "passed",
+    "cargo_audit_deny_yanked": "passed",
+    "rust_tests_passed": 77,
+    "ctest_targets_passed": 3,
+    "qt_report_passed_including_init_cleanup": 21,
+    "qt_opt_in_benchmark_skipped_in_default_suite": 1,
+    "gui_smoke": [
+      "three archives including encrypted ZIP",
+      "independent queries/navigation/selection",
+      "background preview during primary job",
+      "60 tab switches without retaining unused selection models",
+      "completion callback starts a new owned operation",
+      "external-process edit then explicit save and refreshed archive",
+      "source conflict preserves original and working copy"
+    ]
+  },
+  "artifacts": {
+    "VYNX-ARC-Portable-x64.zip": {
+      "sha256": "3f2cc20620510bf3d226a0dae3ec5a31bb1f41bee3fcfcdebead2cda8d19c88f",
+      "bytes": 25337212
+    },
+    "VYNX-ARC-Setup-x64.exe": {
+      "sha256": "755f7d0195c4ce59d68c7fa1e38e76a8fb3a7e9d100ab7e538a41e5c9f124143",
+      "bytes": 18426784
+    },
+    "VYNX-ARC-Explorer-x64.msix": {
+      "sha256": "ff7b633c85430b6edc53d70891c7b0254a47b51ad5c356b5651503091c20c41a",
+      "bytes": 13186
+    }
+  },
+  "application_sha256": "3b77a1fc1a59895527cbcc1e8d18b7b9e02f95b050232152e0cef5a2a8a4da10",
+  "cli_sha256": "dd586e7347b5d240f085cc01bdc30ec083ad5b516b2c1b8b4344b6201970cd35",
+  "portable_report": "verification/0.5/portable.json",
+  "installer_report": "verification/0.5/installer-upgrade.json",
+  "controlled_lock_cases": 6,
+  "parser_mutations_passed": 512,
+  "zip_publications_passed": 4900,
+  "killed_rebuild_boundaries": [
+    {
+      "boundary": "rebuild",
+      "termination_exit": 1,
+      "original_preserved": true,
+      "working_copy_preserved": true,
+      "orphan_stage_retained": ".tmp47i3Mg"
+    },
+    {
+      "boundary": "late-staging",
+      "termination_exit": 1,
+      "original_preserved": true,
+      "working_copy_preserved": true,
+      "orphan_stage_retained": ".tmpuU7kUj"
+    }
+  ],
+  "performance_report": "BENCHMARKS_0_5.md",
+  "performance_raw": "benchmarks/0.5",
+  "ui_matrices": [
+    {
+      "name": "ui-release",
+      "manifest": {
+        "application_sha256": "3b77a1fc1a59895527cbcc1e8d18b7b9e02f95b050232152e0cef5a2a8a4da10",
+        "screenshot_count": 96,
+        "requested_window_size": null,
+        "states": [
+          "review",
+          "tabs",
+          "temporary-files",
+          "working-copies"
+        ]
+      },
+      "frames": [
+        {
+          "file": "review-dark-en-1.25.png",
+          "sha256": "eb0bd67e9b7305b488c3bcb7f8f63f2862e324c5735dd519d773cbe70dada246",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-dark-en-1.5.png",
+          "sha256": "bd7ade2d36e36512f876b020b1059e1f6cbe44a3b0bc4381d2905006546d946d",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-dark-en-1.png",
+          "sha256": "874e3f12a39a7fdcbaaa7f56a7ea70b3abd40d6d7579eec684a17be8dda88fb2",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-dark-en-2.png",
+          "sha256": "09f430b720704879cf4ad818a61e81c123556b29501f4e4da3028202a08d35f6",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "review-dark-ru-1.25.png",
+          "sha256": "b802c92a9ca0153351658e982354f3ffce80edca3d8a3f7cd8315338c39b4f2b",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-dark-ru-1.5.png",
+          "sha256": "1641d60b3e11db6c78c0f447e4a7303fee9612165c64ec04f2ea0679cb99b419",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-dark-ru-1.png",
+          "sha256": "0db42a49e5cff50ec5428ba7cb9df5b44319c1de9c785d69fa4782f7abf2cecd",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-dark-ru-2.png",
+          "sha256": "57d4124f5c136e66bd5680518079cc9643b7cd83c98aacad5f1710120289c760",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "review-dark-uk-1.25.png",
+          "sha256": "d6cad62c0db407194a2b7df26177a24280edb4abaeb7f15ea1c7abf4f31b3f09",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-dark-uk-1.5.png",
+          "sha256": "b15e5eb683feb7b0558cb4cbf8c47ba0de215f85b8de2eddd76274ba49b5375d",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-dark-uk-1.png",
+          "sha256": "351177e774ffe064714ac21ec1238a5a51d8930fd159ac334b87664a0c3f4415",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-dark-uk-2.png",
+          "sha256": "4efd82c35d616edf9aeac346316211102744c0e6d3af7f527773fd00aea91b12",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "review-light-en-1.25.png",
+          "sha256": "c2a5f8d3c71aa84353a197cd9c15474a8d87879d0fe9f0af552a864acc3af110",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-light-en-1.5.png",
+          "sha256": "54cd1d2667f744c76a413752045c6fe91f7d165758ef6752b84ee5a74fb6ffa2",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-light-en-1.png",
+          "sha256": "969fda77129cafada443db3dfa3be6faa43af0a511654d1617d1c94662fd7fdf",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-light-en-2.png",
+          "sha256": "d9615d05b33044a6657f0e3d9c4fbe8e8de1b134218a4dcf10f0c6fe372137fb",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "review-light-ru-1.25.png",
+          "sha256": "90ba50a8a08d288acb26145e79311eb5eb9e0700a4a9c057a130c6991d2e98c6",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-light-ru-1.5.png",
+          "sha256": "20c5cf4dbff42ff3a807bafd9be40038a1a01b6b3ae4fcda6072445133695ced",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-light-ru-1.png",
+          "sha256": "4adfccc62539d70e007bd89dcf6220fa7e58d88e8e92645e94a104b5a9cd2c3a",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-light-ru-2.png",
+          "sha256": "25727c36169193e1589b1d7d30a16973af26e1a8cb0447c8f91fa6cdc4b2e8d3",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "review-light-uk-1.25.png",
+          "sha256": "66ea9f805a96d6a834fb04338b4b5882568c6c4dfb9a55625b97893066945f60",
+          "width": 813,
+          "height": 563
+        },
+        {
+          "file": "review-light-uk-1.5.png",
+          "sha256": "62e13f402ae81139cd80eed2f7cb4d5bc3614bd272a787492e8dbcaa5f09533a",
+          "width": 975,
+          "height": 675
+        },
+        {
+          "file": "review-light-uk-1.png",
+          "sha256": "39d5f1add63ec9589f59d490c86464e9b2a220db807fe19ddbe8a035e905f73d",
+          "width": 650,
+          "height": 450
+        },
+        {
+          "file": "review-light-uk-2.png",
+          "sha256": "2cc4d4a0b80326fa03697494cd9cf8560b3c6d8602735a027aaef5a2820479bb",
+          "width": 1300,
+          "height": 900
+        },
+        {
+          "file": "tabs-dark-en-1.25.png",
+          "sha256": "f15229ac335ebac36887ed1ef5851c5c7768927a83702e3b80a0af4f694131b7",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-dark-en-1.5.png",
+          "sha256": "a1541dd45a038b9f3b6bb6df074a884958b6f83154927eed068b60769cffc6cf",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-dark-en-1.png",
+          "sha256": "01f84767100905056f108b7a0bd4d0df9bb101a672c0be0187ba46a1f812e13b",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-dark-en-2.png",
+          "sha256": "2302397ac175efc4562b4b64f7d7663e6672728d502ac0f1473c125c56d59790",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "tabs-dark-ru-1.25.png",
+          "sha256": "dca0a49f1e6c94a1a693adf08239f97d9b3688244fa9f10258aefe404c2e7958",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-dark-ru-1.5.png",
+          "sha256": "18f2bcbd77505f5dfb747b7b14cd26175946dd7b267b6c6db2e09ad47ea13f38",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-dark-ru-1.png",
+          "sha256": "bc3310e0618c422b8f80380ca4c847c1547c9d84bb860461c98158d0196ab9df",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-dark-ru-2.png",
+          "sha256": "cf7ddd975042581a5937f06944b96f9a086df4005dd33c6c7ffbb979fdb863b9",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "tabs-dark-uk-1.25.png",
+          "sha256": "c619b80bdf90ac0fcac3539f5db712b8f11e4a500c1dd5338ab78307e8026039",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-dark-uk-1.5.png",
+          "sha256": "000fc68bf02a87bb46f91f6446e847b6d8517fdf2ebb4465decdec88d3ce0c1d",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-dark-uk-1.png",
+          "sha256": "5c49a5a3980b5b36e8b21658be4e6e5c5ce1557c5fe46ba8d512c26d59afe39f",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-dark-uk-2.png",
+          "sha256": "6e264bba68c8297a0f86fcbc311abee738eca3130a0fc6fc4c07a218388edf9b",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "tabs-light-en-1.25.png",
+          "sha256": "b30607feaf06123ef4ee30728c44b44a0d47a0453d81a65d5d107428c187d219",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-light-en-1.5.png",
+          "sha256": "3e9cc6756133e3d98f9a0de4e49560b1361e2329446b155056d6753acff0e155",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-light-en-1.png",
+          "sha256": "5fac896374332cfe41e5842b4753b719a829d671cfdea63bf58f576ef98f6d31",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-light-en-2.png",
+          "sha256": "a2f38c1db5bfce0dc4e906ba2619092be1b7dade4a459384d12ba94f6642f713",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "tabs-light-ru-1.25.png",
+          "sha256": "adc367381365adf5abfc2adb746c4a1e88ee848c2f97cbc76d1df222fce232c6",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-light-ru-1.5.png",
+          "sha256": "3b1f17c056f931478c0c1ba62db77ea45b1c0f98aa21f4112f12c51f9fe99a05",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-light-ru-1.png",
+          "sha256": "d6a60bf13e8b241c48483ba0dc73dbc1401d6728c7bbb2b8d8645bf0912cbdaf",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-light-ru-2.png",
+          "sha256": "cea8b2c0b25904fe84cf4796b945a25e50d55d8799d009c2fe462dae7a2159de",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "tabs-light-uk-1.25.png",
+          "sha256": "a99ea73b870dccfa2b5c823af1900d68f1e18bfed19935cedb2d55051478a0b3",
+          "width": 1325,
+          "height": 900
+        },
+        {
+          "file": "tabs-light-uk-1.5.png",
+          "sha256": "5dc93d6b372ee549dde63042c4ccc2b89c0d96b54a4c3119c60cf2ecdff8458b",
+          "width": 1590,
+          "height": 1061
+        },
+        {
+          "file": "tabs-light-uk-1.png",
+          "sha256": "bc577a5046d1b1524046e620f339ea6ecd082338a8fb2c5052ea3de6aefd184e",
+          "width": 1060,
+          "height": 720
+        },
+        {
+          "file": "tabs-light-uk-2.png",
+          "sha256": "498dad1bbbe489df60e94f3ba30299e0ab052db4df9d3387a53fc94c19d1ec7c",
+          "width": 1924,
+          "height": 1062
+        },
+        {
+          "file": "temporary-files-dark-en-1.25.png",
+          "sha256": "4e000949a73aca04bb4385aecd817b073b19ea64a33283384342518e6f0faece",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-dark-en-1.5.png",
+          "sha256": "8fa11697a325dcad3a0edc75e947e727ae5ff933c2e7283ef0b03de9cf3d8879",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-dark-en-1.png",
+          "sha256": "50dfe8b2f3a497f4773a309520cd68c911232735f255cc83610ddf2a700ef3e7",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-dark-en-2.png",
+          "sha256": "184897600a8b7b0bd168d7e0a93eec6e359e1ef4b078348b8c580523709d4fea",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "temporary-files-dark-ru-1.25.png",
+          "sha256": "8e0718a80c6d07baa732cd4c2f12a9504abbf6d2f1225bd32d4a96d4eff85f7d",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-dark-ru-1.5.png",
+          "sha256": "ffc80e23f613b410bee5db59d3aac770a23e69f13c10fd574fbc2c5e6ad255cf",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-dark-ru-1.png",
+          "sha256": "8f40318e577928dc00bb581c8de355dced8c54a1f810f5c79a46f8dc2b0c27a8",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-dark-ru-2.png",
+          "sha256": "4fc90845df91f964b5522ef90593633a9d188b9823d22b5b1d61a23027e9813d",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "temporary-files-dark-uk-1.25.png",
+          "sha256": "e7253b56b2b8132db0a01a85f450967d2e2365e43f9c0451032f02e2c36f051a",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-dark-uk-1.5.png",
+          "sha256": "79ec8a509fb04b5ef111926f9438d049ae90facd3e81892815194acad35274bc",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-dark-uk-1.png",
+          "sha256": "db5f2423cca414332d1d6baf47798e39b1424b01a8b0715a0342838899941b40",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-dark-uk-2.png",
+          "sha256": "b4ae52d6ad198833cdc099232cef258ebcfa7721810eae3d22833bbbf1c656f4",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "temporary-files-light-en-1.25.png",
+          "sha256": "004f13b5ca0af4332ee20d4484b890452b04aa6a56200d0b2783f4803768a623",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-light-en-1.5.png",
+          "sha256": "e330ac43085d41c8afcb444068e9291e4bd69b055b5a3d9ee62e50047ef455aa",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-light-en-1.png",
+          "sha256": "2388fe34a0eb6a10df322587e480735ead129a2078b437d1d461a58de890660a",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-light-en-2.png",
+          "sha256": "70aa114630285757202d04dc4174e770e870438caefcfbcbbe001fb972cf6cf7",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "temporary-files-light-ru-1.25.png",
+          "sha256": "472ff2f067648b2a8d8916c3b8665744a2901fed2db8a33bad1f81200f4d75fa",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-light-ru-1.5.png",
+          "sha256": "68a2771a32d00f736e79431a4b01afc24882878faa08ab844bdbf817550ff79c",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-light-ru-1.png",
+          "sha256": "2c0b742d817f88fa5e583a02b213ed32a084f98c4cfa1f56c27b407308eb557a",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-light-ru-2.png",
+          "sha256": "ff8ce8f152d321eb61b04fb5828e81b515a82ef7511b3af420ec84e2f8a073fc",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "temporary-files-light-uk-1.25.png",
+          "sha256": "7685638df8bd80bc189d7529d3bd19c8a768b3f5b5d486c9bd5e0a7abece36d3",
+          "width": 1000,
+          "height": 525
+        },
+        {
+          "file": "temporary-files-light-uk-1.5.png",
+          "sha256": "69830cfe041e3d65996f68cdadc4d1352f7147f9a785c9b1a7d2ac2e33b70188",
+          "width": 1200,
+          "height": 630
+        },
+        {
+          "file": "temporary-files-light-uk-1.png",
+          "sha256": "23a22ddc5be019d24819ed14308b3b2edeb21127c2d9ae8a205829842f79890b",
+          "width": 800,
+          "height": 420
+        },
+        {
+          "file": "temporary-files-light-uk-2.png",
+          "sha256": "565bb32eb316c199b59029b520b257f5b25cb206b8dd7fdc0fa677eecc7e9c23",
+          "width": 1600,
+          "height": 840
+        },
+        {
+          "file": "working-copies-dark-en-1.25.png",
+          "sha256": "bd76d1067d7397e29a95f69b0e6e4bb24f426f69f0e24db779ce07e60af8bcd2",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-dark-en-1.5.png",
+          "sha256": "21ad39147218999708c6093c676c0753a58dfc25c16458a523459a23ae210127",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-dark-en-1.png",
+          "sha256": "7befdacdf2222e6cac3775d4de2e583f09e2709d14d03c4a058e2c4b7ff62e14",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-dark-en-2.png",
+          "sha256": "f64fb3722d9740106d64d057d5e83b50a5a4cd58cb52f449c2c20e172a1cb81d",
+          "width": 1920,
+          "height": 1040
+        },
+        {
+          "file": "working-copies-dark-ru-1.25.png",
+          "sha256": "bd84c865fbfcc709008c3c8886ee479c463fe9a8519923d7006dd4120f8bf88a",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-dark-ru-1.5.png",
+          "sha256": "2743f26e61ecd43d0b4af0e8a1efb945a907a2fb3f6c5bfb01308e5759ff6c7d",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-dark-ru-1.png",
+          "sha256": "5e7f1ac5bd872cee16073b3d129717d2600e08ff6a591a0b847abc0e42719063",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-dark-ru-2.png",
+          "sha256": "c147ea383deac713c4cd068d91804020911135f6a6664c6adc6dd516ee2beeb7",
+          "width": 1920,
+          "height": 1040
+        },
+        {
+          "file": "working-copies-dark-uk-1.25.png",
+          "sha256": "9bd998556d4bd4fdfb6b00295cad2115b52639a99f2e7b441291f1936bdcba60",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-dark-uk-1.5.png",
+          "sha256": "178a6124b352b80769d2ed990af25e554d6cdf76dcd986c1479dfa20e0f9f98c",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-dark-uk-1.png",
+          "sha256": "18bdeb907eedf644ebffb11bb8b1dbef6c65864df9070134ea9bd5bc53291735",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-dark-uk-2.png",
+          "sha256": "62c8b03c1fe6dc57a3774d2c1e7653fa4088afb7c2c4ab026afa342124ac4252",
+          "width": 1920,
+          "height": 1040
+        },
+        {
+          "file": "working-copies-light-en-1.25.png",
+          "sha256": "84d8012ef1ddcf1d689f77f4ee52794b41747dcf70dda0a9007e01cc629ea3f4",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-light-en-1.5.png",
+          "sha256": "51fdf1034b20e8741e2df4bdbc6c38f41644637ae46ba1e2791ae29bbdc5bfc3",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-light-en-1.png",
+          "sha256": "058523f745941c8ad42d9d9f031800d6a66e75e869c569adbf645c867e535548",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-light-en-2.png",
+          "sha256": "89e5914c99d548d61d8398b5b895e40b49db20eab998bf767029f571ae775cb6",
+          "width": 1920,
+          "height": 1040
+        },
+        {
+          "file": "working-copies-light-ru-1.25.png",
+          "sha256": "8f718261ba1fc7cce1b1b66cc1afcb6753f934d4d1f639ab0089352a4b5013c5",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-light-ru-1.5.png",
+          "sha256": "40eb949cc508f9c498e6a7d3a43ccefa02f1a508e10776c0d26c8520631567ca",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-light-ru-1.png",
+          "sha256": "4ab89d2d78b27ba16897a27464dbd67f6d2a19cf4998c646cc14f14b1d9ddb07",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-light-ru-2.png",
+          "sha256": "3387b74ca9b531c6cd685070c89bfb08958834dd87c3545f5e9402dcaaa99de6",
+          "width": 1920,
+          "height": 1040
+        },
+        {
+          "file": "working-copies-light-uk-1.25.png",
+          "sha256": "40c265b255eccca1160ffc5ef60c13b0e9371d7361c5ff6fea287d770fa925ca",
+          "width": 1200,
+          "height": 650
+        },
+        {
+          "file": "working-copies-light-uk-1.5.png",
+          "sha256": "fac6a7b50509aea596b3bd299633307e676969cdfc8b30925ac879029ce40c2b",
+          "width": 1440,
+          "height": 780
+        },
+        {
+          "file": "working-copies-light-uk-1.png",
+          "sha256": "a989a54acfe20520692d2667506d6e3d62b864c306c85c5e58c98903d9537713",
+          "width": 960,
+          "height": 520
+        },
+        {
+          "file": "working-copies-light-uk-2.png",
+          "sha256": "c43531727d923e7c15587ec550c80523d682ce807072c2c01a13fe2716771300",
+          "width": 1920,
+          "height": 1040
+        }
+      ]
+    },
+    {
+      "name": "ui-narrow",
+      "manifest": {
+        "application_sha256": "3b77a1fc1a59895527cbcc1e8d18b7b9e02f95b050232152e0cef5a2a8a4da10",
+        "screenshot_count": 24,
+        "requested_window_size": "620x440",
+        "states": [
+          "operation",
+          "queue",
+          "search",
+          "tabs"
+        ]
+      },
+      "frames": [
+        {
+          "file": "operation-dark-en-1.png",
+          "sha256": "af8e1a2d04842c56d26bc7a68cecad7659528bf104d9bcb910c01c9f9119ce4b",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "operation-dark-ru-1.png",
+          "sha256": "34eaaf95c1c59ca5f22dbff482729023d19b2c5984b20a0bec048e5b16f56a1a",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "operation-dark-uk-1.png",
+          "sha256": "b81a77cfa0acdf45aa3fa7528d43da30807d32bcc333ec2908af34b2685b481e",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "operation-light-en-1.png",
+          "sha256": "8d02dd65f74915e52cb97b40287649e038398d295918d80a2343584e4290c865",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "operation-light-ru-1.png",
+          "sha256": "2083e3ee38cd999b07cff3876a27fee81dc533f58bc7a65f2f5e8d3738480f53",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "operation-light-uk-1.png",
+          "sha256": "13e33576bb619f40c395593f9a9ce0b73e23039058d079d26fa304f5b39ccc34",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-dark-en-1.png",
+          "sha256": "0b3bbd595a83de330d0e80e9284d13e418d49067ab493c683a0fef196345dfed",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-dark-ru-1.png",
+          "sha256": "ca05bb91b6db224948bb7a47cb6e6082fcb1d9940af0c952eee620136996f780",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-dark-uk-1.png",
+          "sha256": "2974d69349f9ae8f93d9f1a50b91879ea093375fe1d5eec2605b4fc2b3df7528",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-light-en-1.png",
+          "sha256": "fe43ab0e927ef09bbebc482c0f8fa1d44dcd8af4d53f843a61e5fc4c39d29267",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-light-ru-1.png",
+          "sha256": "3740b21230d69b399c1c2b7afc8adffe425b8d1e7a6d44d28d6b0bf5aaff7253",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "queue-light-uk-1.png",
+          "sha256": "45065538d2fc0b57fe75978dcf7b06c40493500a2c61c089cca3146330b3be6d",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-dark-en-1.png",
+          "sha256": "0c8b0e6535d1fdde343782fc0c709335004d79ca0fa0d3bf080712c3d6802533",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-dark-ru-1.png",
+          "sha256": "444b0c5aaa796b12a968dd2d4984efc7d96e816d790ef6744835075610fead6b",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-dark-uk-1.png",
+          "sha256": "bad4da66dcdaee26f20c7ffa2ebeeb45fe4356f4289b1722063751fa7fa6af2e",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-light-en-1.png",
+          "sha256": "1178cbdd4e2ac505dbef24995cfce23b6063c8d4d576d5cd32ab875661a069e2",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-light-ru-1.png",
+          "sha256": "a3498f4764342bd622cb6dd0c55a70565bf5cd9eccfd58eb297507c53b04f607",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "search-light-uk-1.png",
+          "sha256": "c35e76c24fe0af043440ebb25e9b4899665153f4fdd8ccfdecb04bba7eaf421b",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-dark-en-1.png",
+          "sha256": "148d8a57bb4e9fc5e39d6117d71ba3a9289a892f160b21667a77bbf34258dbcf",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-dark-ru-1.png",
+          "sha256": "988a11bf030287b188ec68efd20c0b9dbdd7a707601d64bf374827c5c806245d",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-dark-uk-1.png",
+          "sha256": "c77a591a3052e9b13e58e985548d3c5e185a0d8d07f8896a7e24f58c607401f7",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-light-en-1.png",
+          "sha256": "bca72f8bb36788e7eb2a1e983e5de11ad752ed4d2960f38b5f9482a872ec749c",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-light-ru-1.png",
+          "sha256": "8e22deb046ca8eb57b36bb65b4fc1940b2a98a77362ff9c18db01886a3a6ca22",
+          "width": 620,
+          "height": 440
+        },
+        {
+          "file": "tabs-light-uk-1.png",
+          "sha256": "2d7fea137d78b93b8d4a03269849122b2d2e4569de94f56cd33f5dbf328fd251",
+          "width": 620,
+          "height": 440
+        }
+      ]
+    }
+  ],
+  "evidence_scope": [
+    "All final package identities are checked against current dist hashes",
+    "Stress/fuzz/lock/interruption checks exercise the unchanged final CLI binary; earlier GUI-only package hashes in stress metadata are not final portable identities",
+    "Benchmark executable hashes identify opt-in instrumentation rather than the shipping GUI executable",
+    "Capture fixtures test layout; synthetic queue counters are not runtime semantic evidence",
+    "Modal dialogs retain default sizes in the narrow main-window capture test"
+  ],
+  "remaining_qualification": [
+    "actual Windows DPI change and multimonitor accessibility",
+    "manual scenarios in specific external desktop editors",
+    "process termination precisely inside publication syscall and physical power loss",
+    "clean-machine and enterprise-policy qualification",
+    "signed distribution",
+    "complete parser allocation budgets and hostile-local-process race hardening"
+  ],
+  "tools": {
+    "python": "3.11.15",
+    "packages": {
+      "psutil": "7.2.2",
+      "py7zr": "1.1.3",
+      "backports.zstd": "1.7.0"
+    }
+  }
+}

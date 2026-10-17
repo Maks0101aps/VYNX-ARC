@@ -1,90 +1,56 @@
-# Implementation status - 2026-10-16
+# Implementation status - 2026-10-17
 
-Version is **0.4.0 development**. Public stable-release acceptance is not
-complete. This file describes the current main checkout; historical measurements
-and failures remain in their dated reports.
+Version: **0.5.0 development milestone**. This is not acceptance of the entire V1
+contract. Current evidence belongs to [MILESTONE_0_5.md](MILESTONE_0_5.md) and
+[VERIFICATION_0_5.json](VERIFICATION_0_5.json). Earlier reports, including 0.4, are
+historical and retain their original pass counts and failures.
 
-## Implemented
+## Available behavior
 
-- Shared Rust archive engine, CXX bridge, native Qt Widgets GUI and Rust CLI.
-- Browse/test/extract ZIP, 7Z, TAR, TAR.GZ, TAR.XZ, TAR.BZ2, TAR.ZST,
-  GZIP/XZ/BZIP2/ZSTD/LZMA and native RAR4/RAR5. Create all except RAR,
-  including ZIP/7Z encryption. RAR is read-only.
-- Compression presets, codec-aware effective settings, three resource modes,
-  phase progress and a bounded queue with pause/resume, reordering, pending
-  cancellation, error details and creation-job dispatch.
-- Transactional ZIP/7Z add/delete/rename, drag-to-add, independent replacement
-  verification, cancellation cleanup and free-space preflight.
-- Split-7Z read/create and RAR multipart read with missing-volume errors.
-- Smart Extract; Ask/Replace/Skip/Keep both/Newer/Stop conflicts and apply-all.
-- SHA-256/CRC32 for archive files and decoded entries, supplied-hash verification.
-- Whole-archive file search by name/path, wildcard matching, path column and
-  restoration of the current folder when search is cleared.
-- Read-only text/image/Hex preview via double-click, Enter or F3. UTF-8/UTF-16
-  text search, image zoom and bounded rendering; no plaintext preview file.
-- Explicit external opening through verified temporary copies for supported
-  document/media types, with read-only attributes and Windows ZoneId=3.
-- Batch extraction into per-archive folders; failures are recorded and remaining
-  jobs continue. A shared optional password stays in memory only.
-- Named selection actions; worker/progress/conflict orchestration lives in
-  MainWindowJobs.cpp and text preview in MainWindowPreview.cpp.
-- English/Ukrainian/Russian UI, theme settings, local history, keyboard navigation.
-- Source quality/audit/test gates and portable/installer/MSIX build scripts.
-- Native Explorer COM/IPC component and optional per-user Open With registration;
-  real signed modern Explorer activation is still unverified.
+- Offline native Qt/CXX/Rust GUI and CLI; ZIP, 7Z, RAR4/RAR5, TAR and compressed
+  TAR/standalone streams. RAR remains read-only. See [formats](SUPPORTED_FORMATS.md).
+- Independent archive tabs with folder history, search, selection, columns and scroll;
+  duplicate/split-volume path normalization, busy-tab cancellation, opt-in workspace
+  restoration. Another idle tab can search/navigate/preview during a primary job.
+- One sequential writer queue, bounded durable job descriptions, atomic journal,
+  explicit review/retry after interruption, parameter changes, password re-entry,
+  batch counts, clearable history and JSON report export. Oversized selections
+  cannot silently replay from truncated descriptions. Restored writes never
+  resume automatically. Size/mtime source snapshots are review hints only.
+- ZIP/7Z add/delete/rename and explicit edit/save-back. Separate registered working
+  copies retain failed/conflicting edits across restart. Save validates source and
+  input SHA-256 under locks, verifies the replacement and updates the owning tab.
+- Read-only text/raster/Hex preview; selected ZIP payload read without decoding
+  unrelated payloads. Full testing still validates every member. External viewing
+  is explicit and restricted; executable/script/active-content types are excluded.
+- Disposable-view manager, editable-copy manager, visible pending-edit indicators,
+  EN/UK/RU, light/dark/system theme, keyboard commands and responsive toolbars.
+- Compression/resource presets for creation and rebuild, phase progress/cancellation,
+  conflict decisions, Smart Extract, file/entry hashes and split-7Z creation/read.
+- Complete metadata/path/collision validation before output; per-file publication,
+  bounded decoder output, link/reparse rejection, conservative disk preflight.
 
-See [MILESTONE_0_4.md](MILESTONE_0_4.md) for the latest product
-feature increment and its validation.
+## Boundaries
 
-## Previous hardening pass
+Working copies keep plaintext and source paths until explicitly discarded, including
+when recent-history storage is disabled: creating a copy requires separate consent.
+The visible edit fingerprint uses metadata; authoritative save checks use hashes.
+Edits are limited to 256 MiB and ZIP/7Z without volumes. No auto-merge, silent save,
+external-editor termination detection or recovery from physical power loss is promised.
 
-ZIP is pinned to stable 9.0.4, replacing yanked 8.6.0. The audit gate now denies
-any yanked dependency. ZIP directory preflight and a documented local 7Z parser
-patch enforce header/metadata and dictionary-chain budgets before affected
-allocations. These are not whole-process memory limits.
+Parser libraries can allocate metadata before all application-level entry budgets
+are checked. This version does not establish complete parser memory budgets or
+hostile-local-process filesystem race freedom. See [security](SECURITY_MODEL.md).
+Solid codecs may decode shared blocks, and cancellation has backend-dependent bounds.
 
-See [IMPROVEMENTS_2026-10-16.md](IMPROVEMENTS_2026-10-16.md) for the final validation
-results, exact artifacts and remaining environment gates. The GitHub workflow
-now packages/verifies the deployed app and runs external-lock/mutation checks;
-that workflow has not been executed remotely in this session.
+The binaries remain unsigned. Local package/installer checks cannot establish
+SmartScreen reputation, enterprise-policy behavior or clean-machine qualification.
+Windows desktop DPI and Qt scale-factor captures are distinct forms of validation.
 
-## Remaining release work
+## Next development priorities
 
-- Clean Windows acceptance: portable, per-user installer, Open With, previous-
-  version upgrade, uninstall/reboot cleanup and actual Explorer menu behavior.
-  scripts/check-clean-windows.ps1 prepares and can launch a Windows Sandbox run;
-  its guest script covers an automated subset only. The guest report and user
-  token must be reviewed; Sandbox is not a substitute for standard-user VM QA.
-- Trusted signing/identity and signed modern Explorer activation.
-- Resolve the historical ZIP replacement failure causally. The original package
-  passed today's project-path verification and 1,400-publication stress run;
-  this does not explain the failures captured on October 3.
-- Broader parser/codec/native allocation and CPU budgets, TAR/PAX review,
-  coverage-guided fuzzing, Unicode identity cases, hostile filesystem races and
-  backend/Qt password-copy zeroization.
-- Metadata preservation review, real large/long-running archive performance,
-  repeated open/close memory retention, keyboard/accessibility/native-frame QA.
-- Profile large archives; refine durable queue history, codec resource estimates
-  and modification compression options.
-
-## Known behavior and compatibility limits
-
-Extraction commits per file; completed files remain after cancellation. Archives
-containing links are rejected for write/extract/test operations. Solid archives
-may decode unrelated streams, including during preview. Internal preview supports
-bounded text/raster/Hex and never executes content; external opening writes an
-explicit temporary copy and invokes the OS handler. Backend error details can
-remain English.
-ZIP metadata preflight deliberately rejects ambiguous end records, trailing data,
-non-contiguous/signed central directories and multi-disk ZIP. Parser budgets can
-reject otherwise valid very large archives. See SECURITY_MODEL.md for exact
-limits and exclusions.
-
-## Historical evidence
-
-- [October 3 acceptance](RELEASE_ACCEPTANCE.md) and
-  [root-cause capture](PUBLICATION_ROOT_CAUSE.md): preserved failures, not today's
-  current runtime result.
-- [UI QA](UI_QA.md) and [performance](PERFORMANCE.md): dated October 2 measurements.
-- [Supported formats](SUPPORTED_FORMATS.md), [security model](SECURITY_MODEL.md),
-  [password lifetime](PASSWORD_LIFETIME.md), [modification](MODIFICATION.md).
+1. Parser memory budgets and sustained malformed-input fuzzing with instrumented builds.
+2. Signed distribution and trusted update/recovery policy.
+3. Broader independent Windows/real-editor/DPI accessibility testing.
+4. Faster selected extraction preflight for very large metadata sets, richer editor
+   conflict recovery, and measured optimization of the remaining solid/stream paths.

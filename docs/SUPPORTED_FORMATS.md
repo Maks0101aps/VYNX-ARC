@@ -1,12 +1,12 @@
 # Format capability matrix
 
-Current 0.4.0 development capabilities.
+Current 0.5.0 development capabilities.
 Yes describes implemented behavior, not qualification of every possible codec.
 
 | Format | Browse | Test | Extract | Create | Modify | Encrypted read | Encrypted write | Multi-volume read | Multi-volume create | Known limits |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ZIP | Yes | Yes | Yes | Yes | Add/delete/rename | AES; legacy ZipCrypto through backend | AES-256 data | No | No | Backend codecs only; no general ZIPX claim; incomplete metadata preservation |
-| 7Z | Yes | Yes | Yes | Yes | Add/delete/rename | AES data and headers | AES data and headers | See split 7Z | See split 7Z | Solid streams may decode unselected entries; incomplete metadata preservation |
+| ZIP | Yes | Yes | Yes | Yes | Add/delete/rename/replace content | AES; legacy ZipCrypto through backend | AES-256 data | No | No | Backend codecs only; no general ZIPX claim; incomplete metadata preservation |
+| 7Z | Yes | Yes | Yes | Yes | Add/delete/rename/replace content | AES data and headers | AES data and headers | See split 7Z | See split 7Z | Solid streams may decode unselected entries; incomplete metadata preservation |
 | split 7Z | Yes | Yes | Yes | Yes | No | AES data and headers | AES before splitting | Yes | Yes | `.7z.001` numbering; equal-size parts, shorter final part; 4096-part read cap; minimum 64 KiB creation part; multi-file publication is not atomic |
 | RAR4 | Yes (Windows) | Yes (Windows) | Yes (Windows) | No | No | Data and encrypted filenames | No | See RAR multipart | No | Read-only UnRAR 7.23; in-process decoder serialization; 512 MiB dictionary limit |
 | RAR5 | Yes (Windows) | Yes (Windows) | Yes (Windows) | No | No | Data and encrypted filenames | No | See RAR multipart | No | Same read-only decoder and limits as RAR4 |
@@ -36,3 +36,5 @@ exactly one regular input file; use a compressed TAR for folders or multiple
 files. Resource modes constrain supported codecs and worker counts, not total
 process memory. Compression presets apply to new archive creation; ZIP/7Z
 modification retains its existing rebuild policy.
+
+Editable working copies and explicit save-back are available for supported ZIP/7Z entries up to 256 MiB. Split archives remain read-only. See [MODIFICATION.md](MODIFICATION.md).

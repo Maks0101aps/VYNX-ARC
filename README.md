@@ -1,7 +1,7 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains a working **0.4.0
+archive core connected through CXX. This repository contains a working **0.5.0
 development milestone**. The supplied master brief remains the V1 contract;
 this milestone does not satisfy the full contract.
 
@@ -11,7 +11,8 @@ Create all of these except RAR, including AES-encrypted ZIP and encrypted 7Z
 filenames. Choose Store/Fast/Balanced/Maximum compression and
 Eco/Balanced/Maximum resource modes. Operations run asynchronously with
 progress and cancellation; additional archive requests enter a visible FIFO queue.
-The browser uses Qt model/view, with folder navigation, sortable columns,
+Each archive has its own tab with independent search, navigation and selection.
+Idle tabs remain available during another archive's operation. The browser uses Qt model/view, with folder navigation, sortable columns,
 keyboard shortcuts and drag-to-open. English, Ukrainian and Russian UI,
 system/light/dark appearance, local recent history and portable settings are
 available. No external archiver, browser engine, telemetry or service is used.
@@ -26,6 +27,14 @@ copy, with explicit confirmation. Executables, scripts and shortcuts are exclude
 File > Batch extraction (Ctrl+Shift+E) queues archives into separate destination
 folders. Pause/resume, reorder or cancel pending jobs in View > Operation queue;
 double-click a row for error details. New creation requests can also be queued.
+The bounded journal restores interrupted jobs for explicit review/retry; passwords
+are never saved. Export a JSON report with terminal results and batch identifiers.
+
+Ctrl+Shift+Return creates an editable working copy of a supported ZIP/7Z file.
+Use View > Working copies to explicitly save it back, reload its source, export or
+discard it. Changed sources stop a save; failed saves retain the edited copy.
+Decrypted working content stays on disk until discarded. View > Temporary files
+manages disposable read-only views separately. Tabs with pending edits show `*`.
 
 Extraction validates Windows paths and collisions, blocks links/reparse points,
 checks output limits, writes unique temporary files and publishes completed
@@ -33,7 +42,7 @@ streams. Existing files are preserved by default. These protections are tested,
 but complete parser allocation budgets and filesystem race hardening still need
 review before a production release.
 
-![Archive browser](docs/screenshots/browser-dark-uk-1.25.png)
+![Archive tabs](docs/screenshots/0.5/tabs-dark-uk-1.25.png)
 
 ## Run
 
@@ -44,8 +53,8 @@ Locally generated artifacts are under `dist/` (ignored by Git):
 - `SHA256SUMS.txt`: SHA-256 checksums of those artifacts.
 
 The binaries are unsigned. The portable package passed tests with only Windows
-directories on PATH. Installer compilation passed; clean-VM installation and
-uninstallation have not been tested. Windows 11 x64 is the tested platform.
+directories on PATH. A per-user 0.4-to-0.5 installer upgrade, settings preservation and
+uninstallation passed on the development host. Clean-VM qualification remains separate. Windows 11 x64 is the tested platform.
 No development SDK is required to run the packages.
 
 ## Build
@@ -69,17 +78,20 @@ the command line are intentionally unsupported.
 
 ## Project status
 
+The [0.5 milestone report](docs/MILESTONE_0_5.md) records current behavior,
+measurements and verification boundaries. [Roadmap](docs/ROADMAP_0_5.md) tracks acceptance.
+
 [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) records evidence,
 limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md)
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
 
-The [0.4 milestone report](docs/MILESTONE_0_4.md) records the current feature
+The [0.4 milestone report](docs/MILESTONE_0_4.md) records the historical feature
 increment and verification. The [previous product report](docs/PRODUCT_DEVELOPMENT.md)
 records the preceding format/resource work. The earlier [improvement report](docs/IMPROVEMENTS_2026-10-16.md)
 records the preceding parser, preview and dependency changes. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
 retains historical failures. Stable-release acceptance remains incomplete at
-version 0.4.0. Run `scripts/check.ps1` for mandatory local source gates;
+version 0.5.0. Run `scripts/check.ps1` for mandatory local source gates;
 release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;

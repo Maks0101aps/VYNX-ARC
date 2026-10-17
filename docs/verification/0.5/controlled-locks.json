@@ -1,0 +1,54 @@
+{
+  "command": "python scripts/check-publication-locks.py --cli target/release/vynxarc-cli.exe --output .dev/milestone-0.5/controlled-locks",
+  "cli_sha256": "dd586e7347b5d240f085cc01bdc30ec083ad5b516b2c1b8b4344b6201970cd35",
+  "cases": [
+    {
+      "format": "zip",
+      "operation": "add",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\zip-add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "zip",
+      "operation": "delete",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\zip-delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "zip",
+      "operation": "rename",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\zip-rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "add",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\7z-add.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "27d43ba326033375569f8e8f64f12e81286b0c557f860886b164cfcb1089b974",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "delete",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\7z-delete.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "8bd0abbd19b915a82cf5f49aafd32c4155d3578d5d4837b05089a26310e106eb",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "rename",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.5\\controlled-locks\\lock-check-kq3e5kc4\\7z-rename.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "0930547ce5f2336eb627ae181e899fd279691966a4dd034d7491fb9a572058dc",
+      "explicit_retry": "passed"
+    }
+  ]
+}

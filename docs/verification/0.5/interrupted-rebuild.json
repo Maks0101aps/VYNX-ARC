@@ -1,0 +1,21 @@
+{
+  "status": "passed",
+  "cli_sha256": "dd586e7347b5d240f085cc01bdc30ec083ad5b516b2c1b8b4344b6201970cd35",
+  "scope": "forced process termination during observed rebuild staging; source publication remains atomic; not a power-loss test",
+  "cases": [
+    {
+      "boundary": "rebuild",
+      "termination_exit": 1,
+      "original_preserved": true,
+      "working_copy_preserved": true,
+      "orphan_stage_retained": ".tmp47i3Mg"
+    },
+    {
+      "boundary": "late-staging",
+      "termination_exit": 1,
+      "original_preserved": true,
+      "working_copy_preserved": true,
+      "orphan_stage_retained": ".tmpuU7kUj"
+    }
+  ]
+}

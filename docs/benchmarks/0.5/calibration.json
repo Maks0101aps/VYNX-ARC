@@ -1,0 +1,6 @@
+{
+  "initial_run": "bench-baseline",
+  "status": "stopped_during_calibration",
+  "reason": "100 resource-retention cycles on the 100000-member corpus repeated expensive full 0.4 decoding. Use a fixed small ZIP for retention cycles; keep all six throughput datasets and three trials unchanged.",
+  "observed_elapsed_seconds_at_last_sample": 327.68
+}
