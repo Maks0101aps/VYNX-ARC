@@ -257,7 +257,7 @@ class GuiPresentationTest : public QObject {
         }
         JobJournal recovered;
         QVERIFY(recovered.open(path, true));
-        QCOMPARE(recovered.record(id)["state"].toString(), QString("interrupted"));
+        QCOMPARE(recovered.record(id)["state"].toString(), QString("unknown"));
         QVERIFY(recovered.setEnabled(false));
         QVERIFY(!QFile::exists(path));
     }
@@ -269,17 +269,75 @@ class GuiPresentationTest : public QObject {
             JobJournal journal;
             QVERIFY(journal.open(path, true));
             QJsonArray names;
-            for (int i = 0; i < 10001; ++i)
+            for (int i = 0; i < 100000; ++i)
                 names.append(QString("file-%1").arg(i));
             id = journal.add("Large selection", QJsonObject{{"kind", "extract"}, {"names", names}});
             QVERIFY(!id.isEmpty());
-            QVERIFY(journal.record(id)["spec"].toObject()["incompleteSpec"].toBool());
+            QVERIFY(!journal.record(id)["spec"].toObject()["incompleteSpec"].toBool());
         }
         JobJournal recovered;
         QVERIFY(recovered.open(path, true));
         const auto spec = recovered.record(id)["spec"].toObject();
-        QVERIFY(spec["incompleteSpec"].toBool());
-        QCOMPARE(spec["names"].toArray().size(), 10000);
+        QVERIFY(!spec["incompleteSpec"].toBool());
+        QCOMPARE(spec["names"].toArray().size(), 100000);
+    }
+    void journalRejectsTamperedPayloadAndMigratesLegacyWithoutResuming() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QString id;
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(path, true));
+            QJsonArray names;
+            for (int i = 0; i < 20000; ++i)
+                names.append(QString("file-%1").arg(i));
+            id = journal.add(
+                "Pending",
+                QJsonObject{{"kind", "extract"}, {"names", names}, {"password", "NEVER-ON-DISK"}});
+            QVERIFY(!id.isEmpty());
+        }
+        {
+            JobJournal recovered;
+            QVERIFY(recovered.open(path, true));
+            QCOMPARE(recovered.record(id)["state"].toString(), QString("interrupted"));
+            const auto files = QDir(path + ".data").entryList({"*.json"}, QDir::Files);
+            QCOMPARE(files.size(), 1);
+            QFile payload(path + ".data/" + files.first());
+            QVERIFY(payload.open(QIODevice::ReadOnly));
+            auto bytes = payload.readAll();
+            QVERIFY(!bytes.contains("NEVER-ON-DISK"));
+            payload.close();
+            bytes[bytes.size() - 2] = 'X';
+            QVERIFY(payload.open(QIODevice::WriteOnly));
+            payload.write(bytes);
+            payload.close();
+        }
+        QFile original(path);
+        QVERIFY(original.open(QIODevice::ReadOnly));
+        const auto before = original.readAll();
+        original.close();
+        {
+            JobJournal rejected;
+            QVERIFY(!rejected.open(path, true));
+        }
+        QVERIFY(original.open(QIODevice::ReadOnly));
+        QCOMPARE(original.readAll(), before);
+        original.close();
+        const auto legacy = root.path() + "/legacy.json";
+        QFile file(legacy);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(
+            R"({"schema":1,"jobs":[{"id":"legacy","state":"pending","spec":{"kind":"extract","names":["one"],"incompleteSpec":true},"sources":[]}]})");
+        file.close();
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(legacy, true));
+            QCOMPARE(journal.record("legacy")["state"].toString(), QString("interrupted"));
+            QVERIFY(journal.record("legacy")["spec"].toObject()["incompleteSpec"].toBool());
+            QVERIFY(journal.setState("legacy", "failed"));
+        }
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QCOMPARE(QJsonDocument::fromJson(file.readAll()).object()["schema"].toInt(), 2);
     }
     void journalRejectsDamageAndDetectsSourceChanges() {
         QTemporaryDir root;
@@ -326,7 +384,7 @@ class GuiPresentationTest : public QObject {
         JobJournal recovered;
         QVERIFY(recovered.open(path, true));
         QCOMPARE(recovered.records().size(), 1);
-        QCOMPARE(recovered.records()[0].toObject()["state"].toString(), QString("interrupted"));
+        QCOMPARE(recovered.records()[0].toObject()["state"].toString(), QString("unknown"));
         EditStore edits(path + ".edits");
         QVERIFY(edits.available());
         QCOMPARE(edits.records().size(), 1);

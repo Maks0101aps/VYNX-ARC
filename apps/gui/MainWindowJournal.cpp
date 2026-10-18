@@ -6,6 +6,10 @@
 #include <QJsonDocument>
 #include <QtWidgets>
 static QString jobStateLabel(const QString &state) {
+    if (state == "unknown")
+        return MainWindow::tr("Result unknown - verification required");
+    if (state == "verifying")
+        return MainWindow::tr("Verifying result");
     if (state == "completed")
         return MainWindow::tr("Completed");
     if (state == "failed")
@@ -42,13 +46,13 @@ void MainWindow::setupJournal() {
         item->setData(Qt::UserRole + 5, record["state"].toString());
         item->setData(Qt::UserRole + 6, record["error"].toString());
         item->setToolTip(record["error"].toString());
-        if (record["state"] == "interrupted")
+        if (record["state"] == "interrupted" || record["state"] == "unknown")
             queueDock_->show();
     }
     updateQueue();
 }
 void MainWindow::syncJournal() {
-    int completed = 0, failed = 0, pending = 0;
+    int completed = 0, failed = 0, pending = 0, running = 0, cancelled = 0, review = 0;
     QMap<QString, QVector<int>> batches;
     for (int i = 0; i < queueView_->count(); ++i) {
         auto *item = queueView_->item(i);
@@ -64,7 +68,11 @@ void MainWindow::syncJournal() {
         journal_.setState(id, state, item->data(Qt::UserRole + 6).toString());
         completed += state == "completed";
         failed += state == "failed";
-        pending += state == "pending" || state == "interrupted" || state == "decision";
+        pending += state == "pending";
+        running += state == "running";
+        cancelled += state == "cancelled";
+        review += state == "interrupted" || state == "decision" || state == "unknown" ||
+                  state == "verifying";
         const auto batch = item->data(Qt::UserRole + 4).toJsonObject()["batchId"].toString();
         if (!batch.isEmpty()) {
             if (!batches.contains(batch))
@@ -74,14 +82,18 @@ void MainWindow::syncJournal() {
             counts[1] += state == "completed";
             counts[2] += state == "failed" || state == "cancelled";
             counts[3] += state == "pending" || state == "running" || state == "interrupted" ||
-                         state == "decision";
+                         state == "decision" || state == "unknown" || state == "verifying";
         }
     }
     if (queueSummary_)
-        queueSummary_->setText(tr("Completed: %1 | Errors: %2 | Pending/review: %3")
+        queueSummary_->setText(tr("Completed: %1 | Errors: %2 | Pending: %3 | Running: %4 | "
+                                  "Cancelled: %5 | Review: %6")
                                    .arg(completed)
                                    .arg(failed)
-                                   .arg(pending));
+                                   .arg(pending)
+                                   .arg(running)
+                                   .arg(cancelled)
+                                   .arg(review));
     QStringList batchSummaries;
     for (auto it = batches.cbegin(); it != batches.cend(); ++it) {
         const auto &c = it.value();
@@ -118,6 +130,13 @@ void MainWindow::retrySelectedJob() {
     const auto record = journal_.record(item->data(Qt::UserRole + 3).toString());
     auto spec = record["spec"].toObject();
     const auto kind = spec["kind"].toString();
+    if (record["state"] == "unknown" || record["state"] == "verifying") {
+        QMessageBox::information(
+            this, tr("Verify result before retry"),
+            tr("This write may have completed. Verify its destination before repeating it. The "
+               "original request is retained and will not run automatically."));
+        return;
+    }
     if (spec["incompleteSpec"].toBool()) {
         QMessageBox::information(this, tr("Retry operation"),
                                  tr("This selection is too large to restore completely. Repeat it "
@@ -166,7 +185,7 @@ void MainWindow::retrySelectedJob() {
         create.password->clear();
         spec["needsPassword"] = !pw->bytes().empty();
         spec["retryOf"] = record["id"];
-        if (record["state"] == "interrupted") {
+        if (record["state"] == "interrupted" || record["state"] == "unknown") {
             item->setData(Qt::UserRole + 5, "failed");
             item->setText(tr("Stopped — %1").arg(item->data(Qt::UserRole + 1).toString()));
         }
@@ -282,7 +301,7 @@ void MainWindow::retrySelectedJob() {
     const auto pw = secret(password->text());
     password->clear();
     spec["needsPassword"] = !pw->bytes().empty();
-    if (record["state"] == "interrupted") {
+    if (record["state"] == "interrupted" || record["state"] == "unknown") {
         item->setData(Qt::UserRole + 5, "failed");
         item->setText(item->data(Qt::UserRole + 1).toString() + " - " + tr("Stopped"));
         journal_.setState(record["id"].toString(), "failed", record["error"].toString());

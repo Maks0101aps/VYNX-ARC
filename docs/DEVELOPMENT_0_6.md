@@ -38,3 +38,25 @@ The job test proved a 512 MiB allocation is refused under a 256 MiB committed-me
 cap and that closing the job terminates its waiting child. The diagnostic child
 is an ignored test-only entry, absent from shipping binaries. GUI crash injection,
 measured resource profiles and complete write isolation remain release work.
+
+## Complete queue descriptions
+
+Journal schema 2 retains up to one million selection names in content-addressed
+payload files (16 MiB per description, 64 MiB live aggregate). Each payload is
+checked against its recorded size and SHA-256 before recovery. The compact journal
+keeps its 1 MiB/96-record bound; writes use QSaveFile without direct-write fallback.
+Schema 1 loads without silently repairing its incomplete-selection flags and is
+migrated on a subsequent successful save. Unsupported/damaged originals are retained.
+New payloads are committed before the referencing journal; obsolete verified payloads
+are pruned only after the replacement journal commits. Storage overflow refuses
+persistence rather than silently truncating a selection.
+
+Interrupted active writes now recover as `unknown`, which cannot enter generic
+retry or completed-history cleanup. Pending jobs recover as explicitly reviewable
+interrupted requests. Queue counters distinguish pending/running/cancelled/review.
+Publication-intent recording and destination reconciliation are the next step;
+unknown writes currently require destination review rather than automatic retry.
+
+Validation: release GUI build and all three CTests passed, including new full
+100,000-name recovery, tampered-payload rejection with original-journal preservation,
+legacy incomplete-selection migration and a real killed-process recovery test.

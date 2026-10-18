@@ -121,7 +121,8 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         QSignalBlocker blocker(queueView_);
         for (int i = queueView_->count() - 1; i >= 0; --i)
             if (queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
-                queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted") {
+                !QStringList{"interrupted", "unknown", "verifying"}.contains(
+                    queueView_->item(i)->data(Qt::UserRole + 5).toString())) {
                 journal_.remove(queueView_->item(i)->data(Qt::UserRole + 3).toString());
                 delete queueView_->takeItem(i);
             }
@@ -263,10 +264,12 @@ void MainWindow::updateQueue() {
     int completed = 0;
     for (int i = 0; i < queueView_->count(); ++i)
         completed += queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
-                     queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted";
+                     !QStringList{"interrupted", "unknown", "verifying"}.contains(
+                         queueView_->item(i)->data(Qt::UserRole + 5).toString());
     for (int i = 0; i < queueView_->count() && completed > 64;) {
         if (queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&
-            queueView_->item(i)->data(Qt::UserRole + 5).toString() != "interrupted") {
+            !QStringList{"interrupted", "unknown", "verifying"}.contains(
+                queueView_->item(i)->data(Qt::UserRole + 5).toString())) {
             journal_.remove(queueView_->item(i)->data(Qt::UserRole + 3).toString());
             delete queueView_->takeItem(i);
             --completed;
