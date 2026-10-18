@@ -29,6 +29,8 @@ qt_add_executable(VynxArc WIN32 apps/gui/main.cpp apps/gui/ArchiveModel.cpp apps
 target_sources(VynxArc PRIVATE
     apps/gui/EditStore.cpp apps/gui/EditStore.h
     apps/gui/MainWindowEdits.cpp
+    apps/gui/MainWindowConversion.cpp
+    apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h
     apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
     apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h
     apps/gui/MainWindowPreview.cpp
@@ -98,8 +100,9 @@ add_executable(VynxPresentationTests
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
     apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h)
+target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h)
 target_include_directories(VynxPresentationTests PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
-target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test vynx_core)
+target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test Qt6::Concurrent vynx_core)
 if(WIN32)
     target_link_libraries(VynxPresentationTests PRIVATE bcrypt ntdll userenv ws2_32 advapi32 shell32 ole32 crypt32)
     target_compile_options(VynxPresentationTests PRIVATE /utf-8)

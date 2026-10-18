@@ -36,6 +36,15 @@ pub mod bridge {
         existing_size: u64,
         existing_modified: u64,
     }
+    struct CopySaveInfo {
+        name: String,
+        input: String,
+        archive_hash: String,
+        input_hash: String,
+        output: String,
+        format: u8,
+        allow_decrypt: bool,
+    }
     struct PublicationTarget {
         path: String,
         sha256: String,
@@ -83,6 +92,22 @@ pub mod bridge {
             id: u64,
             destination: &str,
             password: &str,
+            op: &Operation,
+        ) -> Result<String>;
+        fn convert_archive(
+            archive: &Archive,
+            output: &str,
+            format: u8,
+            source_password: &str,
+            output_password: &str,
+            allow_decrypt: bool,
+            op: &Operation,
+        ) -> Result<String>;
+        fn save_copy_as(
+            archive: &Archive,
+            info: &CopySaveInfo,
+            source_password: &str,
+            output_password: &str,
             op: &Operation,
         ) -> Result<String>;
         fn replace_entry(
@@ -516,4 +541,66 @@ fn reply_publication(op: &Operation, id: u64, accepted: bool) -> bool {
 
 fn control_publication(op: &Operation, enabled: bool) {
     op.control_publication(enabled);
+}
+
+fn conversion_format(format: u8) -> Result<crate::Format> {
+    match format {
+        0 => Ok(crate::Format::Zip),
+        1 => Ok(crate::Format::SevenZ),
+        _ => Err(ArcError::new(
+            "FORMAT",
+            "Conversion supports ZIP and 7Z destinations",
+        )),
+    }
+}
+fn convert_archive(
+    archive: &Archive,
+    output: &str,
+    format: u8,
+    source_password: &str,
+    output_password: &str,
+    allow_decrypt: bool,
+    op: &Operation,
+) -> Result<String> {
+    guarded(|| {
+        crate::worker::Client::sibling()?.convert(
+            archive,
+            &crate::conversion::Options {
+                output: output.into(),
+                format: conversion_format(format)?,
+                password: Zeroizing::new(output_password.into()),
+                allow_decrypt,
+                replacement: None,
+            },
+            source_password,
+            op,
+        )
+    })
+}
+fn save_copy_as(
+    archive: &Archive,
+    info: &bridge::CopySaveInfo,
+    source_password: &str,
+    output_password: &str,
+    op: &Operation,
+) -> Result<String> {
+    guarded(|| {
+        crate::worker::Client::sibling()?.convert(
+            archive,
+            &crate::conversion::Options {
+                output: (&info.output).into(),
+                format: conversion_format(info.format)?,
+                password: Zeroizing::new(output_password.into()),
+                allow_decrypt: info.allow_decrypt,
+                replacement: Some(crate::conversion::Replacement {
+                    name: info.name.clone(),
+                    input: (&info.input).into(),
+                    archive_hash: info.archive_hash.clone(),
+                    input_hash: info.input_hash.clone(),
+                }),
+            },
+            source_password,
+            op,
+        )
+    })
 }

@@ -89,12 +89,16 @@ pub fn modify_with_receipt(
                 "Edited file exceeds 256 MiB or is not a regular file",
             ));
         }
-        if operations::hash_file(&archive.path, op)? != *expected_archive_hash
-            || operations::hash_file(input, op)? != *expected_input_hash
-        {
+        if operations::hash_file(&archive.path, op)? != *expected_archive_hash {
             return Err(ArcError::new(
                 "CHANGED",
-                "Archive or edited file changed. Keep the working copy and reload before saving.",
+                "Archive container changed since this working copy was prepared. Keep the copy; recheck its source before saving.",
+            ));
+        }
+        if operations::hash_file(input, op)? != *expected_input_hash {
+            return Err(ArcError::new(
+                "CHANGED",
+                "Working file changed while the save was being prepared. Finish saving in the editor and retry; the working copy is retained.",
             ));
         }
     }
@@ -468,7 +472,7 @@ fn diagnostic(stage: &str, source: &Path, temp: Option<&Path>) {
     let _ = (stage, source, temp);
 }
 
-fn lock_source(path: &Path) -> Result<File> {
+pub(crate) fn lock_source(path: &Path) -> Result<File> {
     let mut options = OpenOptions::new();
     options.read(true);
     #[cfg(windows)]
@@ -505,12 +509,17 @@ fn modification_error(error: std::io::Error, path: &Path) -> ArcError {
     )
 }
 
-enum Sink<'a> {
+pub(crate) enum Sink<'a> {
     Zip(Box<zip::ZipWriter<&'a mut File>>),
     Seven(sevenz_rust2::ArchiveWriter<&'a mut File>),
 }
 impl<'a> Sink<'a> {
-    fn new(file: &'a mut File, format: Format, password: &str, op: &Operation) -> Result<Self> {
+    pub(crate) fn new(
+        file: &'a mut File,
+        format: Format,
+        password: &str,
+        op: &Operation,
+    ) -> Result<Self> {
         if format == Format::Zip {
             return Ok(Self::Zip(Box::new(zip::ZipWriter::new(file))));
         }
@@ -522,7 +531,7 @@ impl<'a> Sink<'a> {
         Ok(Self::Seven(writer))
     }
     #[allow(clippy::too_many_arguments)]
-    fn add(
+    pub(crate) fn add(
         &mut self,
         entry: &Entry,
         data: &mut dyn Read,
@@ -588,7 +597,7 @@ impl<'a> Sink<'a> {
         }
         Ok(())
     }
-    fn finish(self) -> Result<()> {
+    pub(crate) fn finish(self) -> Result<()> {
         match self {
             Self::Zip(w) => {
                 w.finish()?;

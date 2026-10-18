@@ -37,16 +37,17 @@ void MainWindow::editSelected() {
     consent.setDefaultButton(QMessageBox::Cancel);
     if (consent.exec() != QMessageBox::Ok)
         return;
-    prepareEdit(row.id, row.fullPath, true);
+    prepareEdit(row.id, row.fullPath, true, row.size);
 }
-void MainWindow::prepareEdit(quint64 id, const QString &name, bool launch) {
+void MainWindow::prepareEdit(quint64 id, const QString &name, bool launch, quint64 expectedBytes) {
     if (operations_.busy || session_->busy || !session_->archive)
         return;
-    const auto key = edits_->reserve(session_->path, name);
+    const auto key = edits_->reserve(session_->path, name, expectedBytes);
     if (key.isEmpty()) {
-        QMessageBox::warning(this, tr("Working copies"),
-                             tr("Could not allocate a working copy. Close another instance or "
-                                "discard unused copies (limit 32)."));
+        QMessageBox::warning(
+            this, tr("Working copies"),
+            tr("Could not allocate a working copy. Close another instance or "
+               "discard unused copies (32 copies / 2 GiB budget). Unsaved copies are retained."));
         return;
     }
     const auto directory = edits_->directory(key);
@@ -77,6 +78,8 @@ void MainWindow::prepareEdit(quint64 id, const QString &name, bool launch) {
             (*manifest)["baseHash"] = baseHash;
             (*manifest)["fingerprint"] = EditStore::fingerprint(file);
             (*manifest)["state"] = "ready";
+            (*manifest)["lastVerified"] =
+                QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
             if (!EditStore::write(directory, *manifest))
                 return QStringLiteral("IO: Cannot finalize edit recovery metadata; copy retained");
             return QString();
@@ -134,6 +137,8 @@ void MainWindow::saveWorkingCopy(const QString &id, const std::shared_ptr<Secret
                     (*saved)["baseHash"] = inputHash;
                     (*saved)["fingerprint"] = fingerprint;
                     (*saved)["state"] = "saved";
+                    (*saved)["lastVerified"] =
+                        QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
                     (*saved)["error"] = QString();
                     return QString();
                 },
@@ -244,28 +249,61 @@ void MainWindow::showWorkingCopies() {
         QMessageBox::information(this, tr("Working copies"), edits_->error());
         return;
     }
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Working copies"));
-    dialog.resize(960, 520);
+    if (workingDock_) {
+        workingDock_->show();
+        workingDock_->raise();
+        return;
+    }
+    workingDock_ = new QDockWidget(tr("Working copies"), this);
+    workingDock_->setObjectName("workingCopiesDock");
+    workingDock_->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
+    auto *panel = new QWidget;
+    auto &dialog = *panel;
+    workingDock_->setWidget(panel);
+    addDockWidget(Qt::BottomDockWidgetArea, workingDock_);
     auto *layout = new QVBoxLayout(&dialog);
     auto *notice =
         new QLabel(tr("Working copies contain plaintext and source paths until discarded. Saving "
                       "is explicit; external applications may keep their own copies."));
     notice->setWordWrap(true);
     layout->addWidget(notice);
-    auto *table = new QTableWidget(0, 3);
-    table->setHorizontalHeaderLabels({tr("Archive"), tr("Entry"), tr("State")});
+    auto *usage = new QLabel;
+    usage->setWordWrap(true);
+    usage->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
+    usage->setToolTip(edits_->root());
+    layout->addWidget(usage);
+    auto *table = new QTableWidget(0, 6);
+    table->setObjectName("workingCopiesTable");
+    table->setAccessibleName(tr("Working copies"));
+    table->setHorizontalHeaderLabels(
+        {tr("Archive"), tr("Entry"), tr("Size"), tr("State"), tr("Last verified"), tr("Error")});
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::SingleSelection);
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);
     layout->addWidget(table, 1);
+    auto *detail = new QPlainTextEdit;
+    detail->setReadOnly(true);
+    detail->setMaximumHeight(90);
+    detail->setAccessibleName(tr("Working copy details"));
+    layout->addWidget(detail);
     auto selected = [table] {
         return table->currentRow() < 0
                    ? QString()
                    : table->item(table->currentRow(), 0)->data(Qt::UserRole).toString();
     };
-    auto refresh = [this, table, selected] {
+    auto showDetails = [this, selected, detail] {
+        const auto record = edits_->record(selected());
+        detail->setPlainText(record["file"].toString() + "\n" + record["error"].toString() + "\n" +
+                             tr("Last verified: %1").arg(record["lastVerified"].toString()));
+    };
+    connect(table, &QTableWidget::currentCellChanged, &dialog, [showDetails] { showDetails(); });
+    auto refresh = [this, table, selected, usage, showDetails] {
+        usage->setText(tr("Working storage: %1 / %2. Existing edits are retained when the budget "
+                          "is exceeded.\n%3")
+                           .arg(QLocale().formattedDataSize(qint64(edits_->usedBytes())),
+                                QLocale().formattedDataSize(qint64(edits_->quota())),
+                                edits_->root()));
         const auto current = selected();
         QSignalBlocker blocker(table);
         const auto records = edits_->records();
@@ -281,26 +319,37 @@ void MainWindow::showWorkingCopies() {
             table->setItem(index, 1, new QTableWidgetItem(row["entry"].toString()));
             const bool changed =
                 EditStore::fingerprint(row["file"].toString()) != row["fingerprint"].toString();
-            auto *state =
-                new QTableWidgetItem(row["state"] == "needs-review" ? tr("Review required")
-                                     : row["state"] == "preparing"
-                                         ? tr("Preparation interrupted / export available copy")
-                                     : changed ? tr("Changed / verify before saving")
-                                     : row["state"] == "saved" ? tr("Saved")
-                                                               : tr("Working copy"));
+            auto *state = new QTableWidgetItem(
+                row["state"] == "needs-review" ? tr("Review required")
+                : row["state"] == "preparing"
+                    ? tr("Preparation interrupted / export available copy")
+                : (changed || row["state"] == "changed") ? tr("Changed / verify before saving")
+                : row["state"] == "saved"                ? tr("Saved")
+                                                         : tr("Working copy"));
             state->setToolTip(row["file"].toString() + "\n" + row["error"].toString());
-            table->setItem(index, 2, state);
+            table->setItem(index, 2,
+                           new QTableWidgetItem(QLocale().formattedDataSize(
+                               QFileInfo(row["file"].toString()).size())));
+            table->setItem(index, 3, state);
+            table->setItem(index, 4, new QTableWidgetItem(row["lastVerified"].toString()));
+            auto *error = new QTableWidgetItem(row["error"].toString());
+            error->setToolTip(row["error"].toString());
+            table->setItem(index, 5, error);
             if (row["id"] == current)
                 table->selectRow(index);
         }
         if (table->currentRow() < 0 && table->rowCount())
             table->selectRow(0);
+        showDetails();
     };
     auto *controls = new QToolBar;
     controls->setToolButtonStyle(Qt::ToolButtonTextOnly);
     controls->setStyleSheet("QToolButton#qt_toolbar_ext_button {padding:0px;border:none;}");
     auto *open = controls->addAction(tr("Open copy"));
     auto *save = controls->addAction(tr("Save in archive..."));
+    auto *saveAs = controls->addAction(tr("Save as new archive..."));
+    auto *verifyCopy = controls->addAction(tr("Verify copy"));
+    auto *folder = controls->addAction(tr("Open working folder"));
     auto *reload = controls->addAction(tr("Reload source..."));
     auto *exportFile = controls->addAction(tr("Export file..."));
     auto *discard = controls->addAction(tr("Discard..."));
@@ -318,6 +367,55 @@ void MainWindow::showWorkingCopies() {
         const auto record = edits_->record(selected());
         if (edits_->validPayload(record) && ExternalFiles::allowed(record["file"].toString()))
             QDesktopServices::openUrl(QUrl::fromLocalFile(record["file"].toString()));
+    });
+    connect(verifyCopy, &QAction::triggered, &dialog, [this, selected] {
+        if (operations_.busy)
+            return;
+        const auto id = selected();
+        const auto record = edits_->record(id);
+        if (!edits_->validPayload(record))
+            return;
+        beginOperation();
+        activeSpec_ = QJsonObject{
+            {"kind", "edit-check"}, {"editId", id}, {"sources", QJsonArray{record["file"]}}};
+        auto op = operations_.operation;
+        auto result = std::make_shared<QString>();
+        auto checked = std::make_shared<QString>();
+        runJob(
+            tr("Verifying working copy..."),
+            [record, op, result, checked] {
+                const auto path = record["file"].toString();
+                const auto before = EditStore::fingerprint(path);
+                *result = value(vynx::hash_archive_file(path.toUtf8().toStdString(), **op));
+                if (EditStore::fingerprint(path) != before)
+                    return QStringLiteral(
+                        "CHANGED: Editor changed the file during verification; copy retained");
+                *checked = before;
+                return QString();
+            },
+            [this, id, record, result, checked] {
+                edits_->update(
+                    id, QJsonObject{{"state", *result == record["baseHash"].toString() ? "ready"
+                                                                                       : "changed"},
+                                    {"lastVerified",
+                                     QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
+                                    {"fingerprint", *checked},
+                                    {"error", QString()}});
+            },
+            [this, id](QString error) {
+                edits_->update(id, QJsonObject{{"state", "needs-review"}, {"error", error}});
+            });
+    });
+    connect(saveAs, &QAction::triggered, &dialog, [this, selected] {
+        const auto id = selected();
+        const auto record = edits_->record(id);
+        if (edits_->validPayload(record))
+            chooseConversion({record["archive"].toString()}, id);
+    });
+    connect(folder, &QAction::triggered, &dialog, [this, selected] {
+        const auto path = edits_->directory(selected());
+        if (!path.isEmpty())
+            QDesktopServices::openUrl(QUrl::fromLocalFile(path));
     });
     connect(save, &QAction::triggered, &dialog, [this, selected, password] {
         const auto id = selected();
@@ -395,13 +493,14 @@ void MainWindow::showWorkingCopies() {
         });
     });
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    connect(buttons, &QDialogButtonBox::rejected, workingDock_, &QDockWidget::hide);
     layout->addWidget(buttons);
-    QTimer timer;
-    connect(&timer, &QTimer::timeout, &dialog, refresh);
-    timer.start(1000);
+    auto *timer = new QTimer(panel);
+    connect(timer, &QTimer::timeout, &dialog, refresh);
+    timer->start(1000);
     refresh();
-    dialog.exec();
+    workingDock_->show();
+    workingDock_->raise();
 }
 
 void MainWindow::showTemporaryFiles() {

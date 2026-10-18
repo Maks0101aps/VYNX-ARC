@@ -5,6 +5,7 @@
 #include "../OperationQueue.h"
 #include "../Theme.h"
 #include "../dialogs/BatchExtractDialog.h"
+#include "../dialogs/ConversionDialog.h"
 #include "../dialogs/CreateArchiveDialog.h"
 #include "../dialogs/PreviewDialog.h"
 #include "../pages/ArchivePage.h"
@@ -233,6 +234,63 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!files.remove(root.path()));
         QVERIFY(files.remove(path));
         QCOMPARE(files.items().size(), 0);
+    }
+    void workingCopyQuotaRejectsNewCopiesAndRetainsExistingEdits() {
+        QTemporaryDir root;
+        EditStore store(root.path() + "/copies", 8192);
+        const auto id = store.reserve("source.zip", "note.txt", 1024);
+        QVERIFY(!id.isEmpty());
+        QFile file(store.directory(id) + "/note.txt");
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write(QByteArray(4096, 'x'));
+        file.close();
+        QVERIFY(store.update(id, QJsonObject{{"file", file.fileName()}, {"state", "ready"}}));
+        QVERIFY(store.usedBytes() >= 4096);
+        QVERIFY(store.reserve("another.zip", "another.txt", 4096).isEmpty());
+        QVERIFY(store.validPayload(store.record(id)));
+        QVERIFY(file.open(QIODevice::ReadOnly));
+        QCOMPARE(file.readAll(), QByteArray(4096, 'x'));
+    }
+    void conversionPlanReadsRealArchivesAndPreventsDestinationCollisions() {
+        QTemporaryDir root;
+        const auto input = root.path() + "/note.txt";
+        QFile file(input);
+        QVERIFY(file.open(QIODevice::WriteOnly));
+        file.write("conversion dialog content");
+        file.close();
+        const auto archive = root.path() + "/source.zip";
+        auto op = vynx::new_operation();
+        rust::Vec<rust::String> inputs;
+        inputs.push_back(input.toUtf8().toStdString());
+        vynx::create_archive(archive.toUtf8().toStdString(), {inputs.data(), inputs.size()}, "",
+                             *op);
+        ConversionDialog dialog({archive});
+        dialog.encrypt->setChecked(false);
+        dialog.allowDecrypt->setChecked(true);
+        dialog.show();
+        auto *start = dialog.findChild<QPushButton *>("queueConversion");
+        QVERIFY(start);
+        QTRY_VERIFY_WITH_TIMEOUT(start->isEnabled(), 15000);
+        const auto plans = dialog.plan();
+        QCOMPARE(plans.size(), 1);
+        QVERIFY(plans[0].output.endsWith(".zip"));
+        QFile occupied(root.path() + "/occupied.zip");
+        QVERIFY(occupied.open(QIODevice::WriteOnly));
+        occupied.write("preserved");
+        occupied.close();
+        dialog.outputName->setText("occupied");
+        QVERIFY(!start->isEnabled());
+        dialog.conflict->setCurrentIndex(1);
+        QVERIFY(start->isEnabled());
+        QVERIFY(dialog.plan()[0].output != occupied.fileName());
+        dialog.format->setCurrentIndex(1);
+        QVERIFY(dialog.plan()[0].output.endsWith(".7z"));
+        dialog.sourcePassword->setText("changed-setting");
+        QVERIFY(!start->isEnabled());
+        dialog.findChild<QPushButton *>("readConversionPlan")->click();
+        QTRY_VERIFY_WITH_TIMEOUT(start->isEnabled(), 15000);
+        QVERIFY(occupied.open(QIODevice::ReadOnly));
+        QCOMPARE(occupied.readAll(), QByteArray("preserved"));
     }
     void journalRecoveryIsExplicitAndNeverSerializesPasswords() {
         QTemporaryDir root;

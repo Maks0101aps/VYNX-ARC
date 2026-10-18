@@ -1,5 +1,6 @@
 pub mod archive;
 pub mod compressed;
+pub mod conversion;
 pub mod disk;
 pub mod error;
 pub mod ffi;

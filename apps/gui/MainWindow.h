@@ -64,6 +64,12 @@ class MainWindow : public QMainWindow {
     QString archiveIdentity(const QString &path) const;
     void chooseOpen();
     void chooseBatchExtract();
+    void chooseConversion(const QStringList &initial = {}, const QString &editId = {},
+                          const QJsonObject &retry = {});
+    void dispatchConversionSpec(const QJsonObject &spec,
+                                const std::shared_ptr<SecretUtf8> &sourcePassword,
+                                const std::shared_ptr<SecretUtf8> &outputPassword);
+    void retryFailedBatch();
     bool enqueueRequest(const QString &title, std::function<void()> start,
                         const QString &details = {}, const QJsonObject &spec = {});
     void enqueueBatch(const QStringList &paths, const QString &destination, quint8 conflict,
@@ -98,8 +104,10 @@ class MainWindow : public QMainWindow {
     std::unique_ptr<ExternalFiles> externalFiles_;
     std::unique_ptr<EditStore> edits_;
     void editSelected();
-    void prepareEdit(quint64 id, const QString &name, bool launch);
+    void prepareEdit(quint64 id, const QString &name, bool launch,
+                     quint64 expectedBytes = 256ULL << 20);
     void showWorkingCopies();
+    QDockWidget *workingDock_ = nullptr;
     void saveWorkingCopy(const QString &id, const std::shared_ptr<SecretUtf8> &password);
     void reloadWorkingSource(const QString &id, const std::shared_ptr<SecretUtf8> &password);
     void reloadArchive(const QString &path, const std::shared_ptr<SecretUtf8> &password);

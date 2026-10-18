@@ -106,8 +106,8 @@ fn timeout_kills_child_and_next_operation_still_works() {
 fn malformed_protocol_exits_without_writing_requested_files() {
     for bytes in [
         b"VYNXWP99\0\0\0\0".as_slice(),
-        b"VYNXWP02\xff\xff\xff\xff".as_slice(),
-        b"VYNXWP02\x01\0\0\0\xff".as_slice(),
+        b"VYNXWP03\xff\xff\xff\xff".as_slice(),
+        b"VYNXWP03\x01\0\0\0\xff".as_slice(),
     ] {
         let mut child = Command::new(env!("CARGO_BIN_EXE_vynxarc-worker"))
             .stdin(Stdio::piped())
@@ -283,4 +283,47 @@ fn interrupted_writer_never_claims_original_was_preserved() {
         .code,
         "RESULT_UNKNOWN"
     );
+}
+
+#[test]
+fn conversion_uses_worker_and_keeps_original_bytes() {
+    let dir = tempfile::tempdir().unwrap();
+    let input = dir.path().join("note.txt");
+    std::fs::write(&input, b"worker conversion").unwrap();
+    let path = dir.path().join("source.tar");
+    operations::create(
+        &CreateOptions {
+            output: path.clone(),
+            inputs: vec![input],
+            password: String::new().into(),
+        },
+        &Operation::default(),
+    )
+    .unwrap();
+    let before = std::fs::read(&path).unwrap();
+    let op = Operation::default();
+    let a = client().open(&path, "", &op).unwrap();
+    let output = dir.path().join("converted.7z");
+    client()
+        .convert(
+            &a,
+            &vynx_arc_core::conversion::Options {
+                output: output.clone(),
+                format: vynx_arc_core::Format::SevenZ,
+                password: zeroize::Zeroizing::new("destination-password".into()),
+                allow_decrypt: false,
+                replacement: None,
+            },
+            "",
+            &op,
+        )
+        .unwrap();
+    let result = client().open(&output, "destination-password", &op).unwrap();
+    assert_eq!(
+        client()
+            .bytes(&result, 0, "destination-password", &op)
+            .unwrap(),
+        b"worker conversion"
+    );
+    assert_eq!(std::fs::read(&path).unwrap(), before);
 }

@@ -67,6 +67,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     idleActions_ = {};
     addAction(fileMenu, tr("Batch extraction..."), QKeySequence("Ctrl+Shift+E"),
               [this] { chooseBatchExtract(); });
+    addAction(fileMenu, tr("Convert archives..."), QKeySequence("Ctrl+Shift+C"),
+              [this] { chooseConversion(); });
     fileMenu->addSeparator();
     addAction(fileMenu, tr("Close archive"), QKeySequence("Ctrl+W"),
               [this] { closeSession(tabs_->currentIndex()); });
@@ -1527,6 +1529,35 @@ bool MainWindow::smokeTest() {
             return smokeFailure(__LINE__);
         working.write("unsaved second edit");
         working.close();
+        const auto savedAsPath = temp.path() + "/edited-as-new.7z";
+        const QJsonObject saveAsSpec{{"kind", "convert"},
+                                     {"sources", QJsonArray{archivePath}},
+                                     {"destination", savedAsPath},
+                                     {"format", 1},
+                                     {"preset", 2},
+                                     {"resource", 1},
+                                     {"allowDecrypt", true},
+                                     {"editId", editKey}};
+        enqueueRequest(
+            "Save as smoke",
+            [this, saveAsSpec] { dispatchConversionSpec(saveAsSpec, secret({}), secret({})); }, {},
+            saveAsSpec);
+        loop.exec();
+        if (!QFileInfo::exists(savedAsPath) ||
+            text(vynx::hash_archive_file(utf8(archivePath), *op)) !=
+                edits_->record(editKey)["archiveHash"].toString())
+            return smokeFailure(__LINE__);
+        auto savedAsArchive = vynx::open_archive(utf8(savedAsPath), "", *op);
+        bool foundSavedEdit = false;
+        for (const auto &entry : vynx::list_entries(*savedAsArchive))
+            if (text(entry.name) == edit["entry"].toString()) {
+                const auto bytes = vynx::preview_bytes(*savedAsArchive, entry.id, "", *op);
+                foundSavedEdit = QByteArray(reinterpret_cast<const char *>(bytes.data()),
+                                            qsizetype(bytes.size())) == "unsaved second edit";
+            }
+        if (!foundSavedEdit || !edits_->validPayload(edits_->record(editKey)))
+            return smokeFailure(__LINE__);
+
         rust::Vec<rust::String> externalRename;
         externalRename.push_back("source/nested/renamed.txt");
         vynx::modify_archive(*verifyEdited, 2, {externalRename.data(), externalRename.size()},

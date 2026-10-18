@@ -64,8 +64,9 @@ static bool validState(const QString &state) {
 QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
     QJsonObject result;
     // Never serialize arbitrary worker captures or credentials.
-    const QStringList strings{"kind",    "destination", "folder",      "newName",  "editId",
-                              "batchId", "retryOf",     "archiveHash", "inputHash"};
+    const QStringList strings{"kind",      "destination", "folder",        "newName",
+                              "editId",    "batchId",     "retryOf",       "archiveHash",
+                              "inputHash", "sourceSize",  "sourceModified"};
     const QStringList numbers{"action", "format", "preset", "resource", "conflict", "volumeSize"};
     for (const auto &key : strings)
         if (spec[key].isString()) {
@@ -92,7 +93,8 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
         }
         result[key] = values;
     }
-    for (const auto &key : {QString("smart"), QString("needsPassword"), QString("incompleteSpec")})
+    for (const auto &key : {QString("smart"), QString("needsPassword"), QString("incompleteSpec"),
+                            QString("needsOutputPassword"), QString("allowDecrypt")})
         if (spec[key].isBool())
             result[key] = result[key].toBool() || spec[key].toBool();
     return result;

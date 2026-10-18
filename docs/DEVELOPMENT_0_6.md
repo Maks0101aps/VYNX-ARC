@@ -85,3 +85,35 @@ frozen binaries under `.dev/milestone-0.6/fuzz-campaign-01`; results are not cla
 until it finishes. The harness records its aggregate active wall-time definition,
 resource bounds, individual input hashes and retained unexpected failures. This is
 mutation testing, not sanitizer or coverage-guided fuzzing.
+
+## Conversion, batch retry and working copies
+
+Added stream conversion for supported inputs into new ZIP/7Z containers. A separate
+readback verifies normalized names/sizes/directories and every decoded file SHA-256
+against hashes collected from the original stream (or the verified edited copy).
+The source is read-locked and preserved; output publication never overwrites an
+existing file. Encryption removal requires explicit consent. Representable modified
+times are transferred; ZIP has DOS timestamp precision. Comments/ACLs/ownership and
+extra fields are not preserved. No loose plaintext conversion workspace is created.
+
+The GUI reads a preliminary metadata plan asynchronously, shows decoded size and
+errors, and offers format/compression/resource/encryption/name-conflict choices.
+Single-output names are editable. Passwords stay in memory; protocol 3 carries
+source/destination credentials separately. Batch retry chooses only failed jobs,
+retains original errors and links new attempts through retryOf. Restoring selected
+names now uses an index rather than a quadratic scan of the complete archive.
+
+Working copies now live in a dock with size/error/last-verification details, an
+explicit content check and Save as new archive. Admission uses a 2 GiB budget and
+32-copy bound; editor growth beyond the budget never deletes an existing edit.
+The original archive and working file are preserved by Save as. Container-change
+and concurrent-editor-change errors now explain their different causes.
+
+Validation: four core conversion tests include the format/encryption matrix,
+folders, RAR4/5, Save as, explicit-decryption refusal, collision, stale edits and
+cancellation; eight real-worker integration tests passed. Clippy passed. Release
+GUI and all three CTests passed, including actual conversion-plan reads, collision
+handling, working-copy quota and Save as through the real GUI queue and persistent
+journal. CLI ZIP/7Z/TAR conversions were also read successfully by Python's independent
+ZIP implementation. Extended fault injection, editor-host tests, other independent
+readers and final release acceptance remain pending.

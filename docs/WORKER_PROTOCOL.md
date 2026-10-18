@@ -5,7 +5,9 @@ apply Windows job limits stop the request; there is no in-process fallback.
 Open, preview, materialization, testing, entry hashing, extraction, creation,
 split creation, modification and edited-entry replacement run remotely. Plain-file
 verification remains a bounded streaming hash operation in the GUI core. CLI commands
-retain direct execution for automation; process-isolated CLI commands are planned.
+retain direct execution for automation; `isolated-list`, `isolated-test` and `isolated-extract` select supervised execution;
+`convert` always uses workers. Protocol 3 adds a separately zeroizing destination
+password, so conversion never reuses source encryption settings implicitly.
 
 
 Transport uses anonymous inherited stdin/stdout pipes, with no password arguments
@@ -13,7 +15,7 @@ or password environment variables. Request and encoded frame credentials use
 zeroizing buffers. Worker stderr is discarded and crash dialogs are suppressed.
 This does not promise exclusion of credentials from OS-managed dumps/pagefiles.
 
-Each frame starts with eight bytes `VYNXWP02` and a little-endian u32 payload size.
+Each frame starts with eight bytes `VYNXWP03` and a little-endian u32 payload size.
 Requests are limited to 16 MiB, responses to 128 MiB, individual strings to 1 MiB,
 metadata/selection arrays to 1,000,000 elements, preview blobs to 16 MiB. Decoders
 reject unknown versions, truncated/trailing fields, malformed bools/UTF-8 and
@@ -40,7 +42,7 @@ References: [job objects](https://learn.microsoft.com/en-us/windows/win32/procth
 [extended limits](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_extended_limit_information),
 [completion notifications](https://learn.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-jobobject_associate_completion_port).
 
-## Publication acknowledgement (protocol 2)
+## Publication acknowledgement (protocol 3)
 
 A worker computes raw SHA-256 identities of each verified staged archive/volume
 and the existing destination before committing it. It sends a publication notice

@@ -1,5 +1,6 @@
 #include "MainWindow.h"
 #include "SecretUtf8.h"
+#include "dialogs/BatchExtractDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "widgets/ToastOverlay.h"
 #include <QDesktopServices>
@@ -141,6 +142,13 @@ void MainWindow::retrySelectedJob() {
         QMessageBox::information(this, tr("Retry operation"),
                                  tr("This selection is too large to restore completely. Repeat it "
                                     "from the archive tab."));
+        return;
+    }
+    if (kind == "convert") {
+        QStringList paths;
+        for (const auto &path : spec["sources"].toArray())
+            paths.append(path.toString());
+        chooseConversion(paths, spec["editId"].toString(), record);
         return;
     }
     if (!QStringList{"create", "extract", "test", "shell", "open", "modify"}.contains(kind)) {
@@ -358,17 +366,17 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
                 else if (kind == "extract") {
                     rust::Vec<quint64> ids;
                     const auto entries = vynx::list_entries(*archive);
+                    QHash<QString, quint64> index;
+                    index.reserve(qsizetype(entries.size()));
+                    for (const auto &entry : entries)
+                        index.insert(
+                            QString::fromUtf8(entry.name.data(), qsizetype(entry.name.size())),
+                            entry.id);
                     for (const auto &value : spec["names"].toArray()) {
-                        bool found = false;
-                        for (const auto &entry : entries)
-                            if (QString::fromUtf8(entry.name.data(),
-                                                  qsizetype(entry.name.size())) ==
-                                value.toString()) {
-                                ids.push_back(entry.id);
-                                found = true;
-                            }
-                        if (!found)
+                        const auto found = index.constFind(value.toString());
+                        if (found == index.cend())
                             return QStringLiteral("CHANGED: Selected entry no longer exists");
+                        ids.push_back(found.value());
                     }
                     vynx::extract_archive(*archive, output, {ids.data(), ids.size()},
                                           uint8_t(spec["conflict"].toInt()), spec["smart"].toBool(),
@@ -464,4 +472,97 @@ void MainWindow::verifySelectedResult() {
             return QString();
         },
         [apply] { apply({}); }, [apply](QString error) { apply(error); });
+}
+
+void MainWindow::retryFailedBatch() {
+    const auto *selected = queueView_->currentItem();
+    if (!selected)
+        return;
+    const auto chosen = journal_.record(selected->data(Qt::UserRole + 3).toString());
+    const auto batch = chosen["spec"].toObject()["batchId"].toString();
+    if (batch.isEmpty())
+        return;
+    QJsonArray failed;
+    QStringList paths;
+    QJsonObject origins;
+    for (const auto &value : journal_.records()) {
+        const auto record = value.toObject();
+        const auto spec = record["spec"].toObject();
+        if (record["state"] != "failed" || spec["batchId"] != batch ||
+            spec["incompleteSpec"].toBool())
+            continue;
+        if (spec["kind"] != "extract" && spec["kind"] != "convert")
+            continue;
+        const auto sources = spec["sources"].toArray();
+        if (sources.size() != 1)
+            continue;
+        failed.append(record);
+        const auto path = sources.first().toString();
+        paths.append(path);
+        origins.insert(QFileInfo(path).absoluteFilePath(), record["id"]);
+    }
+    if (failed.isEmpty()) {
+        QMessageBox::information(this, tr("Retry batch"),
+                                 tr("This batch has no failed jobs available for retry."));
+        return;
+    }
+    if (queue_.size() + size_t(failed.size()) > 32) {
+        QMessageBox::information(this, tr("Retry batch"),
+                                 tr("The queue supports up to 32 pending jobs."));
+        return;
+    }
+    const auto first = failed.first().toObject();
+    const auto firstSpec = first["spec"].toObject();
+    if (firstSpec["kind"] == "convert") {
+        auto retry = first;
+        retry["origins"] = origins;
+        chooseConversion(paths, {}, retry);
+        return;
+    }
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Review failed batch jobs"));
+    auto *form = new QFormLayout(&dialog);
+    auto *notice = new QLabel(tr("%1 failed jobs will receive new attempts. Review their "
+                                 "destination and overwrite policy.")
+                                  .arg(failed.size()));
+    notice->setWordWrap(true);
+    form->addRow(notice);
+    auto *destination =
+        new QLineEdit(QFileInfo(firstSpec["destination"].toString()).absolutePath());
+    form->addRow(tr("Output folder"), destination);
+    auto *conflict = new QComboBox;
+    conflict->addItems({tr("Refuse"), tr("Skip existing"), tr("Replace existing"), tr("Ask"),
+                        tr("Keep both"), tr("Newer only")});
+    conflict->setCurrentIndex(qBound(0, firstSpec["conflict"].toInt(4), 5));
+    form->addRow(tr("Conflicts"), conflict);
+    auto *password = new QLineEdit;
+    password->setEchoMode(QLineEdit::Password);
+    form->addRow(tr("Source password"), password);
+    auto *list = new QPlainTextEdit(paths.join('\n'));
+    list->setReadOnly(true);
+    form->addRow(tr("Sources"), list);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    buttons->button(QDialogButtonBox::Ok)->setText(tr("Queue new attempts"));
+    form->addRow(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    dialog.resize(640, 430);
+    if (dialog.exec() != QDialog::Accepted || destination->text().isEmpty())
+        return;
+    const auto pw = secret(password->text());
+    password->clear();
+    const auto newBatch = QUuid::createUuid().toString(QUuid::WithoutBraces);
+    const auto outputs = batchDestinations(paths, destination->text());
+    for (int i = 0; i < failed.size(); ++i) {
+        const auto record = failed[i].toObject();
+        auto spec = record["spec"].toObject();
+        spec["retryOf"] = record["id"];
+        spec["batchId"] = newBatch;
+        spec["destination"] = outputs[i];
+        spec["conflict"] = conflict->currentIndex();
+        spec["needsPassword"] = !pw->bytes().empty();
+        enqueueRequest(
+            tr("Retry %1").arg(record["title"].toString()),
+            [this, spec, pw] { dispatchSpec(spec, pw); }, paths[i] + "\n" + outputs[i], spec);
+    }
 }

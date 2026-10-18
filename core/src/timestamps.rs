@@ -44,3 +44,40 @@ pub fn nt_unix(time: u64) -> Option<u64> {
     time.checked_sub(116_444_736_000_000_000)
         .map(|t| t / 10_000_000)
 }
+
+/// Convert an absolute timestamp to ZIP's local DOS wall clock (2-second precision).
+#[cfg(windows)]
+pub fn unix_zip(seconds: u64) -> Option<zip::DateTime> {
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn FileTimeToSystemTime(file: *const u64, time: *mut [u16; 8]) -> i32;
+        fn SystemTimeToTzSpecificLocalTime(
+            zone: *const std::ffi::c_void,
+            utc: *const [u16; 8],
+            local: *mut [u16; 8],
+        ) -> i32;
+    }
+    let file = seconds
+        .checked_mul(10_000_000)?
+        .checked_add(116_444_736_000_000_000)?;
+    let mut utc = [0; 8];
+    let mut local = [0; 8];
+    if unsafe { FileTimeToSystemTime(&file, &mut utc) } == 0
+        || unsafe { SystemTimeToTzSpecificLocalTime(std::ptr::null(), &utc, &mut local) } == 0
+    {
+        return None;
+    }
+    zip::DateTime::from_date_and_time(
+        local[0],
+        local[1] as u8,
+        local[3] as u8,
+        local[4] as u8,
+        local[5] as u8,
+        local[6] as u8,
+    )
+    .ok()
+}
+#[cfg(not(windows))]
+pub fn unix_zip(_: u64) -> Option<zip::DateTime> {
+    None
+}

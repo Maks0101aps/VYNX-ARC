@@ -21,6 +21,7 @@ const MATERIALIZE: u8 = 7;
 const EXTRACT: u8 = 8;
 const CREATE: u8 = 9;
 const MODIFY: u8 = 10;
+const CONVERT: u8 = 11;
 record!(crate::publication::Target {
     path,
     sha256,
@@ -75,6 +76,7 @@ struct Request {
     kind: u8,
     path: String,
     password: Zeroizing<String>,
+    new_password: Zeroizing<String>,
     fingerprint: String,
     destination: String,
     ids: Vec<u64>,
@@ -90,6 +92,7 @@ record!(Request {
     kind,
     path,
     password,
+    new_password,
     fingerprint,
     destination,
     ids,
@@ -161,6 +164,7 @@ impl Request {
             kind,
             path: path.to_string_lossy().into_owned(),
             password: Zeroizing::new(password.into()),
+            new_password: Zeroizing::new(String::new()),
             fingerprint: String::new(),
             destination: String::new(),
             ids: vec![],
@@ -320,12 +324,34 @@ impl Client {
         }
         Ok(self.run(r, op)?.text)
     }
+    pub fn convert(
+        &self,
+        a: &Archive,
+        options: &crate::conversion::Options,
+        password: &str,
+        op: &Operation,
+    ) -> Result<String> {
+        let mut r = Request::archive(CONVERT, a, password, op);
+        r.destination = options.output.to_string_lossy().into_owned();
+        r.action = options.format as u8;
+        r.new_password = options.password.clone();
+        r.smart = options.allow_decrypt;
+        if let Some(replacement) = &options.replacement {
+            r.names = vec![
+                replacement.name.clone(),
+                replacement.input.to_string_lossy().into_owned(),
+                replacement.archive_hash.clone(),
+                replacement.input_hash.clone(),
+            ];
+        }
+        Ok(self.run(r, op)?.text)
+    }
     pub fn hash_file(&self, path: &Path, op: &Operation) -> Result<String> {
         Ok(self.run(Request::new(HASH_FILE, path, "", op), op)?.text)
     }
     fn run(&self, request: Request, op: &Operation) -> Result<Reply> {
         op.check()?;
-        let writes = matches!(request.kind, EXTRACT | CREATE | MODIFY);
+        let writes = matches!(request.kind, EXTRACT | CREATE | MODIFY | CONVERT);
         let _slot = Slot::acquire(op)?;
         let mut cmd = Command::new(&self.executable);
         cmd.stdin(Stdio::piped())
@@ -556,6 +582,7 @@ fn execute(r: Request, op: &Operation) -> Result<Reply> {
             | EXTRACT
             | CREATE
             | MODIFY
+            | CONVERT
     ) {
         return Err(protocol());
     }
@@ -634,6 +661,35 @@ fn execute(r: Request, op: &Operation) -> Result<Reply> {
             )?
             .to_string_lossy()
             .into_owned();
+        }
+        CONVERT => {
+            let format = match r.action {
+                0 => crate::Format::Zip,
+                1 => crate::Format::SevenZ,
+                _ => return Err(protocol()),
+            };
+            let replacement = match r.names.len() {
+                0 => None,
+                4 => Some(crate::conversion::Replacement {
+                    name: r.names[0].clone(),
+                    input: (&r.names[1]).into(),
+                    archive_hash: r.names[2].clone(),
+                    input_hash: r.names[3].clone(),
+                }),
+                _ => return Err(protocol()),
+            };
+            reply.text = crate::conversion::convert(
+                &archive,
+                &crate::conversion::Options {
+                    output: r.destination.into(),
+                    format,
+                    password: r.new_password,
+                    allow_decrypt: r.smart,
+                    replacement,
+                },
+                &r.password,
+                op,
+            )?;
         }
         MODIFY => {
             use crate::modification::Change;

@@ -8,6 +8,7 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 #include <QUuid>
+#include <limits>
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -22,7 +23,7 @@ static bool plain(const QString &path) {
 #endif
     return true;
 }
-EditStore::EditStore(QString root) : root_(std::move(root)) {
+EditStore::EditStore(QString root, quint64 quota) : root_(std::move(root)), quota_(quota) {
     if (root_.isEmpty())
         root_ = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) +
                 "/WorkingCopies";
@@ -52,8 +53,10 @@ bool EditStore::write(const QString &directory, const QJsonObject &data) {
     return bytes.size() <= 65536 && output.open(QIODevice::WriteOnly) &&
            output.write(bytes) == bytes.size() && output.commit();
 }
-QString EditStore::reserve(const QString &archive, const QString &entry) {
-    if (!available() || records().size() >= 32)
+QString EditStore::reserve(const QString &archive, const QString &entry, quint64 expectedBytes) {
+    const auto used = usedBytes();
+    if (!available() || records().size() >= 32 || expectedBytes > quota_ ||
+        used > quota_ - expectedBytes)
         return {};
     const auto id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     const auto path = root_ + "/edit-" + id;
@@ -143,4 +146,23 @@ bool EditStore::discard(const QString &id) {
     if (!QFile::remove(path + "/.edit.json"))
         return false;
     return QDir(root_).rmdir("edit-" + id);
+}
+
+quint64 EditStore::usedBytes() const {
+    if (!available())
+        return 0;
+    quint64 total = 0;
+    for (const auto &name : QDir(root_).entryList({"edit-*"}, QDir::Dirs | QDir::NoDotAndDotDot)) {
+        const auto path = directory(name.mid(5));
+        if (path.isEmpty())
+            continue;
+        for (const auto &file : QDir(path).entryInfoList(QDir::Files | QDir::NoSymLinks |
+                                                         QDir::Hidden | QDir::System)) {
+            const auto bytes = quint64(qMax<qint64>(0, file.size()));
+            if (total > (~quint64(0)) - bytes)
+                return (~quint64(0));
+            total += bytes;
+        }
+    }
+    return total;
 }

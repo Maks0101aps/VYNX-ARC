@@ -85,6 +85,8 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
             QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
     });
     auto *clearFinished = controls->addAction(tr("Clear completed"));
+    auto *retryBatch = controls->addAction(tr("Retry failed batch jobs..."));
+    connect(retryBatch, &QAction::triggered, this, &MainWindow::retryFailedBatch);
     auto *verifyResult = controls->addAction(tr("Verify result"));
     connect(verifyResult, &QAction::triggered, this, &MainWindow::verifySelectedResult);
     auto *retry = controls->addAction(tr("Review / retry..."));

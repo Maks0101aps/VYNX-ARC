@@ -8,7 +8,7 @@ fn run() -> Result<()> {
     let mut args: Vec<String> = std::env::args().skip(1).collect();
     if args.is_empty() || args[0] == "--help" {
         println!(
-            "VYNX ARC {VERSION}\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT... [--preset store|fast|balanced|maximum] [--resource eco|balanced|maximum] [--split-bytes N (7Z only)]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nStandalone: .gz .xz .bz2 .zst .lzma (one file); TAR: .tar.xz .tar.bz2 .tar.zst. Read commands also accept --resource.\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
+            "VYNX ARC {VERSION}\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.tar|.tar.gz INPUT... [--preset store|fast|balanced|maximum] [--resource eco|balanced|maximum] [--split-bytes N (7Z only)]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  convert SOURCE OUTPUT.zip|.7z [--preset store|fast|balanced|maximum]\n  isolated-list|isolated-test|isolated-extract ARCHIVE (same read/extraction options)\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nStandalone: .gz .xz .bz2 .zst .lzma (one file); TAR: .tar.xz .tar.bz2 .tar.zst. Read commands also accept --resource.\nPasswords: use the GUI; passwords on command lines are deliberately unsupported.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
         );
         return Ok(());
     }
@@ -36,6 +36,49 @@ fn run() -> Result<()> {
         )?);
     }
     match command.as_str() {
+        "convert" => {
+            let output = PathBuf::from(args.first().ok_or_else(|| {
+                ArcError::new(
+                    "USAGE",
+                    "convert SOURCE OUTPUT.zip|.7z [--preset store|fast|balanced|maximum]",
+                )
+            })?);
+            let mut preset = 2;
+            let mut allow_decrypt = false;
+            let mut index = 1;
+            while index < args.len() {
+                match args[index].as_str() {
+                    "--preset" => {
+                        index += 1;
+                        preset = match args.get(index).map(String::as_str) {
+                            Some("store") => 0,
+                            Some("fast") => 1,
+                            Some("balanced") => 2,
+                            Some("maximum") => 3,
+                            _ => return Err(ArcError::new("USAGE", "Unknown conversion preset")),
+                        };
+                    }
+                    "--allow-decrypt" => allow_decrypt = true,
+                    _ => return Err(ArcError::new("USAGE", "Unknown conversion option")),
+                }
+                index += 1;
+            }
+            op.configure(vynx_arc_core::settings::Settings::from_ids(
+                preset,
+                selected_resource,
+            )?);
+            let worker = vynx_arc_core::worker::Client::sibling()?;
+            let archive = worker.open(Path::new(&path), "", &op)?;
+            let options = vynx_arc_core::conversion::Options {
+                format: vynx_arc_core::Format::for_output(&output)?,
+                output,
+                password: String::new().into(),
+                allow_decrypt,
+                replacement: None,
+            };
+            worker.convert(&archive, &options, "", &op)?;
+            println!("Converted archive verified and published; source preserved");
+        }
         "hash-entry" | "verify-entry" => {
             let name = args
                 .first()
@@ -139,10 +182,16 @@ fn run() -> Result<()> {
                 operations::create(&options, &op)?;
             }
         }
-        "list" | "test" | "extract" => {
-            let archive = Archive::open(Path::new(&path), "", &op)?;
+        "list" | "test" | "extract" | "isolated-list" | "isolated-test" | "isolated-extract" => {
+            let isolated = command.starts_with("isolated-");
+            let worker = vynx_arc_core::worker::Client::sibling()?;
+            let archive = if isolated {
+                worker.open(Path::new(&path), "", &op)?
+            } else {
+                Archive::open(Path::new(&path), "", &op)?
+            };
             match command.as_str() {
-                "list" => {
+                "list" | "isolated-list" => {
                     println!(
                         "{} — {} entries",
                         archive.format.name(),
@@ -152,13 +201,18 @@ fn run() -> Result<()> {
                         println!("{}\t{}\t{}", e.id, e.size, e.name);
                     }
                 }
-                "test" => {
-                    operations::test(&archive, "", &op)?;
+                "test" | "isolated-test" => {
+                    if isolated {
+                        worker.test(&archive, "", &op)?;
+                    } else {
+                        operations::test(&archive, "", &op)?;
+                    }
                     println!("All streams decoded successfully");
                 }
                 _ => {
                     let mut dest = PathBuf::from(".");
                     let mut smart = false;
+                    let mut selected = Vec::new();
                     let mut conflict = Conflict::Refuse;
                     let mut i = 0;
                     while i < args.len() {
@@ -172,6 +226,18 @@ fn run() -> Result<()> {
                                     })?
                                     .into();
                             }
+                            "--entry" => {
+                                i += 1;
+                                let name = args.get(i).ok_or_else(|| {
+                                    ArcError::new("USAGE", "--entry needs an archive path")
+                                })?;
+                                let entry = archive
+                                    .entries
+                                    .iter()
+                                    .find(|e| e.name == *name)
+                                    .ok_or_else(|| ArcError::new("SELECTION", "Entry not found"))?;
+                                selected.push(entry.id);
+                            }
                             "--smart" => smart = true,
                             "--skip" => conflict = Conflict::Skip,
                             "--replace" => conflict = Conflict::Replace,
@@ -180,18 +246,18 @@ fn run() -> Result<()> {
                         }
                         i += 1;
                     }
-                    let root = operations::extract(
-                        &archive,
-                        &ExtractOptions {
-                            destination: dest,
-                            selected: vec![],
-                            conflict,
-                            smart,
-                            policy: Policy::default(),
-                        },
-                        "",
-                        &op,
-                    )?;
+                    let options = ExtractOptions {
+                        destination: dest,
+                        selected,
+                        conflict,
+                        smart,
+                        policy: Policy::default(),
+                    };
+                    let root = if isolated {
+                        worker.extract(&archive, &options, "", &op)?
+                    } else {
+                        operations::extract(&archive, &options, "", &op)?
+                    };
                     println!("Extracted to {}", root.display());
                 }
             }
