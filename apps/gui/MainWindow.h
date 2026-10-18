@@ -76,6 +76,8 @@ class MainWindow : public QMainWindow {
     void setupJournal();
     void syncJournal();
     void retrySelectedJob();
+    void verifySelectedResult();
+    quint64 shownPublication_ = 0;
     void dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8> &password);
     void exportJobReport();
     QLabel *queueSummary_ = nullptr;

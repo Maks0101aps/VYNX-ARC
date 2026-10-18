@@ -9,6 +9,7 @@ pub mod operations;
 pub mod parser;
 pub mod preview;
 mod priority;
+pub mod publication;
 #[cfg(windows)]
 pub mod rar;
 pub mod security;

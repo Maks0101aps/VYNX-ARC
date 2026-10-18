@@ -18,6 +18,22 @@ const TEST: u8 = 4;
 const HASH_ENTRIES: u8 = 5;
 const HASH_FILE: u8 = 6;
 const MATERIALIZE: u8 = 7;
+const EXTRACT: u8 = 8;
+const CREATE: u8 = 9;
+const MODIFY: u8 = 10;
+record!(crate::publication::Target {
+    path,
+    sha256,
+    before
+});
+record!(crate::operations::ConflictDetails {
+    incoming_name,
+    incoming_size,
+    incoming_modified,
+    existing_path,
+    existing_size,
+    existing_modified
+});
 impl Wire for Zeroizing<String> {
     fn put(&self, o: &mut Vec<u8>) {
         (**self).put(o);
@@ -64,6 +80,11 @@ struct Request {
     ids: Vec<u64>,
     preset: u8,
     resource: u8,
+    names: Vec<String>,
+    action: u8,
+    text: String,
+    smart: bool,
+    volume: u64,
 }
 record!(Request {
     kind,
@@ -73,7 +94,12 @@ record!(Request {
     destination,
     ids,
     preset,
-    resource
+    resource,
+    names,
+    action,
+    text,
+    smart,
+    volume
 });
 struct Reply {
     kind: u8,
@@ -83,6 +109,9 @@ struct Reply {
     content: Blob,
     hashes: Vec<EntryHash>,
     error: String,
+    notice_id: u64,
+    targets: Vec<crate::publication::Target>,
+    conflict: Option<crate::operations::ConflictDetails>,
 }
 record!(Reply {
     kind,
@@ -91,7 +120,10 @@ record!(Reply {
     text,
     content,
     hashes,
-    error
+    error,
+    notice_id,
+    targets,
+    conflict
 });
 impl Default for Reply {
     fn default() -> Self {
@@ -103,6 +135,9 @@ impl Default for Reply {
             content: Blob(vec![]),
             hashes: vec![],
             error: String::new(),
+            notice_id: 0,
+            targets: vec![],
+            conflict: None,
         }
     }
 }
@@ -131,6 +166,11 @@ impl Request {
             ids: vec![],
             preset: s.preset as u8,
             resource: s.resource as u8,
+            names: vec![],
+            action: 0,
+            text: String::new(),
+            smart: false,
+            volume: 0,
         }
     }
     fn archive(kind: u8, a: &Archive, password: &str, op: &Operation) -> Self {
@@ -205,11 +245,87 @@ impl Client {
         r.destination = destination.to_string_lossy().into_owned();
         Ok(self.run(r, op)?.text)
     }
+    pub fn extract(
+        &self,
+        a: &Archive,
+        options: &crate::ExtractOptions,
+        password: &str,
+        op: &Operation,
+    ) -> Result<PathBuf> {
+        let mut r = Request::archive(EXTRACT, a, password, op);
+        r.destination = options.destination.to_string_lossy().into_owned();
+        r.ids = options.selected.clone();
+        r.action = options.conflict as u8;
+        r.smart = options.smart;
+        Ok(self.run(r, op)?.text.into())
+    }
+    pub fn create(
+        &self,
+        options: &crate::CreateOptions,
+        format: crate::Format,
+        volume: u64,
+        op: &Operation,
+    ) -> Result<()> {
+        let mut r = Request::new(CREATE, &options.output, &options.password, op);
+        r.names = options
+            .inputs
+            .iter()
+            .map(|p| p.to_string_lossy().into_owned())
+            .collect();
+        r.action = format as u8;
+        r.volume = volume;
+        self.run(r, op).map(|_| ())
+    }
+    pub fn modify(
+        &self,
+        a: &Archive,
+        change: &crate::modification::Change,
+        password: &str,
+        op: &Operation,
+    ) -> Result<String> {
+        use crate::modification::Change;
+        let mut r = Request::archive(MODIFY, a, password, op);
+        match change {
+            Change::Add { inputs, folder } => {
+                r.action = 0;
+                r.names = inputs
+                    .iter()
+                    .map(|p| p.to_string_lossy().into_owned())
+                    .collect();
+                r.destination = folder.clone();
+            }
+            Change::Delete { names } => {
+                r.action = 1;
+                r.names = names.clone();
+            }
+            Change::Rename { old, new } => {
+                r.action = 2;
+                r.names = vec![old.clone()];
+                r.text = new.clone();
+            }
+            Change::Replace {
+                name,
+                input,
+                expected_archive_hash,
+                expected_input_hash,
+            } => {
+                r.action = 3;
+                r.names = vec![
+                    name.clone(),
+                    input.to_string_lossy().into_owned(),
+                    expected_archive_hash.clone(),
+                    expected_input_hash.clone(),
+                ];
+            }
+        }
+        Ok(self.run(r, op)?.text)
+    }
     pub fn hash_file(&self, path: &Path, op: &Operation) -> Result<String> {
         Ok(self.run(Request::new(HASH_FILE, path, "", op), op)?.text)
     }
     fn run(&self, request: Request, op: &Operation) -> Result<Reply> {
         op.check()?;
+        let writes = matches!(request.kind, EXTRACT | CREATE | MODIFY);
         let _slot = Slot::acquire(op)?;
         let mut cmd = Command::new(&self.executable);
         cmd.stdin(Stdio::piped())
@@ -249,7 +365,7 @@ impl Client {
             loop {
                 let reply = wire::read_frame(&mut output, wire::RESPONSE_LIMIT)
                     .and_then(|v| wire::decoded::<Reply>(&v));
-                let terminal = !matches!(&reply, Ok(r) if r.kind == 0);
+                let terminal = !matches!(&reply, Ok(r) if matches!(r.kind, 0|3|4));
                 if tx.send(reply).is_err() || terminal {
                     break;
                 }
@@ -257,7 +373,27 @@ impl Client {
         });
         let start = Instant::now();
         let mut cancelled = None;
+        let mut publication: Option<(u64, u64)> = None;
+        let mut conflict: Option<(u64, u64)> = None;
         let result = loop {
+            if let Some((remote, local)) = publication
+                && let Some(accepted) = op.take_publication_reply(local)
+            {
+                let mut bytes = vec![if accepted { 2 } else { 3 }];
+                remote.put(&mut bytes);
+                let _ = controls.try_send(bytes);
+                publication = None;
+            }
+            if let Some((remote, local)) = conflict
+                && let Some((choice, all)) = op.take_conflict_reply(local)
+            {
+                let mut bytes = vec![4];
+                remote.put(&mut bytes);
+                (choice as u8).put(&mut bytes);
+                all.put(&mut bytes);
+                let _ = controls.try_send(bytes);
+                conflict = None;
+            }
             #[cfg(windows)]
             if job.memory_exceeded() {
                 break Err(ArcError::new(
@@ -270,7 +406,14 @@ impl Client {
                 cancelled = Some(Instant::now());
             }
             if cancelled.is_some_and(|t: Instant| t.elapsed() > Duration::from_secs(2)) {
-                break op.check().and_then(|_| Err(protocol()));
+                break if writes {
+                    Err(ArcError::new(
+                        "RESULT_UNKNOWN",
+                        "Worker was forcibly cancelled; verify the destination before retrying",
+                    ))
+                } else {
+                    op.check().and_then(|_| Err(protocol()))
+                };
             }
             if start.elapsed() > self.timeout {
                 break Err(ArcError::new(
@@ -284,6 +427,36 @@ impl Client {
                         op.import_progress(p);
                     } else {
                         break Err(protocol());
+                    }
+                }
+                Ok(Ok(r)) if r.kind == 3 && r.notice_id > 0 && !r.targets.is_empty() => {
+                    if publication.is_some() {
+                        break Err(protocol());
+                    }
+                    if op
+                        .publication_controlled()
+                        .load(std::sync::atomic::Ordering::Relaxed)
+                    {
+                        match op.publish_intent(r.targets) {
+                            Ok(local) => publication = Some((r.notice_id, local)),
+                            Err(e) => break Err(e),
+                        }
+                    } else {
+                        let mut bytes = vec![2];
+                        r.notice_id.put(&mut bytes);
+                        let _ = controls.try_send(bytes);
+                    }
+                }
+                Ok(Ok(r)) if r.kind == 4 && r.notice_id > 0 => {
+                    if conflict.is_some() {
+                        break Err(protocol());
+                    }
+                    let Some(details) = r.conflict else {
+                        break Err(protocol());
+                    };
+                    match op.publish_conflict(details) {
+                        Ok(local) => conflict = Some((r.notice_id, local)),
+                        Err(e) => break Err(e),
                     }
                 }
                 Ok(Ok(r)) if r.kind == 1 => break Ok(r),
@@ -306,7 +479,25 @@ impl Client {
         drop(controls);
         let _ = reader.join();
         let _ = writer.join();
-        result
+        op.clear_remote_requests();
+        result.map_err(|e| {
+            if writes
+                && matches!(
+                    e.code,
+                    "WORKER_STOPPED" | "WORKER_TIMEOUT" | "WORKER_MEMORY" | "WORKER_PROTOCOL"
+                )
+            {
+                ArcError::new(
+                    "RESULT_UNKNOWN",
+                    format!(
+                        "{} Verify the destination before any retry; a write may have completed.",
+                        e.message
+                    ),
+                )
+            } else {
+                e
+            }
+        })
     }
 }
 struct OwnedChild(Child);
@@ -340,6 +531,15 @@ fn remote_error(code: &str, message: &str) -> ArcError {
         "ZIP" => "ZIP",
         "7Z" => "7Z",
         "RAR" => "RAR",
+        "JOURNAL" => "JOURNAL",
+        "READ_ONLY" => "READ_ONLY",
+        "ARCHIVE_BUSY" => "ARCHIVE_BUSY",
+        "ACCESS_DENIED" => "ACCESS_DENIED",
+        "REPLACE" => "REPLACE",
+        "OPTIONS" => "OPTIONS",
+        "CONFLICT" => "CONFLICT",
+        "VERIFY" => "VERIFY",
+        "CLEANUP" => "CLEANUP",
         _ => "WORKER_ERROR",
     };
     ArcError::new(code, message)
@@ -347,11 +547,47 @@ fn remote_error(code: &str, message: &str) -> ArcError {
 fn execute(r: Request, op: &Operation) -> Result<Reply> {
     if !matches!(
         r.kind,
-        OPEN | TEXT | CONTENT | TEST | HASH_ENTRIES | HASH_FILE | MATERIALIZE
+        OPEN | TEXT
+            | CONTENT
+            | TEST
+            | HASH_ENTRIES
+            | HASH_FILE
+            | MATERIALIZE
+            | EXTRACT
+            | CREATE
+            | MODIFY
     ) {
         return Err(protocol());
     }
     op.configure(crate::settings::Settings::from_ids(r.preset, r.resource)?);
+    if r.kind == CREATE {
+        let options = crate::CreateOptions {
+            output: r.path.into(),
+            inputs: r.names.into_iter().map(PathBuf::from).collect(),
+            password: r.password,
+        };
+        if r.volume > 0 {
+            crate::operations::create_split(&options, r.volume, op)?;
+        } else {
+            let format = match r.action {
+                0 => crate::Format::Zip,
+                1 => crate::Format::SevenZ,
+                2 => crate::Format::Tar,
+                3 => crate::Format::TarGz,
+                4 => crate::Format::Gzip,
+                5 => crate::Format::Xz,
+                6 => crate::Format::Bzip2,
+                7 => crate::Format::Zstd,
+                8 => crate::Format::Lzma,
+                9 => crate::Format::TarXz,
+                10 => crate::Format::TarBz2,
+                11 => crate::Format::TarZst,
+                _ => return Err(protocol()),
+            };
+            crate::operations::create_as(&options, format, op)?;
+        }
+        return Ok(Reply::default());
+    }
     if r.kind == HASH_FILE {
         return Ok(Reply {
             text: crate::operations::hash_file(Path::new(&r.path), op)?,
@@ -374,6 +610,54 @@ fn execute(r: Request, op: &Operation) -> Result<Reply> {
     let id = || r.ids.first().copied().ok_or_else(protocol);
     let mut reply = Reply::default();
     match r.kind {
+        EXTRACT => {
+            let conflict = match r.action {
+                0 => crate::Conflict::Refuse,
+                1 => crate::Conflict::Skip,
+                2 => crate::Conflict::Replace,
+                3 => crate::Conflict::Ask,
+                4 => crate::Conflict::Rename,
+                5 => crate::Conflict::Newer,
+                _ => return Err(protocol()),
+            };
+            reply.text = crate::operations::extract(
+                &archive,
+                &crate::ExtractOptions {
+                    destination: r.destination.into(),
+                    selected: r.ids,
+                    conflict,
+                    smart: r.smart,
+                    policy: crate::security::Policy::default(),
+                },
+                &r.password,
+                op,
+            )?
+            .to_string_lossy()
+            .into_owned();
+        }
+        MODIFY => {
+            use crate::modification::Change;
+            let change = match r.action {
+                0 => Change::Add {
+                    inputs: r.names.into_iter().map(PathBuf::from).collect(),
+                    folder: r.destination,
+                },
+                1 => Change::Delete { names: r.names },
+                2 if r.names.len() == 1 => Change::Rename {
+                    old: r.names[0].clone(),
+                    new: r.text,
+                },
+                3 if r.names.len() == 4 => Change::Replace {
+                    name: r.names[0].clone(),
+                    input: (&r.names[1]).into(),
+                    expected_archive_hash: r.names[2].clone(),
+                    expected_input_hash: r.names[3].clone(),
+                },
+                _ => return Err(protocol()),
+            };
+            reply.text =
+                crate::modification::modify_with_receipt(&archive, &change, &r.password, op)?;
+        }
         MATERIALIZE => {
             reply.text = crate::preview::materialize(
                 &archive,
@@ -402,13 +686,44 @@ pub fn serve() -> Result<()> {
         wire::decoded::<Request>(&frame)?
     };
     let op = Operation::default();
+    op.control_publication(true);
     let controls = op.clone();
     std::thread::spawn(move || {
         let mut input = std::io::stdin().lock();
         loop {
             match wire::read_frame(&mut input, 16) {
                 Ok(v) if *v == [1] => controls.cancel(),
-                _ => {
+                Ok(v) => {
+                    let mut bytes = &v[..];
+                    let result = (|| -> Result<()> {
+                        let kind = u8::get(&mut bytes)?;
+                        let id = u64::get(&mut bytes)?;
+                        let valid = match kind {
+                            2 | 3 => controls.reply_publication(id, kind == 2),
+                            4 => {
+                                let choice = match u8::get(&mut bytes)? {
+                                    0 => crate::Conflict::Refuse,
+                                    1 => crate::Conflict::Skip,
+                                    2 => crate::Conflict::Replace,
+                                    4 => crate::Conflict::Rename,
+                                    _ => return Err(protocol()),
+                                };
+                                let all = bool::get(&mut bytes)?;
+                                controls.reply_conflict(id, choice, all)
+                            }
+                            _ => return Err(protocol()),
+                        };
+                        if !valid || !bytes.is_empty() {
+                            return Err(protocol());
+                        }
+                        Ok(())
+                    })();
+                    if result.is_err() {
+                        controls.cancel();
+                        break;
+                    }
+                }
+                Err(_) => {
                     controls.cancel();
                     break;
                 }
@@ -424,6 +739,8 @@ pub fn serve() -> Result<()> {
         let _ = tx.send(result);
     });
     let mut output = std::io::stdout().lock();
+    let mut publication_sent = 0;
+    let mut conflict_sent = 0;
     loop {
         let reply = match rx.recv_timeout(Duration::from_millis(100)) {
             Ok(Ok(reply)) => reply,
@@ -433,15 +750,40 @@ pub fn serve() -> Result<()> {
                 text: e.message,
                 ..Reply::default()
             },
-            Err(mpsc::RecvTimeoutError::Timeout) => Reply {
-                kind: 0,
-                progress: Some(op.snapshot()),
-                ..Reply::default()
-            },
+            Err(mpsc::RecvTimeoutError::Timeout) => {
+                if let Some((id, targets)) = op
+                    .pending_publication()
+                    .filter(|(id, _)| *id != publication_sent)
+                {
+                    publication_sent = id;
+                    Reply {
+                        kind: 3,
+                        notice_id: id,
+                        targets,
+                        ..Reply::default()
+                    }
+                } else if let Some((id, details)) =
+                    op.pending_conflict().filter(|(id, _)| *id != conflict_sent)
+                {
+                    conflict_sent = id;
+                    Reply {
+                        kind: 4,
+                        notice_id: id,
+                        conflict: Some(details),
+                        ..Reply::default()
+                    }
+                } else {
+                    Reply {
+                        kind: 0,
+                        progress: Some(op.snapshot()),
+                        ..Reply::default()
+                    }
+                }
+            }
             Err(_) => return Err(protocol()),
         };
         wire::write_frame(&mut output, &wire::encoded(&reply), wire::RESPONSE_LIMIT)?;
-        if reply.kind != 0 {
+        if matches!(reply.kind, 1 | 2) {
             return Ok(());
         }
     }

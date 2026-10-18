@@ -395,3 +395,73 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
             toast_->notify(tr("Operation stopped. Review details in the queue."));
         });
 }
+
+void MainWindow::verifySelectedResult() {
+    if (operations_.busy)
+        return;
+    auto *item = queueView_->currentItem();
+    if (!item)
+        return;
+    const auto id = item->data(Qt::UserRole + 3).toString();
+    const auto record = journal_.record(id);
+    if (record["state"] != "unknown" && record["state"] != "verifying")
+        return;
+    const auto targets = record["publication"].toArray();
+    if (targets.isEmpty()) {
+        QMessageBox::information(
+            this, tr("Verify result"),
+            tr("No publication identity was recorded. Inspect the destination and source manually. "
+               "This request will not be retried automatically."));
+        return;
+    }
+    journal_.setState(id, "verifying");
+    item->setData(Qt::UserRole + 5, "verifying");
+    beginOperation();
+    activeSpec_ = QJsonObject{{"kind", "reconcile"}};
+    auto op = operations_.operation;
+    auto result = std::make_shared<QString>("unknown");
+    auto apply = [this, id, result](const QString &error) {
+        const auto state = error.isEmpty() ? *result : QString("unknown");
+        const auto detail =
+            state == "completed" ? tr("Verified destination matches the recorded result.")
+            : state == "failed"  ? tr("Verified destination matches the pre-publication state. "
+                                       "Review parameters before explicitly retrying.")
+                                : tr("Destination differs or cannot be checked. Preserve files and "
+                                     "inspect it before any retry.");
+        journal_.setState(id, state, error.isEmpty() ? detail : error);
+        for (int i = 0; i < queueView_->count(); ++i) {
+            auto *row = queueView_->item(i);
+            if (row->data(Qt::UserRole + 3).toString() != id)
+                continue;
+            row->setData(Qt::UserRole + 5, state);
+            row->setData(Qt::UserRole + 6, error.isEmpty() ? detail : error);
+            row->setText(jobStateLabel(state) + " - " + row->data(Qt::UserRole + 1).toString());
+            row->setToolTip(detail + "\n" + error);
+        }
+        updateQueue();
+        QMessageBox::information(this, tr("Verify result"),
+                                 detail + (error.isEmpty() ? QString() : "\n" + error));
+    };
+    runJob(
+        tr("Verifying interrupted publication..."),
+        [targets, op, result] {
+            bool after = true, before = true;
+            for (const auto &v : targets) {
+                if (vynx::cancelled(**op))
+                    return QStringLiteral("CANCELLED: Verification cancelled");
+                const auto t = v.toObject();
+                const auto path = t["path"].toString();
+                QString current;
+                if (QFileInfo::exists(path))
+                    current = QString::fromStdString(
+                        std::string(vynx::hash_archive_file(path.toUtf8().toStdString(), **op)));
+                if (!current.isEmpty())
+                    current = current.section('\n', 0, 0).mid(9);
+                after &= current == t["sha256"].toString();
+                before &= current == t["before"].toString();
+            }
+            *result = after ? "completed" : before ? "failed" : "unknown";
+            return QString();
+        },
+        [apply] { apply({}); }, [apply](QString error) { apply(error); });
+}

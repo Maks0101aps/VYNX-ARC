@@ -4,7 +4,7 @@ use std::io::{Read, Write};
 use zeroize::Zeroizing;
 pub const REQUEST_LIMIT: usize = 16 << 20;
 pub const RESPONSE_LIMIT: usize = 128 << 20;
-const MAGIC: &[u8; 8] = b"VYNXWP01";
+const MAGIC: &[u8; 8] = b"VYNXWP02";
 fn invalid() -> ArcError {
     ArcError::new("WORKER_PROTOCOL", "Invalid or oversized worker message")
 }
@@ -181,11 +181,11 @@ mod tests {
         write_frame(&mut frame, b"abc", 3).unwrap();
         assert_eq!(&*read_frame(&mut &frame[..], 3).unwrap(), b"abc");
         assert!(read_frame(&mut &frame[..], 2).is_err());
-        frame[7] = b'2';
+        frame[7] = b'3';
         assert!(read_frame(&mut &frame[..], 3).is_err());
         assert!(decoded::<Vec<String>>(&u32::MAX.to_le_bytes()).is_err());
         assert!(decoded::<bool>(&[2]).is_err());
         assert!(decoded::<u8>(&[1, 2]).is_err());
-        assert!(read_frame(&mut &b"VYNXWP01"[..], 16).is_err());
+        assert!(read_frame(&mut &b"VYNXWP02"[..], 16).is_err());
     }
 }

@@ -243,6 +243,13 @@ pub fn publish(source: &mut File, prefix: &Path, size: u64, op: &Operation) -> R
             "Archive changed while staging split volumes",
         ));
     }
+    op.prepare_publication(
+        &names
+            .iter()
+            .zip(&staged)
+            .map(|(name, part)| (name.clone(), part.path().to_owned()))
+            .collect::<Vec<_>>(),
+    )?;
     let mut published = Vec::new();
     let result = (|| {
         op.phase("Publishing split volumes");

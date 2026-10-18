@@ -19,6 +19,8 @@ pub struct Operation(Arc<State>);
 #[derive(Default)]
 struct State {
     settings: Mutex<crate::settings::Settings>,
+    publication_controlled: AtomicBool,
+    publication: Mutex<crate::publication::Pending>,
     stage: Mutex<String>,
     details: Mutex<String>,
     cancelled: AtomicBool,
@@ -53,6 +55,79 @@ pub struct Progress {
     pub cancelled: bool,
 }
 impl Operation {
+    pub(crate) fn publication_controlled(&self) -> &AtomicBool {
+        &self.0.publication_controlled
+    }
+    pub(crate) fn publish_intent(&self, targets: Vec<crate::publication::Target>) -> Result<u64> {
+        let mut state = self
+            .0
+            .publication
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "Publication lock failed"))?;
+        if state.targets.is_some() {
+            return Err(ArcError::new("INTERNAL", "Overlapping publication intents"));
+        }
+        state.id += 1;
+        state.targets = Some(targets);
+        state.reply = None;
+        Ok(state.id)
+    }
+    pub fn pending_publication(&self) -> Option<(u64, Vec<crate::publication::Target>)> {
+        let state = self.0.publication.lock().ok()?;
+        Some((state.id, state.targets.clone()?))
+    }
+    pub fn reply_publication(&self, id: u64, accepted: bool) -> bool {
+        let Ok(mut state) = self.0.publication.lock() else {
+            return false;
+        };
+        if state.id != id || state.targets.is_none() || state.reply.is_some() {
+            return false;
+        }
+        state.reply = Some(accepted);
+        true
+    }
+    pub(crate) fn take_publication_reply(&self, id: u64) -> Option<bool> {
+        let mut state = self.0.publication.lock().ok()?;
+        if state.id != id {
+            return None;
+        }
+        let reply = state.reply.take()?;
+        state.targets = None;
+        Some(reply)
+    }
+    pub(crate) fn clear_remote_requests(&self) {
+        if let Ok(mut s) = self.0.publication.lock() {
+            s.targets = None;
+            s.reply = None;
+        }
+        if let Ok(mut s) = self.0.conflict.lock() {
+            s.request = None;
+            s.reply = None;
+        }
+    }
+    pub(crate) fn publish_conflict(&self, details: ConflictDetails) -> Result<u64> {
+        let mut state = self
+            .0
+            .conflict
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "Conflict lock failed"))?;
+        if state.request.is_some() {
+            return Err(ArcError::new("INTERNAL", "Overlapping conflicts"));
+        }
+        state.id += 1;
+        state.request = Some(details);
+        state.reply = None;
+        Ok(state.id)
+    }
+    pub(crate) fn take_conflict_reply(&self, id: u64) -> Option<(Conflict, bool)> {
+        let mut state = self.0.conflict.lock().ok()?;
+        if state.id != id {
+            return None;
+        }
+        let reply = state.reply.take()?;
+        state.request = None;
+        Some(reply)
+    }
     pub fn configure(&self, settings: crate::settings::Settings) {
         *self.0.settings.lock().expect("settings lock") = settings;
     }
@@ -782,6 +857,8 @@ fn create_internal(
         return crate::volumes::publish(temp.as_file_mut(), &options.output, size, op);
     }
     op.stage("Publishing verified archive");
+    op.prepare_publication(&[(options.output.clone(), temp.path().to_owned())])?;
+    op.check()?;
     temp.persist_noclobber(security::publication_path(&options.output)?)
         .map_err(|e| ArcError::from(e.error))?;
     Ok(())

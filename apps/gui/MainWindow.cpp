@@ -1185,6 +1185,9 @@ bool MainWindow::smokeTest() {
         settings_ =
             std::make_unique<QSettings>(temp.path() + "/settings.ini", QSettings::IniFormat);
         settings_->setValue("historyEnabled", false);
+        if (!journal_.open(temp.path() + "/smoke-jobs.json", true))
+            return smokeFailure(__LINE__);
+
         const QString source = temp.path() + "/source";
         QDir().mkpath(source + "/nested");
         QFile input(source + "/nested/дані.txt");

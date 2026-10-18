@@ -186,6 +186,8 @@ bool JobJournal::open(const QString &path, bool enabled) {
                 record.remove("payload");
                 record["spec"] = payload.object()["spec"];
                 record["sources"] = payload.object()["sources"];
+                if (payload.object().contains("publication"))
+                    record["publication"] = payload.object()["publication"];
             }
             if (!validState(record["state"].toString()) || record["id"].toString().isEmpty() ||
                 !record["spec"].isObject()) {
@@ -195,7 +197,7 @@ bool JobJournal::open(const QString &path, bool enabled) {
             }
             record["spec"] = sanitizeSpec(record["spec"].toObject());
             if (record["state"] == "running" || record["state"] == "pending" ||
-                record["state"] == "decision") {
+                record["state"] == "decision" || record["state"] == "verifying") {
                 const auto kind = record["spec"].toObject()["kind"].toString();
                 const bool writes =
                     record["state"] != "pending" &&
@@ -243,10 +245,12 @@ bool JobJournal::save() {
     qint64 totalPayload = 0;
     for (const auto &value : records_) {
         auto record = value.toObject();
-        const auto payload = QJsonDocument(QJsonObject{{"schema", 1},
-                                                       {"spec", record["spec"]},
-                                                       {"sources", record["sources"]}})
-                                 .toJson(QJsonDocument::Compact);
+        const auto payload =
+            QJsonDocument(QJsonObject{{"schema", 1},
+                                      {"spec", record["spec"]},
+                                      {"sources", record["sources"]},
+                                      {"publication", record["publication"].toArray()}})
+                .toJson(QJsonDocument::Compact);
         if (payload.size() > 16 * 1024 * 1024 ||
             (totalPayload += payload.size()) > 64 * 1024 * 1024) {
             error_ = "Complete queue descriptions exceed storage budget; request was not persisted";
@@ -280,6 +284,7 @@ bool JobJournal::save() {
             referenced.insert(name);
             record.remove("spec");
             record.remove("sources");
+            record.remove("publication");
             record["payload"] = QJsonObject{{"sha256", digest}, {"bytes", payload.size()}};
         }
         diskRecords.append(record);
@@ -331,6 +336,35 @@ QString JobJournal::add(const QString &title, const QJsonObject &spec) {
         return {};
     }
     return id;
+}
+bool JobJournal::recordIntent(const QString &id, const QJsonArray &targets) {
+    if (targets.isEmpty() || targets.size() > 10000)
+        return false;
+    const QRegularExpression digest("^[0-9a-f]{64}$");
+    QJsonArray safe;
+    for (const auto &v : targets) {
+        const auto target = v.toObject();
+        const auto path = target["path"].toString();
+        const auto sha = target["sha256"].toString(), before = target["before"].toString();
+        if (path.isEmpty() || path.size() > 32768 || !QFileInfo(path).isAbsolute() ||
+            !digest.match(sha).hasMatch() ||
+            (!before.isEmpty() && !digest.match(before).hasMatch()))
+            return false;
+        safe.append(QJsonObject{{"path", path}, {"sha256", sha}, {"before", before}});
+    }
+    for (int i = 0; i < records_.size(); ++i) {
+        auto row = records_[i].toObject();
+        if (row["id"] != id)
+            continue;
+        const auto previous = records_[i];
+        row["publication"] = safe;
+        records_[i] = row;
+        if (save())
+            return true;
+        records_[i] = previous;
+        return false;
+    }
+    return false;
 }
 bool JobJournal::setState(const QString &id, const QString &state, const QString &error) {
     if (!validState(state))

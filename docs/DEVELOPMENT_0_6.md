@@ -60,3 +60,28 @@ unknown writes currently require destination review rather than automatic retry.
 Validation: release GUI build and all three CTests passed, including new full
 100,000-name recovery, tampered-payload rejection with original-journal preservation,
 legacy incomplete-selection migration and a real killed-process recovery test.
+
+## Controlled writes and publication identity
+
+Protocol 2 moves extraction/creation/split creation/modification/replacement into
+workers and forwards overwrite conflicts without blocking parent supervision. Before
+archive/volume publication the GUI must atomically record expected new/prior raw
+SHA-256 identities. Acknowledgement failure preserves the unpublished archive.
+Unknown outcomes are kept for explicit read-only reconciliation; no write resumes
+or retries automatically. Per-file extraction recovery remains manual.
+
+Validation: all seven real-worker integration tests passed (including rejection
+before commit, original preservation, remote 7Z overwrite decision, stale replies
+and timeout of a writer). Clippy passed. Release GUI plus all three CTests passed;
+the GUI smoke now uses a real temporary persistent journal. Qt also checks durable
+publication identity roundtrip and rejects presentation hash reports as identities.
+The first GUI attempt timed out after this identity-format defect caused a safe
+publication refusal; corrected code and repeat results are recorded here rather
+than treating that attempt as a pass. Forced before/after-commit fault injection
+and final-package recovery acceptance remain outstanding.
+
+A four-worker, one-hour-per-worker native parser mutation campaign is running on
+frozen binaries under `.dev/milestone-0.6/fuzz-campaign-01`; results are not claimed
+until it finishes. The harness records its aggregate active wall-time definition,
+resource bounds, individual input hashes and retained unexpected failures. This is
+mutation testing, not sanitizer or coverage-guided fuzzing.

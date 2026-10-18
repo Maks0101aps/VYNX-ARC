@@ -85,6 +85,8 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
             QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
     });
     auto *clearFinished = controls->addAction(tr("Clear completed"));
+    auto *verifyResult = controls->addAction(tr("Verify result"));
+    connect(verifyResult, &QAction::triggered, this, &MainWindow::verifySelectedResult);
     auto *retry = controls->addAction(tr("Review / retry..."));
     connect(retry, &QAction::triggered, this, &MainWindow::retrySelectedJob);
     auto *report = controls->addAction(tr("Export report..."));
@@ -143,6 +145,19 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         auto p = vynx::progress(**operations_.operation);
         operationView_->updateProgress(p.done, p.total, text(p.current), elapsed_.elapsed(),
                                        text(p.phase), text(p.details), p.cancelled);
+        const auto publication = vynx::publication_id(**operations_.operation);
+        if (publication && publication != shownPublication_) {
+            shownPublication_ = publication;
+            QJsonArray targets;
+            for (const auto &t : vynx::publication_targets(**operations_.operation))
+                targets.append(QJsonObject{{"path", text(t.path)},
+                                           {"sha256", text(t.sha256)},
+                                           {"before", text(t.before)}});
+            const bool recorded =
+                runningItem_ &&
+                journal_.recordIntent(runningItem_->data(Qt::UserRole + 3).toString(), targets);
+            vynx::reply_publication(**operations_.operation, publication, recorded);
+        }
         showConflict();
     });
     connect(&operations_.watcher(), &QFutureWatcher<QString>::finished, this, [this] {
@@ -162,6 +177,14 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         if (session_->archive)
             updateStatus();
         QString error = operations_.watcher().result();
+        if (runningItem_ && !error.isEmpty() && !error.startsWith("RESULT_UNKNOWN:") &&
+            !journal_.record(runningItem_->data(Qt::UserRole + 3).toString())["publication"]
+                 .toArray()
+                 .isEmpty())
+            error = "RESULT_UNKNOWN: Publication was prepared. Verify the destination before "
+                    "retrying.\n" +
+                    error;
+
         if (runningItem_) {
             if (!error.isEmpty())
                 runningItem_->setToolTip(runningItem_->toolTip() + "\n" + error);
@@ -170,7 +193,9 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
                                                                  : tr("Stopped — %1");
             runningItem_->setText(status.arg(runningItem_->data(Qt::UserRole + 1).toString()));
             runningItem_->setData(Qt::UserRole + 2, true);
-            runningItem_->setData(Qt::UserRole + 5, error.isEmpty()                  ? "completed"
+            runningItem_->setData(Qt::UserRole + 5, error.isEmpty() ? "completed"
+                                                    : error.startsWith("RESULT_UNKNOWN:")
+                                                        ? "unknown"
                                                     : error.startsWith("CANCELLED:") ? "cancelled"
                                                                                      : "failed");
             runningItem_->setData(Qt::UserRole + 6, error);
@@ -203,6 +228,7 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
 }
 void MainWindow::beginOperation() {
     shownConflict_ = 0;
+    shownPublication_ = 0;
     if (activeSpec_.isEmpty())
         activeSpec_ = QJsonObject{{"kind", "read"}, {"sources", QJsonArray{session_->path}}};
     operations_.operation = std::make_shared<rust::Box<vynx::Operation>>(vynx::new_operation());
@@ -257,6 +283,7 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
     progress_->setRange(0, 0);
     elapsed_.start();
     timer_->start();
+    vynx::control_publication(**operations_.operation, true);
     operations_.start(std::move(worker));
 }
 void MainWindow::updateQueue() {

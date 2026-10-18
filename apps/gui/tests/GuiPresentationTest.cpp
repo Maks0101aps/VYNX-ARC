@@ -339,6 +339,30 @@ class GuiPresentationTest : public QObject {
         QVERIFY(file.open(QIODevice::ReadOnly));
         QCOMPARE(QJsonDocument::fromJson(file.readAll()).object()["schema"].toInt(), 2);
     }
+    void publicationIntentRetainsExactIdentitiesAndRejectsInvalidDigests() {
+        QTemporaryDir root;
+        const auto path = root.path() + "/jobs.json";
+        QString id;
+        const QJsonArray targets{QJsonObject{{"path", root.path() + "/result.zip"},
+                                             {"sha256", QString(64, 'a')},
+                                             {"before", QString(64, 'b')}}};
+        {
+            JobJournal journal;
+            QVERIFY(journal.open(path, true));
+            id =
+                journal.add("Write", QJsonObject{{"kind", "create"},
+                                                 {"sources", QJsonArray{root.path() + "/source"}}});
+            QVERIFY(journal.setState(id, "running"));
+            QVERIFY(!journal.recordIntent(
+                id, QJsonArray{QJsonObject{{"path", root.path() + "/result.zip"},
+                                           {"sha256", "SHA-256: bad"}}}));
+            QVERIFY(journal.recordIntent(id, targets));
+        }
+        JobJournal recovered;
+        QVERIFY(recovered.open(path, true));
+        QCOMPARE(recovered.record(id)["state"].toString(), QString("unknown"));
+        QCOMPARE(recovered.record(id)["publication"].toArray(), targets);
+    }
     void journalRejectsDamageAndDetectsSourceChanges() {
         QTemporaryDir root;
         const auto path = root.path() + "/jobs.json";

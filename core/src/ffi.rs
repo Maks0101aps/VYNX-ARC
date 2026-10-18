@@ -36,6 +36,11 @@ pub mod bridge {
         existing_size: u64,
         existing_modified: u64,
     }
+    struct PublicationTarget {
+        path: String,
+        sha256: String,
+        before: String,
+    }
     struct EntryHashInfo {
         name: String,
         sha256: String,
@@ -45,6 +50,10 @@ pub mod bridge {
         type Archive;
         type Operation;
         fn new_operation() -> Box<Operation>;
+        fn control_publication(op: &Operation, enabled: bool);
+        fn publication_id(op: &Operation) -> u64;
+        fn publication_targets(op: &Operation) -> Vec<PublicationTarget>;
+        fn reply_publication(op: &Operation, id: u64, accepted: bool) -> bool;
         fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()>;
         fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String>;
         fn clone_operation(op: &Operation) -> Box<Operation>;
@@ -182,7 +191,7 @@ fn replace_entry(
     op: &Operation,
 ) -> Result<String> {
     guarded(|| {
-        crate::modification::modify_with_receipt(
+        crate::worker::Client::sibling()?.modify(
             archive,
             &crate::modification::Change::Replace {
                 name: name.into(),
@@ -320,12 +329,13 @@ fn create_split_archive(
     op: &Operation,
 ) -> Result<()> {
     guarded(|| {
-        operations::create_split(
+        crate::worker::Client::sibling()?.create(
             &operations::CreateOptions {
                 output: output.into(),
                 inputs: inputs.iter().map(PathBuf::from).collect(),
                 password: Zeroizing::new(password.into()),
             },
+            crate::Format::SevenZ,
             volume_size,
             op,
         )
@@ -357,7 +367,8 @@ fn extract_archive(
             smart,
             policy: Policy::default(),
         };
-        operations::extract(archive, &options, password, op)
+        crate::worker::Client::sibling()?
+            .extract(archive, &options, password, op)
             .map(|p| p.to_string_lossy().into_owned())
     })
 }
@@ -366,12 +377,14 @@ fn test_archive(archive: &Archive, password: &str, op: &Operation) -> Result<()>
 }
 fn create_archive(output: &str, inputs: &[String], password: &str, op: &Operation) -> Result<()> {
     guarded(|| {
-        operations::create(
+        crate::worker::Client::sibling()?.create(
             &operations::CreateOptions {
                 output: output.into(),
                 inputs: inputs.iter().map(PathBuf::from).collect(),
                 password: Zeroizing::new(password.into()),
             },
+            crate::Format::for_output(Path::new(output))?,
+            0,
             op,
         )
     })
@@ -438,13 +451,14 @@ fn create_archive_as(
             11 => crate::Format::TarZst,
             _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
         };
-        operations::create_as(
+        crate::worker::Client::sibling()?.create(
             &operations::CreateOptions {
                 output: output.into(),
                 inputs: inputs.iter().map(PathBuf::from).collect(),
                 password: Zeroizing::new(password.into()),
             },
             format,
+            0,
             op,
         )
     })
@@ -474,6 +488,32 @@ fn modify_archive(
             },
             _ => return Err(ArcError::new("OPTIONS", "Invalid modification request")),
         };
-        crate::modification::modify(archive, &change, password, op)
+        crate::worker::Client::sibling()?
+            .modify(archive, &change, password, op)
+            .map(|_| ())
     })
+}
+
+fn publication_id(op: &Operation) -> u64 {
+    op.pending_publication().map_or(0, |(id, _)| id)
+}
+fn publication_targets(op: &Operation) -> Vec<bridge::PublicationTarget> {
+    op.pending_publication()
+        .map_or_else(Vec::new, |(_, targets)| {
+            targets
+                .into_iter()
+                .map(|t| bridge::PublicationTarget {
+                    path: t.path,
+                    sha256: t.sha256,
+                    before: t.before,
+                })
+                .collect()
+        })
+}
+fn reply_publication(op: &Operation, id: u64, accepted: bool) -> bool {
+    op.reply_publication(id, accepted)
+}
+
+fn control_publication(op: &Operation, enabled: bool) {
+    op.control_publication(enabled);
 }

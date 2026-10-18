@@ -413,6 +413,8 @@ pub fn modify_with_receipt(
 fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
     op.check()?;
     let publication_path = security::publication_path(path)?;
+    op.prepare_publication(&[(path.to_owned(), replacement.path().to_owned())])?;
+    op.check()?;
     diagnostic("PUBLISH_BEGIN", path, Some(replacement.path()));
     match replacement.persist(publication_path) {
         Ok(_) => {
