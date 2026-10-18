@@ -1,6 +1,6 @@
 ﻿# План VYNX ARC 0.6.0
 
-Статус: предложенный объём разработки; реализация не начата.
+Status: development in progress; see [development evidence](DEVELOPMENT_0_6.md).
 База: `v0.5.0`, коммит `be1befc`.
 
 ## Цель

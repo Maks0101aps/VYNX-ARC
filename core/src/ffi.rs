@@ -150,10 +150,10 @@ fn guarded<T>(f: impl FnOnce() -> Result<T>) -> Result<T> {
     })
 }
 fn preview_text(archive: &Archive, id: u64, password: &str, op: &Operation) -> Result<String> {
-    guarded(|| crate::preview::text(archive, id, password, op))
+    guarded(|| crate::worker::Client::sibling()?.text(archive, id, password, op))
 }
 fn preview_bytes(archive: &Archive, id: u64, password: &str, op: &Operation) -> Result<Vec<u8>> {
-    guarded(|| crate::preview::bytes(archive, id, password, op))
+    guarded(|| crate::worker::Client::sibling()?.bytes(archive, id, password, op))
 }
 fn materialize_entry(
     archive: &Archive,
@@ -163,8 +163,13 @@ fn materialize_entry(
     op: &Operation,
 ) -> Result<String> {
     guarded(|| {
-        crate::preview::materialize(archive, id, Path::new(destination), password, op)
-            .map(|p| p.to_string_lossy().into_owned())
+        crate::worker::Client::sibling()?.materialize(
+            archive,
+            id,
+            Path::new(destination),
+            password,
+            op,
+        )
     })
 }
 fn replace_entry(
@@ -198,16 +203,18 @@ fn hash_entries(
     op: &Operation,
 ) -> Result<Vec<bridge::EntryHashInfo>> {
     guarded(|| {
-        crate::hashing::entries(archive, selected, password, op).map(|items| {
-            items
-                .into_iter()
-                .map(|h| bridge::EntryHashInfo {
-                    name: h.name,
-                    sha256: h.sha256,
-                    crc32: h.crc32,
-                })
-                .collect()
-        })
+        crate::worker::Client::sibling()?
+            .hashes(archive, selected, password, op)
+            .map(|items| {
+                items
+                    .into_iter()
+                    .map(|h| bridge::EntryHashInfo {
+                        name: h.name,
+                        sha256: h.sha256,
+                        crc32: h.crc32,
+                    })
+                    .collect()
+            })
     })
 }
 fn verify_entry_hash(
@@ -219,7 +226,7 @@ fn verify_entry_hash(
 ) -> Result<String> {
     guarded(|| {
         crate::hashing::validate_expected(expected)?;
-        let hashes = crate::hashing::entries(archive, &[id], password, op)?;
+        let hashes = crate::worker::Client::sibling()?.hashes(archive, &[id], password, op)?;
         let h = hashes
             .first()
             .ok_or_else(|| ArcError::new("SELECTION", "Select a regular file"))?;
@@ -274,7 +281,11 @@ fn progress(op: &Operation) -> bridge::ProgressInfo {
     }
 }
 fn open_archive(path: &str, password: &str, op: &Operation) -> Result<Box<Archive>> {
-    guarded(|| Archive::open(Path::new(path), password, op).map(Box::new))
+    guarded(|| {
+        crate::worker::Client::sibling()?
+            .open(Path::new(path), password, op)
+            .map(Box::new)
+    })
 }
 fn list_entries(archive: &Archive) -> Vec<bridge::EntryInfo> {
     archive
@@ -351,7 +362,7 @@ fn extract_archive(
     })
 }
 fn test_archive(archive: &Archive, password: &str, op: &Operation) -> Result<()> {
-    guarded(|| operations::test(archive, password, op))
+    guarded(|| crate::worker::Client::sibling()?.test(archive, password, op))
 }
 fn create_archive(output: &str, inputs: &[String], password: &str, op: &Operation) -> Result<()> {
     guarded(|| {
@@ -366,7 +377,7 @@ fn create_archive(output: &str, inputs: &[String], password: &str, op: &Operatio
     })
 }
 fn hash_archive_file(path: &str, op: &Operation) -> Result<String> {
-    guarded(|| operations::hash_file(Path::new(path), op))
+    guarded(|| crate::worker::Client::sibling()?.hash_file(Path::new(path), op))
 }
 fn cancelled(op: &Operation) -> bool {
     op.check().is_err()

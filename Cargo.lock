@@ -792,6 +792,7 @@ dependencies = [
 name = "vynxarc-cli"
 version = "0.5.0"
 dependencies = [
+ "tempfile",
  "vynx-arc-core",
  "zeroize",
 ]

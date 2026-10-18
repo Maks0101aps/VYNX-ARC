@@ -7,3 +7,14 @@ license = "MIT"
 [dependencies]
 vynx-arc-core = { path = "../../core" }
 zeroize = "=1.9.0"
+
+[[bin]]
+name = "vynxarc-cli"
+path = "src/main.rs"
+
+[[bin]]
+name = "vynxarc-worker"
+path = "src/worker.rs"
+
+[dev-dependencies]
+tempfile = "=3.27.0"

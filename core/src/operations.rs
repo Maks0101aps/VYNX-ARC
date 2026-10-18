@@ -102,6 +102,13 @@ impl Operation {
             cancelled: self.0.cancelled.load(Ordering::Relaxed),
         }
     }
+    pub(crate) fn import_progress(&self, p: Progress) {
+        self.0.done.store(p.done, Ordering::Relaxed);
+        self.0.total.store(p.total, Ordering::Relaxed);
+        self.phase(&p.current);
+        self.stage(&p.phase);
+        self.details(p.details);
+    }
     pub fn advance(&self, n: u64) {
         self.0.done.fetch_add(n, Ordering::Relaxed);
     }

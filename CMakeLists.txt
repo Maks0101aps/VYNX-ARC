@@ -16,6 +16,7 @@ else()
     set(RUST_LIBRARY "${RUST_TARGET_DIR}/release/libvynx_arc_core.a")
 endif()
 add_custom_command(OUTPUT "${RUST_LIBRARY}"
+    BYPRODUCTS "${RUST_TARGET_DIR}/release/vynxarc-worker.exe" "${RUST_TARGET_DIR}/release/vynxarc-cli.exe"
     COMMAND ${CARGO_EXECUTABLE} build --workspace --release --locked
     WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
     DEPENDS ${CORE_SOURCES} ${CLI_SOURCES} ${RAR_SOURCES} ${SEVENZ_SOURCES} third_party/sevenz-rust2/Cargo.toml apps/cli/Cargo.toml third_party/unrar-sys/build.rs core/build.rs core/Cargo.toml Cargo.toml Cargo.lock
@@ -79,7 +80,10 @@ endif()
 qt_add_resources(VynxArc branding PREFIX "/" FILES assets/icons/vynx-arc.svg assets/icons/vynx-arc.png)
 qt_add_translations(VynxArc TS_FILES assets/translations/vynx_uk.ts assets/translations/vynx_ru.ts RESOURCE_PREFIX "/i18n")
 install(TARGETS VynxArc RUNTIME DESTINATION .)
-install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" DESTINATION .)
+add_custom_command(TARGET VynxArc POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${RUST_TARGET_DIR}/release/vynxarc-worker.exe" "$<TARGET_FILE_DIR:VynxArc>"
+    VERBATIM)
+install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" "${RUST_TARGET_DIR}/release/vynxarc-worker.exe" DESTINATION .)
 install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
 enable_testing()
 add_executable(VynxPresentationTests

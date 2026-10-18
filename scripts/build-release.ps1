@@ -15,6 +15,7 @@ try {
     Copy-Item -LiteralPath (Join-Path $distRoot 'VYNX-ARC-Explorer-x64.msix') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'installer\Register-Explorer.ps1'),(Join-Path $repoRoot 'installer\Unregister-Explorer.ps1') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'target\release\vynxarc-cli.exe') -Destination $stage
+    Copy-Item -LiteralPath (Join-Path $repoRoot 'target\release\vynxarc-worker.exe') -Destination $stage
     Copy-Item -LiteralPath (Join-Path $repoRoot 'LICENSE'),(Join-Path $repoRoot 'docs\THIRD_PARTY_NOTICES.md') -Destination $stage
     Invoke-VynxTool windeployqt @('--release','--no-translations','--no-system-d3d-compiler','--no-opengl-sw','--no-compiler-runtime','--skip-plugin-types','generic,networkinformation,tls',(Join-Path $stage 'VynxArc.exe'))
     # App-local MSVC runtime: no developer SDK or runtime installation needed.
