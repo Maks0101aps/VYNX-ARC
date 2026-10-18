@@ -302,6 +302,18 @@ pub fn extract(
         .collect::<Result<_>>()?;
     archive.streams(password, op, |entry, data| {
         op.phase(&entry.name);
+        // Metadata was validated for the entire archive. Unselected payloads still
+        // get decoded/checked, but must not inspect unrelated destination paths.
+        if !selected(entry) {
+            return copy_checked(
+                data,
+                &mut std::io::sink(),
+                entry,
+                op,
+                &options.policy,
+                &mut actual,
+            );
+        }
         let mut output = security::output_path(&root, &entry.name)?;
         let mut choice = effective;
         if selected(entry) && output.exists() {
@@ -342,7 +354,7 @@ pub fn extract(
                 output = keep_both(&root, &output, &reserved, op)?;
             }
         }
-        if !selected(entry) || output.exists() && choice == Conflict::Skip {
+        if output.exists() && choice == Conflict::Skip {
             return copy_checked(
                 data,
                 &mut std::io::sink(),

@@ -1,5 +1,8 @@
 # Implementation plan
 
+Next development scope: [ROADMAP_0_6.md](ROADMAP_0_6.md). It is proposed work,
+not implemented 0.5 behavior.
+
 The 0.5 milestone and its remaining qualification boundaries are recorded in [ROADMAP_0_5.md](ROADMAP_0_5.md).
 See MILESTONE_0_5.md for verified capabilities; unchecked qualification items remain unperformed.
 

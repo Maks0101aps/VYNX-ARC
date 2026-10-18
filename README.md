@@ -78,6 +78,10 @@ the command line are intentionally unsupported.
 
 ## Project status
 
+The next milestone is proposed in the [0.6.0 plan](docs/ROADMAP_0_6.md):
+bounded workers, faster large-archive operations, conversion and stronger recovery.
+The plan does not change the implemented version.
+
 The [0.5 milestone report](docs/MILESTONE_0_5.md) records current behavior,
 measurements and verification boundaries. [Roadmap](docs/ROADMAP_0_5.md) tracks acceptance.
 
