@@ -117,3 +117,22 @@ handling, working-copy quota and Save as through the real GUI queue and persiste
 journal. CLI ZIP/7Z/TAR conversions were also read successfully by Python's independent
 ZIP implementation. Extended fault injection, editor-host tests, other independent
 readers and final release acceptance remain pending.
+
+## Actual editor hosts
+
+[First editor report](verification/0.6/real-editors-first.json): VS Code **1.142.0**
+and LibreOffice Writer **26.8.1.1** each changed/saved four real working copies and
+verified saveback into plain/encrypted ZIP and 7Z. Writer changed the underlying
+file identifier in all four saves, covering its replace-through-temporary-file path.
+Client preparation and saveback were separate processes. Working copies survived
+and their bytes exactly matched decoded saved entries and publication receipts.
+These are actual editor API workflows (VS Code extension host and headless Writer
+UNO), not manual editor UI testing. They are separate from the synthetic PowerShell
+write in the ordinary GUI smoke. Test credentials are public fixed fixture strings;
+passwords were not placed in process arguments or acceptance manifests.
+
+The optional editor driver requires explicitly named local editor paths. Writer was
+administratively extracted into an ignored workspace directory from the official
+26.8.1 MSI, checked against its published SHA-256 and a valid Document Foundation
+Authenticode signature; it was not installed globally. Each editor used a private
+profile and owned fixture files. Raw logs remain under the local evidence root.
