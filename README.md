@@ -1,8 +1,8 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains a working **0.5.0
-development milestone**. The supplied master brief remains the V1 contract;
+archive core connected through CXX. This repository contains the **0.6.0
+release candidate**. Final package acceptance is in progress. The supplied master brief remains the V1 contract;
 this milestone does not satisfy the full contract.
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
@@ -30,9 +30,22 @@ double-click a row for error details. New creation requests can also be queued.
 The bounded journal restores interrupted jobs for explicit review/retry; passwords
 are never saved. Export a JSON report with terminal results and batch identifiers.
 
+File > Convert archives (Ctrl+Shift+C) plans and queues supported source formats
+into new ZIP/7Z archives, with independent source/destination encryption choices.
+Originals are kept; output contents are decoded and verified before publication.
+Retry failed batch jobs creates explicit new attempts with reviewed settings.
+Large queue selections are stored completely in verified bounded sidecar files.
+Unknown archive-write results require verification before retrying.
+
+Archive decoders and writers used by the GUI run in supervised worker processes,
+with Windows memory/process limits, a wall-time budget and forced cancellation of
+unresponsive children. Other idle tabs and retained working copies survive a worker
+failure. This is resource isolation, not a separate filesystem-permission sandbox.
+
 Ctrl+Shift+Return creates an editable working copy of a supported ZIP/7Z file.
-Use View > Working copies to explicitly save it back, reload its source, export or
-discard it. Changed sources stop a save; failed saves retain the edited copy.
+Use the View > Working copies dock to explicitly save it back, save as a new
+archive, verify its contents, reload its source, export or discard it. Changed
+sources stop a save; failed saves retain the edited copy.
 Decrypted working content stays on disk until discarded. View > Temporary files
 manages disposable read-only views separately. Tabs with pending edits show `*`.
 
@@ -72,17 +85,19 @@ Release packaging additionally requires Python for license collection and Inno
 Setup 6 for the installer. `-SkipInstaller` generates only the portable package.
 
 The bundled CLI supports `list`, `extract`, `create`, `test`, `add`, `delete`,
-`rename`, `hash`, `verify`, `hash-entry` and `verify-entry`.
+`rename`, `convert`, `hash`, `verify`, `hash-entry`, `verify-entry` and supervised
+`isolated-list`, `isolated-test`, `isolated-extract`.
 Run `vynxarc-cli --help`. Password operations currently use the GUI; secrets on
 the command line are intentionally unsupported.
 
 ## Project status
 
-The next milestone is proposed in the [0.6.0 plan](docs/ROADMAP_0_6.md):
-bounded workers, faster large-archive operations, conversion and stronger recovery.
-The plan does not change the implemented version.
+The [0.6.0 plan](docs/ROADMAP_0_6.md), [development evidence](docs/DEVELOPMENT_0_6.md)
+and [performance report](docs/BENCHMARKS_0_6.md) track bounded workers, faster
+large-archive operations, conversion and stronger recovery. Final package and
+0.5-to-0.6 upgrade qualification remains pending for this candidate.
 
-The [0.5 milestone report](docs/MILESTONE_0_5.md) records current behavior,
+The [0.5 milestone report](docs/MILESTONE_0_5.md) records the preceding behavior,
 measurements and verification boundaries. [Roadmap](docs/ROADMAP_0_5.md) tracks acceptance.
 
 [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) records evidence,
@@ -95,7 +110,7 @@ increment and verification. The [previous product report](docs/PRODUCT_DEVELOPME
 records the preceding format/resource work. The earlier [improvement report](docs/IMPROVEMENTS_2026-10-16.md)
 records the preceding parser, preview and dependency changes. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
 retains historical failures. Stable-release acceptance remains incomplete at
-version 0.5.0. Run `scripts/check.ps1` for mandatory local source gates;
+version 0.6.0. Run `scripts/check.ps1` for mandatory local source gates;
 release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;
