@@ -37,7 +37,10 @@ run([cli,'--help']);print('Isolated deployed CLI passed',flush=True)
 work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=work_scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)
 (source/'README.md').write_text('# Archive verification\nReal test files for VYNX ARC.\n',encoding='utf-8');(source/'src/дані.txt').write_text('Перевірка архівів — справжні байти.\n',encoding='utf-8');(source/'empty.txt').write_bytes(b'')
 import py7zr,tarfile,io,gzip,bz2,lzma
-from backports import zstd
+try:
+    from compression import zstd
+except ImportError:
+    from backports import zstd
 evidence={}
 for ext in ['zip','7z','tar','tar.gz','tar.xz','tar.bz2','tar.zst']:
     output=work/f'Project.{ext}'

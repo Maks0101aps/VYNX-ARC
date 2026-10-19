@@ -9,7 +9,10 @@ parser.add_argument('--output',type=pathlib.Path)
 args=parser.parse_args();root=args.fixtures.resolve();root.mkdir(parents=True,exist_ok=True)
 if args.prepare:
  import py7zr,tarfile
- from backports import zstd
+ try:
+  from compression import zstd
+ except ImportError:
+  from backports import zstd
  rng=random.Random(0x56594e58)
  cases=[]
  with zipfile.ZipFile(root/'cycles.zip','w',compression=zipfile.ZIP_STORED) as cycle:cycle.writestr('needle.txt','resource-cycle payload')
