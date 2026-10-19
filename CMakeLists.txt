@@ -85,6 +85,7 @@ qt_add_translations(VynxArc TS_FILES assets/translations/vynx_uk.ts assets/trans
 install(TARGETS VynxArc RUNTIME DESTINATION .)
 add_custom_command(TARGET VynxArc POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${RUST_TARGET_DIR}/release/vynxarc-worker.exe" "$<TARGET_FILE_DIR:VynxArc>"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" "$<TARGET_FILE_DIR:VynxArc>"
     VERBATIM)
 install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" "${RUST_TARGET_DIR}/release/vynxarc-worker.exe" DESTINATION .)
 install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
@@ -116,3 +117,5 @@ if(TARGET VynxShellSmoke)
 endif()
 add_test(NAME gui_smoke COMMAND VynxArc --smoke-test)
 set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 60)
+add_test(NAME gui_batch COMMAND VynxArc --smoke-test --worker-fault-smoke batch -)
+set_tests_properties(gui_batch PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 60)

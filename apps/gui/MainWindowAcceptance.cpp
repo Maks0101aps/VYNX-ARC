@@ -1,6 +1,7 @@
 ﻿#include "EditStore.h"
 #include "MainWindow.h"
 #include "SecretUtf8.h"
+#include "dialogs/ConversionDialog.h"
 #include "pages/ArchivePage.h"
 #include <QtConcurrent>
 #include <QtWidgets>
@@ -177,7 +178,7 @@ bool MainWindow::workerFaultAcceptance(const QString &mode, const QString &root)
     };
     const bool recovering = mode.startsWith("recover-");
     if (!QStringList{"crash", "hang", "memory", "before", "after", "recover-before",
-                     "recover-after", "recover-after-dirty"}
+                     "recover-after", "recover-after-dirty", "batch"}
              .contains(mode))
         return fail(__LINE__);
     if (!recovering && QFileInfo::exists(root))
@@ -285,6 +286,114 @@ bool MainWindow::workerFaultAcceptance(const QString &mode, const QString &root)
                       {"create", archive, root + "/note.txt"});
             if (!cli.waitForFinished(15000) || cli.exitCode() != 0)
                 return fail(__LINE__);
+        }
+        if (mode == "batch") {
+            const auto bad = root + "/bad.zip";
+            if (!write(bad, "damaged input"))
+                return fail(__LINE__);
+            const auto batch = QUuid::createUuid().toString(QUuid::WithoutBraces);
+            for (const auto &input : {source, good, bad}) {
+                const auto output = root + "/batch-output/" + QFileInfo(input).fileName();
+                const QJsonObject spec{{"kind", "convert"},     {"sources", QJsonArray{input}},
+                                       {"destination", output}, {"format", 0},
+                                       {"preset", 2},           {"resource", 1},
+                                       {"allowDecrypt", true},  {"needsOutputPassword", false},
+                                       {"batchId", batch}};
+                if (!enqueueRequest(
+                        "Batch acceptance",
+                        [this, spec] { dispatchConversionSpec(spec, secret({}), secret({})); }, {},
+                        spec))
+                    return fail(__LINE__);
+            }
+            if (!waitIdle())
+                return fail(__LINE__);
+            QString failedId;
+            int completed = 0, failures = 0;
+            for (const auto &value : journal_.records()) {
+                const auto row = value.toObject();
+                if (row["spec"].toObject()["batchId"] != batch)
+                    continue;
+                completed += row["state"] == "completed";
+                failures += row["state"] == "failed";
+                if (row["state"] == "failed")
+                    failedId = row["id"].toString();
+            }
+            if (completed != 2 || failures != 1 || failedId.isEmpty() ||
+                QFileInfo::exists(root + "/batch-output/bad.zip"))
+                return fail(__LINE__);
+            QFile original(good), repaired(bad);
+            if (!original.open(QIODevice::ReadOnly) ||
+                !repaired.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                return fail(__LINE__);
+            const auto bytes = original.readAll();
+            if (repaired.write(bytes) != bytes.size())
+                return fail(__LINE__);
+            repaired.close();
+            original.close();
+            if (!QDir().mkpath(root + "/retried"))
+                return fail(__LINE__);
+            for (int i = 0; i < queueView_->count(); ++i)
+                if (queueView_->item(i)->data(Qt::UserRole + 3).toString() == failedId)
+                    queueView_->setCurrentItem(queueView_->item(i));
+            bool submitted = false, onlyFailed = false, configured = false;
+            QElapsedTimer deadline;
+            deadline.start();
+            QTimer review;
+            connect(&review, &QTimer::timeout, this, [&] {
+                auto *dialog = qobject_cast<ConversionDialog *>(QApplication::activeModalWidget());
+                if (!dialog)
+                    return;
+                if (deadline.elapsed() > 15000) {
+                    dialog->reject();
+                    return;
+                }
+                if (!configured) {
+                    configured = true;
+                    onlyFailed = dialog->sources().size() == 1 &&
+                                 archiveIdentity(dialog->sources().first()) == archiveIdentity(bad);
+                    if (!onlyFailed) {
+                        dialog->reject();
+                        return;
+                    }
+                    dialog->destination->setText(root + "/retried");
+                    dialog->encrypt->setChecked(false);
+                    dialog->allowDecrypt->setChecked(true);
+                }
+                auto *start = dialog->findChild<QPushButton *>("queueConversion");
+                if (start && start->isEnabled()) {
+                    submitted = true;
+                    review.stop();
+                    start->click();
+                }
+            });
+            review.start(20);
+            retryFailedBatch();
+            review.stop();
+            if (!submitted || !onlyFailed || !waitIdle())
+                return fail(__LINE__);
+            int retries = 0;
+            for (const auto &value : journal_.records()) {
+                const auto row = value.toObject();
+                if (row["spec"].toObject()["retryOf"] != failedId)
+                    continue;
+                ++retries;
+                if (row["state"] != "completed" || row["spec"].toObject()["batchId"] == batch)
+                    return fail(__LINE__);
+            }
+            if (retries != 1 || journal_.record(failedId)["state"] != "failed" ||
+                journal_.record(failedId)["error"].toString().isEmpty() ||
+                !QFileInfo::exists(root + "/retried/bad.zip"))
+                return fail(__LINE__);
+            QSaveFile report(root + "/worker-result.json");
+            const auto result = QJsonDocument(QJsonObject{{"status", "passed"},
+                                                          {"mode", mode},
+                                                          {"initial_completed", completed},
+                                                          {"initial_failed", failures},
+                                                          {"retried_only_failed", true},
+                                                          {"original_error_retained", true}})
+                                    .toJson();
+            return report.open(QIODevice::WriteOnly) && report.write(result) == result.size() &&
+                   report.commit();
         }
         openWithSecret(good, secret({}));
         if (!waitIdle() || !session_->archive)

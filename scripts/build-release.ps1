@@ -21,8 +21,16 @@ try {
     # App-local MSVC runtime: no developer SDK or runtime installation needed.
     $crt = Get-ChildItem -LiteralPath (Join-Path $vsRoot 'VC\Redist\MSVC') -Directory |
         Where-Object Name -Match '^\d+\.' | Sort-Object Name -Descending | Select-Object -First 1
-    $crtDirectory = Join-Path $crt.FullName 'x64\Microsoft.VC143.CRT'
-    if (!(Test-Path $crtDirectory)) { throw 'MSVC redistributable DLLs not found.' }
+    $crtPackage = Get-ChildItem -LiteralPath (Join-Path $crt.FullName 'x64') -Directory |
+        Where-Object Name -Match '^Microsoft\.VC\d+\.CRT$' |
+        Sort-Object Name -Descending | Select-Object -First 1
+    if (!$crtPackage) { throw "MSVC x64 redistributable DLLs not found under $($crt.FullName)." }
+    $crtDirectory = $crtPackage.FullName
+    foreach($requiredRuntime in 'msvcp140.dll','vcruntime140.dll') {
+        if (!(Test-Path -LiteralPath (Join-Path $crtDirectory $requiredRuntime))) {
+            throw "Incomplete MSVC runtime: $requiredRuntime is missing from $crtDirectory."
+        }
+    }
     Get-ChildItem -LiteralPath $crtDirectory -Filter '*.dll' | Copy-Item -Destination $stage
     New-Item -ItemType Directory -Force (Join-Path $stage 'translations') | Out-Null
     foreach($lang in 'uk','ru') {

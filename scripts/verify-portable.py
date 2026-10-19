@@ -33,6 +33,7 @@ def run(command):
     if r.returncode:raise RuntimeError((r.returncode,r.stdout.decode(errors='replace'),r.stderr.decode(errors='replace')))
     return r.stdout.decode(errors='replace')
 run([exe,'--smoke-test']);print('Isolated deployed GUI smoke passed',flush=True)
+run([exe,'--smoke-test','--worker-fault-smoke','batch','-']);print('Isolated deployed GUI batch/retry passed',flush=True)
 run([cli,'--help']);print('Isolated deployed CLI passed',flush=True)
 work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=work_scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)
 (source/'README.md').write_text('# Archive verification\nReal test files for VYNX ARC.\n',encoding='utf-8');(source/'src/дані.txt').write_text('Перевірка архівів — справжні байти.\n',encoding='utf-8');(source/'empty.txt').write_bytes(b'')
@@ -149,5 +150,6 @@ for theme,lang,scale in [('light','en','1'),('dark','en','1'),('dark','uk','1.25
 remaining=[p.pid for p in psutil.process_iter(['exe']) if p.info['exe'] and os.path.normcase(p.info['exe'])==os.path.normcase(str(exe.resolve()))]
 assert not remaining,('Verified application left running',remaining)
 result={'status':'passed','timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'portable_sha256':hashlib.sha256((root/'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),'application_sha256':hashlib.sha256(exe.read_bytes()).hexdigest(),'isolated_environment':'PATH only Windows and System32; all developer Qt variables removed','archive_verification':evidence,'memory_samples':measure,'remaining_processes':remaining,'process_scope':'Only the executable unpacked by this verifier; unrelated running app instances are excluded'}
+result['deployed_gui_batch']='mixed batch and failed-only retry passed'
 report_path.write_text(json.dumps(result,indent=2)+'\n',encoding='utf-8',newline='\n')
 print(json.dumps(result,indent=2),flush=True)

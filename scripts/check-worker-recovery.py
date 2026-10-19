@@ -31,7 +31,7 @@ def main():
     windows = next(value for key, value in env.items() if key.lower() == "systemroot")
     env["PATH"] = os.pathsep.join((windows, str(Path(windows) / "System32")))
     results = []
-    for label in ("crash", "hang", "memory", "before", "after", "after-dirty"):
+    for label in ("crash", "hang", "memory", "before", "after", "after-dirty", "batch"):
         mode = "after" if label == "after-dirty" else label
         case = root / ("case-" + label)
         env["VYNX_WORKER_FAULT"] = {"before": "before-publish", "after": "after-publish"}.get(mode, mode)

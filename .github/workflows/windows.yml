@@ -18,6 +18,8 @@ jobs:
           # Pin upstream's architecture-split repository support until released.
           aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7'
           py7zrversion: '==1.1.3'
+          cache: true
+          cache-key-prefix: vynx-qt-076e165
       - name: Install pinned audit tool
         shell: pwsh
         run: |

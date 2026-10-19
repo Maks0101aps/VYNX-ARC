@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QPointer>
 #include <QSettings>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <QTranslator>
 int main(int argc, char **argv) {
@@ -51,10 +52,16 @@ int main(int argc, char **argv) {
     if (faultIndex >= 0) {
         if (!app.arguments().contains("--smoke-test") || faultIndex + 2 >= app.arguments().size())
             return 2;
-        return window.workerFaultAcceptance(app.arguments()[faultIndex + 1],
-                                            app.arguments()[faultIndex + 2])
-                   ? 0
-                   : 1;
+        const auto mode = app.arguments()[faultIndex + 1];
+        auto root = app.arguments()[faultIndex + 2];
+        std::unique_ptr<QTemporaryDir> fixture;
+        if (mode == "batch" && root == "-") {
+            fixture = std::make_unique<QTemporaryDir>();
+            if (!fixture->isValid())
+                return 1;
+            root = fixture->path() + "/batch";
+        }
+        return window.workerFaultAcceptance(mode, root) ? 0 : 1;
     }
     const auto perfIndex = app.arguments().indexOf("--performance-smoke");
     if (perfIndex >= 0) {
