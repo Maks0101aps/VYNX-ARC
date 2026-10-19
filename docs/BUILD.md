@@ -14,6 +14,12 @@ Set `VYNX_QT_ROOT` to the Qt SDK root (containing bin, include, lib, plugins).
 CMake and Ninja must be on PATH. Python is needed for release license collection;
 aqt is an optional installation helper. Neither is a runtime dependency.
 
+Qt 6.11+ Windows repositories are split by compiler architecture. Released aqt
+3.3.0 does not resolve the Qt 6.12 MSVC repository correctly. CI pins upstream
+aqt commit `076e1659807d0b362a3ed684d54c2e9c775eb9c7` through install-qt-action's
+`aqtsource` input; ordinary Qt archive checksum verification remains enabled.
+This fixes the observed SDK installation failure, without changing the Qt version.
+
 ```powershell
 $env:VYNX_QT_ROOT = "$env:LOCALAPPDATA\VynxArcDev\QtMSVC"
 scripts/bootstrap.ps1

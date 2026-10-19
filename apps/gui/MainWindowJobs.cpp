@@ -101,7 +101,13 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     auto *report = controls->addAction(tr("Export report..."));
     connect(report, &QAction::triggered, this, &MainWindow::exportJobReport);
     queueLayout->addWidget(controls);
-    queueDock_->setWidget(queuePanel);
+    auto *queueScroll = new QScrollArea;
+    queueScroll->setWidgetResizable(true);
+    queueScroll->setFrameShape(QFrame::NoFrame);
+    queueScroll->setMinimumSize(0, 0);
+    queuePanel->setMinimumHeight(260);
+    queueScroll->setWidget(queuePanel);
+    queueDock_->setWidget(queueScroll);
     addDockWidget(Qt::BottomDockWidgetArea, queueDock_);
     queueDock_->hide();
     viewMenu->addAction(queueDock_->toggleViewAction());
@@ -310,6 +316,10 @@ void MainWindow::updateQueue() {
              QStringList{"unknown", "verifying", "interrupted", "decision"}.contains(state)) ||
             (filter == 5 && QStringList{"completed", "cancelled"}.contains(state));
         row->setHidden(!visible);
+    }
+    if (queueView_->currentItem() && queueView_->currentItem()->isHidden()) {
+        queueView_->clearSelection();
+        queueView_->setCurrentItem(nullptr);
     }
     int completed = 0;
     for (int i = 0; i < queueView_->count(); ++i)

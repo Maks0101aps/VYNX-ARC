@@ -168,3 +168,28 @@ inputs passed 16 bounded replays each (maximum 0.776 seconds). The original fail
 evidence is retained; its cause is not established and this campaign is not marked
 passed. A separate continuation campaign is running. Aggregate campaign wall time
 includes process startup and is neither CPU time nor coverage-guided fuzzing.
+
+The next recovery extension also changes the working file after the interrupted
+publication. Verification preserves its newer bytes and marks them dirty; both the
+unchanged and dirty cases then successfully save a second edit through the GUI.
+See [edited-save recovery](verification/0.6/worker-recovery-edits.json).
+
+Independent readers **pyzipper** and **py7zr** decoded all **44** conversion results
+from ordinary/encrypted ZIP/7Z, TAR and compressed TAR, and real RAR4/5 inputs.
+Files (including empty/binary/Unicode content), SHA-256 values and directory sets
+matched the expected source manifest, and source bytes were unchanged. Expected
+source hashes are produced by the core; result decoding uses independent libraries.
+See [reader report](verification/0.6/conversion-independent-first.json).
+
+A streaming cancellation regression initially returned a wrapped `7Z` encoder
+error. The shared rebuild sink now restores the operation's cancellation cause
+when the encoder wraps a reader failure. The repeated test confirms `CANCELLED`,
+an unchanged source, no published output and no staging file left behind. All five
+conversion tests passed. Worker request kinds are now a validated native enum;
+their existing protocol-3 wire values remain unchanged.
+
+Visual inspection at 620 x 440 found dock controls below the window boundary.
+Queue and working-copy contents now scroll instead of being clipped. RU screenshots
+cover light/dark at 100/125/150/200%, UK additionally covers narrow 100/200%, and EN
+covers both themes. Final package captures and aggregate GUI performance remain
+pending.

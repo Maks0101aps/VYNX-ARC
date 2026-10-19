@@ -13,17 +13,47 @@ use std::{
 };
 use wire::{Wire, record};
 use zeroize::Zeroizing;
-const OPEN: u8 = 1;
-const TEXT: u8 = 2;
-const CONTENT: u8 = 3;
-const TEST: u8 = 4;
-const HASH_ENTRIES: u8 = 5;
-const HASH_FILE: u8 = 6;
-const MATERIALIZE: u8 = 7;
-const EXTRACT: u8 = 8;
-const CREATE: u8 = 9;
-const MODIFY: u8 = 10;
-const CONVERT: u8 = 11;
+#[derive(Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
+enum JobKind {
+    Open = 1,
+    Text,
+    Content,
+    Test,
+    HashEntries,
+    HashFile,
+    Materialize,
+    Extract,
+    Create,
+    Modify,
+    Convert,
+}
+use JobKind::{
+    Content as CONTENT, Convert as CONVERT, Create as CREATE, Extract as EXTRACT,
+    HashEntries as HASH_ENTRIES, HashFile as HASH_FILE, Materialize as MATERIALIZE,
+    Modify as MODIFY, Open as OPEN, Test as TEST, Text as TEXT,
+};
+impl Wire for JobKind {
+    fn put(&self, out: &mut Vec<u8>) {
+        (*self as u8).put(out);
+    }
+    fn get(input: &mut &[u8]) -> Result<Self> {
+        match u8::get(input)? {
+            1 => Ok(OPEN),
+            2 => Ok(TEXT),
+            3 => Ok(CONTENT),
+            4 => Ok(TEST),
+            5 => Ok(HASH_ENTRIES),
+            6 => Ok(HASH_FILE),
+            7 => Ok(MATERIALIZE),
+            8 => Ok(EXTRACT),
+            9 => Ok(CREATE),
+            10 => Ok(MODIFY),
+            11 => Ok(CONVERT),
+            _ => Err(protocol()),
+        }
+    }
+}
 record!(crate::publication::Target {
     path,
     sha256,
@@ -75,7 +105,7 @@ impl Wire for Blob {
     }
 }
 struct Request {
-    kind: u8,
+    kind: JobKind,
     path: String,
     password: Zeroizing<String>,
     new_password: Zeroizing<String>,
@@ -160,7 +190,7 @@ fn fingerprint(a: &Archive) -> String {
     hash.finalize().iter().map(|v| format!("{v:02x}")).collect()
 }
 impl Request {
-    fn new(kind: u8, path: &Path, password: &str, op: &Operation) -> Self {
+    fn new(kind: JobKind, path: &Path, password: &str, op: &Operation) -> Self {
         let s = op.settings();
         Self {
             kind,
@@ -179,7 +209,7 @@ impl Request {
             volume: 0,
         }
     }
-    fn archive(kind: u8, a: &Archive, password: &str, op: &Operation) -> Self {
+    fn archive(kind: JobKind, a: &Archive, password: &str, op: &Operation) -> Self {
         let mut request = Self::new(kind, &a.path, password, op);
         request.fingerprint = fingerprint(a);
         request
@@ -576,21 +606,6 @@ fn remote_error(code: &str, message: &str) -> ArcError {
 fn execute(r: Request, op: &Operation) -> Result<Reply> {
     #[cfg(feature = "worker-diagnostics")]
     diagnostics::before(&r)?;
-    if !matches!(
-        r.kind,
-        OPEN | TEXT
-            | CONTENT
-            | TEST
-            | HASH_ENTRIES
-            | HASH_FILE
-            | MATERIALIZE
-            | EXTRACT
-            | CREATE
-            | MODIFY
-            | CONVERT
-    ) {
-        return Err(protocol());
-    }
     op.configure(crate::settings::Settings::from_ids(r.preset, r.resource)?);
     if r.kind == CREATE {
         let options = crate::CreateOptions {

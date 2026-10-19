@@ -56,6 +56,15 @@ int main(int argc, char **argv) {
                    ? 0
                    : 1;
     }
+    const auto perfIndex = app.arguments().indexOf("--performance-smoke");
+    if (perfIndex >= 0) {
+        if (!app.arguments().contains("--smoke-test") || perfIndex + 2 >= app.arguments().size())
+            return 2;
+        return window.performanceAcceptance(app.arguments()[perfIndex + 1],
+                                            app.arguments()[perfIndex + 2])
+                   ? 0
+                   : 1;
+    }
     if (app.arguments().contains("--smoke-test"))
         return window.smokeTest() ? 0 : 1;
     window.show();

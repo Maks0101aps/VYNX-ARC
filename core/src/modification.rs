@@ -585,7 +585,12 @@ impl<'a> Sink<'a> {
                         expected: entry.size,
                         done: 0,
                     };
-                    writer.push_archive_entry(e, Some(&mut reader))?;
+                    let encoded = writer.push_archive_entry(e, Some(&mut reader));
+                    if encoded.is_err() {
+                        // The encoder wraps reader cancellation in its own error type.
+                        op.check()?;
+                    }
+                    encoded?;
                     if reader.done != entry.size {
                         return Err(ArcError::new(
                             "CORRUPT",

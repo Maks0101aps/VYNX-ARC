@@ -43,6 +43,7 @@ class MainWindow : public QMainWindow {
     void openPath(const QString &path);
     bool smokeTest();
     bool workerFaultAcceptance(const QString &mode, const QString &root);
+    bool performanceAcceptance(const QString &archive, const QString &root);
     void handleShellRequest(quint32 action, const QStringList &paths);
     QWidget *prepareCapture(const QString &mode);
 

@@ -219,3 +219,67 @@ fn converts_real_rar4_rar5_fixtures() {
         }
     }
 }
+
+#[test]
+fn conversion_cancellation_during_streaming_keeps_source_and_removes_staging() {
+    let dir = tempfile::tempdir().unwrap();
+    let input = dir.path().join("large.bin");
+    fs::write(&input, vec![b'x'; 32 << 20]).unwrap();
+    let source = dir.path().join("source.zip");
+    let create = Operation::default();
+    create.configure(settings::Settings::from_ids(0, 0).unwrap());
+    operations::create(
+        &CreateOptions {
+            output: source.clone(),
+            inputs: vec![input],
+            password: String::new().into(),
+        },
+        &create,
+    )
+    .unwrap();
+    let original = operations::hash_file(&source, &Operation::default()).unwrap();
+    let archive = Archive::open(&source, "", &Operation::default()).unwrap();
+    let output = dir.path().join("result.7z");
+    let op = Operation::default();
+    let cancellation = op.clone();
+    let stop = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+    let finished = stop.clone();
+    let watcher = std::thread::spawn(move || {
+        while !finished.load(std::sync::atomic::Ordering::Acquire) {
+            if cancellation.snapshot().done > 0 {
+                cancellation.cancel();
+                return true;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+        false
+    });
+    let result = conversion::convert(
+        &archive,
+        &Options {
+            output: output.clone(),
+            format: Format::SevenZ,
+            password: String::new().into(),
+            allow_decrypt: false,
+            replacement: None,
+        },
+        "",
+        &op,
+    );
+    stop.store(true, std::sync::atomic::Ordering::Release);
+    assert!(
+        watcher.join().unwrap(),
+        "cancellation must occur after work starts"
+    );
+    assert_eq!(result.unwrap_err().code, "CANCELLED");
+    assert!(!output.exists());
+    assert_eq!(
+        operations::hash_file(&source, &Operation::default()).unwrap(),
+        original
+    );
+    assert_eq!(
+        fs::read_dir(dir.path()).unwrap().count(),
+        2,
+        "staged output must be removed"
+    );
+}

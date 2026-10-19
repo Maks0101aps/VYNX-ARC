@@ -1,0 +1,85 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "error": "WORKER_STOPPED: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available",
+      "heartbeat_ticks": 10,
+      "mode": "crash",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "case": "crash"
+    },
+    {
+      "error": "CANCELLED: Operation cancelled; completed files remain",
+      "heartbeat_ticks": 117,
+      "mode": "hang",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "case": "hang"
+    },
+    {
+      "error": "WORKER_MEMORY: Diagnostic 1 GiB committed allocation was refused by the worker job",
+      "heartbeat_ticks": 2,
+      "mode": "memory",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "case": "memory"
+    },
+    {
+      "error": "RESULT_UNKNOWN: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available Verify the destination before any retry; a write may have completed.",
+      "heartbeat_ticks": 22,
+      "mode": "before",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "recovery": {
+        "state": "failed",
+        "status": "passed",
+        "working_copy_retained": true
+      },
+      "case": "before"
+    },
+    {
+      "error": "RESULT_UNKNOWN: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available Verify the destination before any retry; a write may have completed.",
+      "heartbeat_ticks": 21,
+      "mode": "after",
+      "original_preserved": false,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "recovery": {
+        "state": "completed",
+        "status": "passed",
+        "working_copy_retained": true
+      },
+      "case": "after"
+    },
+    {
+      "error": "RESULT_UNKNOWN: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available Verify the destination before any retry; a write may have completed.",
+      "heartbeat_ticks": 24,
+      "mode": "after",
+      "original_preserved": false,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "recovery": {
+        "state": "completed",
+        "status": "passed",
+        "working_copy_retained": true
+      },
+      "case": "after-dirty"
+    }
+  ],
+  "scope": "Actual GUI queue and new-process recovery with opt-in fault hooks; diagnostic hooks excluded from normal builds.",
+  "binaries": {
+    "VynxArc.exe": "cf4e5feadbdd235e1ef3289e125ab2258ec57c3a18cc24a3d41fb0d6a39600ff",
+    "vynxarc-worker.exe": "33fc0b865b3f2ecf4d11d7e3417ab029df61203454b1669ff905dc1a4e2a59ec"
+  }
+}

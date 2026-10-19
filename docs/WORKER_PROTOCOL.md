@@ -61,7 +61,9 @@ The queue's Verify result action reads destination SHA-256 values in workers. Al
 expected result hashes matching establishes completed publication; all prior hashes
 (or prior absence) matching establishes that the destination is currently unchanged.
 Mixed or inaccessible results remain unknown. There is no automatic retry. Working
-copy recovery metadata is not silently rebound by this verification. Extraction has
+copy recovery metadata is updated only for a recorded edited-save input digest;
+the current working file is independently hashed and newer bytes remain dirty.
+Extraction has
 per-file publication and no aggregate receipt yet; interrupted extraction requires
 manual destination review and is not automatically retried.
 

@@ -1,0 +1,72 @@
+{
+  "status": "completed with reviewed timing alarms",
+  "cases": 61321,
+  "aggregate_active_wall_seconds": 15499.31300000001,
+  "format_case_counts": {
+    "zip": 2671,
+    "7z": 2669,
+    "tar": 2669,
+    "tar.gz": 2669,
+    "gz": 2669,
+    "xz": 2668,
+    "bz2": 2667,
+    "zst": 2667,
+    "lzma": 2666,
+    "tar.xz": 2666,
+    "tar.bz2": 2666,
+    "tar.zst": 2666,
+    "RAR:test_read_format_rar.rar": 2666,
+    "RAR:test_read_format_rar4_encrypted.rar": 2665,
+    "RAR:test_read_format_rar4_encrypted_filenames.rar": 2665,
+    "RAR:test_read_format_rar5_compressed.rar": 2665,
+    "RAR:test_read_format_rar5_encrypted.rar": 2664,
+    "RAR:test_read_format_rar5_encrypted_filenames.rar": 2664,
+    "RAR:test_read_format_rar5_multiple_files.rar": 2664,
+    "RAR:test_read_format_rar5_stored.rar": 2664,
+    "RAR:test_read_format_rar5_unicode.rar": 2664,
+    "RAR:test_read_format_rar_binary_data.rar": 2664,
+    "RAR:test_read_format_rar_compress_normal.rar": 2663
+  },
+  "runs": [
+    {
+      "status": "failed",
+      "cases": 44167,
+      "aggregate_seconds": 10698.923999999999,
+      "cli_sha256": "78cae0a325845882ed9d48228e07c30e64b1591212c67ee9db6837d7697c9e1f",
+      "timing_alarms": [
+        {
+          "case": 11040,
+          "format": "zip",
+          "sha256": "fe8bd593a4c89a4e185d56ecdbeea4ed16c4c6fc4344aae1bdc2430f344ef156",
+          "seconds": 8.57799999999952,
+          "error": "campaign child exceeded 7 seconds"
+        },
+        {
+          "case": 11040,
+          "format": "zip",
+          "sha256": "fd8ddfe957fd0b716b2917d7aaaaa106d5c56fb10a9efdcb506ed52541d1b635",
+          "seconds": 7.813000000000102,
+          "error": "campaign child exceeded 7 seconds"
+        },
+        {
+          "case": 11038,
+          "format": "RAR:test_read_format_rar_binary_data.rar",
+          "sha256": "39b6c3dc2df33678e881ce4a3d01e6bab6d8994b2f60bc8ccb615d3ae7bada18",
+          "seconds": 7.296999999999571,
+          "error": "campaign child exceeded 7 seconds"
+        }
+      ]
+    },
+    {
+      "status": "passed",
+      "cases": 17154,
+      "aggregate_seconds": 4800.38900000001,
+      "cli_sha256": "3dd6da234aa3fdba5b65dfbc944b174ff4a8e2c9e13518aff6c66253ba4fd5a5",
+      "timing_alarms": []
+    }
+  ],
+  "replay_count": 32,
+  "replay_failures": 0,
+  "max_replay_seconds": 0.7757159000029787,
+  "scope": "4 independent mutation workers, 512 MiB job cap, 4 s native command / 7 s harness deadlines. Aggregate active campaign wall time includes startup; not CPU time, sanitizers, coverage-guided fuzzing or security certification. First run retained two timing alarms; each input passed 16 bounded replays. Original cause not established. Continuation passed."
+}

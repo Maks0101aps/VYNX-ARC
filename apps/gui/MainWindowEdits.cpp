@@ -265,7 +265,13 @@ void MainWindow::showWorkingCopies() {
     workingDock_->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
     auto *panel = new QWidget;
     auto &dialog = *panel;
-    workingDock_->setWidget(panel);
+    auto *scroll = new QScrollArea;
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setMinimumSize(0, 0);
+    panel->setMinimumHeight(360);
+    scroll->setWidget(panel);
+    workingDock_->setWidget(scroll);
     addDockWidget(Qt::BottomDockWidgetArea, workingDock_);
     auto *layout = new QVBoxLayout(&dialog);
     auto *notice =
@@ -507,6 +513,7 @@ void MainWindow::showWorkingCopies() {
     refresh();
     workingDock_->show();
     workingDock_->raise();
+    resizeDocks({workingDock_}, {qBound(180, height() / 2, 380)}, Qt::Vertical);
 }
 
 void MainWindow::showTemporaryFiles() {
