@@ -1,6 +1,6 @@
 # Format capability matrix
 
-Current 0.5.0 development capabilities.
+Current 0.6.0 candidate capabilities.
 Yes describes implemented behavior, not qualification of every possible codec.
 
 | Format | Browse | Test | Extract | Create | Modify | Encrypted read | Encrypted write | Multi-volume read | Multi-volume create | Known limits |
@@ -34,7 +34,8 @@ is codec-specific and is not advertised broadly.
 Compressed TAR is identified by decoded USTAR metadata. Stream formats accept
 exactly one regular input file; use a compressed TAR for folders or multiple
 files. Resource modes constrain supported codecs and worker counts, not total
-process memory. Compression presets apply to new archive creation; ZIP/7Z
+process memory in direct core/CLI calls. Supervised GUI workers additionally have
+OS committed-memory caps of 768/1536/3072 MiB. Compression presets apply to new archive creation; ZIP/7Z
 modification retains its existing rebuild policy.
 
 Editable working copies and explicit save-back are available for supported ZIP/7Z entries up to 256 MiB. Split archives remain read-only. See [MODIFICATION.md](MODIFICATION.md).

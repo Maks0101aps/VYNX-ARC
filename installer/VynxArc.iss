@@ -44,15 +44,15 @@ Name: "{autodesktop}\VYNX ARC"; Filename: "{app}\VynxArc.exe"; Tasks: desktop
 Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive"; ValueType: string; ValueData: "VYNX ARC archive"; Flags: uninsdeletekey; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\DefaultIcon"; ValueType: string; ValueData: "{app}\VynxArc.exe,0"; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\shell\open\command"; ValueType: string; ValueData: """{app}\VynxArc.exe"" ""%1"""; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.zip\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.7z\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.tar\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.tgz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.gz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.xz\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.bz2\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.zst\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\.lzma\OpenWithProgids"; ValueType: none; ValueName: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.zip\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.7z\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.tar\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.tgz\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.gz\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.xz\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.bz2\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.zst\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.lzma\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
 
 [Run]
 #ifdef SignedIdentity

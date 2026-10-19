@@ -43,7 +43,8 @@ def main():
         z.extractall(work / 'app')
     cli = args.cli.resolve() if args.cli else work / 'app/vynxarc-cli.exe'
     env = os.environ.copy()
-    env['PATH'] = os.environ['SystemRoot'] + ';' + str(pathlib.Path(os.environ['SystemRoot']) / 'System32')
+    windows = next(v for k, v in env.items() if k.lower() == 'systemroot')
+    env['PATH'] = windows + ';' + str(pathlib.Path(windows) / 'System32')
     for name in ['QTDIR', 'QT_PLUGIN_PATH', 'QML2_IMPORT_PATH', 'VYNX_QT_ROOT',
                  'VYNX_DIAGNOSTIC_PYTHON', 'VYNX_DIAGNOSTIC_HELPER']:
         env.pop(name, None)

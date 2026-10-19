@@ -193,3 +193,20 @@ Queue and working-copy contents now scroll instead of being clipped. RU screensh
 cover light/dark at 100/125/150/200%, UK additionally covers narrow 100/200%, and EN
 covers both themes. Final package captures and aggregate GUI performance remain
 pending.
+
+## Candidate packages and installation
+
+Candidate metadata is 0.6.0 at `20abed0`. Source gates and portable/installer
+packaging passed. The deployed portable verifier passed with only Windows
+directories on PATH and no remaining owned application process. An actual
+0.5-to-0.6 installation uncovered an older installer defect: Inno `ValueType: none`
+creates a registry key without its named value. Open With entries now use empty
+string values. The corrected installer passed registration of all nine extensions,
+installed GUI/CLI smoke, preserved settings/schema-1 working-copy bytes, unchanged
+default associations and uninstallation. Initial failed harness runs remain local.
+
+The Qt CI installer now resolves architecture-specific Qt 6.12 repositories through
+a pinned upstream aqt commit. Its next run reached the verification dependencies,
+where Python 3.14 correctly refused the pre-3.14 Zstandard backport. Verification
+scripts now use standard `compression.zstd` on 3.14 and the pinned backport below
+3.14. This is a developer-test dependency fix; packaged runtime binaries are unchanged.

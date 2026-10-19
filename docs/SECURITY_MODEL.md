@@ -3,6 +3,15 @@
 Archives and their metadata are attacker controlled. The destination directory and
 source files are user owned. Operations run as the current user, with no elevation.
 
+GUI archive operations execute in sibling worker processes. Windows Job Objects
+enforce one process per job, kill-on-close and committed-memory caps of
+768/1536/3072 MiB; at most two workers run per GUI instance. A 30-minute wall
+budget and cancellation grace period bound nonresponsive jobs. These caps exclude
+the GUI and external editors. Worker loss does not trigger an in-process decoder
+fallback. Job limits are resource controls, not a filesystem-permission sandbox.
+Legacy CLI commands remain direct; isolated CLI commands and conversion use the
+supervisor. See [worker protocol](WORKER_PROTOCOL.md) for exact transport bounds.
+
 Reject traversal, absolute/UNC/drive paths, ADS, reserved DOS names (including
 superscript COM/LPT names), control characters, trailing dots/spaces, empty components,
 oversized paths, duplicate names and case-insensitive collisions. Reject links,
@@ -30,6 +39,8 @@ at 64 MiB, with at most eight coders. Limits are checked before affected parser
 and decoder allocations, including encrypted/encoded headers. They are not an
 overall RSS ceiling or a complete audit of every codec allocation. TAR/PAX,
 native RAR allocation budgets, ZIP codec workspaces and CPU budgets remain open.
+The GUI worker's OS memory/time limits bound consequences of these remaining
+per-allocation gaps; they do not establish that every allocation has been audited.
 
 Internal preview returns at most 16 MiB of verified entry bytes and publishes no
 plaintext on disk. Text accepts strict UTF-8 or BOM-marked UTF-16 up to 4 MiB;

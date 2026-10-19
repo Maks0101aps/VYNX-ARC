@@ -1,5 +1,34 @@
 # Changelog
 
+## 0.6.0 candidate - 2026-10-19
+
+- Move GUI archive reads and writes into bounded, supervised worker processes;
+  retain other tabs and working copies after worker failure.
+- Reduce selected extraction from a 100,000-entry ZIP from 40.14 to 1.78 seconds
+  in the core benchmark; actual GUI median is 3.32 seconds.
+- Persist complete large selections, acknowledge publication only after durable
+  intent recording, and verify unknown write results before explicit retry.
+- Add planned single/batch conversion into verified ZIP/7Z with separate source
+  and destination credentials, explicit decryption consent and failed-only retries.
+- Add a working-copy dock, content verification, storage admission budget and
+  Save as new archive; reconcile interrupted edit saves without losing newer edits.
+- Add queue filters, accurate state counters, scrolling docks and RU/UK translations.
+- Fix installer Open With values; validate the real 0.5-to-0.6 upgrade and uninstall.
+- Exercise actual VS Code/Writer saves, independent archive readers, GUI fault
+  injection, large-archive/retention benchmarks and extended mutation campaigns.
+
+See [development evidence](DEVELOPMENT_0_6.md) and [benchmarks](BENCHMARKS_0_6.md).
+Final package acceptance is in progress.
+
+## 0.5.0 development - 2026-10-17
+
+- Add archive tabs, isolated session state, durable reviewable queue history and
+  explicit ZIP/7Z working-copy saveback with content/source guards.
+- Add archive-wide search, selected ZIP preview and retained edit recovery.
+- Validate packages and the earlier 0.4-to-0.5 installer upgrade.
+
+See the historical [0.5 report](MILESTONE_0_5.md).
+
 ## 0.4.0 development - 2026-10-16
 
 - Add verified bounded file content and external materialization to the Rust/CXX API.
