@@ -36,7 +36,6 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     queueFilter_->setAccessibleName(tr("Filter operations"));
     queueFilter_->addItems({tr("All operations"), tr("Pending"), tr("Running"), tr("Errors"),
                             tr("Needs review"), tr("Finished")});
-    queueLayout->addWidget(queueFilter_);
     connect(queueFilter_, &QComboBox::currentIndexChanged, this, [this] { updateQueue(); });
     auto *controls = new QToolBar;
     controls->setObjectName("queueControls");
@@ -100,14 +99,19 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     connect(retry, &QAction::triggered, this, &MainWindow::retrySelectedJob);
     auto *report = controls->addAction(tr("Export report..."));
     connect(report, &QAction::triggered, this, &MainWindow::exportJobReport);
-    queueLayout->addWidget(controls);
+    auto *queueFrame = new QWidget;
+    auto *frameLayout = new QVBoxLayout(queueFrame);
+    frameLayout->setContentsMargins(0, 0, 0, 0);
     auto *queueScroll = new QScrollArea;
     queueScroll->setWidgetResizable(true);
     queueScroll->setFrameShape(QFrame::NoFrame);
     queueScroll->setMinimumSize(0, 0);
-    queuePanel->setMinimumHeight(260);
+    queuePanel->setMinimumHeight(140);
     queueScroll->setWidget(queuePanel);
-    queueDock_->setWidget(queueScroll);
+    frameLayout->addWidget(queueScroll, 1);
+    frameLayout->addWidget(queueFilter_);
+    frameLayout->addWidget(controls);
+    queueDock_->setWidget(queueFrame);
     addDockWidget(Qt::BottomDockWidgetArea, queueDock_);
     queueDock_->hide();
     viewMenu->addAction(queueDock_->toggleViewAction());

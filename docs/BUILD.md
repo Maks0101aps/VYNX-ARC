@@ -27,6 +27,21 @@ scripts/build.ps1
 scripts/build-release.ps1
 ```
 
+An additional developer-only C++ AddressSanitizer build was exercised with:
+
+```powershell
+. scripts/env.ps1
+cmake -S . -B .dev/build-asan-0.6 -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=cl "-DCMAKE_PREFIX_PATH=$env:VYNX_QT_ROOT" "-DCMAKE_CXX_FLAGS=/fsanitize=address /Zi /D_DISABLE_VECTOR_ANNOTATION /D_DISABLE_STRING_ANNOTATION" -DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO
+cmake --build .dev/build-asan-0.6 --parallel 6
+ctest --test-dir .dev/build-asan-0.6 --output-on-failure
+```
+
+STL annotations are disabled consistently because the Rust bridge/native static
+libraries are not instrumented. GUI/shell C++ accesses retain ASan instrumentation;
+this is not a Rust/UnRAR/Qt sanitizer build or leak detector. The ASan runtime must
+be discoverable from the developer environment. Never package this binary as the
+normal release. The release target and its Rust library remain uninstrumented.
+
 Cargo.lock pins transitive Rust dependencies. CMake builds the release static core
 and typed bridge before linking the GUI. `ctest` exercises the real CXX boundary.
 The build directory is `build-msvc`; MSVC runtime DLLs are deployed app-locally.

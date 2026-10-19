@@ -163,7 +163,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         settings_->setValue("recent", recent);
         updateRecent();
     });
-    pages_->addWidget(home);
+    // The hidden home page must not impose its full content height on archive docks.
+    auto *homeScroll = new QScrollArea;
+    homeScroll->setWidgetResizable(true);
+    homeScroll->setFrameShape(QFrame::NoFrame);
+    homeScroll->setWidget(home);
+    pages_->addWidget(homeScroll);
     auto *properties = addAction(operationsMenu, tr("Properties"), QKeySequence("Alt+Return"),
                                  [this] { showProperties(); });
     propertiesAction_ = properties;
@@ -1581,6 +1586,25 @@ bool MainWindow::smokeTest() {
         working.close();
         if (!edits_->discard(editKey))
             return smokeFailure(__LINE__);
+        // Action bars must stay inside a narrow window while long content scrolls.
+        showWorkingCopies();
+        resize(620, 440);
+        show();
+        QCoreApplication::processEvents();
+        for (const auto &name : {QString("workingCopyControls"), QString("queueControls")}) {
+            const auto *bar = findChild<QToolBar *>(name);
+            if (!bar || !bar->isVisible() ||
+                !rect().contains(QRect(bar->mapTo(this, QPoint()), bar->size())))
+                return smokeFailure(__LINE__);
+        }
+        if (queueView_->count()) {
+            queueView_->setCurrentItem(queueView_->item(0));
+            queueFilter_->setCurrentIndex(1);
+            if (queueView_->currentItem() && queueView_->currentItem()->isHidden())
+                return smokeFailure(__LINE__);
+            queueFilter_->setCurrentIndex(0);
+        }
+        hide();
         // Large model/view metadata is test input only, never a simulated product archive.
         rust::Vec<vynx::EntryInfo> many;
         for (quint64 i = 0; i < 100000; ++i) {

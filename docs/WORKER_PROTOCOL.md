@@ -49,6 +49,9 @@ and the existing destination before committing it. It sends a publication notice
 and waits for an explicit acknowledgement. The GUI records the intent through its
 atomic journal before acknowledging. Failure to record it rejects publication.
 Passwords and arbitrary captures are excluded from the journal.
+When the user disables history, the journal and publication receipts remain in
+memory only: current-session verification still works, but queue recovery after
+process exit is intentionally unavailable. Retained working files are separate.
 
 The parent keeps monitoring while publication/conflict decisions are pending.
 Conflict replies and cancellation use bounded control frames. Unexpected loss of a

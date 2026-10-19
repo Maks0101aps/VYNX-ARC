@@ -265,13 +265,17 @@ void MainWindow::showWorkingCopies() {
     workingDock_->setAllowedAreas(Qt::BottomDockWidgetArea | Qt::RightDockWidgetArea);
     auto *panel = new QWidget;
     auto &dialog = *panel;
+    auto *frame = new QWidget;
+    auto *frameLayout = new QVBoxLayout(frame);
+    frameLayout->setContentsMargins(0, 0, 0, 0);
     auto *scroll = new QScrollArea;
     scroll->setWidgetResizable(true);
     scroll->setFrameShape(QFrame::NoFrame);
     scroll->setMinimumSize(0, 0);
-    panel->setMinimumHeight(360);
+    panel->setMinimumHeight(180);
     scroll->setWidget(panel);
-    workingDock_->setWidget(scroll);
+    frameLayout->addWidget(scroll, 1);
+    workingDock_->setWidget(frame);
     addDockWidget(Qt::BottomDockWidgetArea, workingDock_);
     auto *layout = new QVBoxLayout(&dialog);
     auto *notice =
@@ -355,6 +359,7 @@ void MainWindow::showWorkingCopies() {
         showDetails();
     };
     auto *controls = new QToolBar;
+    controls->setObjectName("workingCopyControls");
     controls->setToolButtonStyle(Qt::ToolButtonTextOnly);
     controls->setStyleSheet("QToolButton#qt_toolbar_ext_button {padding:0px;border:none;}");
     auto *open = controls->addAction(tr("Open copy"));
@@ -365,7 +370,7 @@ void MainWindow::showWorkingCopies() {
     auto *reload = controls->addAction(tr("Reload source..."));
     auto *exportFile = controls->addAction(tr("Export file..."));
     auto *discard = controls->addAction(tr("Discard..."));
-    layout->addWidget(controls);
+    frameLayout->addWidget(controls);
     auto password = [this](const QJsonObject &record, bool &ok) {
         for (const auto &session : sessions_)
             if (archiveIdentity(session->path) == archiveIdentity(record["archive"].toString()) &&
@@ -506,14 +511,16 @@ void MainWindow::showWorkingCopies() {
     });
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
     connect(buttons, &QDialogButtonBox::rejected, workingDock_, &QDockWidget::hide);
-    layout->addWidget(buttons);
+    frameLayout->addWidget(buttons);
     auto *timer = new QTimer(panel);
     connect(timer, &QTimer::timeout, &dialog, refresh);
     timer->start(1000);
     refresh();
     workingDock_->show();
     workingDock_->raise();
-    resizeDocks({workingDock_}, {qBound(180, height() / 2, 380)}, Qt::Vertical);
+    QTimer::singleShot(0, this, [this] {
+        resizeDocks({workingDock_}, {qBound(180, height() * 3 / 5, 440)}, Qt::Vertical);
+    });
 }
 
 void MainWindow::showTemporaryFiles() {

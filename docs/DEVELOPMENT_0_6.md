@@ -210,3 +210,17 @@ a pinned upstream aqt commit. Its next run reached the verification dependencies
 where Python 3.14 correctly refused the pre-3.14 Zstandard backport. Verification
 scripts now use standard `compression.zstd` on 3.14 and the pinned backport below
 3.14. This is a developer-test dependency fix; packaged runtime binaries are unchanged.
+
+Final capture inspection found that a scrollable dock alone still hid its action
+bar. Actions now stay outside scrollable content. A hidden home page was also
+imposing its larger minimum height on the archive view; wrapping home content
+removes that constraint while preserving access to home controls in small windows.
+The real GUI smoke now checks that both action bars fit inside 620 x 440, and that
+filtering cannot leave an invisible selected job actionable. Native tests pass.
+
+The additional MSVC C++ ASan build passed all three CTests and a complete
+three-trial / 100-cycle GUI workflow without an ASan finding. The first link attempt
+exposed mixed STL annotation settings with the uninstrumented bridge/native static
+libraries; consistent annotation macros resolve that build mismatch. This scope
+instruments GUI/shell C++ only, not Rust or decoder libraries, and is not leak
+detection. Instrumented memory/timings are excluded from release performance claims.
