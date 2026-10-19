@@ -30,6 +30,7 @@ target_sources(VynxArc PRIVATE
     apps/gui/EditStore.cpp apps/gui/EditStore.h
     apps/gui/MainWindowEdits.cpp
     apps/gui/MainWindowConversion.cpp
+    apps/gui/MainWindowAcceptance.cpp
     apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h
     apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
     apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h

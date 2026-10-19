@@ -339,10 +339,15 @@ QString JobJournal::add(const QString &title, const QJsonObject &spec) {
     }
     return id;
 }
-bool JobJournal::recordIntent(const QString &id, const QJsonArray &targets) {
+bool JobJournal::recordIntent(const QString &id, const QJsonArray &targets,
+                              const QString &inputHash) {
     if (targets.isEmpty() || targets.size() > 10000)
         return false;
     const QRegularExpression digest("^[0-9a-f]{64}$");
+    if (!inputHash.isEmpty() && !QRegularExpression("^SHA-256: [0-9a-f]{64}\\nCRC32: [0-9a-f]{8}$")
+                                     .match(inputHash)
+                                     .hasMatch())
+        return false;
     QJsonArray safe;
     for (const auto &v : targets) {
         const auto target = v.toObject();
@@ -360,6 +365,11 @@ bool JobJournal::recordIntent(const QString &id, const QJsonArray &targets) {
             continue;
         const auto previous = records_[i];
         row["publication"] = safe;
+        if (!inputHash.isEmpty()) {
+            auto spec = row["spec"].toObject();
+            spec["inputHash"] = inputHash;
+            row["spec"] = spec;
+        }
         records_[i] = row;
         if (save())
             return true;

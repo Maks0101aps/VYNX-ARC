@@ -47,6 +47,15 @@ int main(int argc, char **argv) {
             return 2;
         window.resize(width, height);
     }
+    const auto faultIndex = app.arguments().indexOf("--worker-fault-smoke");
+    if (faultIndex >= 0) {
+        if (!app.arguments().contains("--smoke-test") || faultIndex + 2 >= app.arguments().size())
+            return 2;
+        return window.workerFaultAcceptance(app.arguments()[faultIndex + 1],
+                                            app.arguments()[faultIndex + 2])
+                   ? 0
+                   : 1;
+    }
     if (app.arguments().contains("--smoke-test"))
         return window.smokeTest() ? 0 : 1;
     window.show();

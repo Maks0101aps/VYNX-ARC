@@ -152,10 +152,16 @@ void MainWindow::saveWorkingCopy(const QString &id, const std::shared_ptr<Secret
                 },
                 [this, id](QString error) {
                     edits_->update(id, QJsonObject{{"state", "needs-review"}, {"error", error}});
-                    QMessageBox message(QMessageBox::Warning, tr("Changes were not saved"),
-                                        tr("The working copy is retained. Reload the source or "
-                                           "export the file before retrying."),
-                                        QMessageBox::Close, this);
+                    const bool unknown = error.startsWith("RESULT_UNKNOWN:");
+                    QMessageBox message(
+                        QMessageBox::Warning,
+                        unknown ? tr("Save result requires verification")
+                                : tr("Changes were not saved"),
+                        unknown ? tr("The archive may have been saved. Keep the working copy and "
+                                     "use Verify result in the queue before retrying.")
+                                : tr("The working copy is retained. Reload the source or export "
+                                     "the file before retrying."),
+                        QMessageBox::Close, this);
                     message.setDetailedText(error);
                     message.exec();
                 });

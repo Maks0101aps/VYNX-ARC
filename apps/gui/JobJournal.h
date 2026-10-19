@@ -11,7 +11,7 @@ class JobJournal {
     bool open(const QString &path, bool enabled);
     QString add(const QString &title, const QJsonObject &spec);
     bool updateSpec(const QString &id, const QJsonObject &spec);
-    bool recordIntent(const QString &id, const QJsonArray &targets);
+    bool recordIntent(const QString &id, const QJsonArray &targets, const QString &inputHash = {});
     bool setState(const QString &id, const QString &state, const QString &error = {});
     bool remove(const QString &id);
     bool clear();

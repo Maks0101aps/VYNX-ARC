@@ -21,7 +21,7 @@ parser.add_argument('--details-only',action='store_true')
 parser.add_argument('--workspace-content',action='store_true')
 parser.add_argument('--language', choices=['en', 'uk', 'ru'])
 parser.add_argument('--recents', action='store_true')
-parser.add_argument('--state', action='append', choices=['tabs','working-copies','temporary-files','review','home','archive','create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'])
+parser.add_argument('--state', action='append', choices=['convert','tabs','working-copies','temporary-files','review','home','archive','create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'])
 args = parser.parse_args()
 app = args.app.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
@@ -58,7 +58,8 @@ try:
                     output = args.output / f'{state}-{theme}-{language}-{scale}.png'
                     env = os.environ.copy()
                     env['QT_SCALE_FACTOR'] = scale
-                    env['PATH'] = os.environ['SystemRoot'] + ';' + os.environ['SystemRoot'] + '/System32'
+                    windows = next(value for key, value in env.items() if key.lower() == 'systemroot')
+                    env['PATH'] = windows + ';' + windows + '/System32'
                     for key in ['QT_PLUGIN_PATH', 'QML2_IMPORT_PATH', 'VYNX_QT_ROOT']:
                         env.pop(key, None)
                     command = [str(app / 'VynxArc.exe')]

@@ -21,6 +21,7 @@ struct State {
     settings: Mutex<crate::settings::Settings>,
     publication_controlled: AtomicBool,
     publication: Mutex<crate::publication::Pending>,
+    input_receipt: Mutex<String>,
     stage: Mutex<String>,
     details: Mutex<String>,
     cancelled: AtomicBool,
@@ -55,6 +56,21 @@ pub struct Progress {
     pub cancelled: bool,
 }
 impl Operation {
+    pub fn set_input_receipt(&self, receipt: &str) -> Result<()> {
+        *self
+            .0
+            .input_receipt
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "Input receipt lock failed"))? = receipt.into();
+        Ok(())
+    }
+    pub fn input_receipt(&self) -> String {
+        self.0
+            .input_receipt
+            .lock()
+            .map(|s| s.clone())
+            .unwrap_or_default()
+    }
     pub(crate) fn publication_controlled(&self) -> &AtomicBool {
         &self.0.publication_controlled
     }

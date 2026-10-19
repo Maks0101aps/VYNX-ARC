@@ -414,12 +414,16 @@ class GuiPresentationTest : public QObject {
             QVERIFY(!journal.recordIntent(
                 id, QJsonArray{QJsonObject{{"path", root.path() + "/result.zip"},
                                            {"sha256", "SHA-256: bad"}}}));
-            QVERIFY(journal.recordIntent(id, targets));
+            QVERIFY(!journal.recordIntent(id, targets, "invalid receipt"));
+            QVERIFY(journal.recordIntent(
+                id, targets, "SHA-256: " + QString(64, 'c') + "\nCRC32: " + QString(8, 'd')));
         }
         JobJournal recovered;
         QVERIFY(recovered.open(path, true));
         QCOMPARE(recovered.record(id)["state"].toString(), QString("unknown"));
         QCOMPARE(recovered.record(id)["publication"].toArray(), targets);
+        QCOMPARE(recovered.record(id)["spec"].toObject()["inputHash"].toString(),
+                 "SHA-256: " + QString(64, 'c') + "\nCRC32: " + QString(8, 'd'));
     }
     void journalRejectsDamageAndDetectsSourceChanges() {
         QTemporaryDir root;

@@ -4,6 +4,9 @@ version = "0.5.0"
 edition = "2024"
 license = "MIT"
 
+[features]
+worker-diagnostics = ["vynx-arc-core/worker-diagnostics"]
+
 [dependencies]
 vynx-arc-core = { path = "../../core" }
 zeroize = "=1.9.0"

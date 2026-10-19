@@ -47,6 +47,12 @@ impl Operation {
             self.check()?;
             if let Some(accepted) = self.take_publication_reply(id) {
                 return if accepted {
+                    #[cfg(feature = "worker-diagnostics")]
+                    if paths.iter().any(|(path, _)| {
+                        crate::worker::diagnostics::matches(path, "before-publish")
+                    }) {
+                        std::process::abort();
+                    }
                     Ok(())
                 } else {
                     Err(ArcError::new(

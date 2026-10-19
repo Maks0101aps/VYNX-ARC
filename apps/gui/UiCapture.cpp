@@ -4,6 +4,7 @@
 #include "dialogs/AboutDialog.h"
 #include "dialogs/BatchExtractDialog.h"
 #include "dialogs/ConflictDialog.h"
+#include "dialogs/ConversionDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "dialogs/ExtractDialog.h"
 #include "dialogs/SettingsDialog.h"
@@ -67,7 +68,9 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
         QTimer::singleShot(0, this, &MainWindow::retrySelectedJob);
         return this;
     }
-    if (mode == "create")
+    if (mode == "convert")
+        dialog = new ConversionDialog({session_->path}, this);
+    else if (mode == "create")
         dialog = new CreateArchiveDialog({session_->path}, 1, this);
     else if (mode == "create-stream")
         dialog = new CreateArchiveDialog({session_->path}, 5, this);
@@ -102,11 +105,15 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
         return this;
     } else if (mode == "queue") {
         queueDock_->show();
-        new QListWidgetItem(tr("Completed — %1").arg("Project.zip"), queueView_);
+        auto *completed = new QListWidgetItem(tr("Completed — %1").arg("Project.zip"), queueView_);
+        completed->setData(Qt::UserRole + 1, "Project.zip");
+        completed->setData(Qt::UserRole + 2, true);
+        completed->setData(Qt::UserRole + 5, "completed");
         const auto id = queue_.enqueue("Project.7z", [] {});
         auto *item = new QListWidgetItem(tr("Pending — %1").arg("Project.7z"), queueView_);
         item->setData(Qt::UserRole, id);
         item->setData(Qt::UserRole + 1, "Project.7z");
+        item->setData(Qt::UserRole + 5, "pending");
         queueView_->setCurrentItem(item);
         updateQueue();
         return this;

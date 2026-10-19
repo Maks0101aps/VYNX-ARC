@@ -1,0 +1,65 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "error": "WORKER_STOPPED: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available",
+      "heartbeat_ticks": 17,
+      "mode": "crash",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true
+    },
+    {
+      "error": "CANCELLED: Operation cancelled; completed files remain",
+      "heartbeat_ticks": 116,
+      "mode": "hang",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true
+    },
+    {
+      "error": "WORKER_MEMORY: Diagnostic 1 GiB committed allocation was refused by the worker job",
+      "heartbeat_ticks": 6,
+      "mode": "memory",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true
+    },
+    {
+      "error": "RESULT_UNKNOWN: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available Verify the destination before any retry; a write may have completed.",
+      "heartbeat_ticks": 54,
+      "mode": "before",
+      "original_preserved": true,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "recovery": {
+        "state": "failed",
+        "status": "passed",
+        "working_copy_retained": true
+      }
+    },
+    {
+      "error": "RESULT_UNKNOWN: Archive worker stopped unexpectedly or exceeded its memory limit; other documents remain available Verify the destination before any retry; a write may have completed.",
+      "heartbeat_ticks": 55,
+      "mode": "after",
+      "original_preserved": false,
+      "other_tab_readable": true,
+      "status": "passed",
+      "working_copy_retained": true,
+      "recovery": {
+        "state": "completed",
+        "status": "passed",
+        "working_copy_retained": true
+      }
+    }
+  ],
+  "scope": "Actual GUI queue and new-process recovery with opt-in fault hooks; diagnostic hooks excluded from normal builds.",
+  "binaries": {
+    "VynxArc.exe": "e48ec318392446e25ea9a64b59cf7d7cbfbb4a4b71cf3e48de12e25cec97b840",
+    "vynxarc-worker.exe": "33fc0b865b3f2ecf4d11d7e3417ab029df61203454b1669ff905dc1a4e2a59ec"
+  }
+}

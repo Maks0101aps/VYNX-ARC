@@ -12,6 +12,7 @@
 #include <memory>
 class QTableView;
 class QLineEdit;
+class QComboBox;
 class QProgressBar;
 class QPushButton;
 class QLabel;
@@ -41,6 +42,7 @@ class MainWindow : public QMainWindow {
     ~MainWindow() override;
     void openPath(const QString &path);
     bool smokeTest();
+    bool workerFaultAcceptance(const QString &mode, const QString &root);
     void handleShellRequest(quint32 action, const QStringList &paths);
     QWidget *prepareCapture(const QString &mode);
 
@@ -87,6 +89,7 @@ class MainWindow : public QMainWindow {
     void dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8> &password);
     void exportJobReport();
     QLabel *queueSummary_ = nullptr;
+    QComboBox *queueFilter_ = nullptr;
     void chooseCreate(const QStringList &initial = {}, int initialFormat = 0);
     void chooseModify(int kind, const QStringList &sources = {}, bool folders = false);
     bool writableArchive() const;

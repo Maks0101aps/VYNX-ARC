@@ -1,4 +1,6 @@
 //! Owned archive worker. The CLI executes core operations directly; GUI uses IPC.
+#[cfg(feature = "worker-diagnostics")]
+pub(crate) mod diagnostics;
 #[cfg(windows)]
 mod job;
 mod wire;
@@ -548,6 +550,7 @@ fn remote_error(code: &str, message: &str) -> ArcError {
         "PASSWORD" => "PASSWORD",
         "CHANGED" => "CHANGED",
         "LIMIT" => "LIMIT",
+        "WORKER_MEMORY" => "WORKER_MEMORY",
         "CORRUPT" => "CORRUPT",
         "UNSAFE_PATH" => "UNSAFE_PATH",
         "SELECTION" => "SELECTION",
@@ -571,6 +574,8 @@ fn remote_error(code: &str, message: &str) -> ArcError {
     ArcError::new(code, message)
 }
 fn execute(r: Request, op: &Operation) -> Result<Reply> {
+    #[cfg(feature = "worker-diagnostics")]
+    diagnostics::before(&r)?;
     if !matches!(
         r.kind,
         OPEN | TEXT
@@ -789,9 +794,16 @@ pub fn serve() -> Result<()> {
     let work = op.clone();
     let (tx, rx) = mpsc::sync_channel(1);
     std::thread::spawn(move || {
+        #[cfg(feature = "worker-diagnostics")]
+        let stop_after = matches!(request.kind, CREATE | MODIFY | CONVERT | EXTRACT)
+            && diagnostics::matches(std::path::Path::new(&request.path), "after-publish");
         let result =
             std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| execute(request, &work)))
                 .unwrap_or_else(|_| Err(ArcError::new("WORKER_ERROR", "Archive worker panicked")));
+        #[cfg(feature = "worker-diagnostics")]
+        if stop_after && result.is_ok() {
+            std::process::abort();
+        }
         let _ = tx.send(result);
     });
     let mut output = std::io::stdout().lock();

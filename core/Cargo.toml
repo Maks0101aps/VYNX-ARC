@@ -10,6 +10,7 @@ crate-type = ["rlib", "staticlib"]
 [features]
 # Explicit opt-in; normal packages contain neither logging nor diagnostic hooks.
 publication-diagnostics = []
+worker-diagnostics = []
 
 [dependencies]
 cxx = "=1.0.202"

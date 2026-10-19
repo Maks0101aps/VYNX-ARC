@@ -1,3 +1,4 @@
+#include "EditStore.h"
 #include "MainWindow.h"
 #include "SecretUtf8.h"
 #include "dialogs/BatchExtractDialog.h"
@@ -6,6 +7,13 @@
 #include <QDesktopServices>
 #include <QJsonDocument>
 #include <QtWidgets>
+static QString receiptKey(const QString &path) {
+    auto key = QDir::cleanPath(QDir::fromNativeSeparators(QFileInfo(path).absoluteFilePath()));
+#ifdef Q_OS_WIN
+    key = key.toCaseFolded();
+#endif
+    return key;
+}
 static QString jobStateLabel(const QString &state) {
     if (state == "unknown")
         return MainWindow::tr("Result unknown - verification required");
@@ -428,8 +436,40 @@ void MainWindow::verifySelectedResult() {
     activeSpec_ = QJsonObject{{"kind", "reconcile"}};
     auto op = operations_.operation;
     auto result = std::make_shared<QString>("unknown");
-    auto apply = [this, id, result](const QString &error) {
+    const auto spec = record["spec"].toObject();
+    const auto editId = spec["editId"].toString();
+    const auto edit = edits_->record(editId);
+    const auto workingFile = edits_->validPayload(edit) ? edit["file"].toString() : QString();
+    auto hashes = std::make_shared<QHash<QString, QString>>();
+    auto workingHash = std::make_shared<QString>();
+    auto workingFingerprint = std::make_shared<QString>();
+    auto apply = [this, id, result, spec, editId, workingFile, hashes, workingHash,
+                  workingFingerprint](const QString &error) {
         const auto state = error.isEmpty() ? *result : QString("unknown");
+        if (state == "completed" && spec["kind"] == "edit" && !workingFile.isEmpty()) {
+            const auto current = edits_->record(editId);
+            const auto source = spec["sources"].toArray().first().toString();
+            const auto savedInput = spec["inputHash"].toString();
+            if (edits_->validPayload(current) && current["file"] == workingFile &&
+                archiveIdentity(current["archive"].toString()) == archiveIdentity(source) &&
+                !savedInput.isEmpty() && hashes->contains(receiptKey(source))) {
+                const bool unchanged = *workingHash == savedInput &&
+                                       !workingFingerprint->isEmpty() &&
+                                       *workingFingerprint == EditStore::fingerprint(workingFile);
+                QJsonObject update{
+                    {"archiveHash", hashes->value(receiptKey(source))},
+                    {"baseHash", savedInput},
+                    {"state", unchanged ? "saved" : "changed"},
+                    {"error", QString()},
+                    {"lastVerified", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)}};
+                if (unchanged)
+                    update["fingerprint"] = *workingFingerprint;
+                if (!edits_->update(editId, update))
+                    QMessageBox::warning(this, tr("Working copies"),
+                                         tr("The archive was verified, but recovery metadata could "
+                                            "not be updated. Keep the working copy."));
+            }
+        }
         const auto detail =
             state == "completed" ? tr("Verified destination matches the recorded result.")
             : state == "failed"  ? tr("Verified destination matches the pre-publication state. "
@@ -452,7 +492,7 @@ void MainWindow::verifySelectedResult() {
     };
     runJob(
         tr("Verifying interrupted publication..."),
-        [targets, op, result] {
+        [targets, op, result, hashes, workingFile, workingHash, workingFingerprint] {
             bool after = true, before = true;
             for (const auto &v : targets) {
                 if (vynx::cancelled(**op))
@@ -464,11 +504,24 @@ void MainWindow::verifySelectedResult() {
                     current = QString::fromStdString(
                         std::string(vynx::hash_archive_file(path.toUtf8().toStdString(), **op)));
                 if (!current.isEmpty())
+                    hashes->insert(receiptKey(path), current);
+                if (!current.isEmpty())
                     current = current.section('\n', 0, 0).mid(9);
                 after &= current == t["sha256"].toString();
                 before &= current == t["before"].toString();
             }
             *result = after ? "completed" : before ? "failed" : "unknown";
+            if (after && !workingFile.isEmpty()) {
+                const auto fingerprint = EditStore::fingerprint(workingFile);
+                try {
+                    *workingHash = QString::fromStdString(std::string(
+                        vynx::hash_archive_file(workingFile.toUtf8().toStdString(), **op)));
+                    if (fingerprint == EditStore::fingerprint(workingFile))
+                        *workingFingerprint = fingerprint;
+                } catch (...) {
+                    // Archive verification remains valid; retain an unverified dirty copy.
+                }
+            }
             return QString();
         },
         [apply] { apply({}); }, [apply](QString error) { apply(error); });

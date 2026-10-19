@@ -62,6 +62,7 @@ pub mod bridge {
         fn control_publication(op: &Operation, enabled: bool);
         fn publication_id(op: &Operation) -> u64;
         fn publication_targets(op: &Operation) -> Vec<PublicationTarget>;
+        fn operation_input_hash(op: &Operation) -> String;
         fn reply_publication(op: &Operation, id: u64, accepted: bool) -> bool;
         fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()>;
         fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String>;
@@ -216,6 +217,7 @@ fn replace_entry(
     op: &Operation,
 ) -> Result<String> {
     guarded(|| {
+        op.set_input_receipt(input_hash)?;
         crate::worker::Client::sibling()?.modify(
             archive,
             &crate::modification::Change::Replace {
@@ -521,6 +523,9 @@ fn modify_archive(
 
 fn publication_id(op: &Operation) -> u64 {
     op.pending_publication().map_or(0, |(id, _)| id)
+}
+fn operation_input_hash(op: &Operation) -> String {
+    op.input_receipt()
 }
 fn publication_targets(op: &Operation) -> Vec<bridge::PublicationTarget> {
     op.pending_publication()

@@ -31,6 +31,13 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
     queueSummary_ = new QLabel;
     queueSummary_->setWordWrap(true);
     queueLayout->addWidget(queueSummary_);
+    queueFilter_ = new QComboBox;
+    queueFilter_->setObjectName("queueFilter");
+    queueFilter_->setAccessibleName(tr("Filter operations"));
+    queueFilter_->addItems({tr("All operations"), tr("Pending"), tr("Running"), tr("Errors"),
+                            tr("Needs review"), tr("Finished")});
+    queueLayout->addWidget(queueFilter_);
+    connect(queueFilter_, &QComboBox::currentIndexChanged, this, [this] { updateQueue(); });
     auto *controls = new QToolBar;
     controls->setObjectName("queueControls");
     controls->setToolButtonStyle(Qt::ToolButtonTextOnly);
@@ -157,7 +164,8 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
                                            {"before", text(t.before)}});
             const bool recorded =
                 runningItem_ &&
-                journal_.recordIntent(runningItem_->data(Qt::UserRole + 3).toString(), targets);
+                journal_.recordIntent(runningItem_->data(Qt::UserRole + 3).toString(), targets,
+                                      text(vynx::operation_input_hash(**operations_.operation)));
             vynx::reply_publication(**operations_.operation, publication, recorded);
         }
         showConflict();
@@ -190,9 +198,10 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         if (runningItem_) {
             if (!error.isEmpty())
                 runningItem_->setToolTip(runningItem_->toolTip() + "\n" + error);
-            const auto status = error.isEmpty()                  ? tr("Completed — %1")
-                                : error.startsWith("CANCELLED:") ? tr("Cancelled — %1")
-                                                                 : tr("Stopped — %1");
+            const auto status = error.isEmpty()                       ? tr("Completed — %1")
+                                : error.startsWith("RESULT_UNKNOWN:") ? tr("Result unknown — %1")
+                                : error.startsWith("CANCELLED:")      ? tr("Cancelled — %1")
+                                                                      : tr("Stopped — %1");
             runningItem_->setText(status.arg(runningItem_->data(Qt::UserRole + 1).toString()));
             runningItem_->setData(Qt::UserRole + 2, true);
             runningItem_->setData(Qt::UserRole + 5, error.isEmpty() ? "completed"
@@ -290,6 +299,18 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
 }
 void MainWindow::updateQueue() {
     QSignalBlocker blocker(queueView_);
+    for (int i = 0; i < queueView_->count(); ++i) {
+        auto *row = queueView_->item(i);
+        const auto state = row->data(Qt::UserRole + 5).toString();
+        const int filter = queueFilter_->currentIndex();
+        const bool visible =
+            filter == 0 || (filter == 1 && state == "pending") ||
+            (filter == 2 && state == "running") || (filter == 3 && state == "failed") ||
+            (filter == 4 &&
+             QStringList{"unknown", "verifying", "interrupted", "decision"}.contains(state)) ||
+            (filter == 5 && QStringList{"completed", "cancelled"}.contains(state));
+        row->setHidden(!visible);
+    }
     int completed = 0;
     for (int i = 0; i < queueView_->count(); ++i)
         completed += queueView_->item(i)->data(Qt::UserRole + 2).toBool() &&

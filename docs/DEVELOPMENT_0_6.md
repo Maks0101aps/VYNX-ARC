@@ -136,3 +136,35 @@ administratively extracted into an ignored workspace directory from the official
 26.8.1 MSI, checked against its published SHA-256 and a valid Document Foundation
 Authenticode signature; it was not installed globally. Each editor used a private
 profile and owned fixture files. Raw logs remain under the local evidence root.
+
+## GUI fault acceptance and edit recovery
+
+An opt-in `worker-diagnostics` feature adds deterministic crash, non-cooperative
+hang, allocation refusal and publication-boundary aborts. Normal packages compile
+these hooks out. `scripts/check-worker-recovery.py` stages a private runtime and
+runs the actual GUI queue, then a new GUI process for recovery.
+
+The first five-scenario run passed: the other archive tab remains readable, a
+working copy survives, and cancellation terminates the hung worker after its grace
+period. A 1 GiB committed allocation is refused under the Eco worker budget.
+Before-publication failure reconciles to unchanged/failed; after-publication
+failure reconciles to completed. These are controlled diagnostic faults, not claims
+that every possible decoder crash was reproduced.
+
+The extended run now uses the actual edited-file save path. Publication atomically
+records the input digest alongside destination identities. Reconciliation updates
+the saved base only from that receipt, hashes the current working file separately,
+and retains newer edits as dirty. An initial extended test exposed mixed Windows
+path separators preventing metadata recovery; path-key normalization fixed it.
+All five scenarios then passed, including new-process recovery of edit metadata.
+Unknown saves now say that verification is required, rather than claiming nothing
+was saved. Queue filters and capture-fixture counters are implemented; new strings
+have Russian and Ukrainian translations. Final visual and package acceptance is
+still pending.
+
+The first long mutation campaign stopped after 44,167 cases / 10,698.924 aggregate
+active wall seconds when two harness children exceeded seven seconds. Both retained
+inputs passed 16 bounded replays each (maximum 0.776 seconds). The original failure
+evidence is retained; its cause is not established and this campaign is not marked
+passed. A separate continuation campaign is running. Aggregate campaign wall time
+includes process startup and is neither CPU time nor coverage-guided fuzzing.
