@@ -260,6 +260,8 @@ pub fn publish(source: &mut File, prefix: &Path, size: u64, op: &Operation) -> R
                 .persist_noclobber(security::publication_path(&name)?)
                 .map_err(|e| ArcError::from(e.error))?;
             published.push((name, file));
+            #[cfg(all(test, windows))]
+            tests::after_publish(&published.last().expect("just published").0);
         }
         Ok(())
     })();
@@ -320,4 +322,56 @@ fn remove_owned(file: &File, _: &Path) -> io::Result<()> {
 #[cfg(not(windows))]
 fn remove_owned(_: &File, path: &Path) -> io::Result<()> {
     fs::remove_file(path)
+}
+
+#[cfg(all(test, windows))]
+mod tests {
+    use super::*;
+    use std::cell::RefCell;
+    type Observer = Box<dyn FnMut(&Path)>;
+    thread_local! {
+        static OBSERVER: RefCell<Option<Observer>> = RefCell::new(None);
+    }
+    pub(super) fn after_publish(path: &Path) {
+        OBSERVER.with(|slot| {
+            if let Some(observer) = slot.borrow_mut().as_mut() {
+                observer(path);
+            }
+        });
+    }
+    struct Reset;
+    impl Drop for Reset {
+        fn drop(&mut self) {
+            OBSERVER.with(|slot| *slot.borrow_mut() = None);
+        }
+    }
+    #[test]
+    fn cancelled_split_cleanup_does_not_delete_a_replacement_path() {
+        let root = tempfile::tempdir().unwrap();
+        let input = root.path().join("source.dat");
+        fs::write(&input, vec![42u8; 128 * 1024]).unwrap();
+        let mut source = File::open(&input).unwrap();
+        let prefix = root.path().join("new.7z");
+        let first = root.path().join("new.7z.001");
+        let moved = root.path().join("owned-part-moved");
+        let expected = first.clone();
+        let moved_actor = moved.clone();
+        let op = Operation::default();
+        let actor = op.clone();
+        OBSERVER.with(|slot| {
+            *slot.borrow_mut() = Some(Box::new(move |published| {
+                assert_eq!(published, expected);
+                fs::rename(published, &moved_actor).unwrap();
+                fs::write(published, b"user replacement must survive").unwrap();
+                actor.cancel();
+            }));
+        });
+        let _reset = Reset;
+        let error = publish(&mut source, &prefix, 65536, &op).unwrap_err();
+        assert_eq!(error.code, "CANCELLED");
+        assert_eq!(fs::read(&first).unwrap(), b"user replacement must survive");
+        assert!(!moved.exists());
+        assert!(!root.path().join("new.7z.002").exists());
+        assert_eq!(fs::read_dir(root.path()).unwrap().count(), 2);
+    }
 }
