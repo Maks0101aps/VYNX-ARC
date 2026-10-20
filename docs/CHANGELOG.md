@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.6.0 candidate - 2026-10-19
+## 0.6.0 development milestone - 2026-10-20
 
 - Move GUI archive reads and writes into bounded, supervised worker processes;
   retain other tabs and working copies after worker failure.
@@ -18,7 +18,7 @@
   injection, large-archive/retention benchmarks and extended mutation campaigns.
 
 See [development evidence](DEVELOPMENT_0_6.md) and [benchmarks](BENCHMARKS_0_6.md).
-Final package acceptance is in progress.
+See [final acceptance](MILESTONE_0_6.md) for package evidence and boundaries.
 
 ## 0.5.0 development - 2026-10-17
 

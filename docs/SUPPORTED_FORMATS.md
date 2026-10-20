@@ -1,6 +1,6 @@
 # Format capability matrix
 
-Current 0.6.0 candidate capabilities.
+Current 0.6.0 development capabilities.
 Yes describes implemented behavior, not qualification of every possible codec.
 
 | Format | Browse | Test | Extract | Create | Modify | Encrypted read | Encrypted write | Multi-volume read | Multi-volume create | Known limits |
@@ -39,3 +39,10 @@ OS committed-memory caps of 768/1536/3072 MiB. Compression presets apply to new 
 modification retains its existing rebuild policy.
 
 Editable working copies and explicit save-back are available for supported ZIP/7Z entries up to 256 MiB. Split archives remain read-only. See [MODIFICATION.md](MODIFICATION.md).
+
+Conversion accepts the supported readable source variants and writes a new ZIP or
+7Z, including separately encrypted results. It verifies names, file hashes and
+directory sets before publication, preserving the source. Representable modified
+times are copied; comments, ACLs, ownership and extra metadata are not transferred.
+Converting RAR contents does not add RAR encoding. The GUI working-copy dock also
+offers Save as new archive through this same verified path.

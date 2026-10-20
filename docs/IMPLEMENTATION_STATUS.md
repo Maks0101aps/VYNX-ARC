@@ -1,56 +1,58 @@
-# Implementation status - 2026-10-17
+# Implementation status — 2026-10-20
 
-Version: **0.5.0 development milestone**. This is not acceptance of the entire V1
-contract. Current evidence belongs to [MILESTONE_0_5.md](MILESTONE_0_5.md) and
-[VERIFICATION_0_5.json](VERIFICATION_0_5.json). Earlier reports, including 0.4, are
-historical and retain their original pass counts and failures.
+Version: **0.6.0 development milestone**. Local release acceptance passed; remote
+CI/publication state and exact identities are in [VERIFICATION_0_6.json](VERIFICATION_0_6.json).
+The [milestone report](MILESTONE_0_6.md) defines the current boundary. Earlier reports
+retain historical counts/failures. This is not acceptance of the entire V1 brief.
 
 ## Available behavior
 
-- Offline native Qt/CXX/Rust GUI and CLI; ZIP, 7Z, RAR4/RAR5, TAR and compressed
-  TAR/standalone streams. RAR remains read-only. See [formats](SUPPORTED_FORMATS.md).
-- Independent archive tabs with folder history, search, selection, columns and scroll;
-  duplicate/split-volume path normalization, busy-tab cancellation, opt-in workspace
-  restoration. Another idle tab can search/navigate/preview during a primary job.
-- One sequential writer queue, bounded durable job descriptions, atomic journal,
-  explicit review/retry after interruption, parameter changes, password re-entry,
-  batch counts, clearable history and JSON report export. Oversized selections
-  cannot silently replay from truncated descriptions. Restored writes never
-  resume automatically. Size/mtime source snapshots are review hints only.
-- ZIP/7Z add/delete/rename and explicit edit/save-back. Separate registered working
-  copies retain failed/conflicting edits across restart. Save validates source and
-  input SHA-256 under locks, verifies the replacement and updates the owning tab.
-- Read-only text/raster/Hex preview; selected ZIP payload read without decoding
-  unrelated payloads. Full testing still validates every member. External viewing
-  is explicit and restricted; executable/script/active-content types are excluded.
-- Disposable-view manager, editable-copy manager, visible pending-edit indicators,
-  EN/UK/RU, light/dark/system theme, keyboard commands and responsive toolbars.
-- Compression/resource presets for creation and rebuild, phase progress/cancellation,
-  conflict decisions, Smart Extract, file/entry hashes and split-7Z creation/read.
-- Complete metadata/path/collision validation before output; per-file publication,
-  bounded decoder output, link/reparse rejection, conservative disk preflight.
+- Offline Windows Qt/CXX/Rust GUI and CLI; existing ZIP/7Z/RAR/TAR/stream formats,
+  creation/compression/resource modes, hashes, previews and split-7Z remain.
+- Independent archive tabs, archive-wide search, navigation/selection, workspace
+  restoration and background reads while another tab owns a primary job.
+- Supervised GUI archive workers: bounded protocol, two-worker admission, Windows
+  memory/process limits, wall-time budget and forced cancellation. Failures retain
+  GUI, other tabs and registered working files.
+- Selected extraction of the 100,000-entry ZIP: 1.78 s in core and 3.32 s through
+  GUI. Complete name/collision/size and payload checks remain. [Measurements](BENCHMARKS_0_6.md).
+- Complete large selections, verified sidecars, journal migration, publication
+  acknowledgements and read-only verification of unknown archive writes. Explicit
+  failed-only retries retain errors/attempt links. Queue counters and filters.
+- Planned conversion into new verified ZIP/7Z from supported sources, including
+  RAR/TAR. Separate credentials, explicit unencrypted consent, originals retained.
+- ZIP/7Z working-copy saveback, Save as new archive, content verification, admission
+  budget, last-verification/error details and conflict recovery. Newer bytes are
+  never assumed saved during reconciliation.
+- EN/UK/RU, light/dark/system, scrollable narrow content with visible action bars,
+  keyboard commands, disposable views and working-copy management.
+- Portable/per-user installer, packaged worker, repaired Open With, actual
+  0.5-to-0.6 upgrade and uninstall without changing file defaults.
 
-## Boundaries
+## Evidence and boundaries
 
-Working copies keep plaintext and source paths until explicitly discarded, including
-when recent-history storage is disabled: creating a copy requires separate consent.
-The visible edit fingerprint uses metadata; authoritative save checks use hashes.
-Edits are limited to 256 MiB and ZIP/7Z without volumes. No auto-merge, silent save,
-external-editor termination detection or recovery from physical power loss is promised.
+Final packages passed isolated SDK-free smoke, independent readers, actual mixed
+GUI batch/retry and upgrade checks. Eight worker integration tests, seven GUI
+fault/recovery/batch cases, real VS Code/Writer saves, four native CTests, C++ ASan,
+mutation and publication/lock/interruption checks are linked from the report.
 
-Parser libraries can allocate metadata before all application-level entry budgets
-are checked. This version does not establish complete parser memory budgets or
-hostile-local-process filesystem race freedom. See [security](SECURITY_MODEL.md).
-Solid codecs may decode shared blocks, and cancellation has backend-dependent bounds.
+Worker jobs share the user's filesystem rights and exclude GUI/editor memory.
+Preflight/OS caps do not prove a complete allocation or race audit. Qt raster
+decoding remains bounded in GUI. Direct CLI commands are not implicitly supervised.
 
-The binaries remain unsigned. Local package/installer checks cannot establish
-SmartScreen reputation, enterprise-policy behavior or clean-machine qualification.
-Windows desktop DPI and Qt scale-factor captures are distinct forms of validation.
+History disabled means session-only queue recovery. Interrupted extraction needs
+manual review; no aggregate receipt exists. Physical power loss is unqualified.
+GUI adapters still contain closures/JSON despite typed centralized native execution.
 
-## Next development priorities
+Working files retain plaintext/source paths until discarded, independently of
+history settings. Fingerprints are hints; saves use hashes. The 2 GiB / 32-copy
+admission budget never deletes existing or editor-grown edits. Saveback supports
+bounded ZIP/7Z entries without volumes; no auto-merge or hidden save.
 
-1. Parser memory budgets and sustained malformed-input fuzzing with instrumented builds.
-2. Signed distribution and trusted update/recovery policy.
-3. Broader independent Windows/real-editor/DPI accessibility testing.
-4. Faster selected extraction preflight for very large metadata sets, richer editor
-   conflict recovery, and measured optimization of the remaining solid/stream paths.
+Packages are unsigned. Trusted Explorer identity installation, SmartScreen,
+enterprise policy, independent clean-machine qualification and physical OS DPI
+transitions remain separate from host/Qt-scale tests. Full Rust/native decoder
+sanitizers and coverage-guided campaigns remain future work.
+
+See [formats](SUPPORTED_FORMATS.md), [security](SECURITY_MODEL.md),
+[worker protocol](WORKER_PROTOCOL.md) and [historical 0.5 report](MILESTONE_0_5.md).

@@ -1,0 +1,363 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "output": "result-0-0.zip",
+      "source": "source-0.zip",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "959a0d14aa97c3e074a48253b97143e285c9612849c411699197549150807d6e"
+    },
+    {
+      "output": "result-0-1.zip",
+      "source": "source-0.zip",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "6a43c6bf8cbed3ec9b6fbaa66776082a6264204d5bc27a07c811c22378b0ef65"
+    },
+    {
+      "output": "result-0-0.7z",
+      "source": "source-0.zip",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "405213d0f90cc6b9af1b291ed16d988ee3ad3e32df1c89e2375f46743d5b311f"
+    },
+    {
+      "output": "result-0-1.7z",
+      "source": "source-0.zip",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "6be3ad99967bc975c5e238655be8e885e53d4ae47a2b9cc25986c387cb093863"
+    },
+    {
+      "output": "result-1-0.zip",
+      "source": "source-1.zip",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "959a0d14aa97c3e074a48253b97143e285c9612849c411699197549150807d6e"
+    },
+    {
+      "output": "result-1-1.zip",
+      "source": "source-1.zip",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "fc4b03c9a900ff5214289ecd5aa4b0cc79705b6ea742a39f0048d6c96191e031"
+    },
+    {
+      "output": "result-1-0.7z",
+      "source": "source-1.zip",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "405213d0f90cc6b9af1b291ed16d988ee3ad3e32df1c89e2375f46743d5b311f"
+    },
+    {
+      "output": "result-1-1.7z",
+      "source": "source-1.zip",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "895a8c11bac611c3da352418a8213d061f4f96d367e634d3864f26fd78649ac0"
+    },
+    {
+      "output": "result-2-0.zip",
+      "source": "source-0.7z",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-2-1.zip",
+      "source": "source-0.7z",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "3b0931ae6b546fa11b4dafd61568baf9466692f5255deff71ecaedd327d60563"
+    },
+    {
+      "output": "result-2-0.7z",
+      "source": "source-0.7z",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-2-1.7z",
+      "source": "source-0.7z",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "c4ae2e17fa76c52c6e6effb0f2959e30b2b426b83764918b3a596e7a7f388d12"
+    },
+    {
+      "output": "result-3-0.zip",
+      "source": "source-1.7z",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-3-1.zip",
+      "source": "source-1.7z",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "0fb1a733e5108668a9f17f5ebe43f7cbd336271e0018105200e3676ec36a7095"
+    },
+    {
+      "output": "result-3-0.7z",
+      "source": "source-1.7z",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-3-1.7z",
+      "source": "source-1.7z",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "aeae938edc0a12b3e174393cb515bc2c36b1b2c33e808d32a0a99335793c0fd2"
+    },
+    {
+      "output": "result-4-0.zip",
+      "source": "source-0.tar",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-4-1.zip",
+      "source": "source-0.tar",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d111eb0df4ba6b2116dad2d8d50ebc769ef0c08c9ea5c136a4088ad9bb5784f5"
+    },
+    {
+      "output": "result-4-0.7z",
+      "source": "source-0.tar",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-4-1.7z",
+      "source": "source-0.tar",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "b4a012f17b0239388a6917d56efe73eed4b7cde61f3354ec6c2926a09bf8f2bd"
+    },
+    {
+      "output": "result-5-0.zip",
+      "source": "source-0.tar.gz",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-5-1.zip",
+      "source": "source-0.tar.gz",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "fa8445348efbc7fea573ad9c7495225487ade3f9e30a945705bc228be5afb8af"
+    },
+    {
+      "output": "result-5-0.7z",
+      "source": "source-0.tar.gz",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-5-1.7z",
+      "source": "source-0.tar.gz",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "190e55de71e35b5abf95e77177d3ccb97b81918f26966c76acf57067c31db71b"
+    },
+    {
+      "output": "result-6-0.zip",
+      "source": "source-0.tar.xz",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-6-1.zip",
+      "source": "source-0.tar.xz",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "25ff0894d2e317732f51d8d8eec2a4c18cf67a9b8c0cad47ef686039e1580bd1"
+    },
+    {
+      "output": "result-6-0.7z",
+      "source": "source-0.tar.xz",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-6-1.7z",
+      "source": "source-0.tar.xz",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "4f5575b2cd8fecc036aed1ab6c9ee499766c9f06b7fe08e35636c8a4c51a9c5a"
+    },
+    {
+      "output": "result-7-0.zip",
+      "source": "source-0.tar.bz2",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-7-1.zip",
+      "source": "source-0.tar.bz2",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "8e9d65a5f8b94f48d576d3e84915e8ef1c3265e9ada9d5f96f1522cf897f3fad"
+    },
+    {
+      "output": "result-7-0.7z",
+      "source": "source-0.tar.bz2",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-7-1.7z",
+      "source": "source-0.tar.bz2",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "7bb4908533d6742f961bd272cb84962279b093b1d061dbf0d98cc2342976194a"
+    },
+    {
+      "output": "result-8-0.zip",
+      "source": "source-0.tar.zst",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "d24d81611a471cc11bd22de73878ffad121766aa3b2016d2fe245fb3bbd363d6"
+    },
+    {
+      "output": "result-8-1.zip",
+      "source": "source-0.tar.zst",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "98fb9cb8e8a921978ec5a1c0577ea213852be7f6a823ce9ce8cf1ac00552ae6a"
+    },
+    {
+      "output": "result-8-0.7z",
+      "source": "source-0.tar.zst",
+      "encrypted": false,
+      "files": 3,
+      "directories": 2,
+      "sha256": "a99c9a08813cca9938ff96e0f461a771335cf3f3dccabb83cc67211be5d49413"
+    },
+    {
+      "output": "result-8-1.7z",
+      "source": "source-0.tar.zst",
+      "encrypted": true,
+      "files": 3,
+      "directories": 2,
+      "sha256": "b03cc34c1873c05da2068435ddead099fed3de21fcd86ad9fa815cc871a6c8a4"
+    },
+    {
+      "output": "result-9-0.zip",
+      "source": "test_read_format_rar_binary_data.rar",
+      "encrypted": false,
+      "files": 2,
+      "directories": 0,
+      "sha256": "fc2ece8835c506d63a00bbfac3f97d4038dff066d341875e9826662d4b9a570e"
+    },
+    {
+      "output": "result-9-1.zip",
+      "source": "test_read_format_rar_binary_data.rar",
+      "encrypted": true,
+      "files": 2,
+      "directories": 0,
+      "sha256": "73a2cabe3486e4d49385ffc835bdd958da0e7bb6b241e66481e1bd108612c888"
+    },
+    {
+      "output": "result-9-0.7z",
+      "source": "test_read_format_rar_binary_data.rar",
+      "encrypted": false,
+      "files": 2,
+      "directories": 0,
+      "sha256": "2844b45c8e625d2590eea32cbfa97f9bdbc875bb8653d85e28e027b3506bf55d"
+    },
+    {
+      "output": "result-9-1.7z",
+      "source": "test_read_format_rar_binary_data.rar",
+      "encrypted": true,
+      "files": 2,
+      "directories": 0,
+      "sha256": "013512f73df8b0b8659742e47c899652a5d32b41103caca68cdf283e8af8c27f"
+    },
+    {
+      "output": "result-10-0.zip",
+      "source": "test_read_format_rar5_compressed.rar",
+      "encrypted": false,
+      "files": 1,
+      "directories": 0,
+      "sha256": "faf1ddc9cf3002c119bb856d87e1592a8bc9fac4dbdb9ea13473459513089d53"
+    },
+    {
+      "output": "result-10-1.zip",
+      "source": "test_read_format_rar5_compressed.rar",
+      "encrypted": true,
+      "files": 1,
+      "directories": 0,
+      "sha256": "07cbdea04958e87c491765ea0f7ae454bfc01675c415fcd042795466bae9f780"
+    },
+    {
+      "output": "result-10-0.7z",
+      "source": "test_read_format_rar5_compressed.rar",
+      "encrypted": false,
+      "files": 1,
+      "directories": 0,
+      "sha256": "80a0c71d5b4b80e9059cdc222c9a6a0cafbc957f5ba9e69ea3a5cbdd9df13b5d"
+    },
+    {
+      "output": "result-10-1.7z",
+      "source": "test_read_format_rar5_compressed.rar",
+      "encrypted": true,
+      "files": 1,
+      "directories": 0,
+      "sha256": "df96f39bade2432cb86fff46d00a8b4bd557c722525d6958afc1d88a22460306"
+    }
+  ],
+  "readers": {
+    "py7zr": "1.1.3",
+    "pyzipper": "0.4.0"
+  },
+  "worker_sha256": "5539559f35e36429b8db7d78b8fbc55ca14a46051dc09a1b068939008c4dce79",
+  "scope": "Independent result decoding, exact file hashes and directory sets; expected source hashes produced by core. Fixed public fixture credentials, no user passwords."
+}

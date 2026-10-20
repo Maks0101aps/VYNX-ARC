@@ -1,0 +1,56 @@
+{
+  "status": "passed",
+  "cli_sha256": "8063b998e4a782ca93baa37655d1be577f8ede4bb0692cad4f9449025cdc7735",
+  "cases": [
+    {
+      "format": "zip",
+      "operation": "add",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\zip-add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "zip",
+      "operation": "delete",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\zip-delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "zip",
+      "operation": "rename",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\zip-rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "add",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\7z-add.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "f5d7290aa5cb8363418b6ef54905013a54083f676c74cdb005b789a99b04b10a",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "delete",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\7z-delete.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "e10fcac0e3135d0f609ed2712fc2b24be7969648f4f8398b1bba1071a75b8649",
+      "explicit_retry": "passed"
+    },
+    {
+      "format": "7z",
+      "operation": "rename",
+      "status": "passed",
+      "failed_stderr": "ACCESS_DENIED: Could not update .dev\\milestone-0.6\\locks-validated\\lock-check-430dn0gi\\7z-rename.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "original_sha256": "c4cf0b3731a6844eecda526eb1571f91aa7ada226d0b1654d9046a1079a20917",
+      "explicit_retry": "passed"
+    }
+  ],
+  "binary_identity_scope": "Curated identity of the exact immutable staged path used by the invocation; raw harness emits a case list.",
+  "raw_results_sha256": "593faffe417a1afc7979eb7d1ca2feee827c54c49e3b7cd37bfd9842d9bcd682"
+}

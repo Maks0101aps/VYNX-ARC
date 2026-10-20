@@ -1,0 +1,18 @@
+{
+  "status": "passed",
+  "source_commit": "bedc03bc947b74d60ba0fbc9c229b1456cbf3c8d",
+  "tests": [
+    "presentation",
+    "shell_smoke",
+    "gui_smoke",
+    "gui_batch"
+  ],
+  "test_log_sha256": "9271ba31427ed9440d7065d6b23aa06cf4e1574f7217f5410b9667f2ea7772aa",
+  "instrumented_gui_sha256": "8759c1bbe5ee3799f05832eaa1d4435b8015274f854949e9cfab4470afb9a116",
+  "scope": "MSVC C++ GUI/shell instrumentation. STL container annotations disabled consistently for uninstrumented static libraries. Rust, decoder libraries and Qt are not instrumented; not leak detection.",
+  "earlier_candidate_100_cycle_report": {
+    "path": ".dev/milestone-0.6/asan-gui-cycles-01/results.json",
+    "sha256": "ee68c5f2fdc120e4b8bafdca9eeba9bd946e8ced8e599d3a048cca6210f7f27e",
+    "status": "passed"
+  }
+}

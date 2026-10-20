@@ -4,6 +4,9 @@ Measurements on the existing Windows development host, with the same six 0.5
 corpora. Three trials per throughput case; OS filesystem caches were not flushed.
 The first GUI operation is process-first, not a claim of a cold filesystem cache.
 Benchmarks ran after the mutation campaigns and native builds finished.
+The [host snapshot](benchmarks/0.6/host.json) matches the historical CPU, memory
+and Windows build. Across six core corpora, sampled peak RSS changed by -3.7% to
++2.3%; no measured core peak increased by more than 15%.
 
 ## Selected extraction and actual GUI
 

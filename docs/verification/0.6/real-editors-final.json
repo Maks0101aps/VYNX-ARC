@@ -1,0 +1,65 @@
+{
+  "scope": "actual editor APIs and worker saveback across separate client processes, not manual UI testing",
+  "status": "passed",
+  "cases": [
+    {
+      "editor": "Visual Studio Code",
+      "version": "1.142.0",
+      "saves": [
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\vscode-cases\\zip-plain\\working\\text-input.txt",
+          "saved": true,
+          "sha256": "be67bb8e77b88489333580fc08772fe6c76e45d83f134f4e79a86228af4b5412",
+          "file_id_changed": false
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\vscode-cases\\zip-encrypted\\working\\text-input.txt",
+          "saved": true,
+          "sha256": "be67bb8e77b88489333580fc08772fe6c76e45d83f134f4e79a86228af4b5412",
+          "file_id_changed": false
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\vscode-cases\\7z-plain\\working\\text-input.txt",
+          "saved": true,
+          "sha256": "be67bb8e77b88489333580fc08772fe6c76e45d83f134f4e79a86228af4b5412",
+          "file_id_changed": false
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\vscode-cases\\7z-encrypted\\working\\text-input.txt",
+          "saved": true,
+          "sha256": "be67bb8e77b88489333580fc08772fe6c76e45d83f134f4e79a86228af4b5412",
+          "file_id_changed": false
+        }
+      ],
+      "saveback": "Verified 4 real editor saves into plain/encrypted ZIP/7Z; copies retained"
+    },
+    {
+      "editor": "LibreOffice Writer",
+      "version": "LibreOffice 26.8.1.1 bf6ef2662401c7d6dce671ab4deb26ee0af3a7c1",
+      "saves": [
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\writer-cases\\zip-plain\\working\\document.docx",
+          "saved": true,
+          "file_id_changed": true
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\writer-cases\\zip-encrypted\\working\\document.docx",
+          "saved": true,
+          "file_id_changed": true
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\writer-cases\\7z-plain\\working\\document.docx",
+          "saved": true,
+          "file_id_changed": true
+        },
+        {
+          "file": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\milestone-0.6\\real-editors-validated\\writer-cases\\7z-encrypted\\working\\document.docx",
+          "saved": true,
+          "file_id_changed": true
+        }
+      ],
+      "saveback": "Verified 4 real editor saves into plain/encrypted ZIP/7Z; copies retained"
+    }
+  ],
+  "worker_sha256": "5539559f35e36429b8db7d78b8fbc55ca14a46051dc09a1b068939008c4dce79"
+}

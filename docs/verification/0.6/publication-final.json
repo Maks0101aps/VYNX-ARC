@@ -1,0 +1,100 @@
+{
+  "location": "project",
+  "work": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\zip-stress-phactdf_",
+  "cycles": 350,
+  "started_utc": "2026-10-20T07:34:10.893422+00:00",
+  "portable_sha256": "8200874b588fbab86296c0d01f0507560298c0e414c4a12ff90ed6e8fb41db30",
+  "continue_on_failure": false,
+  "cli_sha256": "8063b998e4a782ca93baa37655d1be577f8ede4bb0692cad4f9449025cdc7735",
+  "categories": [
+    {
+      "category": "add",
+      "motw": false,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "delete",
+      "motw": false,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "rename",
+      "motw": false,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "mixed",
+      "motw": false,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 1400,
+      "publication_successes": 1400,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "add",
+      "motw": true,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "delete",
+      "motw": true,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "rename",
+      "motw": true,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 350,
+      "publication_successes": 350,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    },
+    {
+      "category": "mixed",
+      "motw": true,
+      "completed": 350,
+      "attempted_cycles": 350,
+      "publication_attempts": 1400,
+      "publication_successes": 1400,
+      "failures": [],
+      "original_preserved": true,
+      "status": "passed"
+    }
+  ],
+  "finished_utc": "2026-10-20T07:38:04.697767+00:00"
+}

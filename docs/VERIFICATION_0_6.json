@@ -1,0 +1,130 @@
+{
+  "version": "0.6.0",
+  "release_date": "2026-10-20",
+  "status": "accepted development milestone",
+  "release_tag": "v0.6.0",
+  "application_build_source_commit": "bedc03bc947b74d60ba0fbc9c229b1456cbf3c8d",
+  "source_validation_commit": "bedc03bc947b74d60ba0fbc9c229b1456cbf3c8d",
+  "source_tree": "ff4759f51af83d3367e89505a073f02b8abe040f",
+  "publication_boundary": "The annotated Git tag is created and pushed after committing this report; the remote Git ref is authoritative. Report-only commits do not change packaged code.",
+  "artifacts": [
+    {
+      "path": "dist/VYNX-ARC-Portable-x64.zip",
+      "bytes": 25941218,
+      "sha256": "8200874b588fbab86296c0d01f0507560298c0e414c4a12ff90ed6e8fb41db30"
+    },
+    {
+      "path": "dist/VYNX-ARC-Setup-x64.exe",
+      "bytes": 18467372,
+      "sha256": "f5d7c016f6247b6316f8e0f4e06743c2c53cf254624f8a7d2829ff7a45041298"
+    },
+    {
+      "path": "dist/VYNX-ARC-Explorer-x64.msix",
+      "bytes": 13188,
+      "sha256": "8d11b915746a218fad983335d057cae169692f509841f4620be65bdeecd5b376"
+    },
+    {
+      "path": "dist/SHA256SUMS.txt",
+      "bytes": 277,
+      "sha256": "19b4630e5cedb52d00d96f6766b436532dae40290d1fa71cbab343e6e70762e9"
+    }
+  ],
+  "binaries": {
+    "VynxArc.exe": "a5d433dc242d7d2f6ef2013beeecf95d0b4e0b9100d31a8b0c77704a1f178a94",
+    "vynxarc-cli.exe": "8063b998e4a782ca93baa37655d1be577f8ede4bb0692cad4f9449025cdc7735",
+    "vynxarc-worker.exe": "5539559f35e36429b8db7d78b8fbc55ca14a46051dc09a1b068939008c4dce79",
+    "VynxShell.dll": "ba35db169f89001ef872e9a5c0f4d6581cdf03793302f58890b51924452c391f"
+  },
+  "local_source_gates": {
+    "status": "passed",
+    "command": "scripts/build-release.ps1",
+    "checks": [
+      "fmt",
+      "Clippy -D warnings",
+      "locked workspace tests",
+      "cargo audit --deny yanked",
+      "CMake Release",
+      "four CTests"
+    ],
+    "log_sha256": "07e2813ece30bffbc2f154af392f72f2311baf96d38144fbe1171d61e692de14"
+  },
+  "remote_ci": {
+    "id": 39386567084,
+    "head_sha": "bedc03bc947b74d60ba0fbc9c229b1456cbf3c8d",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/Maks0101aps/VYNX-ARC/actions/runs/39386567084",
+    "created_at": "2026-10-20T07:26:54Z",
+    "updated_at": "2026-10-20T07:41:11Z"
+  },
+  "production_worker_diagnostic_hooks": {
+    "status": "excluded",
+    "runtime_probe": "fault environment ignored by packaged isolated-test",
+    "log_sha256": "090bc9ec64865cd7b69c4eaf2b8c67aa6dc308d8937038c883a333a36d683849"
+  },
+  "performance": {
+    "scope": "Development acceptance measurements; first/repeated process operations, OS caches uncontrolled",
+    "core_report": "benchmarks/0.6/core-current.json",
+    "gui_report": "benchmarks/0.6/gui-current.json",
+    "host_report": "benchmarks/0.6/host.json"
+  },
+  "verification_reports": {
+    "portable-final.json": {
+      "path": "verification/0.6/portable-final.json",
+      "sha256": "839b7dbc9da0784e22252cf63dc3d5763db6c838750d6c051a8504dd22c16053"
+    },
+    "installer-upgrade-final.json": {
+      "path": "verification/0.6/installer-upgrade-final.json",
+      "sha256": "b411ca116fcaf8048a825acb315601287e8c485ac554bd970490c4c9835d8f37"
+    },
+    "worker-recovery-final.json": {
+      "path": "verification/0.6/worker-recovery-final.json",
+      "sha256": "e88aa1aef32981a6d299a3a1e7a6705b8af0333a508213e6692fc3a3e8cfa244"
+    },
+    "real-editors-final.json": {
+      "path": "verification/0.6/real-editors-final.json",
+      "sha256": "73cc9f313213748b0d19ed5282fab88eb8c783deadd6afd0354da4f3ddb16373"
+    },
+    "conversion-independent-final.json": {
+      "path": "verification/0.6/conversion-independent-final.json",
+      "sha256": "b56d58f9ded7671aa52cee174d0c57f9219cc1cda5eb581a04cefc13755a2922"
+    },
+    "publication-final.json": {
+      "path": "verification/0.6/publication-final.json",
+      "sha256": "a906b5048ea2fa9d3a55f706f9b7ec65046962fcb8703ec547a1cdb81c006d10"
+    },
+    "parser-smoke-final.json": {
+      "path": "verification/0.6/parser-smoke-final.json",
+      "sha256": "c7757adeae61ea78e4066c4d550ea37d26ccc783095118eb0d850b7af264d038"
+    },
+    "locks-final.json": {
+      "path": "verification/0.6/locks-final.json",
+      "sha256": "e47994dc0db9f86ba8c2f1de33027a68e352ac094b30961b6643dd74620af832"
+    },
+    "interrupted-final.json": {
+      "path": "verification/0.6/interrupted-final.json",
+      "sha256": "c0eaab3a1a9efc6292b6fed2ca8db8a2caa00e916b201fd8c89077ed18e4f9dd"
+    },
+    "ui-final.json": {
+      "path": "verification/0.6/ui-final.json",
+      "sha256": "771ebbae704b049a0991478432c95ea03ca3f63fa670dd985c599aa865f4dee2"
+    },
+    "asan-final.json": {
+      "path": "verification/0.6/asan-final.json",
+      "sha256": "7fd317980435a90d58529c34de535ab9dee564bd71c45e4976cf070d459e79b9"
+    },
+    "fuzz-campaign.json": {
+      "path": "verification/0.6/fuzz-campaign.json",
+      "sha256": "c5ba36869c1ff83df6d78a3f68437d0187c2479ae5313af32b6ab56694c1c7aa"
+    }
+  },
+  "limitations": [
+    "unsigned packages; trusted Explorer identity/SmartScreen/enterprise policy unqualified",
+    "independent clean-machine and physical OS DPI/monitor transitions not tested",
+    "history-disabled queue is session-only; extraction has no aggregate reconciliation receipt",
+    "C++ ASan excludes Rust/decoder/prebuilt Qt and is not leak detection; mutation campaigns are not coverage-guided",
+    "two original timing alarms retained; 32 bounded replays passed; original cause not established",
+    "worker job limits do not restrict filesystem authority or GUI/editor memory; remaining GUI adapters use closures/JSON",
+    "working-copy quota is admission-only; conversion does not retain ACL/ownership/comments/extra metadata; no RAR encoding"
+  ]
+}

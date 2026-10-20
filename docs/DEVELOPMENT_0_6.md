@@ -1,7 +1,8 @@
 ﻿# 0.6 development evidence
 
-This is an incremental development record, not release acceptance. Versions remain
-0.5.0 until a validated 0.6 candidate is ready.
+This is a historical incremental record. Its earlier pending statements and
+candidate identities are retained. Current acceptance belongs to
+[MILESTONE_0_6.md](MILESTONE_0_6.md) and [VERIFICATION_0_6.json](VERIFICATION_0_6.json).
 
 ## Selected extraction
 
@@ -224,3 +225,25 @@ exposed mixed STL annotation settings with the uninstrumented bridge/native stat
 libraries; consistent annotation macros resolve that build mismatch. This scope
 instruments GUI/shell C++ only, not Rust or decoder libraries, and is not leak
 detection. Instrumented memory/timings are excluded from release performance claims.
+
+The final batch acceptance deliberately mixes two successful inputs and one damaged
+input, repairs the failed source, invokes the actual retry dialog and verifies that
+only the failed job gets a new attempt while its original error remains. It is now
+a mandatory fourth CTest and runs again against the unpacked portable package.
+
+Remote CI passed Qt installation, verification dependencies and all application
+tests, then exposed a VS 2026 packaging assumption: CRT folders are no longer always
+named VC143. Runtime selection now finds the actual x64 VC CRT folder and validates
+required DLLs. A subsequent run exposed the older split-cleanup regression's race:
+its ten-second timer began before all volumes had been staged. The regression now
+uses a Windows unit-test-only observer immediately after the first real publication,
+replaces that path and cancels. It deterministically checks that cleanup removes
+the owned file object while preserving the replacement; no shipping hook, retry or
+weakened assertion is introduced. Targeted checks and Clippy passed.
+
+The validated package build is now `bedc03b`; its complete local source gates,
+four native release/ASan tests and deployed verification passed again. The matching
+[remote run](https://github.com/Maks0101aps/VYNX-ARC/actions/runs/39386567084) also
+completed successfully, including runtime packaging and isolated portable checks.
+The final manifest binds reports/screenshots to the validated executable and
+artefact hashes. Earlier candidate reports remain historical.

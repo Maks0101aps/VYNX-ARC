@@ -2,7 +2,7 @@
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
 archive core connected through CXX. This repository contains the **0.6.0
-release candidate**. Final package acceptance is in progress. The supplied master brief remains the V1 contract;
+development milestone**. The supplied master brief remains the V1 contract;
 this milestone does not satisfy the full contract.
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
@@ -55,7 +55,7 @@ streams. Existing files are preserved by default. These protections are tested,
 but complete parser allocation budgets and filesystem race hardening still need
 review before a production release.
 
-![Archive tabs](docs/screenshots/0.5/tabs-dark-uk-1.25.png)
+![Working copies](docs/screenshots/0.6/working-copies-dark-uk-1.25.png)
 
 ## Run
 
@@ -66,8 +66,10 @@ Locally generated artifacts are under `dist/` (ignored by Git):
 - `SHA256SUMS.txt`: SHA-256 checksums of those artifacts.
 
 The binaries are unsigned. The portable package passed tests with only Windows
-directories on PATH. A per-user 0.4-to-0.5 installer upgrade, settings preservation and
-uninstallation passed on the development host. Clean-VM qualification remains separate. Windows 11 x64 is the tested platform.
+directories on PATH. A real per-user 0.5-to-0.6 upgrade preserved settings and
+working-copy data; Open With registration, unchanged defaults and uninstallation
+passed on the development host. Independent clean-machine qualification remains
+separate. Windows 11 x64 is the tested platform.
 No development SDK is required to run the packages.
 
 ## Build
@@ -92,10 +94,11 @@ the command line are intentionally unsupported.
 
 ## Project status
 
-The [0.6.0 plan](docs/ROADMAP_0_6.md), [development evidence](docs/DEVELOPMENT_0_6.md)
-and [performance report](docs/BENCHMARKS_0_6.md) track bounded workers, faster
-large-archive operations, conversion and stronger recovery. Final package and
-0.5-to-0.6 upgrade qualification remains pending for this candidate.
+The [0.6.0 acceptance report](docs/MILESTONE_0_6.md),
+[verification manifest](docs/VERIFICATION_0_6.json) and
+[performance report](docs/BENCHMARKS_0_6.md) record completed workflows, exact package
+identities and explicit limitations. The [plan](docs/ROADMAP_0_6.md) and
+[development log](docs/DEVELOPMENT_0_6.md) retain the implementation history.
 
 The [0.5 milestone report](docs/MILESTONE_0_5.md) records the preceding behavior,
 measurements and verification boundaries. [Roadmap](docs/ROADMAP_0_5.md) tracks acceptance.
