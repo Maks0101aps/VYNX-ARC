@@ -4,7 +4,7 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Restore verified local RAR test fixtures
         run: python scripts/fetch-rar-fixtures.py
       - name: Rust MSVC toolchain
