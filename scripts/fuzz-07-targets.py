@@ -32,7 +32,9 @@ def main():
     env = os.environ.copy()
     qt = env.get('VYNX_QT_ROOT') or str(Path(env.get('LOCALAPPDATA', '')) / 'VynxArcDev/QtMSVC')
     env['PATH'] = str(Path(qt) / 'bin') + os.pathsep + env.get('PATH', '')
-    env['QT_QPA_PLATFORM'] = 'offscreen'
+    # Deployed Windows packages intentionally ship qwindows, not SDK-only test plugins.
+    env['QT_QPA_PLATFORM'] = 'windows'
+    env['QT_ASSUME_STDERR_HAS_CONSOLE'] = '1'
     report = {'status': 'running', 'binaries': {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in bins.items()},
               'scope': 'Bounded regression suite, not coverage-guided fuzzing or security certification'}
     args.output.parent.mkdir(parents=True, exist_ok=True)
