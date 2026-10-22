@@ -68,6 +68,10 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
     layout->addLayout(commands);
     table = new QTableView;
     table->setMouseTracking(true);
+    table->setDragEnabled(true);
+    table->setAcceptDrops(true);
+    table->setDropIndicatorShown(true);
+    table->setDragDropMode(QAbstractItemView::DragDrop);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table->setSortingEnabled(true);

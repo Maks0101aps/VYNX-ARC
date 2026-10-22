@@ -1,5 +1,8 @@
 #include "EditStore.h"
 #include "ExternalFiles.h"
+#include "TempStore.h"
+#include "NestedStore.h"
+#include "dialogs/TemporaryStorageDialog.h"
 #include "MainWindow.h"
 #include "SecretUtf8.h"
 #include "pages/ArchivePage.h"
@@ -200,6 +203,7 @@ void MainWindow::reloadArchive(const QString &path, const std::shared_ptr<Secret
             return QString();
         },
         [this, owner, archive, prepared, pw, folder, query] {
+            owner->previewCache.clear();
             owner->archive = *archive;
             owner->password = pw;
             owner->model->loadPrepared(*prepared);
@@ -524,74 +528,31 @@ void MainWindow::showWorkingCopies() {
 }
 
 void MainWindow::showTemporaryFiles() {
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Temporary files"));
-    dialog.resize(800, 420);
-    auto *layout = new QVBoxLayout(&dialog);
-    auto *summary = new QLabel;
-    summary->setWordWrap(true);
-    layout->addWidget(summary);
-    auto *table = new QTableWidget(0, 2);
-    table->setHorizontalHeaderLabels({tr("Location"), tr("Size")});
-    table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    table->setSelectionBehavior(QAbstractItemView::SelectRows);
-    table->setSelectionMode(QAbstractItemView::SingleSelection);
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    layout->addWidget(table, 1);
-    auto refresh = [this, table, summary] {
-        const auto rows = externalFiles_->items();
-        table->setRowCount(0);
-        quint64 bytes = 0;
-        for (const auto &value : rows) {
-            const auto row = value.toObject();
-            int index = table->rowCount();
-            table->insertRow(index);
-            table->setItem(index, 0, new QTableWidgetItem(row["directory"].toString()));
-            table->setItem(index, 1,
-                           new QTableWidgetItem(displaySize(quint64(row["bytes"].toDouble()))));
-            bytes += quint64(row["bytes"].toDouble());
+    QSet<QString> activeNested;
+    for (const auto &s : sessions_) {
+        if (s->nestedInfo && !s->nestedInfo->nestedStoreId.isEmpty())
+            activeNested.insert(s->nestedInfo->nestedStoreId);
+    }
+    // A child retains every ancestor container needed for navigation, even if
+    // its parent's tab was closed.
+    if (nestedStore_) {
+        const auto records = nestedStore_->records();
+        bool expanded = true;
+        while (expanded) {
+            expanded = false;
+            for (const auto &child : records) {
+                const auto rec = child.toObject();
+                if (!activeNested.contains(rec["id"].toString())) continue;
+                for (const auto &parent : records) {
+                    const auto ancestor = parent.toObject();
+                    const auto id = ancestor["id"].toString();
+                    if (!activeNested.contains(id) && ancestor["file"] == rec["parentArchive"]) {
+                        activeNested.insert(id); expanded = true;
+                    }
+                }
+            }
         }
-        quint64 editBytes = 0;
-        for (const auto &value : edits_->records())
-            editBytes += quint64(QFileInfo(value.toObject()["file"].toString()).size());
-        summary->setText(tr("Temporary views: %1. Working copies: %2 (managed separately and never "
-                            "removed here).")
-                             .arg(displaySize(bytes), displaySize(editBytes)));
-        if (table->rowCount())
-            table->selectRow(0);
-    };
-    auto *controls = new QHBoxLayout;
-    auto *open = new QPushButton(tr("Open folder"));
-    auto *remove = new QPushButton(tr("Delete selected copy..."));
-    auto *update = new QPushButton(tr("Refresh"));
-    controls->addWidget(open);
-    controls->addWidget(remove);
-    controls->addWidget(update);
-    layout->addLayout(controls);
-    connect(update, &QPushButton::clicked, &dialog, refresh);
-    connect(open, &QPushButton::clicked, &dialog, [table] {
-        if (table->currentRow() >= 0)
-            QDesktopServices::openUrl(
-                QUrl::fromLocalFile(table->item(table->currentRow(), 0)->text()));
-    });
-    connect(remove, &QPushButton::clicked, &dialog, [this, table, refresh] {
-        if (table->currentRow() < 0 || operations_.busy)
-            return;
-        if (QMessageBox::question(
-                this, tr("Delete temporary copy"),
-                tr("Delete this temporary view? Close any external application using it first. The "
-                   "archive and editable working copies are not changed."),
-                QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
-            return;
-        if (!externalFiles_->remove(table->item(table->currentRow(), 0)->text()))
-            QMessageBox::warning(this, tr("Temporary files"),
-                                 tr("The copy is in use or cannot be safely removed. Close the "
-                                    "other application and retry."));
-        refresh();
-    });
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    layout->addWidget(buttons);
-    refresh();
+    }
+    TemporaryStorageDialog dialog(tempStore_.get(), activeNested, this);
     dialog.exec();
 }

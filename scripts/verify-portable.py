@@ -33,6 +33,7 @@ def run(command):
     if r.returncode:raise RuntimeError((r.returncode,r.stdout.decode(errors='replace'),r.stderr.decode(errors='replace')))
     return r.stdout.decode(errors='replace')
 run([exe,'--smoke-test']);print('Isolated deployed GUI smoke passed',flush=True)
+run([exe,'--smoke-test','--product-smoke','-']);print('Isolated deployed nested/copy/recovery workflows passed',flush=True)
 run([exe,'--smoke-test','--worker-fault-smoke','batch','-']);print('Isolated deployed GUI batch/retry passed',flush=True)
 run([cli,'--help']);print('Isolated deployed CLI passed',flush=True)
 work=pathlib.Path(tempfile.mkdtemp(prefix='independent-check-',dir=work_scratch));source=work/'Project';(source/'src').mkdir(parents=True,exist_ok=True)

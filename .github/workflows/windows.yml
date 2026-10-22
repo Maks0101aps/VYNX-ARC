@@ -38,6 +38,8 @@ jobs:
           $env:VYNX_VERIFY_REPORT = Join-Path $PWD '.dev/ci-portable.json'
           python scripts/verify-portable.py
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/fuzz-07-targets.py --output .dev/ci-qualification-0.7.json
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/check-publication-locks.py --cli target/release/vynxarc-cli.exe --output .dev/ci-locks
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/check-interrupted-rebuild.py --cli target/release/vynxarc-cli.exe --output .dev/ci-interrupted
@@ -51,6 +53,7 @@ jobs:
           name: windows-verification
           path: |
             .dev/ci-portable.json
+            .dev/ci-qualification-0.7.json
             .dev/ci-locks/results.json
             .dev/ci-interrupted/results.json
             build-msvc/presentation-tests.txt

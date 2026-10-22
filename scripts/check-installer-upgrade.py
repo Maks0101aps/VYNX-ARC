@@ -40,6 +40,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('old', 'new', 'gui', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--old-version', default='0.6.0')
+    parser.add_argument('--new-version', default='0.7.0')
     args = parser.parse_args()
     if value(UNINSTALL, 'UninstallString') is not None:
         raise RuntimeError('An existing installation is registered; refusing to replace it for QA')
@@ -66,7 +68,7 @@ def main():
     copy_id = str(uuid.uuid4())
     working = Path(environment('LOCALAPPDATA')) / 'VYNX/VYNX ARC/WorkingCopies' / ('edit-' + copy_id)
     report = dict(status='running', settings_preexisting=original is not None,
-                  scope='Actual per-user 0.5-to-0.6 installer upgrade, Open With registry/command, installed GUI smoke, settings and schema-1 working-copy fixture preservation; not a clean VM or unsigned Explorer identity registration')
+                  scope=f'Actual per-user {args.old_version}-to-{args.new_version} installer upgrade, Open With registry/command, installed GUI smoke, settings and schema-1 working-copy fixture preservation; not a clean VM or unsigned Explorer identity registration')
     env = os.environ.copy()
     windows = environment('SystemRoot')
     env['PATH'] = windows + ';' + windows + '/System32'
@@ -96,8 +98,8 @@ def main():
 
     try:
         run([args.old.resolve(), '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=openwith',
-             f'/DIR={app}', f'/LOG={root / "install-0.5.log"}'])
-        assert b'0.5.0' in run([app / 'vynxarc-cli.exe', '--help']).stdout
+             f'/DIR={app}', f'/LOG={root / "install-old.log"}'])
+        assert args.old_version.encode() in run([app / 'vynxarc-cli.exe', '--help']).stdout
         settings.parent.mkdir(parents=True, exist_ok=True)
         settings.write_bytes(expected)
         note = root / 'note.txt'
@@ -112,10 +114,10 @@ def main():
         (working / '.edit.json').write_text(json.dumps(manifest), encoding='utf-8')
         preserved = {p.name: p.read_bytes() for p in working.iterdir()}
         run([args.new.resolve(), '/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=openwith',
-             f'/DIR={app}', f'/LOG={root / "upgrade-0.6.log"}'])
+             f'/DIR={app}', f'/LOG={root / "upgrade-new.log"}'])
         assert settings.read_bytes() == expected
-        assert value(UNINSTALL, 'DisplayVersion') == '0.6.0'
-        assert b'0.6.0' in run([app / 'vynxarc-cli.exe', '--help']).stdout
+        assert value(UNINSTALL, 'DisplayVersion') == args.new_version
+        assert args.new_version.encode() in run([app / 'vynxarc-cli.exe', '--help']).stdout
         assert (app / 'vynxarc-worker.exe').is_file()
         assert hashlib.sha256((app / 'VynxArc.exe').read_bytes()).digest() == hashlib.sha256(args.gui.read_bytes()).digest()
         assert {p.name: p.read_bytes() for p in working.iterdir()} == preserved
@@ -157,7 +159,7 @@ def main():
                     file.unlink()
             working.rmdir()
         (root / 'results.json').write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
-    print('Installer 0.5 -> 0.6, Open With, preserved data and uninstall: passed')
+    print(f'Installer {args.old_version} -> {args.new_version}, Open With, preserved data and uninstall: passed')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.24)
-project(VynxArc VERSION 0.6.0 LANGUAGES CXX)
+project(VynxArc VERSION 0.7.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.12 REQUIRED COMPONENTS Widgets Concurrent Test LinguistTools)
@@ -27,10 +27,11 @@ set_target_properties(vynx_core PROPERTIES IMPORTED_LOCATION "${RUST_LIBRARY}")
 add_dependencies(vynx_core rust_core)
 qt_add_executable(VynxArc WIN32 apps/gui/main.cpp apps/gui/ArchiveModel.cpp apps/gui/ArchiveModel.h apps/gui/MainWindow.cpp apps/gui/MainWindow.h apps/gui/ShellRequest.cpp apps/gui/ShellRequest.h)
 target_sources(VynxArc PRIVATE
-    apps/gui/EditStore.cpp apps/gui/EditStore.h
+    apps/gui/JobTypes.cpp apps/gui/JobTypes.h apps/gui/NestedStore.cpp apps/gui/NestedStore.h apps/gui/TempStore.cpp apps/gui/TempStore.h apps/gui/dialogs/TemporaryStorageDialog.cpp apps/gui/dialogs/TemporaryStorageDialog.h apps/gui/EditStore.cpp apps/gui/EditStore.h
     apps/gui/MainWindowEdits.cpp
     apps/gui/MainWindowConversion.cpp
     apps/gui/MainWindowAcceptance.cpp
+    apps/gui/MainWindowProductAcceptance.cpp
     apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h
     apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
     apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h
@@ -39,6 +40,7 @@ target_sources(VynxArc PRIVATE
     apps/gui/MainWindowJournal.cpp
     apps/gui/ArchiveSession.h apps/gui/OperationController.h
     apps/gui/MainWindowSessions.cpp
+    apps/gui/MainWindowNested.cpp
     apps/gui/MainWindowBatch.cpp
     apps/gui/dialogs/BatchExtractDialog.cpp apps/gui/dialogs/BatchExtractDialog.h
     apps/gui/MainWindowJobs.cpp
@@ -48,6 +50,8 @@ target_sources(VynxArc PRIVATE
     apps/gui/dialogs/ConflictDialog.cpp apps/gui/dialogs/ConflictDialog.h
     apps/gui/dialogs/SettingsDialog.cpp apps/gui/dialogs/SettingsDialog.h
     apps/gui/dialogs/AboutDialog.cpp apps/gui/dialogs/AboutDialog.h
+    apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h
+    apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h
     apps/gui/Theme.cpp apps/gui/Theme.h
     apps/gui/pages/HomePage.cpp apps/gui/pages/HomePage.h
     apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
@@ -91,7 +95,7 @@ install(FILES "${RUST_TARGET_DIR}/release/vynxarc-cli.exe" "${RUST_TARGET_DIR}/r
 install(FILES LICENSE docs/THIRD_PARTY_NOTICES.md DESTINATION .)
 enable_testing()
 add_executable(VynxPresentationTests
-    apps/gui/EditStore.cpp apps/gui/EditStore.h
+    apps/gui/JobTypes.cpp apps/gui/JobTypes.h apps/gui/NestedStore.cpp apps/gui/NestedStore.h apps/gui/TempStore.cpp apps/gui/TempStore.h apps/gui/dialogs/TemporaryStorageDialog.cpp apps/gui/dialogs/TemporaryStorageDialog.h apps/gui/EditStore.cpp apps/gui/EditStore.h
     apps/gui/ExternalFiles.cpp apps/gui/ExternalFiles.h
     apps/gui/dialogs/PreviewDialog.cpp apps/gui/dialogs/PreviewDialog.h
     apps/gui/dialogs/BatchExtractDialog.cpp apps/gui/dialogs/BatchExtractDialog.h
@@ -102,7 +106,7 @@ add_executable(VynxPresentationTests
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
     apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h)
-target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h)
+target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h)
 target_include_directories(VynxPresentationTests PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
 target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test Qt6::Concurrent vynx_core)
 if(WIN32)
@@ -119,3 +123,5 @@ add_test(NAME gui_smoke COMMAND VynxArc --smoke-test)
 set_tests_properties(gui_smoke PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 60)
 add_test(NAME gui_batch COMMAND VynxArc --smoke-test --worker-fault-smoke batch -)
 set_tests_properties(gui_batch PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 60)
+add_test(NAME gui_product COMMAND VynxArc --smoke-test --product-smoke -)
+set_tests_properties(gui_product PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_ASSUME_STDERR_HAS_CONSOLE=1" TIMEOUT 180)

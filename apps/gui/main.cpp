@@ -48,6 +48,17 @@ int main(int argc, char **argv) {
             return 2;
         window.resize(width, height);
     }
+    const auto productIndex = app.arguments().indexOf("--product-smoke");
+    if (productIndex >= 0) {
+        if (!app.arguments().contains("--smoke-test") || productIndex + 1 >= app.arguments().size()) return 2;
+        auto root = app.arguments()[productIndex + 1];
+        QTemporaryDir fixture;
+        if (root == "-") {
+            if (!fixture.isValid()) return 1;
+            root = fixture.path() + "/product";
+        }
+        return window.productAcceptance(root) ? 0 : 1;
+    }
     const auto faultIndex = app.arguments().indexOf("--worker-fault-smoke");
     if (faultIndex >= 0) {
         if (!app.arguments().contains("--smoke-test") || faultIndex + 2 >= app.arguments().size())

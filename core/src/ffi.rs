@@ -74,6 +74,7 @@ pub mod bridge {
         fn cancelled(op: &Operation) -> bool;
         fn open_archive(path: &str, password: &str, op: &Operation) -> Result<Box<Archive>>;
         fn list_entries(archive: &Archive) -> Vec<EntryInfo>;
+        fn extraction_root(archive: &Archive, destination: &str, smart: bool) -> Result<String>;
         fn archive_format(archive: &Archive) -> String;
         fn archive_writable(archive: &Archive) -> bool;
         fn preview_text(
@@ -340,6 +341,22 @@ fn list_entries(archive: &Archive) -> Vec<bridge::EntryInfo> {
             modified_known: e.modified_unix.is_some(),
         })
         .collect()
+}
+fn extraction_root(archive: &Archive, destination: &str, smart: bool) -> Result<String> {
+    guarded(|| {
+        let base = Path::new(destination);
+        let root = if smart {
+            let stem = archive
+                .path
+                .file_stem()
+                .and_then(|v| v.to_str())
+                .unwrap_or("Archive");
+            crate::security::smart_destination(base, stem, &archive.entries)?
+        } else {
+            base.to_path_buf()
+        };
+        Ok(root.to_string_lossy().into_owned())
+    })
 }
 fn archive_format(archive: &Archive) -> String {
     archive.format.name().into()

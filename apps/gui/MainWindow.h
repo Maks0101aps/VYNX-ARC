@@ -30,6 +30,31 @@ class QVBoxLayout;
 class SecretUtf8;
 class ExternalFiles;
 class EditStore;
+class NestedStore;
+class TempStore;
+struct ArchiveClipboardItem {
+    quint64 id = 0;
+    QString name;
+    QString fullPath;
+    quint64 size = 0;
+    bool folder = false;
+    QVector<quint64> memberIds;
+};
+struct ArchiveClipboard {
+    QString sourceArchive;
+    QString sourceSessionId;
+    QString sourceFingerprint;
+    std::shared_ptr<SecretUtf8> sourcePassword;
+    QVector<ArchiveClipboardItem> items;
+    bool isEmpty() const { return items.isEmpty() || sourceArchive.isEmpty(); }
+    void clear() {
+        items.clear();
+        sourceArchive.clear();
+        sourceSessionId.clear();
+        sourceFingerprint.clear();
+        sourcePassword.reset();
+    }
+};
 class BreadcrumbBar;
 class ArchivePage;
 class OperationPanel;
@@ -42,12 +67,14 @@ class MainWindow : public QMainWindow {
     ~MainWindow() override;
     void openPath(const QString &path);
     bool smokeTest();
+    bool productAcceptance(const QString &root);
     bool workerFaultAcceptance(const QString &mode, const QString &root);
     bool performanceAcceptance(const QString &archive, const QString &root);
     void handleShellRequest(quint32 action, const QStringList &paths);
     QWidget *prepareCapture(const QString &mode);
 
   protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void closeEvent(QCloseEvent *event) override;
@@ -107,6 +134,17 @@ class MainWindow : public QMainWindow {
     std::unique_ptr<QTemporaryDir> transientStorage_;
     std::unique_ptr<ExternalFiles> externalFiles_;
     std::unique_ptr<EditStore> edits_;
+    std::unique_ptr<NestedStore> nestedStore_;
+    std::unique_ptr<TempStore> tempStore_;
+    ArchiveClipboard clipboard_;
+    void openNestedArchive(const ArchiveRow &row);
+    void navigateToParentArchive(int parentLevel);
+    void copySelectedToClipboard();
+    void pasteFromClipboard();
+    void pasteFromMimeData(const QMimeData *mime);
+    void reviewInterruptedExtraction(const QJsonObject &spec);
+    QAction *copyAction_ = nullptr;
+    QAction *pasteAction_ = nullptr;
     void editSelected();
     void prepareEdit(quint64 id, const QString &name, bool launch,
                      quint64 expectedBytes = 256ULL << 20);

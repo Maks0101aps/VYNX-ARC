@@ -1,21 +1,24 @@
 #pragma once
+#include "JobTypes.h"
 #include <QString>
 #include <deque>
 #include <functional>
 #include <optional>
+
 // In-process FIFO. The first implementation serializes every job, including reads.
 class OperationQueue {
   public:
     struct Job {
-        quint64 id;
+        quint64 id = 0;
         QString title;
         std::function<void()> start;
+        ArchiveJobSpec spec;
     };
-    quint64 enqueue(QString title, std::function<void()> start) {
+    quint64 enqueue(QString title, std::function<void()> start, ArchiveJobSpec spec = {}) {
         if (pending_.size() >= 32)
             return 0;
         const auto id = ++nextId_;
-        pending_.push_back({id, std::move(title), std::move(start)});
+        pending_.push_back({id, std::move(title), std::move(start), std::move(spec)});
         return id;
     }
     bool cancel(quint64 id) {

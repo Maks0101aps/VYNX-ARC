@@ -49,11 +49,19 @@ class ArchiveModel : public QAbstractTableModel {
     quint64 totalPacked() const;
     int count() const { return prepared_ ? int(prepared_->flat.size()) : 0; }
 
+    void setArchiveSource(const QString &path, const QString &sessionId) {
+        archivePath_ = path; sourceSessionId_ = sessionId;
+    }
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::DropActions supportedDragActions() const override;
+    QStringList mimeTypes() const override;
+    QMimeData *mimeData(const QModelIndexList &indexes) const override;
+
   private:
     std::shared_ptr<PreparedArchive> prepared_;
     QCache<QString, QVector<ArchiveRow>> folderCache_{50000};
     QVector<ArchiveRow> rows_;
-    QString folder_;
+    QString folder_, archivePath_, sourceSessionId_;
     quint64 totalSize_ = 0, totalPacked_ = 0;
     bool searchMode_ = false;
 };

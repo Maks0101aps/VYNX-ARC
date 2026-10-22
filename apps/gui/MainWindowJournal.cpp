@@ -1,3 +1,4 @@
+#include "dialogs/ExtractionRecoveryDialog.h"
 #include "EditStore.h"
 #include "MainWindow.h"
 #include "SecretUtf8.h"
@@ -139,6 +140,45 @@ void MainWindow::retrySelectedJob() {
     const auto record = journal_.record(item->data(Qt::UserRole + 3).toString());
     auto spec = record["spec"].toObject();
     const auto kind = spec["kind"].toString();
+
+    // Prioritize structured extraction recovery: allows inspecting & resuming even after crash ('unknown' state)
+    if (kind == "extract" && spec["recoveryPlan"].isObject()) {
+        const auto archivePath = spec["sources"].toArray().first().toString();
+        const auto destRoot = spec["recoveryPlan"].toObject()["destination"].toString(spec["destination"].toString());
+        const auto savedFp = spec["archiveHash"].toString();
+        ExtractionRecoveryDialog recovery(archivePath, destRoot, savedFp, spec["recoveryPlan"].toObject(), this);
+        if (recovery.exec() == QDialog::Accepted && recovery.canResume()) {
+            const auto toExtract = recovery.filesToExtract();
+            QJsonArray remainingNames;
+            for (const auto &f : toExtract)
+                remainingNames.append(f.name);
+            spec["names"] = remainingNames;
+            spec["conflict"] = 0; // Refuse newly appearing files, including races after review
+            spec["smart"] = false;
+            spec["destination"] = spec["recoveryPlan"].toObject()["destination"].toString(destRoot);
+            if (remainingNames.isEmpty()) return;
+            spec["retryOf"] = record["id"];
+            if (record["state"] == "interrupted" || record["state"] == "unknown") {
+                item->setData(Qt::UserRole + 5, "failed");
+                item->setText(tr("Stopped — %1").arg(item->data(Qt::UserRole + 1).toString()));
+            }
+            auto pw = secret({});
+            if (spec["needsPassword"].toBool()) {
+                bool ok = false;
+                const auto entered = askPassword(&ok);
+                if (!ok)
+                    return;
+                pw = secret(entered);
+            }
+            enqueueRequest(
+                tr("Resumed: %1").arg(item->data(Qt::UserRole + 1).toString()),
+                [this, spec, pw] { dispatchSpec(spec, pw); },
+                {}, spec);
+            return;
+        }
+        return;
+    }
+
     if (record["state"] == "unknown" || record["state"] == "verifying") {
         QMessageBox::information(
             this, tr("Verify result before retry"),
@@ -372,6 +412,13 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
                 if (kind == "test")
                     vynx::test_archive(*archive, pw->bytes(), **op);
                 else if (kind == "extract") {
+                    if (spec.contains("retryOf") && spec["recoveryPlan"].isObject()) {
+                        const auto expected = spec["recoveryPlan"].toObject()["sourceDigest"].toString();
+                        if (expected.isEmpty() ||
+                            QString::fromStdString(std::string(vynx::hash_archive_file(
+                                paths.first().toUtf8().toStdString(), **op))) != expected)
+                            return QStringLiteral("CHANGED: Extraction source identity could not be verified");
+                    }
                     rust::Vec<quint64> ids;
                     const auto entries = vynx::list_entries(*archive);
                     QHash<QString, quint64> index;
@@ -397,15 +444,19 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
                         *archive, uint8_t(spec["action"].toInt()), {names.data(), names.size()},
                         spec["newName"].toString().toUtf8().toStdString(),
                         spec["folder"].toString().toUtf8().toStdString(), pw->bytes(), **op);
+                } else if (kind == "copy") {
+                    return QStringLiteral("OPTIONS: Repeat inter-archive copy from its source tab");
                 } else
                     return QStringLiteral("OPTIONS: Unsupported restored operation");
             }
             return QString();
         },
-        [this, kind, paths, pw] {
-            if (kind == "modify")
+        [this, kind, paths, pw, spec] {
+            if (kind == "modify" || kind == "copy") {
+                const auto target = kind == "copy" ? spec["targetArchive"].toString() : paths.first();
                 QTimer::singleShot(0, this,
-                                   [this, path = paths.first(), pw] { reloadArchive(path, pw); });
+                                   [this, target, pw] { reloadArchive(target, pw); });
+            }
         },
         [this](const QString &) {
             toast_->notify(tr("Operation stopped. Review details in the queue."));

@@ -1,5 +1,10 @@
 #include "MainWindow.h"
 #include "EditStore.h"
+#include "NestedStore.h"
+#include "TempStore.h"
+#include "dialogs/TemporaryStorageDialog.h"
+#include "dialogs/InterArchiveCopyDialog.h"
+#include "dialogs/ExtractionRecoveryDialog.h"
 #include "ExternalFiles.h"
 #include "FormatUtils.h"
 #include "SecretUtf8.h"
@@ -21,6 +26,7 @@
 #include <QtWidgets>
 #include <atomic>
 
+bool isArchiveEntry(const QString &name);
 static QString text(const rust::String &s) {
     return QString::fromUtf8(s.data(), qsizetype(s.size()));
 }
@@ -36,10 +42,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         transientStorage_ = std::make_unique<QTemporaryDir>();
         edits_ = std::make_unique<EditStore>(transientStorage_->path() + "/WorkingCopies");
         externalFiles_ = std::make_unique<ExternalFiles>(transientStorage_->path() + "/Views");
+        nestedStore_ = std::make_unique<NestedStore>(transientStorage_->path() + "/NestedArchives");
     } else {
         edits_ = std::make_unique<EditStore>();
         externalFiles_ = std::make_unique<ExternalFiles>();
+        nestedStore_ = std::make_unique<NestedStore>();
+
     }
+    tempStore_ = std::make_unique<TempStore>(externalFiles_.get(), nestedStore_.get(), edits_.get());
     setWindowTitle(tr("VYNX ARC"));
     setWindowIcon(QIcon(":/assets/icons/vynx-arc.png"));
     resize(1060, 720);
@@ -111,7 +121,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                              [this] { chooseModify(2); });
     auto *remove = addAction(operationsMenu, tr("Delete entries…"), QKeySequence::Delete,
                              [this] { chooseModify(1); });
-    archiveActions_.append({addFiles, addFolder, rename, remove});
+    copyAction_ = addAction(operationsMenu, tr("Copy (between archives)"), QKeySequence::Copy,
+                            [this] { copySelectedToClipboard(); });
+    pasteAction_ = addAction(operationsMenu, tr("Paste (between archives)"), QKeySequence::Paste,
+                             [this] { pasteFromClipboard(); });
+    archiveActions_.append({addFiles, addFolder, rename, remove, copyAction_, pasteAction_});
     for (auto *a : archiveActions_)
         a->setEnabled(false);
     auto *viewMenu = menuBar()->addMenu(tr("&View"));
@@ -185,11 +199,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     search_ = archivePage_->search;
     table_ = archivePage_->table;
     connect(breadcrumb_, &BreadcrumbBar::navigateRequested, this, &MainWindow::navigate);
+    connect(breadcrumb_, &BreadcrumbBar::parentArchiveRequested, this, &MainWindow::navigateToParentArchive);
     session_->filter->setSourceModel(session_->model);
     session_->filter->setFilterCaseSensitivity(Qt::CaseInsensitive);
     session_->filter->setFilterKeyColumn(0);
     table_->setModel(session_->filter);
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    table_->viewport()->installEventFilter(this);
+    tabs_->installEventFilter(this);
+    tabs_->setAcceptDrops(true);
     table_->sortByColumn(0, Qt::AscendingOrder);
     table_->setColumnWidth(1, 100);
     table_->setColumnWidth(2, 100);
@@ -226,11 +244,23 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
         if (r.folder)
             navigate(r.fullPath);
+        else if (isArchiveEntry(r.name))
+            openNestedArchive(r);
         else
             previewSelected();
     });
     connect(table_->selectionModel(), &QItemSelectionModel::selectionChanged, this,
             [this] { updateStatus(); });
+    auto *nextTab = new QShortcut(QKeySequence("Ctrl+Tab"), this);
+    connect(nextTab, &QShortcut::activated, this, [this] {
+        if (sessions_.size() > 1)
+            activateSession((tabs_->currentIndex() + 1) % sessions_.size());
+    });
+    auto *prevTab = new QShortcut(QKeySequence("Ctrl+Shift+Tab"), this);
+    connect(prevTab, &QShortcut::activated, this, [this] {
+        if (sessions_.size() > 1)
+            activateSession((tabs_->currentIndex() - 1 + sessions_.size()) % sessions_.size());
+    });
     auto *selectAll = new QShortcut(QKeySequence::SelectAll, table_);
     connect(selectAll, &QShortcut::activated, table_, &QTableView::selectAll);
     auto *searchShortcut = new QShortcut(QKeySequence::Find, this);
@@ -259,6 +289,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
             const auto &r = session_->model->row(session_->filter->mapToSource(rows.first()).row());
             if (r.folder)
                 navigate(r.fullPath);
+            else if (isArchiveEntry(r.name))
+                openNestedArchive(r);
             else
                 previewSelected();
         }
@@ -284,6 +316,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                 menu.addAction(extract);
                 menu.addAction(hashSelectedAction_);
                 menu.addAction(previewAction_);
+                menu.addAction(copyAction_);
+                menu.addAction(pasteAction_);
                 if (writableArchive()) {
                     menu.addSeparator();
                     for (auto *a : {addFiles, addFolder, rename, remove})
@@ -421,6 +455,7 @@ void MainWindow::openWithSecret(const QString &path, const std::shared_ptr<Secre
             return QString();
         },
         [this, result, prepared, path, pw] {
+            session_->previewCache.clear();
             session_->password = pw;
             session_->archive = *result;
             session_->path = path;
@@ -497,18 +532,54 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
                     selectedNames.append(
                         QString::fromUtf8(entry.name.data(), qsizetype(entry.name.size())));
         }
+    QJsonArray planFiles;
+    for (const auto &entry : vynx::list_entries(**session_->archive)) {
+        if (scope->currentIndex() == 0 || std::find(ids->begin(), ids->end(), entry.id) != ids->end()) {
+            if (!entry.directory) {
+                QJsonObject f;
+                f["name"] = QString::fromUtf8(entry.name.data(), qsizetype(entry.name.size()));
+                f["size"] = double(entry.size);
+                f["modified"] = double(entry.modified_unix);
+                f["crc"] = QString::fromUtf8(entry.crc.data(), qsizetype(entry.crc.size()));
+                planFiles.append(f);
+            }
+        }
+    }
+    const auto archiveFp = QString("%1:%2").arg(QFileInfo(session_->path).size())
+                                          .arg(QFileInfo(session_->path).lastModified().toMSecsSinceEpoch());
+    QJsonObject recoveryPlan;
+    recoveryPlan["archive"] = session_->path;
+    recoveryPlan["archiveHash"] = archiveFp;
+    recoveryPlan["destination"] = QDir::fromNativeSeparators(text(vynx::extraction_root(**session_->archive, dest, smart)));
+    recoveryPlan["files"] = planFiles;
+
     activeSpec_ = QJsonObject{{"kind", "extract"},
                               {"sources", QJsonArray{session_->path}},
                               {"destination", destination->text()},
                               {"conflict", int(conflict)},
                               {"smart", smart},
                               {"names", selectedNames},
+                              {"archiveHash", archiveFp},
                               {"resource", settings_->value("resourceMode", 1).toInt()},
-                              {"needsPassword", !pw->bytes().empty()}};
+                              {"needsPassword", !pw->bytes().empty()},
+                              {"recoveryPlan", recoveryPlan}};
 
     auto op = operations_.operation;
     auto archive = session_->archive;
-    runJob(tr("Extracting…"), [archive, op, ids, dest, pw, conflict, smart] {
+    const auto sourcePath = session_->path;
+    runJob(tr("Extracting…"), [this, archive, op, ids, dest, pw, conflict, smart, sourcePath] {
+        const auto digest = text(vynx::hash_archive_file(sourcePath.toUtf8().toStdString(), **op));
+        bool recorded = false;
+        QMetaObject::invokeMethod(this, [this, digest, &recorded] {
+            if (!runningItem_) return;
+            auto spec = runningItem_->data(Qt::UserRole + 4).toJsonObject();
+            auto plan = spec["recoveryPlan"].toObject();
+            plan["sourceDigest"] = digest;
+            spec["recoveryPlan"] = plan;
+            recorded = journal_.updateSpec(runningItem_->data(Qt::UserRole + 3).toString(), spec);
+            if (recorded) runningItem_->setData(Qt::UserRole + 4, spec);
+        }, Qt::BlockingQueuedConnection);
+        if (!recorded) return QStringLiteral("JOURNAL: Could not persist extraction source identity");
         vynx::extract_archive(**archive, dest, rust::Slice<const quint64>(ids->data(), ids->size()),
                               conflict, smart, pw->bytes(), **op);
         return QString();
@@ -729,7 +800,7 @@ void MainWindow::navigate(const QString &folder) {
 }
 
 bool MainWindow::writableArchive() const {
-    if (!session_->archive)
+    if (session_->nestedInfo || !session_->archive)
         return false;
     return vynx::archive_writable(**session_->archive);
 }
@@ -1091,13 +1162,45 @@ void MainWindow::applyTheme(const QString &theme) {
     applyUiTheme(theme);
     table_->viewport()->update();
 }
+bool MainWindow::eventFilter(QObject *watched, QEvent *event) {
+    if (watched == table_->viewport() || watched == tabs_) {
+        if (event->type() == QEvent::DragEnter) {
+            auto *de = static_cast<QDragEnterEvent *>(event);
+            if (!operations_.busy && (de->mimeData()->hasUrls() || de->mimeData()->hasFormat("application/x-vynx-archive-copy"))) {
+                de->acceptProposedAction();
+                return true;
+            }
+        } else if (event->type() == QEvent::DragMove) {
+            auto *dm = static_cast<QDragMoveEvent *>(event);
+            if (watched == tabs_) {
+                int idx = tabs_->tabAt(dm->position().toPoint());
+                if (idx >= 0 && idx != tabs_->currentIndex() && idx < sessions_.size())
+                    activateSession(idx);
+            }
+            dm->acceptProposedAction();
+            return true;
+        } else if (event->type() == QEvent::Drop) {
+            auto *de = static_cast<QDropEvent *>(event);
+            dropEvent(de);
+            return true;
+        }
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
+
 void MainWindow::dragEnterEvent(QDragEnterEvent *e) {
-    if (!operations_.busy && e->mimeData()->hasUrls())
+    if (!operations_.busy && (e->mimeData()->hasUrls() || e->mimeData()->hasFormat("application/x-vynx-archive-copy")))
         e->acceptProposedAction();
 }
+
 void MainWindow::dropEvent(QDropEvent *e) {
     if (operations_.busy)
         return;
+    if (e->mimeData()->hasFormat("application/x-vynx-archive-copy")) {
+        e->acceptProposedAction();
+        pasteFromMimeData(e->mimeData());
+        return;
+    }
     const auto urls = e->mimeData()->urls();
     if (session_->archive) {
         QStringList sources;

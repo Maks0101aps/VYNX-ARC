@@ -6,6 +6,10 @@
 #include <QHash>
 #include <QLocale>
 #include <QStyle>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMimeData>
 
 static QString text(const rust::String &s) {
     return QString::fromUtf8(s.data(), qsizetype(s.size()));
@@ -244,4 +248,53 @@ bool ArchiveFilter::lessThan(const QModelIndex &a, const QModelIndex &b) const {
                    ? left.sortKey->compare(*right.sortKey) < 0
                    : QString::localeAwareCompare(left.name, right.name) < 0;
     return QSortFilterProxyModel::lessThan(a, b);
+}
+
+Qt::ItemFlags ArchiveModel::flags(const QModelIndex &index) const {
+    auto defaultFlags = QAbstractTableModel::flags(index);
+    if (index.isValid())
+        return defaultFlags | Qt::ItemIsDragEnabled;
+    return defaultFlags;
+}
+
+Qt::DropActions ArchiveModel::supportedDragActions() const {
+    return Qt::CopyAction;
+}
+
+QStringList ArchiveModel::mimeTypes() const {
+    return {QStringLiteral("application/x-vynx-archive-copy")};
+}
+
+QMimeData *ArchiveModel::mimeData(const QModelIndexList &indexes) const {
+    auto *mime = new QMimeData;
+    QSet<int> rowSet;
+    for (const auto &idx : indexes) {
+        if (idx.isValid())
+            rowSet.insert(idx.row());
+    }
+    QJsonArray itemsArr;
+    for (int r : rowSet) {
+        if (r >= 0 && r < rows_.size()) {
+            const auto &row = rows_[r];
+            QJsonObject obj;
+            obj["id"] = double(row.id);
+            obj["name"] = row.name;
+            obj["fullPath"] = row.fullPath;
+            obj["size"] = double(row.size);
+            obj["folder"] = row.folder;
+            QJsonArray mArr;
+            for (auto mid : row.memberIds)
+                mArr.append(double(mid));
+            obj["memberIds"] = mArr;
+            itemsArr.append(obj);
+        }
+    }
+    QJsonObject root;
+    root["items"] = itemsArr;
+    root["sourceArchive"] = archivePath_;
+    root["sourceSessionId"] = sourceSessionId_;
+    const QFileInfo source(archivePath_);
+    root["sourceFingerprint"] = QString("%1:%2").arg(source.size()).arg(source.lastModified().toMSecsSinceEpoch());
+    mime->setData("application/x-vynx-archive-copy", QJsonDocument(root).toJson(QJsonDocument::Compact));
+    return mime;
 }

@@ -1,3 +1,4 @@
+#include "NestedStore.h"
 #include "MainWindow.h"
 #include "pages/ArchivePage.h"
 #include "widgets/BreadcrumbBar.h"
@@ -12,6 +13,7 @@ QString MainWindow::archiveIdentity(const QString &path) const {
     return QDir::cleanPath(canonical.isEmpty() ? candidate : canonical).toCaseFolded();
 }
 void MainWindow::bindSession(const std::shared_ptr<ArchiveSession> &next) {
+    next->model->setArchiveSource(next->path, next->id);
     if (session_ == next && table_->model() == next->filter)
         return;
     if (session_ && table_->model() == session_->filter) {
@@ -58,7 +60,18 @@ void MainWindow::updateSessionUi() {
     const auto title =
         session_->path.isEmpty() ? tr("VYNX ARC") : QFileInfo(session_->path).fileName();
     setWindowTitle(title + (session_->path.isEmpty() ? QString() : " — VYNX ARC"));
-    breadcrumb_->setPath(QFileInfo(session_->path).fileName(), session_->model->folder());
+    QStringList parentChain;
+    if (session_->nestedInfo) {
+        parentChain.append(QFileInfo(session_->nestedInfo->parentArchivePath).fileName());
+    }
+    breadcrumb_->setPath(QFileInfo(session_->path).fileName(), session_->model->folder(), parentChain);
+    if (session_->nestedInfo) {
+        QFileInfo parentFi(session_->nestedInfo->parentArchivePath);
+        const QString curFp = QString("%1:%2").arg(parentFi.size()).arg(parentFi.lastModified().toMSecsSinceEpoch());
+        if (!session_->nestedInfo->parentFingerprint.isEmpty() && curFp != session_->nestedInfo->parentFingerprint) {
+            statusBar()->showMessage(tr("Warning: Parent archive was modified; opened nested copy is stale."), 10000);
+        }
+    }
     if (session_->archive)
         updateStatus();
     else {
@@ -95,6 +108,13 @@ void MainWindow::closeSession(int index) {
         return;
     }
     const QSignalBlocker blocker(tabs_);
+    if (closing->nestedInfo && !closing->nestedInfo->nestedStoreId.isEmpty() && nestedStore_) {
+        bool hasChild = false;
+        for (const auto &candidate : sessions_)
+            if (candidate->nestedInfo && candidate->nestedInfo->parentSessionId == closing->id)
+                hasChild = true;
+        if (!hasChild) nestedStore_->discard(closing->nestedInfo->nestedStoreId);
+    }
     sessions_.removeAt(index);
     tabs_->removeTab(index);
     if (sessions_.isEmpty()) {

@@ -66,7 +66,7 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
     // Never serialize arbitrary worker captures or credentials.
     const QStringList strings{"kind",      "destination", "folder",        "newName",
                               "editId",    "batchId",     "retryOf",       "archiveHash",
-                              "inputHash", "sourceSize",  "sourceModified"};
+                              "inputHash", "sourceSize",  "sourceModified", "sourceArchive", "targetArchive"};
     const QStringList numbers{"action", "format", "preset", "resource", "conflict", "volumeSize"};
     for (const auto &key : strings)
         if (spec[key].isString()) {
@@ -97,7 +97,7 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
                             QString("needsOutputPassword"), QString("allowDecrypt")})
         if (spec[key].isBool())
             result[key] = result[key].toBool() || spec[key].toBool();
-    return result;
+    if (spec["recoveryPlan"].isObject()) result["recoveryPlan"] = spec["recoveryPlan"].toObject(); return result;
 }
 QJsonArray JobJournal::sourceSnapshot(const QJsonObject &spec) {
     QJsonArray sources;
@@ -203,7 +203,7 @@ bool JobJournal::open(const QString &path, bool enabled) {
                 const auto kind = record["spec"].toObject()["kind"].toString();
                 const bool writes =
                     record["state"] != "pending" &&
-                    QStringList{"create", "modify", "edit", "convert", "shell", "extract"}.contains(
+                    QStringList{"create", "modify", "edit", "convert", "shell", "extract", "copy"}.contains(
                         kind);
                 record["state"] = writes ? "unknown" : "interrupted";
                 record["error"] =

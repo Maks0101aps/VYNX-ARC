@@ -16,6 +16,13 @@ void MainWindow::previewSelected() {
         return;
     const auto id = row.id;
     const auto name = row.fullPath;
+    auto cached = session_->previewCache.get(id);
+    if (cached.has_value()) {
+        PreviewDialog dialog(name, *cached, ExternalFiles::allowed(name), this);
+        if (dialog.exec() == QDialog::Accepted)
+            QTimer::singleShot(0, this, &MainWindow::openSelectedExternally);
+        return;
+    }
     auto archive = session_->archive;
     auto pw = session_->password ? session_->password : secret({});
     auto result = std::make_shared<PreviewContent>();
@@ -79,7 +86,8 @@ void MainWindow::previewSelected() {
             return vynx::cancelled(**op) ? QStringLiteral("CANCELLED: Preview cancelled")
                                          : QString();
         },
-        [this, result, name] {
+        [this, result, name, id] {
+            session_->previewCache.put(id, *result);
             PreviewDialog dialog(name, *result, ExternalFiles::allowed(name), this);
             if (dialog.exec() == QDialog::Accepted)
                 QTimer::singleShot(0, this, &MainWindow::openSelectedExternally);

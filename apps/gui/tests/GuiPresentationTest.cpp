@@ -1,3 +1,8 @@
+#include "../NestedStore.h"
+#include "../TempStore.h"
+#include "../ArchiveSession.h"
+#include "../dialogs/InterArchiveCopyDialog.h"
+#include "../dialogs/ExtractionRecoveryDialog.h"
 #include "../ArchiveModel.h"
 #include "../EditStore.h"
 #include "../ExternalFiles.h"
@@ -722,6 +727,299 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!light.isNull());
         QVERIFY(!dark.isNull());
         QVERIFY(light != dark);
+    }
+
+    void nestedStoreLimitsAndCleanup() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        NestedStore store(dir.path());
+        QVERIFY(store.available());
+
+        // Normal reserve
+        const auto id1 = store.reserve("parent.zip", "nested1.zip", 1, 1024);
+        QVERIFY(!id1.isEmpty());
+        QCOMPARE(store.records().size(), 1);
+
+        // Depth limit: depth > 4 must be rejected
+        const auto idTooDeep = store.reserve("parent.zip", "deep.zip", 5, 1024);
+        QVERIFY(idTooDeep.isEmpty());
+
+        // Size limit: size > 256 MiB must be rejected
+        const auto idTooLarge = store.reserve("parent.zip", "huge.zip", 1, 300ULL << 20);
+        QVERIFY(idTooLarge.isEmpty());
+
+        // Create second entry
+        const auto id2 = store.reserve("parent.zip", "nested2.7z", 2, 2048);
+        QVERIFY(!id2.isEmpty());
+        QCOMPARE(store.records().size(), 2);
+
+        // Cleanup: preserve active id1, remove inactive id2
+        const int cleaned = store.cleanup({id1});
+        QCOMPARE(cleaned, 1);
+        QCOMPARE(store.records().size(), 1);
+        QCOMPARE(store.records().first().toObject()["id"].toString(), id1);
+    }
+
+    void tempStoreAccountingAndSafeCleanup() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        ExternalFiles ext(dir.path() + "/views");
+        NestedStore nest(dir.path() + "/nested");
+        EditStore edits(dir.path() + "/edits");
+        TempStore store(&ext, &nest, &edits);
+
+        // 1 preview view
+        const auto viewDir = ext.create();
+        QVERIFY(!viewDir.isEmpty());
+        QFile vf(viewDir + "/file.txt");
+        QVERIFY(vf.open(QIODevice::WriteOnly));
+        vf.write("hello preview");
+        vf.close();
+
+        // 1 nested archive
+        const auto nestId = nest.reserve("p.zip", "inner.zip", 1, 100);
+        QVERIFY(!nestId.isEmpty());
+
+        // 1 working copy
+        const auto editId = edits.reserve("p.zip", "edit.txt", 100);
+        QVERIFY(!editId.isEmpty());
+        QFile ef(edits.directory(editId) + "/edit.txt");
+        QVERIFY(ef.open(QIODevice::WriteOnly));
+        ef.write("working copy edit");
+        ef.close();
+        edits.update(editId, QJsonObject{{"file", ef.fileName()}, {"state", "ready"}});
+
+        // Check accounting
+        QCOMPARE(store.previewUsage().count, 1);
+        QCOMPARE(store.nestedUsage().count, 1);
+        QCOMPARE(store.editUsage().count, 1);
+
+        // Check preview cleanup list
+        // Active nestedId is provided as active, so it should not be in cleanup list
+        auto toClean = store.previewCleanupList({nestId});
+        // Only viewDir is disposable and eligible for safe cleanup
+        for (const auto &item : toClean) {
+            QVERIFY(item.category != "WorkingCopy");
+        }
+
+        // Cleanup inactive nested
+        auto toCleanInactive = store.previewCleanupList({}); // no active nested
+        bool hasNested = false;
+        bool hasWorking = false;
+        for (const auto &item : toCleanInactive) {
+            if (item.category == "Nested") hasNested = true;
+            if (item.category == "WorkingCopy") hasWorking = true;
+        }
+        QVERIFY(hasNested);
+        QVERIFY(!hasWorking); // Working copies are NEVER in safe cleanup list!
+    }
+
+    void interArchiveCopyConflictResolution() {
+        QVector<CopyCandidateItem> items;
+        CopyCandidateItem c1;
+        c1.name = "new_file.txt";
+        c1.size = 100;
+        c1.hasConflict = false;
+        c1.targetPath = "new_file.txt";
+        items.append(c1);
+
+        CopyCandidateItem c2;
+        c2.name = "conflict.txt";
+        c2.size = 200;
+        c2.hasConflict = true;
+        c2.targetPath = "conflict.txt";
+        items.append(c2);
+
+        InterArchiveCopyDialog dialog("source.zip", "target.zip", "", items, 10ULL << 20);
+
+        // Default combo is Rename (policy 2)
+        auto resolved = dialog.resolvedItems();
+        QCOMPARE(resolved.size(), 2);
+
+        // Find policy combo and set to Skip (policy 3)
+        auto *combo = dialog.findChild<QComboBox *>("copyPolicyCombo");
+        QVERIFY(combo);
+        combo->setCurrentIndex(2); // Skip
+        QCOMPARE(dialog.policy(), CopyConflictPolicy::Skip);
+
+        auto resolvedSkip = dialog.resolvedItems();
+        QCOMPARE(resolvedSkip.size(), 1);
+        QCOMPARE(resolvedSkip.first().name, QString("new_file.txt"));
+    }
+
+    void extractionRecoveryReconciliation() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+
+        // Dummy source archive file
+        QFile sourceFile(dir.path() + "/archive.zip");
+        QVERIFY(sourceFile.open(QIODevice::WriteOnly));
+        sourceFile.write("dummy archive bytes");
+        sourceFile.close();
+        const QString sourceFp = QString("%1:%2").arg(sourceFile.size()).arg(sourceFile.fileTime(QFileDevice::FileModificationTime).toMSecsSinceEpoch());
+
+        const QString destRoot = dir.path() + "/extracted";
+        QDir().mkpath(destRoot);
+
+        // 1. Untouched completed file: size 10 bytes
+        QFile f1(destRoot + "/f1.txt");
+        QVERIFY(f1.open(QIODevice::WriteOnly));
+        f1.write("0123456789");
+        f1.close();
+        const qint64 f1Mtime = QFileInfo(f1).lastModified().toSecsSinceEpoch();
+
+        // 2. User-modified file: size 22 bytes, file modified after extraction time
+        QFile f2(destRoot + "/f2.txt");
+        QVERIFY(f2.open(QIODevice::WriteOnly));
+        f2.write("user modified content!");
+        f2.close();
+        const qint64 f2Mtime = QFileInfo(f2).lastModified().toSecsSinceEpoch();
+
+        // 3. Corrupt file: size and time match, but CRC in plan differs!
+        QFile f4(destRoot + "/f4.txt");
+        QVERIFY(f4.open(QIODevice::WriteOnly));
+        f4.write("corrupted!"); // 10 bytes
+        f4.close();
+        const qint64 f4Mtime = QFileInfo(f4).lastModified().toSecsSinceEpoch();
+
+        // 4. f3.txt is missing
+
+        QJsonArray planFiles;
+        planFiles.append(QJsonObject{{"name", "f1.txt"}, {"size", 10.0}, {"modified", double(f1Mtime)}});
+        planFiles.append(QJsonObject{{"name", "f2.txt"}, {"size", 22.0}, {"modified", double(f2Mtime - 100)}});
+        planFiles.append(QJsonObject{{"name", "f3.txt"}, {"size", 50.0}, {"modified", 1000.0}});
+        planFiles.append(QJsonObject{{"name", "f4.txt"}, {"size", 10.0}, {"modified", double(f4Mtime)}, {"crc", "12345678"}});
+
+        QJsonObject plan{{"files", planFiles}};
+
+        ExtractionRecoveryDialog dialog(sourceFile.fileName(), destRoot, sourceFp, plan);
+        QVERIFY(dialog.canResume());
+
+        const auto toExtract = dialog.filesToExtract();
+        // Every existing file is preserved, including equal-size/mtime CRC mismatches.
+        QCOMPARE(toExtract.size(), 1);
+        QVERIFY(QFile::exists(f4.fileName()));
+        QFile backup(destRoot + "/f4.txt.personal.tmp");
+        QVERIFY(backup.open(QIODevice::WriteOnly)); backup.write("personal backup"); backup.close();
+        dialog.filesToExtract();
+        QVERIFY(QFile::exists(backup.fileName()));
+        QVERIFY(QFile::exists(f4.fileName()));
+        QStringList extractNames;
+        for (const auto &it : toExtract)
+            extractNames.append(it.name);
+        QVERIFY(extractNames.contains("f3.txt"));
+        QVERIFY(!extractNames.contains("f4.txt"));
+        QVERIFY(!extractNames.contains("f2.txt"));
+    }
+
+    void previewCacheLRUAndInvalidation() {
+        PreviewCache cache;
+        QCOMPARE(cache.count(), 0);
+        QCOMPARE(cache.totalBytes(), 0);
+
+        PreviewContent c1;
+        c1.bytes = "hello world";
+        cache.put(1, c1);
+        QCOMPARE(cache.count(), 1);
+
+        auto ret = cache.get(1);
+        QVERIFY(ret.has_value());
+        QCOMPARE(ret->bytes, QByteArray("hello world"));
+
+        // Image size accounting
+        PreviewContent c2;
+        QImage testImg(100, 100, QImage::Format_ARGB32);
+        c2.image = testImg;
+        quint64 expectedImgBytes = quint64(testImg.sizeInBytes());
+        cache.put(2, c2);
+        QCOMPARE(cache.count(), 2);
+        QVERIFY(cache.totalBytes() >= expectedImgBytes);
+
+        // Oversized single item (> 32 MiB) rejected
+        PreviewContent oversized;
+        oversized.bytes = QByteArray(33 * 1024 * 1024, 'X');
+        cache.put(3, oversized);
+        QCOMPARE(cache.count(), 2); // Not admitted!
+        QVERIFY(!cache.get(3).has_value());
+
+        // Invalidation
+        cache.clear();
+        QCOMPARE(cache.count(), 0);
+        QCOMPARE(cache.totalBytes(), 0);
+        QVERIFY(!cache.get(1).has_value());
+    }
+
+    void archiveDragIncludesSourceIdentity() {
+        ArchiveModel model;
+        auto prepared = std::make_shared<PreparedArchive>();
+        ArchiveRow row; row.name = "note.txt"; row.fullPath = "note.txt"; row.id = 7;
+        prepared->root.append(row);
+        model.loadPrepared(prepared);
+        model.setArchiveSource("C:/source.zip", "session-7");
+        std::unique_ptr<QMimeData> mime(model.mimeData({model.index(0, 0)}));
+        const auto obj = QJsonDocument::fromJson(mime->data("application/x-vynx-archive-copy")).object();
+        QCOMPARE(obj["sourceArchive"].toString(), QString("C:/source.zip"));
+        QCOMPARE(obj["sourceSessionId"].toString(), QString("session-7"));
+        QCOMPARE(obj["items"].toArray().size(), 1);
+    }
+
+    void journalMigrationFrom06() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+        const QString historyPath = dir.path() + "/history.json";
+
+        // Create 0.6 schema 2 journal file
+        QJsonObject job1{
+            {"id", "job-06-001"},
+            {"state", "completed"},
+            {"spec", QJsonObject{{"kind", "create"}, {"destination", "out.zip"}, {"sources", QJsonArray{"file1.txt"}}}}
+        };
+        QJsonObject job2{
+            {"id", "job-06-002"},
+            {"state", "interrupted"},
+            {"spec", QJsonObject{{"kind", "extract"}, {"destination", "extracted/"}, {"sources", QJsonArray{"archive.zip"}}}}
+        };
+        QJsonObject oldDoc{
+            {"schema", 2},
+            {"jobs", QJsonArray{job1, job2}}
+        };
+
+        QFile f(historyPath);
+        QVERIFY(f.open(QIODevice::WriteOnly));
+        f.write(QJsonDocument(oldDoc).toJson());
+        f.close();
+
+        // Load into 0.7 JobJournal
+        JobJournal journal;
+        QVERIFY(journal.open(historyPath, true));
+        const auto records = journal.records();
+        QCOMPARE(records.size(), 2);
+
+        QCOMPARE(records[0]["id"].toString(), QString("job-06-001"));
+        QCOMPARE(records[0]["state"].toString(), QString("completed"));
+        QCOMPARE(records[1]["id"].toString(), QString("job-06-002"));
+    }
+
+    void tempStoreCategoryMapping() {
+        QTemporaryDir dir;
+        QVERIFY(dir.isValid());
+
+        NestedStore nested(dir.path() + "/nested");
+        TempStore store(nullptr, &nested, nullptr);
+
+        const QString id = nested.reserve("parent.zip", "inner.7z", 1, 1024);
+        QVERIFY(!id.isEmpty());
+        QVERIFY(!nested.record(id).isEmpty());
+
+        // Clean with category 'Nested archive' (UI label)
+        TempStore::TempItem item;
+        item.category = "Nested";
+        item.id = id;
+        item.canClean = true;
+
+        int cleaned = store.cleanItems({item});
+        QCOMPARE(cleaned, 1);
+        QVERIFY(nested.record(id).isEmpty());
     }
 };
 int main(int argc, char **argv) {
