@@ -20,7 +20,7 @@
   },
   "translations": "Agent editorial review of UK/RU copy/recovery/storage catalogs and placeholder checks; not a human full visual-language matrix",
   "seven_z": {
-    "decision": "Accepted workload-specific resource cost for 0.8.0; historical 103 MiB difference is not causally explained; not a leak-free or hard RSS claim",
+    "decision": "Accepted workload-specific resource cost; same-host accepted-0.6 comparison does not reproduce a 0.8 memory regression. Historical 103 MiB result is not explained. Not a hard RSS bound or leak-free claim.",
     "summaries": [
       {
         "resource": "eco",
@@ -46,7 +46,32 @@
     ],
     "independent_roundtrips": "9/9",
     "cli_sha256": "02d33d398626f3d78173f55febb044bed003dd21d4c7ae82bf0f1c743d2d2ade",
-    "source_sha256": "9066fc5b288e75c5659a2689f61c4d481669117a30756fdcb19613d5366d13c9"
+    "source_sha256": "9066fc5b288e75c5659a2689f61c4d481669117a30756fdcb19613d5366d13c9",
+    "accepted_06_comparison": {
+      "cli_sha256": "8063b998e4a782ca93baa37655d1be577f8ede4bb0692cad4f9449025cdc7735",
+      "source_sha256": "9066fc5b288e75c5659a2689f61c4d481669117a30756fdcb19613d5366d13c9",
+      "gui_sha256": "a5d433dc242d7d2f6ef2013beeecf95d0b4e0b9100d31a8b0c77704a1f178a94",
+      "gui_identity_matches": "docs/verification/0.6/portable-final.json",
+      "independent_roundtrips": "9/9",
+      "summaries": [
+        {
+          "resource": "eco",
+          "rss_mib": 34.4,
+          "seconds": 3.482
+        },
+        {
+          "resource": "balanced",
+          "rss_mib": 218.9,
+          "seconds": 2.167
+        },
+        {
+          "resource": "maximum",
+          "rss_mib": 218.7,
+          "seconds": 2.056
+        }
+      ],
+      "conclusion": "Balanced 218.9 MiB in accepted 0.6.0 versus 218.5 MiB in 0.8.0; historical doubling did not reproduce under this method"
+    }
   },
   "clean_windows": {
     "status": "BLOCKED_BEFORE_GUEST_START",

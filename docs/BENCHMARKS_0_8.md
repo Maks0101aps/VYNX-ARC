@@ -152,3 +152,8 @@ review, the accepted workload-specific 7Z memory tradeoff and the diagnosed
 clean-Windows blocker (Sandbox 0x80070103, hypervisor not running). This
 follow-up supersedes earlier open-memory/basic-Narrator status, but does not
 claim full manual workflow, human language-matrix or clean-VM acceptance.
+
+Controlled follow-up: the retained, accepted 0.6.0 stage measured 218.9 MiB
+Balanced RSS on the same input/method versus 218.5 MiB for 0.8.0, with nine
+independent old-version round-trips passing. The historical 103 MiB baseline
+was not reproduced; details and binary identities are in the follow-up report.

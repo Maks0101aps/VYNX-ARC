@@ -62,7 +62,7 @@ This decision preserves codec settings, integrity checks and cancellation.
 Use Eco when memory matters more than throughput. Reopen the finding if the
 same workload shows growing per-run peaks, violates worker limits, or fails
 independent round-trip verification. A controlled old/new binary comparison
-is still required to explain the historical 103 MiB measurement.
+was then performed as described below; the historical 103 MiB measurement remains unexplained.
 
 ```powershell
 python scripts/benchmark-7z-memory.py --cli dist/stage-<id>/vynxarc-cli.exe `
@@ -101,3 +101,26 @@ preflight search window. `core/src/parser.rs` intentionally rejects ambiguity to
 prevent backend fallback to unbounded metadata. This protection is unchanged.
 Supporting this case requires a separate safe parser design and regression tests;
 do not remove the ambiguity check just to make this fixture pass.
+
+
+## Controlled accepted-0.6 comparison
+
+The retained 0.6.0 stage was identified by GUI SHA-256
+`a5d433dc242d7d2f6ef2013beeecf95d0b4e0b9100d31a8b0c77704a1f178a94`,
+matching [the accepted 0.6 report](verification/0.6/portable-final.json).
+Its CLI SHA-256 is
+`8063b998e4a782ca93baa37655d1be577f8ede4bb0692cad4f9449025cdc7735`.
+The same script, source SHA-256, host and three trials per mode were used.
+All nine additional independent round-trips passed.
+
+| Mode | Accepted 0.6 RSS / wall | 0.8 RSS / wall |
+| --- | ---: | ---: |
+| Eco | 34.4 MiB / 3.482 s | 34.0 MiB / 3.094 s |
+| Balanced | 218.9 MiB / 2.167 s | 218.5 MiB / 1.983 s |
+| Maximum | 218.7 MiB / 2.056 s | 218.8 MiB / 2.050 s |
+
+The alleged doubling from 0.6 to 0.8 **did not reproduce** in this controlled
+comparison. This supports accepting the roughly 219 MiB Balanced workload cost
+for 0.8. It does not establish why the older benchmark observed roughly 103 MiB,
+or predict peaks on larger corpora. CLI settings, source hashes and binary
+identities are retained in the structured report and ignored raw samples.
