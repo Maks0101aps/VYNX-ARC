@@ -1,5 +1,13 @@
 # Final ZIP publication root-cause evidence
 
+**Follow-up 2026-10-23:** 0.7.0 implements the bounded, classified retry described
+in [PUBLICATION_HANDLING_DESIGN.md](PUBLICATION_HANDLING_DESIGN.md). New project
+workspace failures from 2026-10-22 are preserved under
+`docs/verification/0.7/failed-2026-10-22/`. After the change, three packaged runs
+in the same project location passed, and the project stress matrix completed
+1,400/1,400 publications with originals preserved. The historical capture below
+is unchanged and is not retroactively reinterpreted.
+
 Historical capture from October 3. On October 16, the same original portable
 package passed project-path verification and all 1,400 stress publications.
 That new result does not establish a causal fix or invalidate this capture.

@@ -8,6 +8,7 @@ use std::{
     fs::{File, OpenOptions},
     io::Read,
     path::{Path, PathBuf},
+    time::{Duration, Instant},
 };
 
 pub enum Change {
@@ -415,21 +416,96 @@ pub fn modify_with_receipt(
 }
 
 fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
+    commit_with_budget(replacement, path, op, Duration::from_secs(2))
+}
+
+/// Retry the final rename only while the native failure is consistent with a
+/// transient competing handle. The verified replacement is retained between
+/// attempts, so a persistent denial still leaves the original untouched.
+fn commit_with_budget(
+    mut replacement: tempfile::NamedTempFile,
+    path: &Path,
+    op: &Operation,
+    budget: Duration,
+) -> Result<()> {
     op.check()?;
     let publication_path = security::publication_path(path)?;
     op.prepare_publication(&[(path.to_owned(), replacement.path().to_owned())])?;
     op.check()?;
-    diagnostic("PUBLISH_BEGIN", path, Some(replacement.path()));
-    match replacement.persist(publication_path) {
-        Ok(_) => {
-            diagnostic("PUBLISH_SUCCESS", path, None);
-            Ok(())
-        }
-        Err(error) => {
-            diagnostic("PUBLISH_FAIL", path, Some(error.file.path()));
-            Err(modification_error(error.error, path))
+    let deadline = Instant::now() + budget;
+    let delays = [25u64, 50, 100, 200, 400, 600, 800];
+    let mut attempt = 0;
+    loop {
+        op.check()?;
+        diagnostic("PUBLISH_BEGIN", path, Some(replacement.path()));
+        match replacement.persist(&publication_path) {
+            Ok(_) => {
+                diagnostic("PUBLISH_SUCCESS", path, None);
+                return Ok(());
+            }
+            Err(error) => {
+                diagnostic("PUBLISH_FAIL", path, Some(error.file.path()));
+                let failure = error.error;
+                replacement = error.file;
+                let retryable = publication_retryable(&failure, &publication_path);
+                let pause = Duration::from_millis(delays.get(attempt).copied().unwrap_or(800));
+                attempt += 1;
+                let remaining = deadline.saturating_duration_since(Instant::now());
+                if !retryable || remaining.is_zero() {
+                    return Err(modification_error(failure, path));
+                }
+                wait_cancellable(op, pause.min(remaining))?;
+            }
         }
     }
+}
+
+fn wait_cancellable(op: &Operation, pause: Duration) -> Result<()> {
+    const SLICE: Duration = Duration::from_millis(50);
+    let deadline = Instant::now() + pause;
+    while Instant::now() < deadline {
+        op.check()?;
+        std::thread::sleep(SLICE.min(deadline.saturating_duration_since(Instant::now())));
+    }
+    op.check()
+}
+
+/// Sharing conflicts (32/33) are transient by nature. Error 5 is ambiguous on
+/// Windows, so retry it only when the read-only attribute is clear and a
+/// DELETE-access probe shows that other handles still permit deletion. A probe
+/// that fails with sharing violation is itself the transient case; any other
+/// denial is treated as a permissions/ACL failure and reported immediately.
+fn publication_retryable(error: &std::io::Error, path: &Path) -> bool {
+    match error.raw_os_error() {
+        Some(32 | 33) => true,
+        Some(5) => !read_only(path) && delete_sharing_available(path),
+        _ => false,
+    }
+}
+
+fn read_only(path: &Path) -> bool {
+    std::fs::metadata(path)
+        .map(|metadata| metadata.permissions().readonly())
+        .unwrap_or(true)
+}
+
+#[cfg(windows)]
+fn delete_sharing_available(path: &Path) -> bool {
+    use std::os::windows::fs::OpenOptionsExt;
+    const DELETE: u32 = 0x0001_0000;
+    match OpenOptions::new()
+        .access_mode(DELETE)
+        .share_mode(7)
+        .open(path)
+    {
+        Ok(_) => true,
+        Err(error) => matches!(error.raw_os_error(), Some(32 | 33)),
+    }
+}
+
+#[cfg(not(windows))]
+fn delete_sharing_available(_path: &Path) -> bool {
+    false
 }
 
 fn diagnostic(stage: &str, source: &Path, temp: Option<&Path>) {
@@ -694,6 +770,63 @@ mod publication_tests {
         let error = result.unwrap_err();
         assert_eq!(error.code, "ACCESS_DENIED");
         assert!(error.message.contains("OS error Some(5)"));
+        assert_eq!(std::fs::read(path).unwrap(), b"original");
+        assert!(!temp.exists());
+    }
+
+    #[cfg(windows)]
+    fn hold_without_delete_sharing(path: &Path) -> File {
+        use std::os::windows::fs::OpenOptionsExt;
+        OpenOptions::new()
+            .read(true)
+            .share_mode(1)
+            .open(path)
+            .unwrap()
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn transient_delete_share_conflict_is_retried() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let held = hold_without_delete_sharing(&path);
+        let handle = std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_millis(150));
+            drop(held);
+        });
+        let replacement = staged(dir.path());
+        let temp = replacement.path().to_owned();
+        commit_with_budget(
+            replacement,
+            &path,
+            &Operation::default(),
+            Duration::from_secs(2),
+        )
+        .unwrap();
+        handle.join().unwrap();
+        assert_eq!(std::fs::read(path).unwrap(), b"replacement");
+        assert!(!temp.exists());
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn persistent_delete_share_conflict_preserves_original() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let held = hold_without_delete_sharing(&path);
+        let replacement = staged(dir.path());
+        let temp = replacement.path().to_owned();
+        let error = commit_with_budget(
+            replacement,
+            &path,
+            &Operation::default(),
+            Duration::from_millis(200),
+        )
+        .unwrap_err();
+        drop(held);
+        assert_eq!(error.code, "ACCESS_DENIED");
         assert_eq!(std::fs::read(path).unwrap(), b"original");
         assert!(!temp.exists());
     }

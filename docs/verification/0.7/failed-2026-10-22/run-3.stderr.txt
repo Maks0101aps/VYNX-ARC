@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "C:\Users\Maksi\Documents\projects\VYNX-ARC\scripts\verify-portable.py", line 99, in <module>
+    run([cli,'rename',output,'Project/src/дані.txt','Project/src/renamed.txt'])
+  File "C:\Users\Maksi\Documents\projects\VYNX-ARC\scripts\verify-portable.py", line 33, in run
+    if r.returncode:raise RuntimeError((r.returncode,r.stdout.decode(errors='replace'),r.stderr.decode(errors='replace')))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: (1, '', 'ACCESS_DENIED: Could not update C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\independent-check-j3gnk8bk\\Project.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n')

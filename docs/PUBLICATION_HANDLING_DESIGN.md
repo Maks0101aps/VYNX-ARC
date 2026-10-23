@@ -1,8 +1,14 @@
-# Proposed Windows publication handling — design only
+# Windows publication handling
 
-No production implementation is authorized in this pass. The current package
-still makes one `NamedTempFile::persist` attempt. This proposal is conditional on
-the causal controls recorded in [PUBLICATION_ROOT_CAUSE.md](PUBLICATION_ROOT_CAUSE.md).
+**Status 2026-10-23: implemented in 0.7.0.** The final rename now uses a bounded
+two-second retry budget with cancellable waits. Error 32/33 and sharing-classified
+error 5 are retried; error 5 is retried only when the read-only attribute is clear
+and a DELETE-access probe indicates a sharing conflict. Unclassified error 5
+(ACL/permissions) still fails immediately. The verified sibling replacement is
+retained between attempts, never rebuilt, and a persistent conflict returns the
+native error with the original archive untouched. The analysis below is kept as
+the design rationale; the earlier statement that no production implementation was
+authorized no longer applies.
 
 ## Error classification
 

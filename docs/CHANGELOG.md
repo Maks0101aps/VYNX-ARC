@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.7.0 - 2026-10-23
+
+- **Publication hardening for Windows sharing conflicts**: The final rename now
+  retries only when the native failure is consistent with a transient competing
+  handle. A read-only attribute or DELETE-access probe that reports a permission
+  denial still fails immediately. Retries keep the independently verified sibling
+  replacement, never rebuild, use a bounded two-second budget with cancellation and
+  leave the original archive untouched on exhaustion. The earlier 3/3 project
+  workspace `ACCESS_DENIED` verification failures are preserved as historical
+  evidence under `docs/verification/0.7/failed-2026-10-22/`.
+- **Nested archives**: Open archives inside archives with double-click or Enter;
+  breadcrumb path chain (e.g. backup.zip › documents.7z › contracts/), bounded container
+  extraction (max depth 4, max 256 MiB container limit), stale detection when parent
+  archive changes, predictable handling of encrypted and corrupted nested archives,
+  automatic cleanup on tab close.
+- **Inter-archive copy**: Copy files between tabs via Ctrl+C / Ctrl+V and drag-and-drop;
+  pre-write planning dialog showing destinations, name conflicts, and space requirements;
+  replace, rename (keep both), or skip conflict policies; source fingerprint verification
+  preventing data drift; writes to ZIP/7Z through verified engine while preserving source.
+- **Extraction recovery**: Close ambiguity on interrupted/aborted extraction; record
+  durable extraction plans and completed file receipts; reconciliation on review/retry
+  showing completed, missing, user-modified, and partial/corrupt files; resume without
+  overwriting user-modified files; source archive consistency checks.
+- **Fast repeated preview**: Bounded LRU preview cache (32 MiB) eliminating redundant
+  preparations and remote worker spawns on repeat navigation; cache invalidation on archive
+  mutation; measured phase timing.
+- **Complete keyboard management and temporary storage accounting**: Full mouse-free
+  navigation with accessible labels, focus order, Tab traversal, dialog shortcuts;
+  dedicated temporary storage dialog accounting for previews, nested containers, and
+  working copies with safe cleanup list and protection of uncommitted edits.
+- **Foundation hardening**: Typed GUI jobs (JobTypes.h), extracted nested and copy
+  controller (MainWindowNested.cpp), targeted fuzzing script (fuzz-07-targets.py),
+  backward compatible 0.6 -> 0.7 journal migration.
+
 ## 0.6.0 development milestone - 2026-10-20
 
 - Move GUI archive reads and writes into bounded, supervised worker processes;

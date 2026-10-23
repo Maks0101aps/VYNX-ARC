@@ -1,0 +1,4 @@
+Isolated deployed GUI smoke passed
+Isolated deployed nested/copy/recovery workflows passed
+Isolated deployed GUI batch/retry passed
+Isolated deployed CLI passed

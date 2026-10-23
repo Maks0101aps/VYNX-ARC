@@ -1,0 +1,50 @@
+[
+  {
+    "format": "zip",
+    "operation": "add",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\zip-add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "zip",
+    "operation": "delete",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\zip-delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "zip",
+    "operation": "rename",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\zip-rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "add",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\7z-add.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "def985835d8c3959c01a9eb323283e0d7b12e7c9e5eb840f592c7ed5e97e5d74",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "delete",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\7z-delete.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "2bbae8a13eac4105eb72969785278d698b12b70e0743185e98e84acf6ee9a829",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "rename",
+    "status": "passed",
+    "failed_stderr": "ACCESS_DENIED: Could not update docs\\verification\\0.7\\locks-final\\lock-check-w94mq0b5\\7z-rename.7z (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+    "original_sha256": "56b360edbafa6b0e2aff233b222bfebd163be12e81570a1a861ec63b9a0b62c2",
+    "explicit_retry": "passed"
+  }
+]
