@@ -35,6 +35,7 @@ TemporaryStorageDialog::TemporaryStorageDialog(TempStore *store, const QSet<QStr
         lblTitle->setObjectName("muted");
         lblTitle->setStyleSheet("font-size: 11px; font-weight: 500;");
         valLabel = new QLabel(QStringLiteral("0 B (0 items)"));
+        valLabel->setAccessibleName(title);
         valLabel->setStyleSheet("font-size: 14px; font-weight: bold;");
         v->addWidget(lblTitle);
         v->addWidget(valLabel);
@@ -48,10 +49,12 @@ TemporaryStorageDialog::TemporaryStorageDialog(TempStore *store, const QSet<QStr
 
     // Filter bar
     auto *filterLayout = new QHBoxLayout;
-    filterLayout->addWidget(new QLabel(tr("Category:")));
+    auto *filterLabel = new QLabel(tr("Category:"));
+    filterLayout->addWidget(filterLabel);
     categoryFilter_ = new QComboBox;
     categoryFilter_->setObjectName("tempCategoryFilter");
     categoryFilter_->setAccessibleName(tr("Filter temporary files by category"));
+    filterLabel->setBuddy(categoryFilter_);
     categoryFilter_->addItems({tr("All categories"), tr("Previews"), tr("Nested archives"), tr("Working copies")});
     connect(categoryFilter_, &QComboBox::currentIndexChanged, this, [this] { refresh(); });
     filterLayout->addWidget(categoryFilter_);
@@ -62,6 +65,8 @@ TemporaryStorageDialog::TemporaryStorageDialog(TempStore *store, const QSet<QStr
     table_ = new QTableWidget(0, 6, this);
     table_->setObjectName("tempStorageTable");
     table_->setAccessibleName(tr("Temporary items table"));
+    table_->setAccessibleDescription(
+        tr("Preview, nested and working-copy items with retention reasons and locations."));
     table_->setHorizontalHeaderLabels({tr("Category"), tr("Name"), tr("Size"), tr("Status"), tr("Retention reason"), tr("Location")});
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -105,6 +110,12 @@ TemporaryStorageDialog::TemporaryStorageDialog(TempStore *store, const QSet<QStr
     controls->addWidget(refreshBtn);
     controls->addWidget(closeBtn);
     mainLayout->addLayout(controls);
+    setTabOrder(categoryFilter_, table_);
+    setTabOrder(table_, cleanupButton_);
+    setTabOrder(cleanupButton_, openButton_);
+    setTabOrder(openButton_, deleteButton_);
+    setTabOrder(deleteButton_, refreshBtn);
+    setTabOrder(refreshBtn, closeBtn);
 
     connect(refreshBtn, &QPushButton::clicked, this, &TemporaryStorageDialog::refresh);
     connect(closeBtn, &QPushButton::clicked, this, &QDialog::accept);

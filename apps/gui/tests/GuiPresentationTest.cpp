@@ -13,6 +13,7 @@
 #include "../dialogs/ConversionDialog.h"
 #include "../dialogs/CreateArchiveDialog.h"
 #include "../dialogs/PreviewDialog.h"
+#include "../dialogs/TemporaryStorageDialog.h"
 #include "../pages/ArchivePage.h"
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
@@ -448,6 +449,7 @@ class GuiPresentationTest : public QObject {
             source.write("changed source");
             source.close();
             QVERIFY(!JobJournal::sourcesUnchanged(journal.record(id)));
+            QVERIFY(journal.setState(id, "unknown"));
             QVERIFY(journal.setState(id, "failed", "Original failure"));
             QVERIFY(!journal.setState(id, "fake-success"));
         }
@@ -845,6 +847,28 @@ class GuiPresentationTest : public QObject {
         auto resolvedSkip = dialog.resolvedItems();
         QCOMPARE(resolvedSkip.size(), 1);
         QCOMPARE(resolvedSkip.first().name, QString("new_file.txt"));
+
+        QVERIFY(!combo->accessibleName().isEmpty());
+        auto *table = dialog.findChild<QTableWidget *>("copyCandidateTable");
+        QVERIFY(table);
+        QVERIFY(!table->accessibleName().isEmpty());
+        QVERIFY(!table->accessibleDescription().isEmpty());
+        QCOMPARE(table->editTriggers(), QAbstractItemView::NoEditTriggers);
+    }
+
+    void dialogKeyboardAndAccessibility() {
+        TemporaryStorageDialog storage(nullptr, {});
+        QVERIFY(!storage.findChild<QComboBox *>("tempCategoryFilter")->accessibleName().isEmpty());
+        auto *table = storage.findChild<QTableWidget *>("tempStorageTable");
+        QVERIFY(table);
+        QVERIFY(!table->accessibleDescription().isEmpty());
+        QCOMPARE(table->editTriggers(), QAbstractItemView::NoEditTriggers);
+        QStringList shortcuts;
+        for (auto *button : storage.findChildren<QPushButton *>())
+            shortcuts << button->shortcut().toString();
+        QVERIFY(shortcuts.contains("Alt+C"));
+        QVERIFY(shortcuts.contains("Alt+O"));
+        QVERIFY(shortcuts.contains("F5"));
     }
 
     void extractionRecoveryReconciliation() {
@@ -894,6 +918,10 @@ class GuiPresentationTest : public QObject {
 
         ExtractionRecoveryDialog dialog(sourceFile.fileName(), destRoot, sourceFp, plan);
         QVERIFY(dialog.canResume());
+        auto *planTable = dialog.findChild<QTableWidget *>("recoveryPlanTable");
+        QVERIFY(planTable);
+        QCOMPARE(planTable->editTriggers(), QAbstractItemView::NoEditTriggers);
+        QVERIFY(!planTable->accessibleDescription().isEmpty());
 
         const auto toExtract = dialog.filesToExtract();
         // Every existing file is preserved, including equal-size/mtime CRC mismatches.
@@ -998,6 +1026,77 @@ class GuiPresentationTest : public QObject {
         QCOMPARE(records[0]["id"].toString(), QString("job-06-001"));
         QCOMPARE(records[0]["state"].toString(), QString("completed"));
         QCOMPARE(records[1]["id"].toString(), QString("job-06-002"));
+    }
+
+    void jobSpecTyping() {
+        QVERIFY(ArchiveJobSpec::stringToKind("shell") == JobKind::Shell);
+        QVERIFY(ArchiveJobSpec::stringToKind("read") == JobKind::Read);
+        QVERIFY(ArchiveJobSpec::stringToKind("reconcile") == JobKind::Reconcile);
+        QVERIFY(ArchiveJobSpec::stringToKind("copy") == JobKind::CopyEntries);
+        QVERIFY(ArchiveJobSpec::stringToKind("not-a-job") == JobKind::Unknown);
+        for (auto kind : {JobKind::Open, JobKind::Extract, JobKind::Create, JobKind::Modify,
+                          JobKind::Convert, JobKind::EditSave, JobKind::Test, JobKind::Hash,
+                          JobKind::Preview, JobKind::CopyEntries, JobKind::Shell, JobKind::Read,
+                          JobKind::Reconcile, JobKind::Unknown})
+            QVERIFY(ArchiveJobSpec::stringToKind(ArchiveJobSpec::kindToString(kind)) == kind);
+
+        QVERIFY(ArchiveJobSpec::stringToState("verifying") == JobState::Verifying);
+        QVERIFY(ArchiveJobSpec::stringToState("bogus") == JobState::Unknown);
+        for (auto state : {JobState::Pending, JobState::Running, JobState::Decision,
+                           JobState::Verifying, JobState::Completed, JobState::Failed,
+                           JobState::Cancelled, JobState::Interrupted, JobState::Unknown})
+            QVERIFY(ArchiveJobSpec::stringToState(ArchiveJobSpec::stateToString(state)) == state);
+
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(0)), int(ConflictPolicy::Refuse));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(1)), int(ConflictPolicy::Skip));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(2)), int(ConflictPolicy::Replace));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(3)), int(ConflictPolicy::Ask));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(4)), int(ConflictPolicy::Rename));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(5)), int(ConflictPolicy::Newer));
+        QCOMPARE(int(ArchiveJobSpec::conflictFromInt(9)), int(ConflictPolicy::Refuse));
+        QCOMPARE(int(ArchiveJobSpec::formatFromInt(11)), int(ArchiveFormat::TarZst));
+        QCOMPARE(int(ArchiveJobSpec::formatFromInt(12)), int(ArchiveFormat::Zip));
+
+        ArchiveJobSpec spec;
+        spec.kind = JobKind::Modify;
+        spec.action = ModifyAction::RenameEntry;
+        spec.format = ArchiveFormat::SevenZ;
+        spec.preset = CompressionPreset::Maximum;
+        spec.resource = ResourceMode::Eco;
+        spec.conflict = ConflictPolicy::Newer;
+        spec.sources = {"a.txt"};
+        spec.names = {"old.txt"};
+        const auto restored = ArchiveJobSpec::fromJson(spec.toJson());
+        QVERIFY(restored.kind == JobKind::Modify);
+        QVERIFY(restored.action == ModifyAction::RenameEntry);
+        QVERIFY(restored.format == ArchiveFormat::SevenZ);
+        QVERIFY(restored.preset == CompressionPreset::Maximum);
+        QVERIFY(restored.resource == ResourceMode::Eco);
+        QVERIFY(restored.conflict == ConflictPolicy::Newer);
+        QCOMPARE(restored.sources, QStringList{"a.txt"});
+        QCOMPARE(restored.names, QStringList{"old.txt"});
+
+        ArchiveJobSpec shell;
+        shell.kind = JobKind::Shell;
+        shell.shellAction = 7;
+        shell.sources = {"C:/file.txt"};
+        QCOMPARE(ArchiveJobSpec::fromJson(shell.toJson()).shellAction, quint32(7));
+
+        ArchiveJobSpec invalidExtract;
+        invalidExtract.kind = JobKind::Extract;
+        QVERIFY(!invalidExtract.validationError().isEmpty());
+        invalidExtract.sources = {"archive.zip"};
+        invalidExtract.destination = "output";
+        QVERIFY(invalidExtract.validationError().isEmpty());
+
+        ArchiveJobSpec invalidRename;
+        invalidRename.kind = JobKind::Modify;
+        invalidRename.sources = {"archive.zip"};
+        invalidRename.names = {"old.txt"};
+        invalidRename.action = ModifyAction::RenameEntry;
+        QVERIFY(!invalidRename.validationError().isEmpty());
+        invalidRename.newName = "new.txt";
+        QVERIFY(invalidRename.validationError().isEmpty());
     }
 
     void tempStoreCategoryMapping() {

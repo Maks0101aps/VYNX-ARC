@@ -43,10 +43,12 @@ InterArchiveCopyDialog::InterArchiveCopyDialog(const QString &sourceArchive,
     }
 
     auto *policyLayout = new QHBoxLayout;
-    policyLayout->addWidget(new QLabel(tr("If destination file already exists:")));
+    auto *policyLabel = new QLabel(tr("If destination file already exists:"));
+    policyLayout->addWidget(policyLabel);
     policyCombo_ = new QComboBox;
     policyCombo_->setObjectName("copyPolicyCombo");
     policyCombo_->setAccessibleName(tr("Conflict resolution policy"));
+    policyLabel->setBuddy(policyCombo_);
     policyCombo_->addItem(tr("Replace existing files"), int(CopyConflictPolicy::Replace));
     policyCombo_->addItem(tr("Rename new files (keep both)"), int(CopyConflictPolicy::Rename));
     policyCombo_->addItem(tr("Skip existing files"), int(CopyConflictPolicy::Skip));
@@ -60,6 +62,8 @@ InterArchiveCopyDialog::InterArchiveCopyDialog(const QString &sourceArchive,
     table_ = new QTableWidget(0, 4, this);
     table_->setObjectName("copyCandidateTable");
     table_->setAccessibleName(tr("Files to copy"));
+    table_->setAccessibleDescription(
+        tr("Files selected for copying with target paths and conflict status."));
     table_->setHorizontalHeaderLabels({tr("File"), tr("Size"), tr("Target path"), tr("Status")});
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -74,6 +78,7 @@ InterArchiveCopyDialog::InterArchiveCopyDialog(const QString &sourceArchive,
 
     // Space label
     spaceLabel_ = new QLabel(this);
+    spaceLabel_->setAccessibleName(tr("Space and conflict summary"));
     spaceLabel_->setText(tr("Required space: <b>%1</b> (available: %2). Conflicts: <b>%3</b>.")
                              .arg(displaySize(totalRequired), displaySize(availableSpace_), QString::number(conflictCount)));
     mainLayout->addWidget(spaceLabel_);
@@ -85,6 +90,8 @@ InterArchiveCopyDialog::InterArchiveCopyDialog(const QString &sourceArchive,
     connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     mainLayout->addWidget(buttonBox);
+    setTabOrder(policyCombo_, table_);
+    setTabOrder(table_, buttonBox->button(QDialogButtonBox::Ok));
 
     updateTable();
 }

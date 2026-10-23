@@ -83,6 +83,11 @@ def main():
                   corpus_sha256=hashlib.sha256(args.archive.read_bytes()).hexdigest(),
                   median_open_seconds=statistics.median(result['open_seconds']),
                   median_selected_extract_seconds=statistics.median(result['selected_extract_seconds']),
+                  median_nested_open_seconds=statistics.median(result['nested_open_seconds']),
+                  median_inter_archive_copy_seconds=statistics.median(result['inter_archive_copy_seconds']),
+                  median_recovery_plan_seconds=statistics.median(result['recovery_plan_seconds']),
+                  median_preview_first_seconds=statistics.median(result['preview_first_seconds']),
+                  median_preview_cached_seconds=statistics.median(result['preview_cached_seconds']),
                   search_p95_milliseconds=searches[int(.95 * (len(searches) - 1))],
                   sampled_peak={key: max(s[key] for s in samples)
                                 for key in ('rss_bytes', 'private_bytes', 'handles', 'children')},
@@ -91,7 +96,13 @@ def main():
     (root / 'results.json').write_text(json.dumps(result, indent=2) + '\n', encoding='utf-8')
     (root / 'samples.json').write_text(json.dumps(samples) + '\n', encoding='utf-8')
     print(json.dumps({k: result[k] for k in ('median_open_seconds', 'median_selected_extract_seconds',
-                                            'search_p95_milliseconds', 'sampled_peak', 'resource_checkpoints')}, indent=2))
+                                            'median_nested_open_seconds',
+                                            'median_inter_archive_copy_seconds',
+                                            'median_recovery_plan_seconds',
+                                            'median_preview_first_seconds',
+                                            'median_preview_cached_seconds',
+                                            'search_p95_milliseconds', 'sampled_peak',
+                                            'resource_checkpoints')}, indent=2))
 
 
 if __name__ == '__main__':

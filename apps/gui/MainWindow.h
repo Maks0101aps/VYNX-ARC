@@ -28,6 +28,7 @@ class QTimer;
 class QAction;
 class QVBoxLayout;
 class SecretUtf8;
+struct ArchiveJobSpec;
 class ExternalFiles;
 class EditStore;
 class NestedStore;
@@ -114,7 +115,7 @@ class MainWindow : public QMainWindow {
     void retrySelectedJob();
     void verifySelectedResult();
     quint64 shownPublication_ = 0;
-    void dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8> &password);
+    void dispatchSpec(const ArchiveJobSpec &job, const std::shared_ptr<SecretUtf8> &password);
     void exportJobReport();
     QLabel *queueSummary_ = nullptr;
     QComboBox *queueFilter_ = nullptr;

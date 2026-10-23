@@ -15,24 +15,28 @@ static QString receiptKey(const QString &path) {
 #endif
     return key;
 }
-static QString jobStateLabel(const QString &state) {
-    if (state == "unknown")
+static QString jobStateLabel(JobState state) {
+    switch (state) {
+    case JobState::Unknown:
         return MainWindow::tr("Result unknown - verification required");
-    if (state == "verifying")
+    case JobState::Verifying:
         return MainWindow::tr("Verifying result");
-    if (state == "completed")
+    case JobState::Completed:
         return MainWindow::tr("Completed");
-    if (state == "failed")
+    case JobState::Failed:
         return MainWindow::tr("Failed");
-    if (state == "cancelled")
+    case JobState::Cancelled:
         return MainWindow::tr("Cancelled");
-    if (state == "interrupted")
+    case JobState::Interrupted:
         return MainWindow::tr("Interrupted - review required");
-    if (state == "decision")
+    case JobState::Decision:
         return MainWindow::tr("Review required");
-    if (state == "running")
+    case JobState::Running:
         return MainWindow::tr("Running");
-    return MainWindow::tr("Pending");
+    case JobState::Pending:
+    default:
+        return MainWindow::tr("Pending");
+    }
 }
 void MainWindow::setupJournal() {
     if (QCoreApplication::arguments().contains("--smoke-test") ||
@@ -46,9 +50,11 @@ void MainWindow::setupJournal() {
     for (const auto &value : journal_.records()) {
         const auto record = value.toObject();
         auto *item =
-            new QListWidgetItem(tr("%1 - %2").arg(jobStateLabel(record["state"].toString()),
-                                                  record["title"].toString()),
-                                queueView_);
+            new QListWidgetItem(
+                tr("%1 - %2").arg(
+                    jobStateLabel(ArchiveJobSpec::stringToState(record["state"].toString())),
+                    record["title"].toString()),
+                queueView_);
         item->setData(Qt::UserRole + 1, record["title"].toString());
         item->setData(Qt::UserRole + 2, true);
         item->setData(Qt::UserRole + 3, record["id"].toString());
@@ -139,10 +145,10 @@ void MainWindow::retrySelectedJob() {
         return;
     const auto record = journal_.record(item->data(Qt::UserRole + 3).toString());
     auto spec = record["spec"].toObject();
-    const auto kind = spec["kind"].toString();
+    const auto kind = ArchiveJobSpec::stringToKind(spec["kind"].toString());
 
     // Prioritize structured extraction recovery: allows inspecting & resuming even after crash ('unknown' state)
-    if (kind == "extract" && spec["recoveryPlan"].isObject()) {
+    if (kind == JobKind::Extract && spec["recoveryPlan"].isObject()) {
         const auto archivePath = spec["sources"].toArray().first().toString();
         const auto destRoot = spec["recoveryPlan"].toObject()["destination"].toString(spec["destination"].toString());
         const auto savedFp = spec["archiveHash"].toString();
@@ -172,7 +178,7 @@ void MainWindow::retrySelectedJob() {
             }
             enqueueRequest(
                 tr("Resumed: %1").arg(item->data(Qt::UserRole + 1).toString()),
-                [this, spec, pw] { dispatchSpec(spec, pw); },
+                [this, job = ArchiveJobSpec::fromJson(spec), pw] { dispatchSpec(job, pw); },
                 {}, spec);
             return;
         }
@@ -192,20 +198,23 @@ void MainWindow::retrySelectedJob() {
                                     "from the archive tab."));
         return;
     }
-    if (kind == "convert") {
+    if (kind == JobKind::Convert) {
         QStringList paths;
         for (const auto &path : spec["sources"].toArray())
             paths.append(path.toString());
         chooseConversion(paths, spec["editId"].toString(), record);
         return;
     }
-    if (!QStringList{"create", "extract", "test", "shell", "open", "modify"}.contains(kind)) {
+    const bool retryable = kind == JobKind::Create || kind == JobKind::Extract ||
+                           kind == JobKind::Test || kind == JobKind::Shell ||
+                           kind == JobKind::Open || kind == JobKind::Modify;
+    if (!retryable) {
         QMessageBox::information(this, tr("Retry operation"),
                                  tr("Repeat this action from its archive tab. Edited files are "
                                     "managed in Working copies."));
         return;
     }
-    if (kind == "create") {
+    if (kind == JobKind::Create) {
         QStringList initial;
         for (const auto &path : spec["sources"].toArray())
             initial << path.toString();
@@ -246,8 +255,8 @@ void MainWindow::retrySelectedJob() {
             item->setText(tr("Stopped — %1").arg(item->data(Qt::UserRole + 1).toString()));
         }
         enqueueRequest(
-            item->data(Qt::UserRole + 1).toString(), [this, spec, pw] { dispatchSpec(spec, pw); },
-            {}, spec);
+            item->data(Qt::UserRole + 1).toString(),
+            [this, job = ArchiveJobSpec::fromJson(spec), pw] { dispatchSpec(job, pw); }, {}, spec);
         return;
     }
     QDialog dialog(this);
@@ -268,7 +277,7 @@ void MainWindow::retrySelectedJob() {
     sources->setMaximumHeight(110);
     form->addRow(tr("Sources (one path per line)"), sources);
     auto *destination = new QLineEdit(spec["destination"].toString(), &dialog);
-    if (kind == "create" || kind == "extract")
+    if (kind == JobKind::Create || kind == JobKind::Extract)
         form->addRow(tr("Destination"), destination);
     else
         destination->hide();
@@ -276,7 +285,7 @@ void MainWindow::retrySelectedJob() {
     conflict->addItems({tr("Stop on conflict"), tr("Skip existing"), tr("Replace existing"),
                         tr("Ask"), tr("Keep both"), tr("Replace if newer")});
     conflict->setCurrentIndex(qBound(0, spec["conflict"].toInt(), 5));
-    if (kind == "extract")
+    if (kind == JobKind::Extract)
         form->addRow(tr("Existing files"), conflict);
     else
         conflict->hide();
@@ -286,7 +295,7 @@ void MainWindow::retrySelectedJob() {
     auto *resource = new QComboBox(&dialog);
     resource->addItems({tr("Eco"), tr("Balanced"), tr("Maximum")});
     resource->setCurrentIndex(qBound(0, spec["resource"].toInt(1), 2));
-    if (kind == "create" || kind == "modify") {
+    if (kind == JobKind::Create || kind == JobKind::Modify) {
         form->addRow(tr("Compression"), preset);
         form->addRow(tr("Resources"), resource);
     } else {
@@ -304,23 +313,25 @@ void MainWindow::retrySelectedJob() {
     names->setMaximumHeight(110);
     auto *newName = new QLineEdit(spec["newName"].toString(), &dialog);
     auto *folder = new QLineEdit(spec["folder"].toString(), &dialog);
-    if (kind != "modify") {
+    if (kind != JobKind::Modify) {
         names->hide();
         newName->hide();
         folder->hide();
     }
-    if (kind == "modify") {
-        const auto action = spec["action"].toInt();
-        form->addRow(tr("Requested change"), new QLabel(action == 0   ? tr("Add files and folders")
-                                                        : action == 1 ? tr("Delete entries")
-                                                                      : tr("Rename entry")));
-        names->setReadOnly(action != 0);
-        form->addRow(action == 0 ? tr("Input paths") : tr("Archive entries"), names);
-        if (action == 2)
+    if (kind == JobKind::Modify) {
+        const auto action = ArchiveJobSpec::actionFromInt(spec["action"].toInt());
+        form->addRow(tr("Requested change"),
+                     new QLabel(action == ModifyAction::AddFiles      ? tr("Add files and folders")
+                                : action == ModifyAction::DeleteEntries ? tr("Delete entries")
+                                                                        : tr("Rename entry")));
+        names->setReadOnly(action != ModifyAction::AddFiles);
+        form->addRow(action == ModifyAction::AddFiles ? tr("Input paths") : tr("Archive entries"),
+                     names);
+        if (action == ModifyAction::RenameEntry)
             form->addRow(tr("New archive path"), newName);
-        if (action != 2)
+        if (action != ModifyAction::RenameEntry)
             newName->hide();
-        if (action == 0)
+        if (action == ModifyAction::AddFiles)
             form->addRow(tr("Destination in archive"), folder);
         else
             folder->hide();
@@ -338,7 +349,7 @@ void MainWindow::retrySelectedJob() {
         list.append(path.trimmed());
     if (list.isEmpty() || list.size() > 10000)
         return;
-    if (kind == "modify") {
+    if (kind == JobKind::Modify) {
         QJsonArray entries;
         for (const auto &name : names->toPlainText().split('\n', Qt::SkipEmptyParts))
             entries.append(name);
@@ -363,22 +374,23 @@ void MainWindow::retrySelectedJob() {
         journal_.setState(record["id"].toString(), "failed", record["error"].toString());
     }
     enqueueRequest(
-        item->data(Qt::UserRole + 1).toString(), [this, spec, pw] { dispatchSpec(spec, pw); },
+        item->data(Qt::UserRole + 1).toString(), [this, job = ArchiveJobSpec::fromJson(spec), pw] { dispatchSpec(job, pw); },
         paths.join('\n'), spec);
 }
-void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8> &pw) {
-    const auto kind = spec["kind"].toString();
-    QStringList paths;
-    for (auto value : spec["sources"].toArray())
-        paths << value.toString();
-    if (paths.isEmpty())
+void MainWindow::dispatchSpec(const ArchiveJobSpec &job, const std::shared_ptr<SecretUtf8> &pw) {
+    const auto kind = job.kind;
+    const auto paths = job.sources;
+    const auto invalid = job.validationError();
+    if (!invalid.isEmpty()) {
+        toast_->notify(invalid);
         return;
-    if (kind == "open") {
+    }
+    if (kind == JobKind::Open) {
         openWithSecret(paths.first(), pw, true);
         return;
     }
-    if (kind == "shell") {
-        handleShellWithSecret(quint32(spec["action"].toInt()), paths, pw);
+    if (kind == JobKind::Shell) {
+        handleShellWithSecret(job.shellAction, paths, pw);
         return;
     }
     for (int i = 0; i < sessions_.size(); ++i)
@@ -387,33 +399,31 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
             break;
         }
     beginOperation();
-    activeSpec_ = spec;
+    activeSpec_ = job.toJson();
     auto op = operations_.operation;
-    vynx::configure_operation(**op, uint8_t(spec["preset"].toInt(2)),
-                              uint8_t(spec["resource"].toInt(1)));
+    vynx::configure_operation(**op, uint8_t(job.preset), uint8_t(job.resource));
     runJob(
         tr("Retry operation"),
-        [spec, kind, paths, pw, op] {
+        [job, kind, paths, pw, op] {
             rust::Vec<rust::String> values;
             for (const auto &path : paths)
                 values.push_back(path.toUtf8().toStdString());
-            const auto output = spec["destination"].toString().toUtf8().toStdString();
-            if (kind == "create") {
-                const auto volume = quint64(spec["volumeSize"].toDouble());
-                if (volume)
-                    vynx::create_split_archive(output, {values.data(), values.size()}, volume,
+            const auto output = job.destination.toUtf8().toStdString();
+            if (kind == JobKind::Create) {
+                if (job.volumeSize)
+                    vynx::create_split_archive(output, {values.data(), values.size()}, job.volumeSize,
                                                pw->bytes(), **op);
                 else
                     vynx::create_archive_as(output, {values.data(), values.size()},
-                                            uint8_t(spec["format"].toInt()), pw->bytes(), **op);
+                                            uint8_t(job.format), pw->bytes(), **op);
             } else {
                 auto archive =
                     vynx::open_archive(paths.first().toUtf8().toStdString(), pw->bytes(), **op);
-                if (kind == "test")
+                if (kind == JobKind::Test)
                     vynx::test_archive(*archive, pw->bytes(), **op);
-                else if (kind == "extract") {
-                    if (spec.contains("retryOf") && spec["recoveryPlan"].isObject()) {
-                        const auto expected = spec["recoveryPlan"].toObject()["sourceDigest"].toString();
+                else if (kind == JobKind::Extract) {
+                    if (!job.retryOf.isEmpty() && !job.recoveryPlan.isEmpty()) {
+                        const auto expected = job.recoveryPlan["sourceDigest"].toString();
                         if (expected.isEmpty() ||
                             QString::fromStdString(std::string(vynx::hash_archive_file(
                                 paths.first().toUtf8().toStdString(), **op))) != expected)
@@ -427,33 +437,33 @@ void MainWindow::dispatchSpec(QJsonObject spec, const std::shared_ptr<SecretUtf8
                         index.insert(
                             QString::fromUtf8(entry.name.data(), qsizetype(entry.name.size())),
                             entry.id);
-                    for (const auto &value : spec["names"].toArray()) {
-                        const auto found = index.constFind(value.toString());
+                    for (const auto &name : job.names) {
+                        const auto found = index.constFind(name);
                         if (found == index.cend())
                             return QStringLiteral("CHANGED: Selected entry no longer exists");
                         ids.push_back(found.value());
                     }
                     vynx::extract_archive(*archive, output, {ids.data(), ids.size()},
-                                          uint8_t(spec["conflict"].toInt()), spec["smart"].toBool(),
-                                          pw->bytes(), **op);
-                } else if (kind == "modify") {
+                                          uint8_t(job.conflict), job.smart, pw->bytes(), **op);
+                } else if (kind == JobKind::Modify) {
                     rust::Vec<rust::String> names;
-                    for (auto name : spec["names"].toArray())
-                        names.push_back(name.toString().toUtf8().toStdString());
+                    for (const auto &name : job.names)
+                        names.push_back(name.toUtf8().toStdString());
                     vynx::modify_archive(
-                        *archive, uint8_t(spec["action"].toInt()), {names.data(), names.size()},
-                        spec["newName"].toString().toUtf8().toStdString(),
-                        spec["folder"].toString().toUtf8().toStdString(), pw->bytes(), **op);
-                } else if (kind == "copy") {
+                        *archive, uint8_t(job.action), {names.data(), names.size()},
+                        job.newName.toUtf8().toStdString(),
+                        job.folder.toUtf8().toStdString(), pw->bytes(), **op);
+                } else if (kind == JobKind::CopyEntries) {
                     return QStringLiteral("OPTIONS: Repeat inter-archive copy from its source tab");
                 } else
                     return QStringLiteral("OPTIONS: Unsupported restored operation");
             }
             return QString();
         },
-        [this, kind, paths, pw, spec] {
-            if (kind == "modify" || kind == "copy") {
-                const auto target = kind == "copy" ? spec["targetArchive"].toString() : paths.first();
+        [this, kind, paths, pw, job] {
+            if (kind == JobKind::Modify || kind == JobKind::CopyEntries) {
+                const auto target =
+                    kind == JobKind::CopyEntries ? job.targetArchive : paths.first();
                 QTimer::singleShot(0, this,
                                    [this, target, pw] { reloadArchive(target, pw); });
             }
@@ -497,7 +507,9 @@ void MainWindow::verifySelectedResult() {
     auto apply = [this, id, result, spec, editId, workingFile, hashes, workingHash,
                   workingFingerprint](const QString &error) {
         const auto state = error.isEmpty() ? *result : QString("unknown");
-        if (state == "completed" && spec["kind"] == "edit" && !workingFile.isEmpty()) {
+        if (state == "completed" &&
+            ArchiveJobSpec::stringToKind(spec["kind"].toString()) == JobKind::EditSave &&
+            !workingFile.isEmpty()) {
             const auto current = edits_->record(editId);
             const auto source = spec["sources"].toArray().first().toString();
             const auto savedInput = spec["inputHash"].toString();
@@ -534,7 +546,8 @@ void MainWindow::verifySelectedResult() {
                 continue;
             row->setData(Qt::UserRole + 5, state);
             row->setData(Qt::UserRole + 6, error.isEmpty() ? detail : error);
-            row->setText(jobStateLabel(state) + " - " + row->data(Qt::UserRole + 1).toString());
+            row->setText(jobStateLabel(ArchiveJobSpec::stringToState(state)) + " - " +
+                         row->data(Qt::UserRole + 1).toString());
             row->setToolTip(detail + "\n" + error);
         }
         updateQueue();
@@ -595,7 +608,8 @@ void MainWindow::retryFailedBatch() {
         if (record["state"] != "failed" || spec["batchId"] != batch ||
             spec["incompleteSpec"].toBool())
             continue;
-        if (spec["kind"] != "extract" && spec["kind"] != "convert")
+        const auto kind = ArchiveJobSpec::stringToKind(spec["kind"].toString());
+        if (kind != JobKind::Extract && kind != JobKind::Convert)
             continue;
         const auto sources = spec["sources"].toArray();
         if (sources.size() != 1)
@@ -617,7 +631,7 @@ void MainWindow::retryFailedBatch() {
     }
     const auto first = failed.first().toObject();
     const auto firstSpec = first["spec"].toObject();
-    if (firstSpec["kind"] == "convert") {
+    if (ArchiveJobSpec::stringToKind(firstSpec["kind"].toString()) == JobKind::Convert) {
         auto retry = first;
         retry["origins"] = origins;
         chooseConversion(paths, {}, retry);
@@ -667,6 +681,6 @@ void MainWindow::retryFailedBatch() {
         spec["needsPassword"] = !pw->bytes().empty();
         enqueueRequest(
             tr("Retry %1").arg(record["title"].toString()),
-            [this, spec, pw] { dispatchSpec(spec, pw); }, paths[i] + "\n" + outputs[i], spec);
+            [this, job = ArchiveJobSpec::fromJson(spec), pw] { dispatchSpec(job, pw); }, paths[i] + "\n" + outputs[i], spec);
     }
 }

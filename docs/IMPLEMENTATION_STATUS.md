@@ -1,58 +1,79 @@
-# Implementation status — 2026-10-20
+# Implementation status — 2026-10-23
 
-Version: **0.6.0 development milestone**. Local release acceptance passed; remote
-CI/publication state and exact identities are in [VERIFICATION_0_6.json](VERIFICATION_0_6.json).
-The [milestone report](MILESTONE_0_6.md) defines the current boundary. Earlier reports
-retain historical counts/failures. This is not acceptance of the entire V1 brief.
+Version: **0.8.0 release candidate**. The accepted baseline is 0.7.0.
+Automated source/package gates passed on the development host; exact package
+identities and open gates are recorded in
+[MILESTONE_0_8.md](MILESTONE_0_8.md), with raw measurements in
+[BENCHMARKS_0_8.md](BENCHMARKS_0_8.md). The [0.8.0 plan](ROADMAP_0_8.md) and
+[changelog](CHANGELOG.md) track the increment from 0.7.0. Earlier reports retain
+historical counts and failures. This is not acceptance of the entire V1 brief.
 
 ## Available behavior
 
-- Offline Windows Qt/CXX/Rust GUI and CLI; existing ZIP/7Z/RAR/TAR/stream formats,
+- Offline Windows Qt/CXX/Rust GUI and CLI; ZIP/7Z/RAR/TAR/stream formats,
   creation/compression/resource modes, hashes, previews and split-7Z remain.
 - Independent archive tabs, archive-wide search, navigation/selection, workspace
   restoration and background reads while another tab owns a primary job.
 - Supervised GUI archive workers: bounded protocol, two-worker admission, Windows
   memory/process limits, wall-time budget and forced cancellation. Failures retain
-  GUI, other tabs and registered working files.
-- Selected extraction of the 100,000-entry ZIP: 1.78 s in core and 3.32 s through
-  GUI. Complete name/collision/size and payload checks remain. [Measurements](BENCHMARKS_0_6.md).
+  the GUI, other tabs and registered working files.
 - Complete large selections, verified sidecars, journal migration, publication
   acknowledgements and read-only verification of unknown archive writes. Explicit
-  failed-only retries retain errors/attempt links. Queue counters and filters.
+  failed-only retries retain errors and attempt links.
 - Planned conversion into new verified ZIP/7Z from supported sources, including
   RAR/TAR. Separate credentials, explicit unencrypted consent, originals retained.
-- ZIP/7Z working-copy saveback, Save as new archive, content verification, admission
-  budget, last-verification/error details and conflict recovery. Newer bytes are
-  never assumed saved during reconciliation.
-- EN/UK/RU, light/dark/system, scrollable narrow content with visible action bars,
-  keyboard commands, disposable views and working-copy management.
-- Portable/per-user installer, packaged worker, repaired Open With, actual
-  0.5-to-0.6 upgrade and uninstall without changing file defaults.
+- ZIP/7Z working-copy saveback, Save as new archive, content verification,
+  admission budget, last-verification/error details and conflict recovery. Newer
+  bytes are never assumed saved during reconciliation.
+- EN/UK/RU with complete catalogs for the 0.8.0 dialogs, light/dark/system themes,
+  scrollable narrow content, keyboard commands, disposable views and working-copy
+  management.
+- Portable package, per-user installer and MSIX identity; packaged worker,
+  Open With registration, upgrade and uninstall paths are exercised on the
+  development host.
+
+## 0.8.0 changes
+
+- Localization catalogs include inter-archive copy, extraction recovery and
+  temporary storage; `lrelease` reports no unfinished messages.
+- Recovery and temporary-storage tables are read-only; key dialogs have accessible
+  names/descriptions, label buddies and explicit tab order. Automated presentation
+  tests cover these properties.
+- `ArchiveJobSpec` centralizes job kinds, states and operation parameters. Journal
+  restoration, retry and dispatch use typed comparisons. The `unknown` state is
+  valid for recovery, while malformed state strings are rejected.
+- Version metadata is consistently 0.8.0 across CMake, Cargo, the installer and
+  MSIX manifest.
+- `ctutils` is updated from 0.4.2 to 0.4.5 to clear `RUSTSEC-2026-0385`; the
+  dependency audit passes with 1350 advisories and 109 crates.
 
 ## Evidence and boundaries
 
-Final packages passed isolated SDK-free smoke, independent readers, actual mixed
-GUI batch/retry and upgrade checks. Eight worker integration tests, seven GUI
-fault/recovery/batch cases, real VS Code/Writer saves, four native CTests, C++ ASan,
-mutation and publication/lock/interruption checks are linked from the report.
+0.8.0 passed Rust tests (91 passed, 2 ignored), CTest 5/5, 6/6 publication-lock
+checks, 1400/1400 stress publications, 3/3 isolated portable verification and
+actual 0.6.0 → 0.8.0 and 0.7.0 → 0.8.0 per-user upgrades. Exact hashes and
+boundaries are in the milestone report. The main open performance finding is
+roughly doubled sampled RSS for 7Z creation on large/random inputs. The
+1000-small-file ZIP extraction result is +4.9% versus 0.6.0 in the recheck; the
+earlier +21% was not reproduced and remains only a variance watch item. Narrator,
+clean-VM and CI acceptance remain unexecuted.
 
 Worker jobs share the user's filesystem rights and exclude GUI/editor memory.
 Preflight/OS caps do not prove a complete allocation or race audit. Qt raster
 decoding remains bounded in GUI. Direct CLI commands are not implicitly supervised.
 
 History disabled means session-only queue recovery. Interrupted extraction needs
-manual review; no aggregate receipt exists. Physical power loss is unqualified.
-GUI adapters still contain closures/JSON despite typed centralized native execution.
-
-Working files retain plaintext/source paths until discarded, independently of
-history settings. Fingerprints are hints; saves use hashes. The 2 GiB / 32-copy
-admission budget never deletes existing or editor-grown edits. Saveback supports
-bounded ZIP/7Z entries without volumes; no auto-merge or hidden save.
+manual review; physical power loss is unqualified. Working files retain
+plaintext/source paths until discarded, independently of history settings.
+Fingerprints are hints; saves use hashes. The 2 GiB / 32-copy admission budget
+never deletes existing or editor-grown edits.
 
 Packages are unsigned. Trusted Explorer identity installation, SmartScreen,
-enterprise policy, independent clean-machine qualification and physical OS DPI
-transitions remain separate from host/Qt-scale tests. Full Rust/native decoder
-sanitizers and coverage-guided campaigns remain future work.
+enterprise policy, independent clean-machine qualification, Narrator review and
+physical OS DPI transitions remain separate from host/Qt-scale tests. Full
+Rust/native decoder sanitizers and coverage-guided campaigns remain future work.
+RAR creation is not implemented.
 
 See [formats](SUPPORTED_FORMATS.md), [security](SECURITY_MODEL.md),
-[worker protocol](WORKER_PROTOCOL.md) and [historical 0.5 report](MILESTONE_0_5.md).
+[worker protocol](WORKER_PROTOCOL.md), [0.8 milestone](MILESTONE_0_8.md) and
+[0.7 milestone](MILESTONE_0_7.md).

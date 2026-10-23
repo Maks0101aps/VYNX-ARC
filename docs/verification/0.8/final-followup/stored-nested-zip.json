@@ -1,0 +1,6 @@
+{
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "CORRUPT: Missing or ambiguous ZIP end records\n",
+  "scope": "Existing conservative EOCD preflight limitation, GUI also observed"
+}

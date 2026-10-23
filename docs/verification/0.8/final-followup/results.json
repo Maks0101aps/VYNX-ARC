@@ -1,0 +1,67 @@
+{
+  "timestamp_utc": "2026-10-23T10:41:31.741598+00:00",
+  "scope": "0.8.0 release-candidate follow-up; no release tag",
+  "rust": {
+    "passed": 95,
+    "failed": 0,
+    "ignored": 2
+  },
+  "ctest": "5/5 passed",
+  "narrator": {
+    "status": "USER_CONFIRMED_BASIC_SMOKE",
+    "checks": [
+      "Tab/Shift+Tab",
+      "button names/states",
+      "Ctrl+, settings",
+      "temporary files table/buttons",
+      "Escape focus return"
+    ],
+    "full_nested_copy_recovery_scenario": "not attested"
+  },
+  "translations": "Agent editorial review of UK/RU copy/recovery/storage catalogs and placeholder checks; not a human full visual-language matrix",
+  "seven_z": {
+    "decision": "Accepted workload-specific resource cost for 0.8.0; historical 103 MiB difference is not causally explained; not a leak-free or hard RSS claim",
+    "summaries": [
+      {
+        "resource": "eco",
+        "median_rss_mib": 34.0,
+        "median_seconds": 3.094,
+        "trials": 3,
+        "settings": "LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)"
+      },
+      {
+        "resource": "balanced",
+        "median_rss_mib": 218.5,
+        "median_seconds": 1.983,
+        "trials": 3,
+        "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)"
+      },
+      {
+        "resource": "maximum",
+        "median_rss_mib": 218.8,
+        "median_seconds": 2.05,
+        "trials": 3,
+        "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)"
+      }
+    ],
+    "independent_roundtrips": "9/9",
+    "cli_sha256": "02d33d398626f3d78173f55febb044bed003dd21d4c7ae82bf0f1c743d2d2ade",
+    "source_sha256": "9066fc5b288e75c5659a2689f61c4d481669117a30756fdcb19613d5366d13c9"
+  },
+  "clean_windows": {
+    "status": "BLOCKED_BEFORE_GUEST_START",
+    "user_reported_error": "Windows Sandbox failed to initialize. No more data is available. (0x80070103)",
+    "hypervisor_present": false,
+    "virtualization_firmware_enabled": true,
+    "slat": true,
+    "guest_results": false
+  },
+  "known_limitations": [
+    "A Store ZIP containing a small ZIP can be rejected as ambiguous EOCD by existing parser security preflight; observed in CLI and GUI; protection retained"
+  ],
+  "packages": {
+    "VYNX-ARC-Explorer-x64.msix": "9157c0877de7b53a0d8298d097a655b47dbb10f90297495307ec4908f36eee9d",
+    "VYNX-ARC-Portable-x64.zip": "a62df2dcf737dd484221bb875d6ef658bafc77f22c846edf7856e60897aa1d3f",
+    "VYNX-ARC-Setup-x64.exe": "107bb9295302d5721e369af674ef19385ef79bc340e4bd3e24b546282d69a5b4"
+  }
+}

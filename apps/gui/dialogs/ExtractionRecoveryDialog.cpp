@@ -66,15 +66,19 @@ ExtractionRecoveryDialog::ExtractionRecoveryDialog(const QString &archivePath,
 
     sourceStatusLabel_ = new QLabel(this);
     sourceStatusLabel_->setWordWrap(true);
+    sourceStatusLabel_->setAccessibleName(tr("Source archive status"));
     mainLayout->addWidget(sourceStatusLabel_);
 
     summaryLabel_ = new QLabel(this);
     summaryLabel_->setWordWrap(true);
+    summaryLabel_->setAccessibleName(tr("Recovery status summary"));
     mainLayout->addWidget(summaryLabel_);
 
     table_ = new QTableWidget(0, 4, this);
     table_->setObjectName("recoveryPlanTable");
     table_->setAccessibleName(tr("Extraction recovery plan table"));
+    table_->setAccessibleDescription(
+        tr("Read-only review of completed, missing and user-modified output files."));
     table_->setHorizontalHeaderLabels({tr("File (Resume Check)"), tr("Expected size"), tr("Current status"), tr("Action on resume")});
     table_->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
     table_->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
@@ -82,6 +86,7 @@ ExtractionRecoveryDialog::ExtractionRecoveryDialog(const QString &archivePath,
     table_->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
     table_->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_->setSelectionMode(QAbstractItemView::SingleSelection);
+    table_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table_->setAlternatingRowColors(true);
     table_->verticalHeader()->hide();
     mainLayout->addWidget(table_, 1);
@@ -89,10 +94,15 @@ ExtractionRecoveryDialog::ExtractionRecoveryDialog(const QString &archivePath,
     auto *buttonBox = new QDialogButtonBox(this);
     resumeButton_ = buttonBox->addButton(tr("Resume extraction"), QDialogButtonBox::AcceptRole);
     resumeButton_->setObjectName("primary");
-    buttonBox->addButton(tr("Cancel"), QDialogButtonBox::RejectRole);
+    resumeButton_->setAccessibleDescription(
+        tr("Extract only missing files and preserve existing output."));
+    auto *cancelButton = buttonBox->addButton(tr("Cancel"), QDialogButtonBox::RejectRole);
+    cancelButton->setAccessibleDescription(tr("Close without changing any files."));
     connect(buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
     mainLayout->addWidget(buttonBox);
+    setTabOrder(table_, resumeButton_);
+    setTabOrder(resumeButton_, cancelButton);
 
     reconcile();
 

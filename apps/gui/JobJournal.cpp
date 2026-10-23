@@ -1,4 +1,5 @@
 #include "JobJournal.h"
+#include "JobTypes.h"
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QRegularExpression>
@@ -57,9 +58,8 @@ static void prunePayloads(const QString &dataRoot, const QSet<QString> &referenc
 JobJournal::JobJournal() = default;
 JobJournal::~JobJournal() = default;
 static bool validState(const QString &state) {
-    return QSet<QString>{"pending",   "running",     "decision", "completed", "failed",
-                         "cancelled", "interrupted", "unknown",  "verifying"}
-        .contains(state);
+    return state == QLatin1String("unknown") ||
+           ArchiveJobSpec::stringToState(state) != JobState::Unknown;
 }
 QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
     QJsonObject result;
@@ -200,11 +200,11 @@ bool JobJournal::open(const QString &path, bool enabled) {
             record["spec"] = sanitizeSpec(record["spec"].toObject());
             if (record["state"] == "running" || record["state"] == "pending" ||
                 record["state"] == "decision" || record["state"] == "verifying") {
-                const auto kind = record["spec"].toObject()["kind"].toString();
+                const auto kind = ArchiveJobSpec::stringToKind(
+                    record["spec"].toObject()["kind"].toString());
                 const bool writes =
                     record["state"] != "pending" &&
-                    QStringList{"create", "modify", "edit", "convert", "shell", "extract", "copy"}.contains(
-                        kind);
+                    ArchiveJobSpec::isWriteKind(kind);
                 record["state"] = writes ? "unknown" : "interrupted";
                 record["error"] =
                     writes ? "Application stopped during a possible write. Verify the destination "

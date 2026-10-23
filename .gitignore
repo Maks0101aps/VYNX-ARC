@@ -38,3 +38,6 @@ Thumbs.db
 /docs/VERIFICATION_LAST_SUCCESS.json
 /docs/VERIFICATION_ATTEMPTS.json
 /docs/RC_PERFORMANCE.json
+
+# Generated benchmark data; keep human-readable benchmark reports tracked.
+/docs/benchmarks/

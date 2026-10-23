@@ -33,6 +33,15 @@ $configuration | Set-Content -LiteralPath $wsb -Encoding UTF8
 Write-Host "Prepared clean Windows run: $wsb"
 if(!$PrepareOnly) {
     try {
+        $hypervisorPresent=(Get-CimInstance Win32_ComputerSystem -ErrorAction Stop).HypervisorPresent
+        $identity.hypervisor_present=$hypervisorPresent
+        if(!$hypervisorPresent) {
+            $identity.status='BLOCKED_HYPERVISOR_NOT_RUNNING'
+            $identity.error='Windows reports HypervisorPresent=False. Prepared guest checks have NOT run. Review Windows Sandbox virtualization prerequisites before retrying; this script does not change boot or security settings.'
+            $identity | ConvertTo-Json -Depth 4 | Set-Content -Encoding UTF8 (Join-Path $output 'host.json')
+            Write-Warning $identity.error
+            return
+        }
         $process=Start-Process -FilePath 'WindowsSandbox.exe' -ArgumentList ('"'+$wsb+'"') -PassThru -WindowStyle Hidden
         $identity.status='LAUNCH_REQUESTED_NOT_VERIFIED'
         $identity.process_id=$process.Id

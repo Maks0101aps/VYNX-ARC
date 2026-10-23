@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "timestamp_utc": "2026-10-23T08:15:17.350811+00:00",
+  "portable_sha256": "42d808a3796defda9c82eb6ed2f691a884b5ecf53838d28664b8e30b80188ba5",
+  "application_sha256": "5d176c9f70beb75c30f63564fa4552894b74274485d30ea6c0a846608f86e9f3",
+  "isolated_environment": "PATH only Windows and System32; all developer Qt variables removed",
+  "archive_verification": {
+    "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+    "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+    "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "tar.xz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "tar.bz2": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "tar.zst": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+    "gz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+    "xz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+    "bz2": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+    "zst": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+    "lzma": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+    "rar-repeated": "10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)",
+    "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+  },
+  "memory_samples": [
+    {
+      "theme": "light",
+      "language": "en",
+      "scale": "1",
+      "working_set_bytes": 45051904
+    },
+    {
+      "theme": "dark",
+      "language": "en",
+      "scale": "1",
+      "working_set_bytes": 45002752
+    },
+    {
+      "theme": "dark",
+      "language": "uk",
+      "scale": "1.25",
+      "working_set_bytes": 45408256
+    },
+    {
+      "theme": "light",
+      "language": "ru",
+      "scale": "2",
+      "working_set_bytes": 45359104
+    }
+  ],
+  "remaining_processes": [],
+  "process_scope": "Only the executable unpacked by this verifier; unrelated running app instances are excluded",
+  "deployed_gui_batch": "mixed batch and failed-only retry passed"
+}

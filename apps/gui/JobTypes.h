@@ -5,7 +5,6 @@
 #include <QStringList>
 
 enum class JobKind {
-    Unknown,
     Open,
     Extract,
     Create,
@@ -15,7 +14,11 @@ enum class JobKind {
     Test,
     Hash,
     Preview,
-    CopyEntries
+    CopyEntries,
+    Shell,
+    Read,
+    Reconcile,
+    Unknown
 };
 
 enum class JobState {
@@ -28,6 +31,37 @@ enum class JobState {
     Cancelled,
     Interrupted,
     Unknown
+};
+
+enum class ModifyAction { AddFiles = 0, DeleteEntries = 1, RenameEntry = 2 };
+
+enum class ArchiveFormat {
+    Zip = 0,
+    SevenZ = 1,
+    Tar = 2,
+    TarGz = 3,
+    Gzip = 4,
+    Xz = 5,
+    Bzip2 = 6,
+    Zstd = 7,
+    Lzma = 8,
+    TarXz = 9,
+    TarBz2 = 10,
+    TarZst = 11
+};
+
+enum class CompressionPreset { Store = 0, Fast = 1, Balanced = 2, Maximum = 3 };
+
+enum class ResourceMode { Eco = 0, Balanced = 1, Maximum = 2 };
+
+// Wire values match core/src/ffi.rs and core/src/worker/mod.rs.
+enum class ConflictPolicy {
+    Refuse = 0,
+    Skip = 1,
+    Replace = 2,
+    Ask = 3,
+    Rename = 4,
+    Newer = 5
 };
 
 struct ArchiveJobSpec {
@@ -45,12 +79,13 @@ struct ArchiveJobSpec {
     QString sourceSize;
     QString sourceModified;
 
-    int action = 0;
-    int format = 0;
-    int preset = 0;
-    int resource = 1;
-    int conflict = 0; // 0: Refuse, 1: Replace, 2: Rename, 3: Skip, 4: Ask, 5: Newer
+    ModifyAction action = ModifyAction::AddFiles;
+    ArchiveFormat format = ArchiveFormat::Zip;
+    CompressionPreset preset = CompressionPreset::Store;
+    ResourceMode resource = ResourceMode::Balanced;
+    ConflictPolicy conflict = ConflictPolicy::Refuse;
     quint64 volumeSize = 0;
+    quint32 shellAction = 0;
 
     QStringList sources;
     QStringList names;
@@ -67,10 +102,17 @@ struct ArchiveJobSpec {
     QJsonObject recoveryPlan;
 
     QJsonObject toJson() const;
+    QString validationError() const;
     static ArchiveJobSpec fromJson(const QJsonObject &json);
     static QString kindToString(JobKind kind);
     static JobKind stringToKind(const QString &str);
     static QString stateToString(JobState state);
     static JobState stringToState(const QString &str);
+    static bool isWriteKind(JobKind kind);
+    static ModifyAction actionFromInt(int value);
+    static ArchiveFormat formatFromInt(int value);
+    static CompressionPreset presetFromInt(int value);
+    static ResourceMode resourceFromInt(int value);
+    static ConflictPolicy conflictFromInt(int value);
 };
 

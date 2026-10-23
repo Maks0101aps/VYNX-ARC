@@ -1,9 +1,9 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains the **0.6.0
-development milestone**. The supplied master brief remains the V1 contract;
-this milestone does not satisfy the full contract.
+archive core connected through CXX. This repository contains the **0.8.0
+release candidate**. The supplied master brief remains the V1 contract; this
+milestone does not satisfy the full contract.
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
 TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
@@ -65,12 +65,11 @@ Locally generated artifacts are under `dist/` (ignored by Git):
 - `VYNX-ARC-Setup-x64.exe`: per-user installer; optional shortcuts and Open With.
 - `SHA256SUMS.txt`: SHA-256 checksums of those artifacts.
 
-The binaries are unsigned. The portable package passed tests with only Windows
-directories on PATH. A real per-user 0.5-to-0.6 upgrade preserved settings and
-working-copy data; Open With registration, unchanged defaults and uninstallation
-passed on the development host. Independent clean-machine qualification remains
-separate. Windows 11 x64 is the tested platform.
-No development SDK is required to run the packages.
+The binaries are unsigned. Package verification, the per-user upgrade path,
+Open With registration and uninstallation are tested on the Windows development
+host with an isolated runtime PATH. Independent clean-machine qualification and
+Narrator review remain separate manual gates. Windows 11 x64 is the tested
+platform. No development SDK is required to run the packages.
 
 ## Build
 
@@ -94,27 +93,23 @@ the command line are intentionally unsupported.
 
 ## Project status
 
-The [0.6.0 acceptance report](docs/MILESTONE_0_6.md),
-[verification manifest](docs/VERIFICATION_0_6.json) and
-[performance report](docs/BENCHMARKS_0_6.md) record completed workflows, exact package
-identities and explicit limitations. The [plan](docs/ROADMAP_0_6.md) and
-[development log](docs/DEVELOPMENT_0_6.md) retain the implementation history.
-
-The [0.5 milestone report](docs/MILESTONE_0_5.md) records the preceding behavior,
-measurements and verification boundaries. [Roadmap](docs/ROADMAP_0_5.md) tracks acceptance.
+The [0.8.0 acceptance report](docs/MILESTONE_0_8.md),
+[performance report](docs/BENCHMARKS_0_8.md) and [plan](docs/ROADMAP_0_8.md)
+record completed workflows, exact package identities and open gates. The
+[0.7.0 acceptance report](docs/MILESTONE_0_7.md) records the accepted baseline. The
+[0.6.0 acceptance report](docs/MILESTONE_0_6.md) and earlier
+[roadmap](docs/ROADMAP_0_6.md) retain the preceding implementation history.
 
 [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) records evidence,
 limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md)
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
 documents protections and incomplete security gates.
 
-The [0.4 milestone report](docs/MILESTONE_0_4.md) records the historical feature
-increment and verification. The [previous product report](docs/PRODUCT_DEVELOPMENT.md)
-records the preceding format/resource work. The earlier [improvement report](docs/IMPROVEMENTS_2026-10-16.md)
-records the preceding parser, preview and dependency changes. The [October 3 acceptance report](docs/RELEASE_ACCEPTANCE.md)
-retains historical failures. Stable-release acceptance remains incomplete at
-version 0.6.0. Run `scripts/check.ps1` for mandatory local source gates;
-release packaging enforces those same gates.
+The [0.5 milestone report](docs/MILESTONE_0_5.md) records the preceding behavior,
+measurements and verification boundaries. The [0.4 milestone report](docs/MILESTONE_0_4.md)
+records the historical feature increment. Stable-release acceptance remains
+incomplete beyond the measured milestone scope. Run `scripts/check.ps1` for
+mandatory local source gates; release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;
 see [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) and the packaged `licenses/`

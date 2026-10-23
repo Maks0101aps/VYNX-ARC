@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.8.0 - в подготовке
+
+- **Полная локализация**: RU/UK каталоги синхронизированы с исходниками, включая
+  диалоги копирования между архивами, восстановления извлечения и временного
+  хранилища; незавершённых переводов нет.
+- **Доступность**: таблицы плана восстановления и временного хранилища доступны
+  только для чтения; добавлены доступные описания, связанные подписи и явный
+  порядок обхода для ключевых диалогов.
+- **Типизация операций**: `JobKind`, `JobState` и параметры операций сведены в
+  `ArchiveJobSpec`; `dispatchSpec()` исполняет спецификацию без разбора
+  пользовательских строк, а `shellAction`/`validationError()` централизуют
+  действия оболочки и проверку полей. Состояние `unknown` остаётся допустимым
+  для восстановления.
+- **Повторная приёмка**: воспроизводимые измерения, сценарии вложенного ZIP,
+  копирования 200 файлов, плана восстановления и preview, проверки публикации,
+  пакеты 0.8.0 и итоговый отчёт с идентификаторами и ограничениями.
+  См. [MILESTONE_0_8.md](MILESTONE_0_8.md) и
+  [BENCHMARKS_0_8.md](BENCHMARKS_0_8.md). Реальный upgrade проверен с 0.6.0 и
+  0.7.0; `ctutils` обновлён до 0.4.5. Открытый finding: наблюдаемый RSS создания
+  7Z на больших/несжимаемых данных примерно вдвое выше. Извлечение 1000 мелких
+  файлов ZIP повторно проверено: +4.9% к 0.6.0, прежние +21% не воспроизвелись.
+
 ## 0.7.0 - 2026-10-23
 
 - **Publication hardening for Windows sharing conflicts**: The final rename now
@@ -109,7 +131,7 @@ See [PRODUCT_DEVELOPMENT.md](PRODUCT_DEVELOPMENT.md) for usage and evidence.
 
 See [the dated report](IMPROVEMENTS_2026-10-16.md) for evidence and release limits.
 
-## Unreleased вЂ” work toward 0.2.0
+## Unreleased — work toward 0.2.0
 
 - Separate compact Home and archive workspace into native Widgets pages; move
   creation, extraction, conflict, settings and about presentation into dialogs.

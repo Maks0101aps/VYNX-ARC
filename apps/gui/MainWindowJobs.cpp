@@ -86,7 +86,9 @@ void MainWindow::setupOperations(QVBoxLayout *layout, QMenu *viewMenu) {
         const auto spec = item->data(Qt::UserRole + 4).toJsonObject();
         const QFileInfo output(spec["destination"].toString());
         const auto folder =
-            spec["kind"] == "create" ? output.absolutePath() : output.absoluteFilePath();
+            ArchiveJobSpec::stringToKind(spec["kind"].toString()) == JobKind::Create
+                ? output.absolutePath()
+                : output.absoluteFilePath();
         if (!spec["destination"].toString().isEmpty() && QDir(folder).exists())
             QDesktopServices::openUrl(QUrl::fromLocalFile(folder));
     });
@@ -265,7 +267,8 @@ void MainWindow::runJob(const QString &title, std::function<QString()> worker,
     operations_.busy = true;
     operations_.owner.reset();
     const auto sources = activeSpec_["sources"].toArray();
-    if (!sources.isEmpty() && activeSpec_["kind"] != "create") {
+    if (!sources.isEmpty() &&
+        ArchiveJobSpec::stringToKind(activeSpec_["kind"].toString()) != JobKind::Create) {
         const auto path = sources.first().toString();
         for (const auto &candidate : sessions_)
             if (!candidate->path.isEmpty() &&

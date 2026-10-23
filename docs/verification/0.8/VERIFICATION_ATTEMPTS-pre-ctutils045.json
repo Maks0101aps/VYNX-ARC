@@ -1,0 +1,97 @@
+{
+  "portable_sha256": "42d808a3796defda9c82eb6ed2f691a884b5ecf53838d28664b8e30b80188ba5",
+  "requested_runs": 3,
+  "locations": {
+    "application": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev",
+    "archive_workspace": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev"
+  },
+  "attempts": [
+    {
+      "run": 1,
+      "timestamp_utc": "2026-10-23T08:14:53.741403+00:00",
+      "exit_code": 0,
+      "status": "passed",
+      "same_portable_sha256": true,
+      "locations": {
+        "application": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev",
+        "archive_workspace": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev"
+      },
+      "completed_archive_checks": {
+        "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.xz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.bz2": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.zst": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "gz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "xz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "bz2": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "zst": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "lzma": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "rar-repeated": "10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)",
+        "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+      },
+      "error": null,
+      "evidence_report": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\verification-series-az87wcvd\\run-1.json"
+    },
+    {
+      "run": 2,
+      "timestamp_utc": "2026-10-23T08:15:17.399453+00:00",
+      "exit_code": 0,
+      "status": "passed",
+      "same_portable_sha256": true,
+      "locations": {
+        "application": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev",
+        "archive_workspace": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev"
+      },
+      "completed_archive_checks": {
+        "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.xz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.bz2": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.zst": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "gz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "xz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "bz2": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "zst": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "lzma": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "rar-repeated": "10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)",
+        "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+      },
+      "error": null,
+      "evidence_report": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\verification-series-az87wcvd\\run-2.json"
+    },
+    {
+      "run": 3,
+      "timestamp_utc": "2026-10-23T08:15:41.696506+00:00",
+      "exit_code": 0,
+      "status": "passed",
+      "same_portable_sha256": true,
+      "locations": {
+        "application": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev",
+        "archive_workspace": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev"
+      },
+      "completed_archive_checks": {
+        "zip": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "7z": "CLI roundtrip matches; opened by an independent Python reader; Smart Extract avoids duplicate archive-root nesting; packaged add/rename/delete, entry hashes/verification and independent read of replacement passed",
+        "tar": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.gz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.xz": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.bz2": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "tar.zst": "CLI roundtrip matches; Smart Extract avoids duplicate archive-root nesting",
+        "gz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "xz": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "bz2": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "zst": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "lzma": "Independent Python read of VYNX output and VYNX extraction of Python output match source bytes",
+        "rar-repeated": "10 packaged list/test cycles each for RAR4, RAR5, RAR4 multipart, and RAR5 multipart (80 CLI operations)",
+        "split-7z": "Packaged create, open second part, test, extract, exact missing part and independent concatenated py7zr extraction passed"
+      },
+      "error": null,
+      "evidence_report": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\verification-series-az87wcvd\\run-3.json"
+    }
+  ]
+}

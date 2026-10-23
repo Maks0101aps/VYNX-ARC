@@ -2,6 +2,9 @@
 #include "MainWindow.h"
 #include "SecretUtf8.h"
 #include "dialogs/ConversionDialog.h"
+#include "dialogs/ExtractionRecoveryDialog.h"
+#include "dialogs/InterArchiveCopyDialog.h"
+#include "dialogs/PreviewDialog.h"
 #include "pages/ArchivePage.h"
 #include <QtConcurrent>
 #include <QtWidgets>
@@ -25,8 +28,17 @@ bool MainWindow::performanceAcceptance(const QString &source, const QString &roo
                 error = box->text();
                 box->accept();
             }
+        for (auto *dialog : findChildren<QDialog *>()) {
+            if (qobject_cast<PreviewDialog *>(dialog)) {
+                if (dialog->isVisible())
+                    dialog->reject();
+            } else if (qobject_cast<InterArchiveCopyDialog *>(dialog)) {
+                if (dialog->isVisible())
+                    dialog->accept();
+            }
+        }
     });
-    closer.start(20);
+    closer.start(5);
     auto idle = [&] {
         QElapsedTimer limit;
         limit.start();
@@ -38,8 +50,29 @@ bool MainWindow::performanceAcceptance(const QString &source, const QString &roo
         QCoreApplication::processEvents();
         return error.isEmpty() && !operations_.busy && !queue_.size() && readers_.isEmpty();
     };
+    auto settle = [&] {
+        int stable = 0;
+        QElapsedTimer limit;
+        limit.start();
+        while (limit.elapsed() < 60000) {
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+            QThread::msleep(2);
+            bool busy = operations_.busy || queue_.size() || !readers_.isEmpty();
+            for (const auto &candidate : sessions_)
+                busy = busy || candidate->busy;
+            if (!busy) {
+                if (++stable == 5)
+                    return error.isEmpty();
+            } else {
+                stable = 0;
+            }
+        }
+        return false;
+    };
     QElapsedTimer time;
     QJsonArray opens, extracts, searches, cycles;
+    QJsonArray nestedOpens, copies, recoveries, firstPreviews, cachedPreviews;
+    int nestedEntries = 0, copyItems = 0, recoveryEntries = 0, recoveryExisting = 0;
     double cancellationSeconds = 0;
     int heartbeats = 0;
     QTimer heartbeat;
@@ -72,6 +105,44 @@ bool MainWindow::performanceAcceptance(const QString &source, const QString &roo
             },
             {}, [&](QString e) { error = e; });
         return idle() && QFileInfo::exists(destination + "/" + name);
+    };
+    auto write = [](const QString &path, const QByteArray &bytes) {
+        QDir().mkpath(QFileInfo(path).absolutePath());
+        QFile file(path);
+        return file.open(QIODevice::WriteOnly) && file.write(bytes) == bytes.size();
+    };
+    auto create = [&](const QString &path, const QStringList &inputs) {
+        QFile::remove(path);
+        rust::Vec<rust::String> values;
+        for (const auto &input : inputs)
+            values.push_back(input.toUtf8().toStdString());
+        auto op = vynx::new_operation();
+        vynx::create_archive_as(path.toUtf8().toStdString(), {values.data(), values.size()}, 0, "",
+                                *op);
+    };
+    auto open = [&](const QString &path) {
+        openWithSecret(path, secret({}));
+        return idle() && session_->archive && session_->path == path;
+    };
+    auto select = [&](const QString &name) {
+        table_->clearSelection();
+        for (int i = 0; i < session_->filter->rowCount(); ++i) {
+            const auto index = session_->filter->index(i, 0);
+            if (session_->model->row(session_->filter->mapToSource(index).row()).name == name) {
+                table_->selectionModel()->select(index, QItemSelectionModel::Select |
+                                                            QItemSelectionModel::Rows);
+                return index;
+            }
+        }
+        return QModelIndex();
+    };
+    auto closePath = [&](const QString &path) {
+        for (int i = 0; i < sessions_.size(); ++i)
+            if (sessions_[i]->path == path) {
+                closeSession(i);
+                return idle();
+            }
+        return true;
     };
     try {
         for (int trial = 0; trial < 3; ++trial) {
@@ -152,6 +223,199 @@ bool MainWindow::performanceAcceptance(const QString &source, const QString &roo
             if (cycle == 9 || cycle == 49 || cycle == 99)
                 qInfo("GUI_RESOURCE_CHECKPOINT %d", cycle + 1);
         }
+
+        const auto nestedInner = root + "/nested-inner";
+        for (int i = 0; i < 500; ++i)
+            if (!write(nestedInner + QString("/nested-%1.txt").arg(i, 3, 10, QChar('0')),
+                       QByteArray("nested-") + QByteArray::number(i) + QByteArray(1024, 'n')))
+                return false;
+        const auto innerArchive = root + "/inner.zip";
+        const auto outerArchive = root + "/outer.zip";
+        create(innerArchive, {nestedInner});
+        create(outerArchive, {innerArchive});
+        if (!open(outerArchive))
+            return false;
+        for (int trial = 0; trial < 3; ++trial) {
+            const auto innerIndex = select("inner.zip");
+            if (!innerIndex.isValid())
+                return false;
+            const auto &innerRow =
+                session_->model->row(session_->filter->mapToSource(innerIndex).row());
+            time.restart();
+            openNestedArchive(innerRow);
+            QElapsedTimer nestedLimit;
+            nestedLimit.start();
+            bool nestedReady = false;
+            while (nestedLimit.elapsed() < 60000) {
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+                if (!operations_.busy && session_->nestedInfo &&
+                    session_->nestedInfo->depth == 1 && session_->archive &&
+                    session_->model->rowCount() > 0) {
+                    nestedReady = true;
+                    break;
+                }
+                QThread::msleep(1);
+            }
+            if (!nestedReady)
+                return false;
+            nestedEntries = session_->model->count();
+            nestedOpens.append(time.nsecsElapsed() / 1e9);
+            if (!closePath(session_->path) || !open(outerArchive))
+                return false;
+        }
+        if (!closePath(outerArchive))
+            return false;
+
+        const auto copySourceDir = root + "/copy-source";
+        QStringList copyInputs;
+        for (int i = 0; i < 300; ++i) {
+            const auto path =
+                copySourceDir + QString("/item-%1.txt").arg(i, 3, 10, QChar('0'));
+            if (!write(path, QByteArray("copy-") + QByteArray::number(i) + QByteArray(4096, 'c')))
+                return false;
+            copyInputs.append(path);
+        }
+        const auto copySource = root + "/copy-source.zip";
+        const auto copySeed = root + "/copy-target-seed.txt";
+        create(copySource, copyInputs);
+        if (!write(copySeed, "target seed"))
+            return false;
+        for (int trial = 0; trial < 3; ++trial) {
+            const auto target = root + QString("/copy-target-%1.zip").arg(trial);
+            create(target, {copySeed});
+            if (!open(copySource))
+                return false;
+            table_->clearSelection();
+            QItemSelection selection;
+            int selectedCount = 0;
+            for (int i = 0; i < session_->filter->rowCount() && selectedCount < 200; ++i) {
+                const auto index = session_->filter->index(i, 0);
+                if (session_->model->row(session_->filter->mapToSource(index).row()).folder)
+                    continue;
+                selection.select(index, index);
+                ++selectedCount;
+            }
+            if (selectedCount != 200)
+                return false;
+            table_->selectionModel()->select(selection, QItemSelectionModel::Select |
+                                                            QItemSelectionModel::Rows);
+            std::unique_ptr<QMimeData> mime(
+                session_->filter->mimeData(table_->selectionModel()->selectedRows()));
+            if (!open(target))
+                return false;
+            time.restart();
+            pasteFromMimeData(mime.get());
+            if (!settle())
+                return false;
+            copies.append(time.nsecsElapsed() / 1e9);
+            copyItems = selectedCount;
+            auto verifyOp = vynx::new_operation();
+            auto targetArchive = vynx::open_archive(target.toUtf8().toStdString(), "", *verifyOp);
+            int files = 0;
+            for (const auto &entry : vynx::list_entries(*targetArchive))
+                if (!entry.directory)
+                    ++files;
+            if (files < selectedCount + 1)
+                return false;
+            if (!closePath(target) || !closePath(copySource))
+                return false;
+        }
+
+        const auto recoverySourceDir = root + "/recovery-source";
+        QStringList recoveryInputs;
+        for (int i = 0; i < 400; ++i) {
+            const auto path =
+                recoverySourceDir + QString("/recovery-%1.txt").arg(i, 3, 10, QChar('0'));
+            if (!write(path, QByteArray("recovery-") + QByteArray::number(i) +
+                                  QByteArray(512, 'r')))
+                return false;
+            recoveryInputs.append(path);
+        }
+        const auto recoveryArchive = root + "/recovery.zip";
+        create(recoveryArchive, recoveryInputs);
+        auto recoveryOp = vynx::new_operation();
+        auto recoverySource =
+            vynx::open_archive(recoveryArchive.toUtf8().toStdString(), "", *recoveryOp);
+        QJsonArray recoveryFiles;
+        QVector<QString> recoveryNames;
+        for (const auto &entry : vynx::list_entries(*recoverySource)) {
+            if (entry.directory)
+                continue;
+            recoveryFiles.append(QJsonObject{{"name", string(entry.name)},
+                                             {"size", double(entry.size)},
+                                             {"modified", double(entry.modified_unix)},
+                                             {"crc", string(entry.crc)}});
+            recoveryNames.append(string(entry.name));
+        }
+        recoveryEntries = recoveryFiles.size();
+        if (recoveryEntries != 400)
+            return false;
+        for (int trial = 0; trial < 3; ++trial) {
+            const auto destination = root + QString("/recovery-output-%1").arg(trial);
+            for (int i = 0; i < 200; ++i) {
+                const auto name = recoveryNames[i];
+                const auto sourceFile = recoverySourceDir + "/" + name;
+                const auto targetFile = destination + "/" + name;
+                QDir().mkpath(QFileInfo(targetFile).absolutePath());
+                if (!QFile::copy(sourceFile, targetFile))
+                    return false;
+            }
+            QJsonObject plan{{"files", recoveryFiles}};
+            time.restart();
+            ExtractionRecoveryDialog dialog(recoveryArchive, destination, {}, plan, this);
+            recoveries.append(time.nsecsElapsed() / 1e9);
+            recoveryExisting = 200;
+            if (dialog.filesToExtract().size() != 200)
+                return false;
+        }
+
+        const auto previewFile = root + "/preview.txt";
+        const auto previewArchive = root + "/preview.zip";
+        if (!write(previewFile, "cached preview payload"))
+            return false;
+        create(previewArchive, {previewFile});
+        for (int trial = 0; trial < 3; ++trial) {
+            if (!open(previewArchive))
+                return false;
+            const auto previewIndex = select("preview.txt");
+            if (!previewIndex.isValid())
+                return false;
+            const auto previewId =
+                session_->model->row(session_->filter->mapToSource(previewIndex).row()).id;
+            auto previewSettled = [&] {
+                QElapsedTimer limit;
+                limit.start();
+                while (limit.elapsed() < 60000) {
+                    QCoreApplication::processEvents(QEventLoop::AllEvents, 10);
+                    bool visible = false;
+                    for (auto *dialog : findChildren<PreviewDialog *>())
+                        visible = visible || dialog->isVisible();
+                    if (!operations_.busy && !visible &&
+                        session_->previewCache.get(previewId).has_value()) {
+                        QElapsedTimer settle;
+                        settle.start();
+                        while (settle.elapsed() < 15)
+                            QCoreApplication::processEvents(QEventLoop::AllEvents, 5);
+                        return true;
+                    }
+                    QThread::msleep(1);
+                }
+                return false;
+            };
+            time.restart();
+            previewSelected();
+            if (!previewSettled())
+                return false;
+            firstPreviews.append(time.nsecsElapsed() / 1e9);
+            time.restart();
+            previewSelected();
+            if (!previewSettled())
+                return false;
+            cachedPreviews.append(time.nsecsElapsed() / 1e9);
+            if (!closePath(previewArchive))
+                return false;
+        }
+
         QSaveFile report(root + "/results.json");
         const auto bytes =
             QJsonDocument(QJsonObject{{"status", "passed"},
@@ -159,10 +423,24 @@ bool MainWindow::performanceAcceptance(const QString &source, const QString &roo
                                       {"selected_extract_seconds", extracts},
                                       {"search_milliseconds", searches},
                                       {"resource_cycle_seconds", cycles},
+                                      {"nested_open_seconds", nestedOpens},
+                                      {"inter_archive_copy_seconds", copies},
+                                      {"recovery_plan_seconds", recoveries},
+                                      {"preview_first_seconds", firstPreviews},
+                                      {"preview_cached_seconds", cachedPreviews},
+                                      {"nested_entries", nestedEntries},
+                                      {"copy_items", copyItems},
+                                      {"recovery_entries", recoveryEntries},
+                                      {"recovery_existing_entries", recoveryExisting},
                                       {"cancellation_seconds", cancellationSeconds},
                                       {"heartbeat_ticks", heartbeats},
                                       {"cache_scope", "First and repeated GUI process operations; "
-                                                      "OS filesystem cache uncontrolled"}})
+                                                      "OS filesystem cache uncontrolled"},
+                                      {"scenario_scope", "Nested ZIP open through GUI; 200-file "
+                                                         "inter-archive copy; recovery dialog "
+                                                         "classification of 400 entries with 200 "
+                                                         "existing outputs; first and cached text "
+                                                         "preview through PreviewDialog"}})
                 .toJson();
         return report.open(QIODevice::WriteOnly) && report.write(bytes) == bytes.size() &&
                report.commit();
