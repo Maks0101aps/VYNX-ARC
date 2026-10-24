@@ -6,7 +6,7 @@
     "job_id": "120832395680",
     "head": "77563d0",
     "failure": "System32 tar extraction case0: Archive entry has empty or unreadable filename ... skipping",
-    "note": "Hosted rerun after this fix remains required."
+    "note": "Historical failed run; subsequent exact fix commit passed hosted qualification."
   },
   "fixture": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-0.rar",
   "fixture_sha256": "0cafd71de578d9e6872ce5f3308bb728407bc2776434fdc996fbfbe248885b42",
@@ -19,7 +19,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       }
     },
     {
@@ -30,7 +30,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       }
     },
     {
@@ -41,7 +41,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       }
     },
     {
@@ -52,7 +52,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       }
     },
     {
@@ -63,7 +63,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       }
     }
   ],
@@ -89,7 +89,7 @@
       "files": {
         "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "corpus/nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       },
       "note": "Modified manifest of isolated test-only OS tar copy; not shipped and OS original unchanged."
     }
@@ -131,12 +131,12 @@
       "hashes": {
         "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       },
       "expected_hashes": {
         "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
         "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-        "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        "nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
       },
       "unicode_tree_matches": true
     }
@@ -239,12 +239,12 @@
         "hashes": {
           "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
           "random.bin": "8ef680315a75823a7d7a72925c8fd5222f594a12fdd2eb987d48ca9dd899918f",
-          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+          "nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
         },
         "expected_hashes": {
           "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
           "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
-          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+          "nested/\u0420\u0491\u0420\u00b0\u0420\u0405\u0421\u2013.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
         },
         "payload_crc_rejected_by_decoder": false,
         "independent_hash_gate_rejected": true
@@ -292,8 +292,7 @@
   "limitations": [
     "OS tar/libarchive3.8.9 accepts this data-CRC-corrupted RAR payload with exit0. Independent decoded-tree SHA256 gate rejects it; native isolated-test exit1 and WinRAR t exit3 reject it.",
     "All authoritative Unicode names and file hashes remain required; no fixture omission or ignored decoder failure.",
-    "Manifest alters only isolated test-only oracle resources/headers; non-resource sections match untouched OS binary. The modified copy is not claimed Microsoft signed and never ships.",
-    "Hosted CI is not yet rerun."
+    "Manifest alters only isolated test-only oracle resources/headers; non-resource sections match untouched OS binary. The modified copy is not claimed Microsoft signed and never ships."
   ],
   "sources": [
     "https://github.com/libarchive/libarchive/blob/master/tar/read.c",
@@ -301,5 +300,12 @@
     "https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale",
     "https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page",
     "https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage"
-  ]
+  ],
+  "hosted_rerun": {
+    "run_id": 40082225124,
+    "head": "ed65934a100a4783562d17e6e469d24dda226fbd",
+    "status": "completed",
+    "conclusion": "success",
+    "url": "https://github.com/Maks0101aps/VYNX-ARC/actions/runs/40082225124"
+  }
 }

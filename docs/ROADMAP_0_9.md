@@ -1,9 +1,9 @@
 # 0.9.0 implementation and qualification
 
-Implemented locally and packaged; stable acceptance is blocked. Final behavior,
+Implemented, packaged and qualified on the development host and GitHub Actions. Final behavior,
 110 Rust tests, independent decoder evidence, measurements and unresolved gates
 are in [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md). This plan is retained as the audit
-sequence; it is not a claim that remote CI, clean Windows or publication passed.
+sequence; remote CI passed on ed65934; clean interactive Windows and public distribution are not claimed.
 
 Baseline: `release/0.8.0` at `1225285`, initially clean; work is isolated on
 `development/0.9.0`. Push is authorized for CI qualification; tags and release publication remain unrequested.

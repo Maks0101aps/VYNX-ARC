@@ -1,0 +1,394 @@
+{
+  "timestamp_utc": "2026-10-24T09:42:35.916773+00:00",
+  "cli_sha256": "7c62e967f9a3a9ebbe0800ad4343b1ad03e84dba08941dd14d502e2249022fa1",
+  "seed": "0x56594E58",
+  "job_memory_mib": 512,
+  "status": "passed",
+  "cases": [
+    {
+      "case": 0,
+      "sha256": "8c2574892063f995fdf756bce07f46c1a5193e54cd52837ed91e32008ccf41ac",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 1,
+      "sha256": "75bd1e8cc88a3e0c5b6ee98058ca9b5cb57957082feabd854d2b009e797213df",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 2,
+      "sha256": "adbf5335bf3cfd29abb5f4a7c683f4c7c45b9eccbbc284f33a57546cedb81518",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 3,
+      "sha256": "f80f98289bbce1ef739371051e1a192a8fb573fc878560fe98cdb06bd4d7caee",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 4,
+      "sha256": "239dc88244ad1462f6ef5aa6e1846f7e141f7637d80456aa07a080b0a3df79b2",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 5,
+      "sha256": "71a36b5a84b5c13c117f665584041887fe4da8c8a2990b17613e685a095c8a63",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 6,
+      "sha256": "6a376de001ae1058f6f50a3d71d7a8cbb08ae14b921d3f9265d3e74aeee18fd9",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 7,
+      "sha256": "df06f3e5a6ad90707e7020f7037a81b94385e9ff960a97d7c8422e6c0973c282",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 8,
+      "sha256": "8295770ad8d723eed991f0e4b22734d071fbef50ab60c796d26f326e2d286c57",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 9,
+      "sha256": "42398e8fa2374f8e071a853a2d8942de20efbed03eea113d00468f29bb1c3944",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 10,
+      "sha256": "82c7a4e0d74022705a74c214dcdd12ca44c9185f2660cf7ee87f42bce5954d05",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 11,
+      "sha256": "3e28de3cbcf6abf444613962915016412d9079d20efd23621cf8e16a692d3560",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 12,
+      "sha256": "b07a0fe56d21d675bc891da7a6cc98726ed0c2a4eec031e2dfd18fe391da1eef",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 13,
+      "sha256": "fc081d73a109bf918af29e71c31ab645f6dd7684f86287bff5fca89246cb0571",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 14,
+      "sha256": "0108f3acf9fcb5ee16eeb0ec19cf10d0bcef08f831ccd68f0019ef89b08a6f6a",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 15,
+      "sha256": "64458c94c34b01cd4a4bbbdac1e7253396c1304bb19cb0d3ba5ab099e255c9fb",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 16,
+      "sha256": "68f615b3e6659925511388910fad1452085b6000b7571e8db10b85ac60107078",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 17,
+      "sha256": "1b5678e424153d06d8d3b18980ff942d29307355b5547f352c6d0c311b2259a0",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 18,
+      "sha256": "5c9512870b1c6ef74d3e671245c99748e4e76cd37e856ce1fd88aba95babb823",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 19,
+      "sha256": "2bcb8ffe8fdbd94670b1ba4067d0ec752b5c3ca13aaed2e5a959713adf31f76f",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 20,
+      "sha256": "1b90751952bf0a6702949629f2fa9a8c53984f6ce5c1ee598de0e52963bdb196",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 21,
+      "sha256": "e566809d5f57c285fead7264f09d959b108c5c19fd399a9bb7b13571c1dbb288",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 22,
+      "sha256": "de0568b1b469c68e6bcf8aea0a233ecee0df7d832da5c51378b028ccd5ba0757",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 23,
+      "sha256": "4386037e552f72ccc9eb46f959b5c11bf40556dcb93051580be9d8bdc4b01743",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 24,
+      "sha256": "123c6ea492077e937377693be297e288fffeae91579a852de62d4021406378d0",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 25,
+      "sha256": "8d2a68ca5c5465bd614199ebd9cfa9cca1aaeea4a48ab88c9d13d59b88e992e7",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 26,
+      "sha256": "925b580dec31ce8f7fdc3ebb719dab962bf210aa250ae383c68a7fafa4a2f15f",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 27,
+      "sha256": "52fda5a28c8a3fb51c94935c34cd577153bd40b3f16955cc3fc67b61bd7de949",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 28,
+      "sha256": "a82a84b6356c32fa8221966c61f00f80c77418d3a97f2422dcaf73670d3fd4ec",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 29,
+      "sha256": "6e02fe305a026139f30d1d67e2a6ee0b1849e13388ec06288963713a1730e08b",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 30,
+      "sha256": "5dc1d1b8350aa36a496597d69587f14749b6a2b87c3f73ac9bbe6351237ee919",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 31,
+      "sha256": "c22845390d61fc8b7f5e5641bd39f9aa847052f1aa8f93f4485ce2c80fc0df69",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 32,
+      "sha256": "d420abdd9e9c7e1768ef9eb75dce8e54bda5cc5d3ad26fe434330c1089b906c1",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 33,
+      "sha256": "03cd1aa54779a597085bf6d97e29267f9510050e654b0ccce662c48acb1d94f1",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 34,
+      "sha256": "e9e799434a43270378007baf1e45b0ba5f21187be984fcf67b672c875c51a4ad",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 35,
+      "sha256": "41dbaa57d6ae0b991de76a14891e7d7fac01f33266c0cdefa8242e4db1248e12",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 36,
+      "sha256": "10921d51b82c27e407f8fe9984fc4c1afa7b520500226021c0d7d8136ebf7c9f",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 37,
+      "sha256": "e12120e9d7a9ccd9a4d920db42fd2c4967d16b6a47ee140414873203acef634d",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 38,
+      "sha256": "a290cfa2b4b4ef54b286ebacece38a6d46519d3eab4048eb13f5ba66f5137c96",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 39,
+      "sha256": "29cbecc7ac467c606276edfe944ad2396df418b265249d98ea24fd98b6425098",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 40,
+      "sha256": "038ee18ae6edee6e40be5050e8fefa3734872d5ca75ab5570d2b8e33f28c4724",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 41,
+      "sha256": "c88b9b794da2ed2a49277a059b781c341efd08d5dcd70b86123af539a3a6d6cb",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 42,
+      "sha256": "b9c2be10e6aa23c4cf33c182949f0d617891b72c839233455c697c38c0588ccd",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 43,
+      "sha256": "59752ea3ae921c77a66b4b20a31a999273d7b3701977f2ce7337384a9b7c02f4",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 44,
+      "sha256": "7169efd84f778fd63ce986550a25de25a5174e3bbeb431b736d4a5acab4a8e49",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 45,
+      "sha256": "fc6a600486d26f474801c2fd784b20c96cf8a2750a0cb10f3627780b364233ee",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 46,
+      "sha256": "419e38d1b2183a8ef31721f8b97aea793d2fe13ff491d8c9e9b8facd8734bb50",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 47,
+      "sha256": "6816c9d35d44da15088b1d83877c7922f4430e06e0e145e880821df3b7f9b023",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 48,
+      "sha256": "3650f3ced09af5e2367a14ed810a6641af5fdbd5f5d5c41900e510ad7a1b8576",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 49,
+      "sha256": "666bf46ea3c4a331a69ce339fe026f4809a9aa9aad23788ed3e43f06f6a93596",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 50,
+      "sha256": "5fafd835af28819e28be122e8fa2d408dc1cdeaa46c55aed0a4a506ade5548db",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 51,
+      "sha256": "f6f06362fe67c4ebd0db686266592ee750c2e967f4523e998d5feba4b8d28df4",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 52,
+      "sha256": "f241dc578aafb6096dd8139a25aeacd9e65babf311bc84035938e91fe6815c2e",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 53,
+      "sha256": "9d408a6b7c7c2daf7c21cc73629c9ab0b80af55e9bf8410794b75cf2256a10df",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 54,
+      "sha256": "a366bfedd61140f1bbe0881eb9d50055b78ca01136571a30e626afc57acdcd13",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 55,
+      "sha256": "e66d340400b14ae5674eec0254062f4b8796e368bd242facd3952957bca1fd97",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 56,
+      "sha256": "f22ea2d2b58f6343a06b23e3b290bf6a2fa542d95749968c5e3aa562b4a92e95",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 57,
+      "sha256": "5cd8b51e607172edc6eae6b18fef068c9b62acb296363b4d349936601869a87a",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 58,
+      "sha256": "d2dfb2213132b0103ff480c954548dc1d25bf8acc502f72bd78eb99a5bc0d2c7",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 59,
+      "sha256": "c53090a2fc9ca5b8e697371e711e56d69c49d4e5b37bd5637774225355a701d0",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 60,
+      "sha256": "cf181e5f5c37c6f383683ad3fb677d55c84b80c581f4a90729175ff051c6b0e6",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 61,
+      "sha256": "6c0edb5d626c401abb0ebe482a17ed04674b6a8856e3044b3ab5650c20fc172d",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 62,
+      "sha256": "92a78fc5b26a882304840bde71f04f93293a9f3617ed8beecde1d75fc3a564d3",
+      "status": "passed",
+      "error": ""
+    },
+    {
+      "case": 63,
+      "sha256": "9ac4392874b3785460c595b2b9ac6f07e1c5e05a11d8b1d60a0f86cca2865832",
+      "status": "passed",
+      "error": ""
+    }
+  ],
+  "scope": "Mutation smoke, not coverage-guided fuzzing or a security certification"
+}

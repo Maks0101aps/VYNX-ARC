@@ -9,3 +9,11 @@ Artifact and source identities: [artifacts.json](artifacts.json).
 Earlier raw stress portable hashes describe the default old ZIP; explicit-CLI tests are identified only by their CLI hash.
 The final stress report correctly records no portable hash for explicit-CLI selection.
 The 20k round-trip used the preceding CLI/worker before the publication-only safety correction. Final CLI decode and GUI open have separate identity-bound evidence.
+
+
+Follow-up: [GitHub Actions](github-actions.json) and downloaded hosted `ci-*.json`;
+[real Narrator/keyboard](keyboard-narrator.json); [TESTONLY signing](test-signing.json)
+and [signed installer host upgrade](test-signed-installer-upgrade.json).
+The first failed CI and UTF-8 process-oracle controls remain in
+[ci-oracle-diagnostic.json](ci-oracle-diagnostic.json). No system decoder or
+shipped binary is modified for the oracle.

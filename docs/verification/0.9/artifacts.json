@@ -1,9 +1,8 @@
 {
   "version": "0.9.0",
-  "status": "development candidate; stable release blocked",
+  "status": "0.9.0 development candidate; native RAR qualified; public distribution/extended platform scope not claimed",
   "branch": "development/0.9.0",
   "base_commit": "122528571d0857fa058d82da5df52a9e1ec12945",
-  "uncommitted": true,
   "source_tree_sha256": "86b13f18c25076615f90166d93d8ea63511b700070e0d0e04c64f65345eae225",
   "source_file_count": 362,
   "artifacts": {
@@ -28,5 +27,12 @@
   "unsigned": true,
   "msix_scope": "Explorer sparse identity; not a full application MSIX",
   "date": "2026-10-24",
-  "push_tag_publication": false
+  "build_snapshot_uncommitted": true,
+  "production_source_commit": "77563d0c003b04d90cdb59e6b14683396e7f367a",
+  "qualification_commit": "ed65934a100a4783562d17e6e469d24dda226fbd",
+  "pushed": true,
+  "tagged": false,
+  "release_published": false,
+  "test_signed_variant": "test-signing.json",
+  "github_actions_report": "github-actions.json"
 }

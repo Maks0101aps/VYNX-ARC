@@ -59,4 +59,4 @@ Codec settings and worker caps are unchanged; the 0.8 Balanced workspace cost re
 The opt-in 100,000-entry Qt model/table benchmark was executed; its JSON is synthetic-model evidence, not a real 100,000-file RAR test.
 Real native-RAR GUI dispatch/journal/worker tests and EN/UK/RU high-DPI screenshots are separate evidence.
 Earlier strict project-path publication stress failed on both candidate and retained 0.8; final native replacement has two passing matrices and controlled handle checks. Failed historical evidence remains.
-These performance observations do not override that blocker or missing clean-VM/CI/manual acceptance.
+These observations do not override qualification boundaries in ACCEPTANCE_0_9.md. Subsequent CI and scoped Narrator/keyboard results are recorded separately.

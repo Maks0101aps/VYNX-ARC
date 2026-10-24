@@ -105,3 +105,11 @@ Microsoft's current documentation was checked on 2026-10-24:
 - [Certificate Subject must match MSIX Publisher](https://learn.microsoft.com/en-us/windows/msix/package/create-certificate-package-signing)
 - [Artifact Signing and public trust profiles](https://learn.microsoft.com/en-us/azure/artifact-signing/overview)
 - [Artifact Signing integrations and signing role](https://learn.microsoft.com/en-us/azure/artifact-signing/how-to-signing-integrations)
+
+## Subsequent signed installer host acceptance
+
+The separately signed Setup was subsequently installed as a real per-user
+0.8.0-to-0.9.0 upgrade and uninstalled. Installed GUI bytes matched the signed
+payload; settings, working copies and existing defaults were preserved; Open With
+registration/removal passed. This is a host check without trusted Explorer
+registration or a clean guest. [Exact report](verification/0.9/test-signed-installer-upgrade.json).

@@ -4,6 +4,17 @@ Native RAR5 implementation and boundaries: [NATIVE_RAR.md](NATIVE_RAR.md).
 Exact verification and open release gates: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
 No stable release, push, tag or publication is claimed.
 
+**RAR support in 0.9.0 is implemented and independently qualified:** RAR4/RAR5
+reading; native RAR5 compressed creation with solid, AES/hidden filenames,
+dictionary controls, recovery records and real volumes; verified single-volume
+RAR5 rebuild modifications. WinRAR21/21 and a real20,000-file round-trip passed.
+RAR4 writing, multipart modification and recovery-repair UI are not supported.
+
+Follow-up: scoped real Narrator/keyboard workflow passed; unsigned and separate
+TESTONLY-signed packages passed host checks. Test signatures are not publicly
+trusted. Passed on [`ed65934`](https://github.com/Maks0101aps/VYNX-ARC/commit/ed65934a100a4783562d17e6e469d24dda226fbd): [run40082225124](https://github.com/Maks0101aps/VYNX-ARC/actions/runs/40082225124), source110, CTest5/5, nativeRAR21 and1,000-file round-trip. Details and exact limits are in the acceptance report.
+No Sandbox result is claimed; the host/remote-runner evidence has its own scope.
+
 The following 0.8 report is historical baseline evidence.
 
 

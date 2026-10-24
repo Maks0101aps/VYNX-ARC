@@ -1,0 +1,50 @@
+[
+  {
+    "format": "zip",
+    "operation": "add",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\zip-add.zip (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "zip",
+    "operation": "delete",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\zip-delete.zip (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "zip",
+    "operation": "rename",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\zip-rename.zip (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "5085e3bf95c659393f57a8f3eaa3ff9d9ad6cba7421f9e0de1692eaee3d21b59",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "add",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\7z-add.7z (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "0bf0ed2892f2f93a833ae885ee4ffde08cbd23b9f52aa09c0780ad631b1ac324",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "delete",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\7z-delete.7z (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "0bf0ed2892f2f93a833ae885ee4ffde08cbd23b9f52aa09c0780ad631b1ac324",
+    "explicit_retry": "passed"
+  },
+  {
+    "format": "7z",
+    "operation": "rename",
+    "status": "passed",
+    "failed_stderr": "ARCHIVE_BUSY: Could not update D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-locks\\lock-check-8oyz3ljv\\7z-rename.7z (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+    "original_sha256": "0bf0ed2892f2f93a833ae885ee4ffde08cbd23b9f52aa09c0780ad631b1ac324",
+    "explicit_retry": "passed"
+  }
+]

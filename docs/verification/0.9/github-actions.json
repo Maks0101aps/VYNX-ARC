@@ -1,0 +1,25 @@
+{
+  "status": "passed",
+  "repository": "Maks0101aps/VYNX-ARC",
+  "qualified_source_test_commit": "ed65934a100a4783562d17e6e469d24dda226fbd",
+  "branch": "development/0.9.0",
+  "run_id": 40082225124,
+  "url": "https://github.com/Maks0101aps/VYNX-ARC/actions/runs/40082225124",
+  "run_status": "completed",
+  "conclusion": "success",
+  "job_id": 120837946690,
+  "source_rust_tests_passed": 110,
+  "ctest_passed": 5,
+  "native_rar_cases": 21,
+  "many_files_roundtrip": 1000,
+  "artifact_id": 12556076959,
+  "artifact_sha256": "b20ba0027830b2cbad8b2cf5693eb5eb60f52afb0e2b4204c05e5125d3179b0f",
+  "earlier_failure": {
+    "run_id": 40080343410,
+    "commit": "77563d0c003b04d90cdb59e6b14683396e7f367a",
+    "url": "https://github.com/Maks0101aps/VYNX-ARC/actions/runs/40080343410",
+    "reason": "System bsdtar process ACP cannot represent required Unicode pathname; causal fix/evidence in ci-oracle-diagnostic.json"
+  },
+  "scope": "Fresh GitHub-hosted Windows runner source/tests/deployed Portable; not interactive clean-guest Setup/Explorer/Narrator. Local binaries have separate identities.",
+  "documentation_followup": "Final acceptance updates are docs/evidence only; exact production/test tree remains the qualified commit."
+}

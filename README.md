@@ -10,6 +10,11 @@ TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
 Create these formats, including native RAR5, AES-encrypted ZIP and encrypted 7Z
 filenames. RAR4 remains read-only. RAR5 adds solid compression, AES/header
 encryption, dictionary controls, recovery records and actual RAR5 volumes.
+**0.9.0 RAR status:** native RAR5 writing and single-volume rebuilds are implemented
+and independently tested with WinRAR. Scoped Narrator/keyboard acceptance and host
+installation checks passed. [Current qualification status](docs/IMPLEMENTATION_STATUS.md)
+separates those results from public signing and clean-guest limits.
+
 See [RAR capabilities and limits](docs/NATIVE_RAR.md) and the
 [0.9 acceptance report](docs/ACCEPTANCE_0_9.md).
 Choose Store/Fast/Balanced/Maximum compression and

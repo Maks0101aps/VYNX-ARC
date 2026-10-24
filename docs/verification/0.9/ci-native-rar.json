@@ -1,0 +1,1295 @@
+{
+  "status": "passed",
+  "cli_sha256": "7c62e967f9a3a9ebbe0800ad4343b1ad03e84dba08941dd14d502e2249022fa1",
+  "cases": [
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-0.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.15479470000002493,
+      "sampled_tree_rss_bytes": 22413312,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-0.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03803960000004736,
+        "sampled_tree_rss_bytes": 25780224
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-0.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008140000000025793,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "libarchive_corrupt_payload_control": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-corrupt-payload.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-corrupt-payload-output"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "hashes": {
+          "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "random.bin": "8ef680315a75823a7d7a72925c8fd5222f594a12fdd2eb987d48ca9dd899918f",
+          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        },
+        "expected_hashes": {
+          "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        },
+        "payload_crc_rejected_by_decoder": false,
+        "independent_hash_gate_rejected": true
+      },
+      "native_corrupt_payload_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-test",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-corrupt-payload.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.03347320000000309,
+        "sampled_tree_rss_bytes": 19099648
+      },
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-0.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004429299999969771,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-1.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12446429999999964,
+      "sampled_tree_rss_bytes": 24473600,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-1.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-1"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03844760000004044,
+        "sampled_tree_rss_bytes": 15519744
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-1.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-1"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008814599999936945,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-1.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004247000000077605,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-2.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12130779999995411,
+      "sampled_tree_rss_bytes": 28102656,
+      "preset": "balanced",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-2.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-2"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.037772300000028736,
+        "sampled_tree_rss_bytes": 16912384
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-2.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-2"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008767899999952533,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-2.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004251199999998789,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-3.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.13164710000000923,
+      "sampled_tree_rss_bytes": 27217920,
+      "preset": "maximum",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-3.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-3"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03757819999998446,
+        "sampled_tree_rss_bytes": 15261696
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-3.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-3"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008904300000040166,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-3.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004236199999922974,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-4.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12585840000008375,
+      "sampled_tree_rss_bytes": 21147648,
+      "preset": "store",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-4.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-4"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03813430000002427,
+        "sampled_tree_rss_bytes": 16007168
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-4.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-4"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008278499999960331,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-4.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.0045229999999492065,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-5.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12317799999993895,
+      "sampled_tree_rss_bytes": 25419776,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-5.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-5"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.043544999999994616,
+        "sampled_tree_rss_bytes": 21237760
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-5.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-5"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008989100000007966,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-5.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004523999999946682,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-6.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.13587970000003224,
+      "sampled_tree_rss_bytes": 26558464,
+      "preset": "balanced",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-6.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-6"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.04054289999999128,
+        "sampled_tree_rss_bytes": 15478784
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-6.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-6"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.011155200000075638,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-6.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004427399999940462,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-7.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1340407000000141,
+      "sampled_tree_rss_bytes": 29323264,
+      "preset": "maximum",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-7.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-7"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.0383375999999771,
+        "sampled_tree_rss_bytes": 15994880
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-7.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-7"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008966099999952348,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-7.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004330700000082288,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-8.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12626899999997931,
+      "sampled_tree_rss_bytes": 21184512,
+      "preset": "store",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-8.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-8"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03683950000004188,
+        "sampled_tree_rss_bytes": 15257600
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-8.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-8"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008454700000015691,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-8.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.0043428000000176326,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-9.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12255909999998948,
+      "sampled_tree_rss_bytes": 24997888,
+      "preset": "fast",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-9.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-9"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.0373683999999912,
+        "sampled_tree_rss_bytes": 18980864
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-9.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-9"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008848100000022896,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-9.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004325300000004972,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-10.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1322488999999223,
+      "sampled_tree_rss_bytes": 27918336,
+      "preset": "balanced",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-10.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-10"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.036923300000012205,
+        "sampled_tree_rss_bytes": 20848640
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-10.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-10"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.00866120000000592,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-10.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.0042199000000664455,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-11.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.12165860000004614,
+      "sampled_tree_rss_bytes": 24686592,
+      "preset": "maximum",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-11.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-11"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03817670000000817,
+        "sampled_tree_rss_bytes": 16297984
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-11.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-11"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.008647999999993772,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-11.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004382599999985359,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-12.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2313718999999992,
+      "sampled_tree_rss_bytes": 27172864,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525191,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-12.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-12",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.07753650000006473,
+        "sampled_tree_rss_bytes": 26787840
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-13.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2394930000000386,
+      "sampled_tree_rss_bytes": 30515200,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525543,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-13.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-13",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11565489999998135,
+        "sampled_tree_rss_bytes": 25776128
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-14.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--encrypt-headers",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.23197959999993145,
+      "sampled_tree_rss_bytes": 27111424,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525450,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-14.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-14",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11649489999990692,
+        "sampled_tree_rss_bytes": 26763264
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-15.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.24334379999993416,
+      "sampled_tree_rss_bytes": 30404608,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 551662,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-15.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-15",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.15434429999993426,
+        "sampled_tree_rss_bytes": 26947584
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-16.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3332004000000097,
+      "sampled_tree_rss_bytes": 27303936,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 526006,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-16.part1.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-16",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.0769715000000133,
+        "sampled_tree_rss_bytes": 26398720
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-17.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3315741999999773,
+      "sampled_tree_rss_bytes": 28987392,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 527170,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-17.part1.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-17",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.15660029999992275,
+        "sampled_tree_rss_bytes": 26800128
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-18.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--recovery-percent",
+        "3",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.35476490000007743,
+      "sampled_tree_rss_bytes": 27336704,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 5,
+      "archive_bytes": 552012,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-18.part1.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-18",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.07870760000002974,
+        "sampled_tree_rss_bytes": 26877952
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-19.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1291599999999562,
+      "sampled_tree_rss_bytes": 21270528,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 1127441,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-19.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-19"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03807500000004893,
+        "sampled_tree_rss_bytes": 19447808
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-19.rar",
+          "-C",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-19"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.00849489999995967,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\damaged-19.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.004347300000063115,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    },
+    {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "create",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-20.rar",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2391172000000097,
+      "sampled_tree_rss_bytes": 25882624,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 525509,
+      "extraction": {
+        "command": [
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-20.part1.rar",
+          "--output",
+          "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\vynx-20"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.03861419999998361,
+        "sampled_tree_rss_bytes": 26562560
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    }
+  ],
+  "external_tools_are_test_only": true,
+  "environment": "isolated host test directories; not a clean Windows VM",
+  "worker_sha256": "70a4dab746f120a89a2ba11a88d92d318aa8fd9a73cf39d382271f0bdb04275c",
+  "winrar": null,
+  "input_file_count": 3,
+  "input_bytes": 1084288,
+  "libarchive_oracle": {
+    "source_path": "C:\\Windows\\System32\\tar.exe",
+    "source_sha256": "a8c4b61db4c2908930be3984d80b4a921f75290c958adc62565da8a455b1230c",
+    "version": "bsdtar 3.8.9 - libarchive 3.8.9 zlib/1.2.13.1-motley liblzma/5.8.1 bz2lib/1.0.8 libzstd/1.5.7 cng/2.0 libb2/bundled",
+    "prepared_path": "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\tar-oracle\\tar-utf8.exe",
+    "prepared_sha256": "98dcef51a21a5ef6f8c41527ce53bc4ca4b4068e9e8870b7a19b14f1859864cb",
+    "process_active_code_page": "UTF-8",
+    "manifest_tool": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+    "non_resource_sections_unchanged": {
+      ".text": "864901da0fcf428bd6d8cb859741fd9bbdcef167212cbaec098e7faf23bee32a",
+      "fothk": "99d6ff68af95986276ecea9e33fe6d28731a6bc6e8b3bd6868c3df6ad59ddf06",
+      ".rdata": "421adca6906d2c5e48b33ec8aee315fa6a4810d76cbf40d8d2c0d8bd16dae167",
+      ".data": "396db7bac93fcd79de782f2cb23c075a63547dbcf6d8a0fa4258c1700f31b9df",
+      ".pdata": "adf242794a32ab8e2d8c76ed7697f51eb0e8704c1ac5392eae6bb37aabb389bb",
+      ".reloc": "fc480977e7599dd189c8be86f46cb45baa9b731f4fcdb4e71118fb86e1f8a91a"
+    },
+    "scope": "Isolated test-only OS tar copy; manifest resource changed, OS original untouched; never shipped.",
+    "LC_ALL": null,
+    "LANG": null,
+    "windows_process_acp": 1252,
+    "windows_oem_code_page": 437,
+    "python_version": "3.15.1 (tags/v3.15.1:c37e74c, Oct 21 2026, 06:24:08) [MSC v.1951 64 bit (AMD64)]",
+    "default_acp_control": {
+      "command": [
+        "C:\\Windows\\System32\\tar.exe",
+        "-xf",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\case-0.rar",
+        "-C",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\libarchive-default-acp-control"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "tar.exe: Archive entry has empty or unreadable filename ... skipping\r\ntar.exe: Error exit delayed from previous errors\r\n",
+      "hashes": {
+        "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd"
+      },
+      "expected_hashes": {
+        "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      },
+      "unicode_tree_matches": false
+    }
+  },
+  "rebuild_add_rename_delete": "passed",
+  "many_files": {
+    "command": [
+      "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+      "create",
+      "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\many.rar",
+      "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\many",
+      "--preset",
+      "fast",
+      "--resource",
+      "eco"
+    ],
+    "exit": 0,
+    "wall_seconds": 1.4829373999999689,
+    "sampled_tree_rss_bytes": 26324992,
+    "files": 1000,
+    "archive_bytes": 95027,
+    "extraction": {
+      "command": [
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\bin\\vynxarc-cli.exe",
+        "isolated-extract",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\many.rar",
+        "--output",
+        "D:\\a\\VYNX-ARC\\VYNX-ARC\\.dev\\ci-rar\\many-decoded"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.996975099999986,
+      "sampled_tree_rss_bytes": 25853952
+    }
+  }
+}
