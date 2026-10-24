@@ -62,4 +62,7 @@ jobs:
             .dev/ci-fuzz/results.json
             .dev/ci-fuzz/case-*.bin
             .dev/ci-rar/results.json
+            .dev/ci-rar/case-0.rar
+            .dev/ci-rar/corpus/**
+            .dev/ci-rar/tar-oracle/*.manifest
           include-hidden-files: true

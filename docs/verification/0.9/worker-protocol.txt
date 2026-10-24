@@ -1,22 +1,21 @@
-warning: patch `vswhom-sys v0.1.3 (C:\Users\Maksi\AppData\Local\Temp\kilo\toolchain\vswhom-sys)` was not used in the crate graph
-help: Check that the patched package version and available features are compatible
-      with the dependency requirements. If the patch has a different version from
-      what is locked in the Cargo.lock file, run `cargo update` to use the new
-      version. This may also occur with an optional dependency that is not enabled.
-   Compiling vynxarc-cli v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\cli)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
-     Running tests\worker.rs (target\debug\deps\worker-c602fb47cfbc2b80.exe)
-
-running 9 tests
-test interrupted_writer_never_claims_original_was_preserved ... ok
-test timeout_kills_child_and_next_operation_still_works ... ok
-test malformed_protocol_exits_without_writing_requested_files ... ok
-test conversion_uses_worker_and_keeps_original_bytes ... ok
-test publication_acknowledgement_precedes_creation_and_replacement ... ok
-test extraction_conflict_reply_crosses_process_boundary ... ok
-test encrypted_worker_and_cancelled_or_missing_worker ... ok
-test native_rar_options_cross_worker_boundary_and_preserve_encryption ... ok
-test isolated_open_preview_test_hash_and_stale_metadata ... ok
-
-test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.92s
-
+warning: patch `vswhom-sys v0.1.3 (C:\Users\Maksi\AppData\Local\Temp\kilo\toolchain\vswhom-sys)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling vynxarc-cli v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.65s
+     Running tests\worker.rs (target\debug\deps\worker-c602fb47cfbc2b80.exe)
+
+running 9 tests
+test interrupted_writer_never_claims_original_was_preserved ... ok
+test timeout_kills_child_and_next_operation_still_works ... ok
+test malformed_protocol_exits_without_writing_requested_files ... ok
+test conversion_uses_worker_and_keeps_original_bytes ... ok
+test publication_acknowledgement_precedes_creation_and_replacement ... ok
+test extraction_conflict_reply_crosses_process_boundary ... ok
+test encrypted_worker_and_cancelled_or_missing_worker ... ok
+test native_rar_options_cross_worker_boundary_and_preserve_encryption ... ok
+test isolated_open_preview_test_hash_and_stale_metadata ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.92s

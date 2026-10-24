@@ -1,0 +1,305 @@
+{
+  "status": "causal-local-reproduction-and-fix-verified",
+  "timestamp_utc": "2026-10-24T09:29:37.639612+00:00",
+  "failed_hosted_run": {
+    "run_id": "40080343410",
+    "job_id": "120832395680",
+    "head": "77563d0",
+    "failure": "System32 tar extraction case0: Archive entry has empty or unreadable filename ... skipping",
+    "note": "Hosted rerun after this fix remains required."
+  },
+  "fixture": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-0.rar",
+  "fixture_sha256": "0cafd71de578d9e6872ce5f3308bb728407bc2776434fdc996fbfbe248885b42",
+  "environment_locale_controls": [
+    {
+      "locale": null,
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      }
+    },
+    {
+      "locale": "C",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      }
+    },
+    {
+      "locale": "C.UTF-8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      }
+    },
+    {
+      "locale": "en_US.UTF-8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      }
+    },
+    {
+      "locale": ".UTF8",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      }
+    }
+  ],
+  "process_code_page_controls": [
+    {
+      "activeCodePage": "en-US",
+      "copied_oracle_sha256": "ebf373c70c41f4a05afa7292913bc14f767f7d9c1da5ec7470e25e1dbed6d134",
+      "exit": 1,
+      "stdout": "",
+      "stderr": "tar-en-US.exe: Archive entry has empty or unreadable filename ... skipping\r\ntar-en-US.exe: Error exit delayed from previous errors\r\n",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd"
+      },
+      "note": "Modified manifest of isolated test-only OS tar copy; not shipped and OS original unchanged."
+    },
+    {
+      "activeCodePage": "UTF-8",
+      "copied_oracle_sha256": "74f3b6148e5d9c6350aff7eb0b08a90332aa884aa4e30193a778cc2e4c4f075f",
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "files": {
+        "corpus/empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "corpus/random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "corpus/nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      },
+      "note": "Modified manifest of isolated test-only OS tar copy; not shipped and OS original unchanged."
+    }
+  ],
+  "conclusion": "The same decoder with en-US/Windows1252 process manifest reproduces exact unreadable-Cyrillic-name failure; UTF-8 process manifest preserves Unicode paths and expected SHA256. LC_ALL/LANG environment controls did not change local extraction.",
+  "oracle": {
+    "source_path": "C:\\WINDOWS\\System32\\tar.exe",
+    "source_sha256": "a3ac62fd4cdf619a7c53f71ca3fe5fb42f72020975670ff29afe3603f6416a8e",
+    "version": "bsdtar 3.8.9 - libarchive 3.8.9 zlib/1.2.13.1-motley liblzma/5.8.3 bz2lib/1.0.8 libzstd/1.5.7 cng/2.0 libb2/bundled",
+    "prepared_path": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\tar-oracle\\tar-utf8.exe",
+    "prepared_sha256": "e10b365c202597cd36225a7bb610896cb6055434e2f558476be01536e73c943b",
+    "process_active_code_page": "UTF-8",
+    "manifest_tool": "C:\\Program Files (x86)\\Windows Kits\\10\\bin\\10.0.26100.0\\x64\\mt.exe",
+    "non_resource_sections_unchanged": {
+      ".text": "864901da0fcf428bd6d8cb859741fd9bbdcef167212cbaec098e7faf23bee32a",
+      "fothk": "99d6ff68af95986276ecea9e33fe6d28731a6bc6e8b3bd6868c3df6ad59ddf06",
+      ".rdata": "803a4071da66f12eb41e3ab4b0b9e0404b5cdab2888a51ab5d93bad878516334",
+      ".data": "396db7bac93fcd79de782f2cb23c075a63547dbcf6d8a0fa4258c1700f31b9df",
+      ".pdata": "adf242794a32ab8e2d8c76ed7697f51eb0e8704c1ac5392eae6bb37aabb389bb",
+      ".reloc": "fc480977e7599dd189c8be86f46cb45baa9b731f4fcdb4e71118fb86e1f8a91a"
+    },
+    "scope": "Isolated test-only OS tar copy; manifest resource changed, OS original untouched; never shipped.",
+    "LC_ALL": "C.UTF-8",
+    "LANG": "C.UTF-8",
+    "windows_process_acp": 1251,
+    "windows_oem_code_page": 866,
+    "python_version": "3.11.15 (main, Jun 11 2026, 04:59:07) [MSC v.1944 64 bit (AMD64)]",
+    "default_acp_control": {
+      "command": [
+        "C:\\WINDOWS\\System32\\tar.exe",
+        "-xf",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\case-0.rar",
+        "-C",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-default-acp-control"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "",
+      "hashes": {
+        "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      },
+      "expected_hashes": {
+        "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+        "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+      },
+      "unicode_tree_matches": true
+    }
+  },
+  "qualification": {
+    "report": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\results.json",
+    "status": "passed",
+    "cases": 21,
+    "required_plain_libarchive_cases": 13,
+    "many_files": {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\many.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\many",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 7.379163200000221,
+      "sampled_tree_rss_bytes": 38883328,
+      "files": 1000,
+      "archive_bytes": 95027,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\many.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\many-decoded"
+        ],
+        "exit": 0,
+        "wall_seconds": 7.872466899999381,
+        "sampled_tree_rss_bytes": 38395904
+      }
+    },
+    "case0": {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\case-0.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.24886779999997088,
+      "sampled_tree_rss_bytes": 33775616,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\case-0.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\vynx-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.12508840000009513,
+        "sampled_tree_rss_bytes": 34361344
+      },
+      "vynx_hashes": "passed",
+      "libarchive_extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\case-0.rar",
+          "-C",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.033964499999456166,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": ""
+      },
+      "libarchive_hashes": "passed",
+      "libarchive_corrupt_payload_control": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\tar-oracle\\tar-utf8.exe",
+          "-xf",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-corrupt-payload.rar",
+          "-C",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-corrupt-payload-output"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "",
+        "hashes": {
+          "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "random.bin": "8ef680315a75823a7d7a72925c8fd5222f594a12fdd2eb987d48ca9dd899918f",
+          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        },
+        "expected_hashes": {
+          "empty.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "random.bin": "e031eb9d5368d093cd38a80d029e537c39242f3fd7fa070dbb6cc2baf46794dd",
+          "nested/дані.txt": "5c1ee474fd906c079511b20e50da422ba09b700c03c6615c897b04838c91d656"
+        },
+        "payload_crc_rejected_by_decoder": false,
+        "independent_hash_gate_rejected": true
+      },
+      "native_corrupt_payload_rejected": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\bin\\vynxarc-cli.exe",
+          "isolated-test",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-corrupt-payload.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.07972239999980957,
+        "sampled_tree_rss_bytes": 23060480
+      },
+      "damaged_header_rejected": true,
+      "libarchive_damaged_header_rejected": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\tar-oracle\\tar-utf8.exe",
+          "-tf",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\damaged-0.rar"
+        ],
+        "exit": 1,
+        "wall_seconds": 0.01667619999989256,
+        "sampled_tree_rss_bytes": 0,
+        "stdout": "",
+        "stderr": "tar-utf8.exe: Header CRC error\r\ntar-utf8.exe: Error exit delayed from previous errors\r\n"
+      }
+    }
+  },
+  "winrar_corrupt_payload_negative_control": {
+    "command": [
+      "C:\\Program Files\\WinRAR\\WinRAR.exe",
+      "t",
+      "-ibck",
+      "-inul",
+      "-y",
+      "-p-",
+      "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-final\\libarchive-corrupt-payload.rar"
+    ],
+    "exit": 3,
+    "stdout": "",
+    "stderr": ""
+  },
+  "preserved_red_report": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-ci-rar-utf8-oracle-negative\\results.json",
+  "limitations": [
+    "OS tar/libarchive3.8.9 accepts this data-CRC-corrupted RAR payload with exit0. Independent decoded-tree SHA256 gate rejects it; native isolated-test exit1 and WinRAR t exit3 reject it.",
+    "All authoritative Unicode names and file hashes remain required; no fixture omission or ignored decoder failure.",
+    "Manifest alters only isolated test-only oracle resources/headers; non-resource sections match untouched OS binary. The modified copy is not claimed Microsoft signed and never ships.",
+    "Hosted CI is not yet rerun."
+  ],
+  "sources": [
+    "https://github.com/libarchive/libarchive/blob/master/tar/read.c",
+    "https://github.com/libarchive/libarchive/blob/master/tar/bsdtar.c",
+    "https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/setlocale-wsetlocale",
+    "https://learn.microsoft.com/en-us/windows/apps/design/globalizing/use-utf8-code-page",
+    "https://learn.microsoft.com/en-us/windows/win32/sbscs/application-manifests#activecodepage"
+  ]
+}

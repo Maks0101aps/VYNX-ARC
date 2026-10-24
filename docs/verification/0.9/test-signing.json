@@ -1,0 +1,196 @@
+﻿{
+    "status":  "passed-development-signing-untrusted",
+    "timestamp_utc":  "2026-10-24T09:13:08.4663213Z",
+    "certificate":  {
+                        "subject":  "CN=VYNX ARC",
+                        "thumbprint":  "1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA",
+                        "friendly_name":  "VYNX ARC TESTONLY local development (30 days)",
+                        "not_before_utc":  "2026-10-24T09:00:59.0000000Z",
+                        "not_after_utc":  "2026-11-23T09:10:59.0000000Z",
+                        "private_key":  "CurrentUser/My; nonexportable; never exported",
+                        "trusted_store_imports":  false,
+                        "timestamp":  false
+                    },
+    "unsigned_source":  "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0",
+    "unsigned_baseline_unchanged":  true,
+    "unsigned_baseline":  [
+                              {
+                                  "name":  "VYNX-ARC-Portable-x64.zip",
+                                  "sha256":  "64d9a8b5b252c9a60081c08b1b7fa20245325c1d92ca3492f52e5bea41cb0e04"
+                              },
+                              {
+                                  "name":  "VYNX-ARC-Setup-x64.exe",
+                                  "sha256":  "dc91c7aa7eed78ddb76cd00537cb025fbbecdfa2a362d8a0c0d1b0f2abbb3593"
+                              },
+                              {
+                                  "name":  "VYNX-ARC-Explorer-x64.msix",
+                                  "sha256":  "9414974ab75521776474cadc20f28bc6cd89c405458ebb49200f302844fe8748"
+                              }
+                          ],
+    "output_directory":  "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed",
+    "artifacts":  [
+                      {
+                          "name":  "VYNX-ARC-Portable-x64.zip",
+                          "sha256":  "8294619f1d94fe1cfbeba48b990c2fa081bdc529affd2a57272cc943c2ad774e"
+                      },
+                      {
+                          "name":  "VYNX-ARC-Setup-x64.exe",
+                          "sha256":  "2588c1f5f857f22b7b3323105519ec289284c9be73869c7b775b13b6edc0b082"
+                      },
+                      {
+                          "name":  "VYNX-ARC-Explorer-x64.msix",
+                          "sha256":  "ee7834a74f3589d292e53a3dfbb8077dac9e68bd968ed10a161c168d2dcf40a7"
+                      }
+                  ],
+    "signatures":  [
+                       {
+                           "file":  "portable\\VynxArc.exe",
+                           "sha256":  "fe192f818888ef46bb2dc80aec1fd4303774afb7c0d988a8aafd6adfd651ecf6",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\portable\\VynxArc.exe\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): D34FC17AF67FB75D651A7BA429FD30808A1EFF0ECFD0DA4F57E96B468A3B76ED\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       },
+                       {
+                           "file":  "portable\\vynxarc-cli.exe",
+                           "sha256":  "19f5fe977b2d255939454e08914b5d29bf72bdeb995185d468f9edc4bcf2054f",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\portable\\vynxarc-cli.exe\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): AC872FA161D0381D88363988431D3C6FACACC4769C4926F3D87A2A2352E89FB5\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       },
+                       {
+                           "file":  "portable\\vynxarc-worker.exe",
+                           "sha256":  "e40004c835c004d6108fd5fd1c66e72ba204840d7f1b7afdd331036c30986e82",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\portable\\vynxarc-worker.exe\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): 8EB6A56387E45AF89C55560D27D29DB690FC80F8871F54D550B61601FD731E29\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       },
+                       {
+                           "file":  "portable\\VynxShell.dll",
+                           "sha256":  "23cdf7cac6b0a9a19b13d0461512f00da97abb42a90dbcf3f8d6ef0d336de1b0",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\portable\\VynxShell.dll\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): 21F0595BD2A731B0275F80466992FEFD852E1F7E91E4C79B4658ABF2C319097B\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       },
+                       {
+                           "file":  "portable\\VYNX-ARC-Explorer-x64.msix",
+                           "sha256":  "ee7834a74f3589d292e53a3dfbb8077dac9e68bd968ed10a161c168d2dcf40a7",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\portable\\VYNX-ARC-Explorer-x64.msix\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): 4150505841585043BAF267B18978EACC7A6DD4608D09C7E495A3A3C86BB7D83DF2F87CF3F5F0C10241584344C669AFF20F7C21BBD5B13C176CD5A7E107DF66AA96CDEBB145695E6EDB127C4341584354BD660BEE45942B0C6FAFCC8335FB2BC90DE44E9B3DF0D2FBD7CBC59497E48D094158424DC79E6F8F4F3349B6A5C0FD069C9912CE7E53DC62205DC93D0D2F83B552EF345C\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       },
+                       {
+                           "file":  "VYNX-ARC-Setup-x64.exe",
+                           "sha256":  "2588c1f5f857f22b7b3323105519ec289284c9be73869c7b775b13b6edc0b082",
+                           "authenticode_status":  "UnknownError",
+                           "status_message":  "A certificate chain processed, but terminated in a root certificate which is not trusted by the trust provider",
+                           "cms_signature_valid":  true,
+                           "cms_digest":  "SHA256",
+                           "signtool_verify_exit":  1,
+                           "signtool_output":  "\n\nVerifying: C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\VYNX-ARC-Setup-x64.exe\n\n\nSignature Index: 0 (Primary Signature)\nHash of file (sha256): C083BE3DFDDEA2D087918B5A17177722FBEFE43C41969E2F2C52C680CDC9297C\n\nSigning Certificate Chain:\n    Issued to: VYNX ARC\n\n    Issued by: VYNX ARC\n\n    Expires:   Mon Nov 23 12:10:59 2026\n\n    SHA1 hash: 1E410A0C3FD8686ED161AAB761A9ED79A75CC1AA\n\n\nFile is not timestamped.\n\n\nNumber of files successfully Verified: 0\n\nNumber of warnings: 0\n\nNumber of errors: 1\n\nSignTool Error: A certificate chain processed, but terminated in a root\n\tcertificate which is not trusted by the trust provider.",
+                           "certificate_chain_status":  [
+                                                            "UntrustedRoot"
+                                                        ],
+                           "timestamp_present":  false
+                       }
+                   ],
+    "tamper_negative_control":  {
+                                    "file":  "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\tampered-cli-negative-control.exe",
+                                    "status":  "HashMismatch",
+                                    "executed":  false
+                                },
+    "untouched_payload_files":  206,
+    "smoke":  [
+                  {
+                      "command":  "VynxArc.exe --smoke-test",
+                      "exit_code":  0,
+                      "output":  "QTemporaryDir: Unable to remove \"C:\\\\Users\\\\Maksi\\\\AppData\\\\Local\\\\Temp\\\\VYNX ARC-dEiAQQ\" most likely due to the presence of read-only files."
+                  },
+                  {
+                      "command":  "VynxArc.exe --smoke-test --product-smoke -",
+                      "exit_code":  0,
+                      "output":  "QTemporaryDir: Unable to remove \"C:\\\\Users\\\\Maksi\\\\AppData\\\\Local\\\\Temp\\\\VYNX ARC-PSznJt\" most likely due to the presence of read-only files."
+                  },
+                  {
+                      "command":  "VynxArc.exe --smoke-test --worker-fault-smoke batch -",
+                      "exit_code":  0,
+                      "output":  "QTemporaryDir: Unable to remove \"C:\\\\Users\\\\Maksi\\\\AppData\\\\Local\\\\Temp\\\\VYNX ARC-hjvqNx\" most likely due to the presence of read-only files."
+                  },
+                  {
+                      "command":  "vynxarc-cli.exe --help",
+                      "exit_code":  0,
+                      "output":  "VYNX ARC 0.9.0\nCommands:\n  list ARCHIVE\n  extract ARCHIVE --output DIRECTORY [--smart] [--skip|--replace|--keep-both]\n  create OUTPUT.zip|.7z|.rar|.tar|.tar.gz INPUT... [--preset store|fast|balanced|maximum] [--resource eco|balanced|maximum] [--split-bytes N (7Z or RAR)] [--solid] [--dictionary-mib N] [--encrypt-headers] [--recovery-percent 0..10]\n  add ARCHIVE INPUT...\n  delete ARCHIVE ENTRY...\n  rename ARCHIVE OLD_PATH NEW_PATH\n  test ARCHIVE\n  convert SOURCE OUTPUT.zip|.7z [--preset store|fast|balanced|maximum]\n  isolated-list|isolated-test|isolated-extract ARCHIVE (same read/extraction options)\n  hash FILE\n  verify FILE DIGEST\n  hash-entry ARCHIVE ENTRY\n  verify-entry ARCHIVE ENTRY DIGEST\nStandalone: .gz .xz .bz2 .zst .lzma (one file); TAR: .tar.xz .tar.bz2 .tar.zst. Read commands also accept --resource.\nPasswords: use the GUI or --password-stdin (one UTF-8 line, at most 4096 bytes); never put passwords on command lines.\nExit codes: 0 success, 1 operation failure, 2 usage, 3 cancelled."
+                  },
+                  {
+                      "command":  "vynxarc-cli.exe create C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\signed-smoke.zip C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\payload.txt",
+                      "exit_code":  0,
+                      "output":  "Deflate level 6; dictionary/window 0 MiB; codec threads 1; 7Z decoder workers 2; encoder budget 384 MiB (estimate)"
+                  },
+                  {
+                      "command":  "vynxarc-cli.exe test C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\signed-smoke.zip",
+                      "exit_code":  0,
+                      "output":  "All streams decoded successfully"
+                  },
+                  {
+                      "command":  "vynxarc-cli.exe extract C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\signed-smoke.zip --output C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\extracted",
+                      "exit_code":  0,
+                      "output":  "Extracted to \\\\?\\C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\dist\\0.9.0-test-signed\\cli-roundtrip\\extracted"
+                  }
+              ],
+    "installer":  {
+                      "rebuilt_from_signed_stage":  true,
+                      "outer_exe_signed":  true,
+                      "signed_identity_flag":  false,
+                      "installed_test":  false
+                  },
+    "limitations":  [
+                        "Self-signed certificate is not publicly trusted; Windows verification intentionally fails for an untrusted root.",
+                        "No timestamp: test signatures expire with the 30-day certificate.",
+                        "CMS CheckSignature(true) checks cryptographic signature, not a trusted chain. Windows separately checks Authenticode file integrity; tampering returns HashMismatch.",
+                        "No trust-store import, Explorer registration, SmartScreen acceptance, clean-Windows acceptance, or installer execution is claimed."
+                    ],
+    "initial_verifier_attempts":  [
+                                      {
+                                          "failure":  "Verifier expected NotTrusted enum; Windows PowerShell 5 maps untrusted root to UnknownError. Signed outputs preserved.",
+                                          "directory":  "dist/0.9.0-test-signing-attempt1-status-mapping"
+                                      },
+                                      {
+                                          "failure":  "Verifier expected single-space root certificate; native output wrapped the text across newline. Signed outputs preserved.",
+                                          "directory":  "dist/0.9.0-test-signing-attempt2-output-wrapping"
+                                      }
+                                  ]
+}
