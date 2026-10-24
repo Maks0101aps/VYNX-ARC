@@ -12,6 +12,104 @@ fn client() -> Client {
     )
 }
 #[test]
+#[cfg(windows)]
+fn native_rar_options_cross_worker_boundary_and_preserve_encryption() {
+    let root = tempfile::tempdir().unwrap();
+    let input = root.path().join("hello.txt");
+    std::fs::write(&input, b"worker RAR input".repeat(2000)).unwrap();
+    let output = root.path().join("worker.rar");
+    let op = Operation::default();
+    op.configure_rar(vynx_arc_core::rar_write::Options {
+        solid: true,
+        dictionary: 1 << 20,
+        encrypt_headers: true,
+        recovery_percent: 3,
+    })
+    .unwrap();
+    client()
+        .create(
+            &CreateOptions {
+                output: output.clone(),
+                inputs: vec![input],
+                password: "ipc-rar-secret".to_owned().into(),
+            },
+            vynx_arc_core::Format::Rar,
+            0,
+            &op,
+        )
+        .unwrap();
+    assert!(client().open(&output, "wrong", &op).is_err());
+    let archive = client().open(&output, "ipc-rar-secret", &op).unwrap();
+    assert!(archive.writable);
+    client().test(&archive, "ipc-rar-secret", &op).unwrap();
+    client()
+        .modify(
+            &archive,
+            &vynx_arc_core::modification::Change::Rename {
+                old: "hello.txt".into(),
+                new: "renamed.txt".into(),
+            },
+            "ipc-rar-secret",
+            &op,
+        )
+        .unwrap();
+    let archive = client().open(&output, "ipc-rar-secret", &op).unwrap();
+    assert_eq!(archive.entries[0].name, "renamed.txt");
+    assert!(client().open(&output, "", &op).is_err());
+}
+
+#[test]
+fn cli_source_password_does_not_select_destination_encryption() {
+    let root = tempfile::tempdir().unwrap();
+    let input = root.path().join("input.txt");
+    std::fs::write(&input, b"conversion credentials").unwrap();
+    let source = root.path().join("source.zip");
+    operations::create(
+        &CreateOptions {
+            output: source.clone(),
+            inputs: vec![input],
+            password: "source-only-secret".to_owned().into(),
+        },
+        &Operation::default(),
+    )
+    .unwrap();
+    let before = std::fs::read(&source).unwrap();
+    for allow in [false, true] {
+        let output = root
+            .path()
+            .join(if allow { "allowed.zip" } else { "refused.zip" });
+        let mut command = Command::new(env!("CARGO_BIN_EXE_vynxarc-cli"));
+        command
+            .arg("convert")
+            .arg(&source)
+            .arg(&output)
+            .arg("--password-stdin");
+        if allow {
+            command.arg("--allow-decrypt");
+        }
+        let mut child = command
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        child
+            .stdin
+            .take()
+            .unwrap()
+            .write_all(b"source-only-secret\n")
+            .unwrap();
+        assert_eq!(child.wait().unwrap().success(), allow);
+        assert_eq!(output.exists(), allow);
+        if allow {
+            let archive = vynx_arc_core::Archive::open(&output, "", &Operation::default()).unwrap();
+            assert!(!archive.entries.iter().any(|e| e.encrypted));
+            operations::test(&archive, "", &Operation::default()).unwrap();
+        }
+    }
+    assert_eq!(std::fs::read(source).unwrap(), before);
+}
+#[test]
 fn isolated_open_preview_test_hash_and_stale_metadata() {
     let dir = tempfile::tempdir().unwrap();
     let input = dir.path().join("hello.txt");
@@ -106,8 +204,9 @@ fn timeout_kills_child_and_next_operation_still_works() {
 fn malformed_protocol_exits_without_writing_requested_files() {
     for bytes in [
         b"VYNXWP99\0\0\0\0".as_slice(),
-        b"VYNXWP03\xff\xff\xff\xff".as_slice(),
-        b"VYNXWP03\x01\0\0\0\xff".as_slice(),
+        b"VYNXWP03\0\0\0\0".as_slice(),
+        b"VYNXWP04\xff\xff\xff\xff".as_slice(),
+        b"VYNXWP04\x01\0\0\0\xff".as_slice(),
     ] {
         let mut child = Command::new(env!("CARGO_BIN_EXE_vynxarc-worker"))
             .stdin(Stdio::piped())

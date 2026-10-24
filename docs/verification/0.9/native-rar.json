@@ -1,0 +1,855 @@
+{
+  "status": "passed",
+  "cli_sha256": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+  "cases": [
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-0.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2856345999998666,
+      "sampled_tree_rss_bytes": 34217984,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-0.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1894043000002057,
+        "sampled_tree_rss_bytes": 34455552
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-1.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3151606000001266,
+      "sampled_tree_rss_bytes": 32669696,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-1"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.2057725999993636,
+        "sampled_tree_rss_bytes": 39555072
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-2.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2914866000000984,
+      "sampled_tree_rss_bytes": 35315712,
+      "preset": "balanced",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-2.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-2"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.16109600000072533,
+        "sampled_tree_rss_bytes": 34914304
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-3.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.17774809999991703,
+      "sampled_tree_rss_bytes": 34807808,
+      "preset": "maximum",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-3.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-3"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.18878759999915928,
+        "sampled_tree_rss_bytes": 39460864
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-4.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.18903520000003482,
+      "sampled_tree_rss_bytes": 29696000,
+      "preset": "store",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-4.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-4"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.22378140000000712,
+        "sampled_tree_rss_bytes": 34291712
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-5.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16187260000060633,
+      "sampled_tree_rss_bytes": 32796672,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-5.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-5"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1885680000004868,
+        "sampled_tree_rss_bytes": 39526400
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-6.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2953522999996494,
+      "sampled_tree_rss_bytes": 36773888,
+      "preset": "balanced",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-6.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-6"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.208631499999683,
+        "sampled_tree_rss_bytes": 43085824
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-7.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.18974770000022545,
+      "sampled_tree_rss_bytes": 34500608,
+      "preset": "maximum",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-7.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-7"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.19642899999962538,
+        "sampled_tree_rss_bytes": 42950656
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-8.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16457119999995484,
+      "sampled_tree_rss_bytes": 29556736,
+      "preset": "store",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-8.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-8"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.179658300000483,
+        "sampled_tree_rss_bytes": 34291712
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-9.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.18139929999961169,
+      "sampled_tree_rss_bytes": 32518144,
+      "preset": "fast",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-9.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-9"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.20816070000000764,
+        "sampled_tree_rss_bytes": 39546880
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-10.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3060814999998911,
+      "sampled_tree_rss_bytes": 32202752,
+      "preset": "balanced",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-10.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-10"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.18372960000033345,
+        "sampled_tree_rss_bytes": 39526400
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-11.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.28766080000059446,
+      "sampled_tree_rss_bytes": 32391168,
+      "preset": "maximum",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-11.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-11"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.19481739999991987,
+        "sampled_tree_rss_bytes": 34865152
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-12.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.29128320000017993,
+      "sampled_tree_rss_bytes": 36556800,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525191,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-12.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-12",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.2130868999993254,
+        "sampled_tree_rss_bytes": 39940096
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-13.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.4076385999997001,
+      "sampled_tree_rss_bytes": 36651008,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525543,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-13.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-13",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.253032799999346,
+        "sampled_tree_rss_bytes": 37801984
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-14.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--encrypt-headers",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.39745010000024195,
+      "sampled_tree_rss_bytes": 36052992,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525450,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-14.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-14",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.2190565000000788,
+        "sampled_tree_rss_bytes": 35418112
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-15.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.4038188000004084,
+      "sampled_tree_rss_bytes": 37371904,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 551662,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-15.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-15",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.27033010000013746,
+        "sampled_tree_rss_bytes": 41263104
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-16.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.5061895999997432,
+      "sampled_tree_rss_bytes": 33370112,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 526006,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-16.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-16",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.18851699999959237,
+        "sampled_tree_rss_bytes": 40062976
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-17.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.6285773999998128,
+      "sampled_tree_rss_bytes": 38293504,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 527170,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-17.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-17",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.29104180000013,
+        "sampled_tree_rss_bytes": 36327424
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-18.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--recovery-percent",
+        "3",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.5048704000000726,
+      "sampled_tree_rss_bytes": 39321600,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 5,
+      "archive_bytes": 552012,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-18.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-18",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.21689429999969434,
+        "sampled_tree_rss_bytes": 40194048
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-19.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.28666059999977733,
+      "sampled_tree_rss_bytes": 29728768,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 1127441,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-19.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-19"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.19817909999983385,
+        "sampled_tree_rss_bytes": 34304000
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-20.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.6358827999993082,
+      "sampled_tree_rss_bytes": 33824768,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 525509,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\case-20.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-completion-native\\vynx-20"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.21727540000028966,
+        "sampled_tree_rss_bytes": 35323904
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    }
+  ],
+  "external_tools_are_test_only": true,
+  "environment": "isolated host test directories; not a clean Windows VM",
+  "worker_sha256": "8f0b0c7cce5860817f3c80561040bc76f3f47b03e91adfe7fbe121d49e183623",
+  "winrar": "C:\\Program Files\\WinRAR\\WinRAR.exe",
+  "winrar_sha256": "dc0291966214c8794c72e946f18c3e945c3c8a5217754fd033106a1252e43d69",
+  "input_file_count": 3,
+  "input_bytes": 1084288,
+  "rebuild_add_rename_delete": "passed",
+  "independent_recovery_repair": {
+    "status": "passed",
+    "mutated_offset": 560629,
+    "repaired_sha256": "4b01d3c5d5ea48fe38838f2098032d3af889a311a1cf2bd9b38668b74dc1cbd1"
+  }
+}

@@ -281,7 +281,7 @@ pub fn publish(source: &mut File, prefix: &Path, size: u64, op: &Operation) -> R
     result
 }
 #[cfg(windows)]
-fn remove_owned(file: &File, _: &Path) -> io::Result<()> {
+pub(crate) fn remove_owned(file: &File, _: &Path) -> io::Result<()> {
     use std::os::windows::io::AsRawHandle;
     #[link(name = "kernel32")]
     unsafe extern "system" {

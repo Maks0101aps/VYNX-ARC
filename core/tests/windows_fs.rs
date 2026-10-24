@@ -111,3 +111,87 @@ fn locked_extraction_output_preserves_bytes_and_cleans_staging() {
     assert_eq!(fs::read_dir(destination).unwrap().count(), 1);
     drop(lock);
 }
+
+#[test]
+fn modification_succeeds_when_destination_held_by_read_attributes() {
+    use std::os::windows::ffi::OsStrExt;
+    use vynx_arc_core::{
+        modification::{self, Change},
+        operations, *,
+    };
+
+    let t = tempfile::tempdir().unwrap();
+    let input = t.path().join("file.txt");
+    fs::write(&input, b"initial").unwrap();
+    let archive_path = t.path().join("archive.zip");
+    operations::create(
+        &CreateOptions {
+            output: archive_path.clone(),
+            inputs: vec![input],
+            password: String::new().into(),
+        },
+        &Operation::default(),
+    )
+    .unwrap();
+
+    let path_w: Vec<u16> = archive_path
+        .as_os_str()
+        .encode_wide()
+        .chain(Some(0))
+        .collect();
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn CreateFileW(
+            name: *const u16,
+            access: u32,
+            share: u32,
+            security: *const std::ffi::c_void,
+            disposition: u32,
+            flags: u32,
+            template: *mut std::ffi::c_void,
+        ) -> *mut std::ffi::c_void;
+        fn CloseHandle(handle: *mut std::ffi::c_void) -> i32;
+    }
+    // Simulate Pylance / IDE handle: FILE_READ_ATTRIBUTES | SYNCHRONIZE (0x100080) with share=0
+    let handle = unsafe {
+        CreateFileW(
+            path_w.as_ptr(),
+            0x0010_0080,
+            0,
+            std::ptr::null(),
+            3,
+            0x80,
+            std::ptr::null_mut(),
+        )
+    };
+    assert_ne!(
+        handle as isize, -1,
+        "Failed to acquire simulated reader handle"
+    );
+
+    let a = Archive::open(&archive_path, "", &Operation::default()).unwrap();
+    let res = modification::modify(
+        &a,
+        &Change::Rename {
+            old: "file.txt".into(),
+            new: "renamed.txt".into(),
+        },
+        "",
+        &Operation::default(),
+    );
+
+    unsafe { CloseHandle(handle) };
+
+    res.expect(
+        "Modification publication should succeed even when target is held by attribute reader",
+    );
+    let verified = Archive::open(&archive_path, "", &Operation::default()).unwrap();
+    let mut names = Vec::new();
+    verified
+        .streams("", &Operation::default(), |e, _| {
+            names.push(e.name.clone());
+            Ok(())
+        })
+        .unwrap();
+    assert_eq!(names, vec!["renamed.txt"]);
+}

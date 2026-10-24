@@ -1,3 +1,31 @@
+# 0.9.0 - development candidate (2026-10-24)
+
+- Native RAR5 through rars 0.12.0: Store/Fast/Balanced/Maximum, solid, dictionaries,
+  AES-256/filenames, recovery records and actual RAR5 volumes. Reader independent.
+- Verified single-volume unlocked/unsigned RAR5 add/delete/rename and working-copy
+  save-back, typed GUI jobs, queue/retry persistence and supervised workers.
+- RAR CLI creation/modification use workers; passwords may come from bounded stdin.
+- Zero-sized volume requests are refused; conversion source credentials never
+  implicitly select destination encryption. Repeated SDK setup keeps PATH bounded,
+  and incremental CMake builds synchronize changed CLI/worker siblings without
+  requiring a GUI relink.
+- Windows replacement now uses a native same-volume recovery backup, preserves
+  named streams, refuses ACL merge errors and retains both recovery candidates
+  on partial OS failures. Controlled reader handles and strict matrices qualify
+  the new path; historical failed attempts remain available.
+- Fixed stored nested ZIP rejection by binding parsing to the validated directory;
+  ambiguous terminal records remain rejected. No unsafe metadata fallback.
+- Canonical RAR separators; typed stream errors retain missing-volume/limit codes.
+- Bounded pinned-parent cache and one anonymous RAR rebuild spool reduce repeated
+  filesystem work and per-file handle growth without buffering whole inputs.
+- RAR GUI controls and EN/UK/RU translations; GUI/CLI/Setup/MSIX version 0.9.0.
+- Independent WinRAR checks, recovery repair oracle, cancellation/lock/volume
+  regressions, large file-count checks and extended mutation smoke.
+
+Boundaries: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md). RAR4 writing, multipart
+modification and recovery repair UI remain unsupported. Candidate is not stable.
+
+
 # Changelog
 
 ## 0.8.0 - в подготовке

@@ -1,5 +1,12 @@
 param([string]$QtRoot = $env:VYNX_QT_ROOT)
 $ErrorActionPreference = 'Stop'
+function Set-VynxUniquePath {
+    # Nested build/check entry points source this script repeatedly. Keep PATH
+    # order, but avoid duplicate SDK entries overflowing cmd.exe's 8191 limit.
+    $vynxSeenPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $env:PATH = (($env:PATH -split ';') | Where-Object { $_ -and $vynxSeenPaths.Add($_) }) -join ';'
+}
+Set-VynxUniquePath
 if (!$QtRoot) { $QtRoot = Join-Path $env:LOCALAPPDATA 'VynxArcDev\QtMSVC' }
 if (!(Test-Path (Join-Path $QtRoot 'lib\cmake\Qt6\Qt6Config.cmake'))) {
     throw 'Set VYNX_QT_ROOT to the Qt 6.12.0 MSVC 2022 x64 SDK directory.'
@@ -12,6 +19,7 @@ if (!$vsRoot) { throw 'Install the Visual Studio C++ build workload.' }
 Import-Module (Join-Path $vsRoot 'Common7\Tools\Microsoft.VisualStudio.DevShell.dll')
 Enter-VsDevShell -VsInstallPath $vsRoot -SkipAutomaticLocation -DevCmdArguments '-arch=x64 -host_arch=x64' | Out-Null
 $env:PATH = "$(Join-Path $env:USERPROFILE '.cargo\bin');$(Join-Path $QtRoot 'bin');$env:PATH"
+Set-VynxUniquePath
 # Select the actual compiler/linker, even if unrelated user Cargo configuration
 # contains an experimental linker or cached SDK search paths.
 $env:CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER = (Get-Command link.exe).Source

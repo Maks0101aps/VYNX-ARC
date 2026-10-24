@@ -1,4 +1,13 @@
-# Dependency decisions (updated 2026-10-16)
+# Dependency decisions
+
+0.9 adds exact rars 0.12.0 (Apache-2.0) for native RAR5 encoding; UnRAR
+remains decoding-only. See [NATIVE_RAR.md](NATIVE_RAR.md) for API and limits.
+ZIP 9.0.4 has a local MIT-licensed patch binding construction to the preflighted
+directory without end-record fallback. Provenance and upgrade instructions:
+[third_party/zip/PATCHES.md](../third_party/zip/PATCHES.md). Full
+COPYING/LICENSE/NOTICE texts and resolved metadata are collected at packaging.
+
+Earlier dependency decisions (2026-10-16):
 
 ZIP moved from yanked 8.6.0 to stable 9.0.4. The maintainer explicitly attributes
 the old-version yanks to security issues in

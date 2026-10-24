@@ -40,10 +40,10 @@ def main():
     args.output.parent.mkdir(parents=True, exist_ok=True)
     try:
         rng = random.Random(0x070001)
-        frames = [b'', b'VYNXWP03', b'VYNXWP03' + (16 * 1024 * 1024 + 1).to_bytes(4, 'little')]
+        frames = [b'', b'VYNXWP03', b'VYNXWP04', b'VYNXWP04' + (16 * 1024 * 1024 + 1).to_bytes(4, 'little')]
         for _ in range(50):
             payload = rng.randbytes(rng.randint(0, 1024))
-            magic = b'VYNXWP03' if rng.choice((True, False)) else rng.randbytes(8)
+            magic = b'VYNXWP04' if rng.choice((True, False)) else rng.randbytes(8)
             frames.append(magic + len(payload).to_bytes(4, 'little') + payload)
         for frame in frames:
             result = subprocess.run([str(bins['vynxarc-worker.exe'])], input=frame, env=env, capture_output=True, timeout=5)

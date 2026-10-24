@@ -1,5 +1,12 @@
 # Archive worker protocol (development)
 
+Protocol 4 (0.9) adds RAR solid/dictionary/header/recovery parameters and a
+supervisor-owned scratch root to requests, plus authoritative archive writable
+capability in replies. Old workers are rejected; packages ship matching siblings.
+Persisted settings, journal schema 1/2 and working-copy records stay compatible.
+New job fields default to off/automatic and contain no credentials. The parent
+removes backend workspaces after worker exit, including forced termination.
+
 The GUI launches its sibling `vynxarc-worker.exe`. Missing workers or failure to
 apply Windows job limits stop the request; there is no in-process fallback.
 Open, preview, materialization, testing, entry hashing, extraction, creation,
@@ -15,7 +22,7 @@ or password environment variables. Request and encoded frame credentials use
 zeroizing buffers. Worker stderr is discarded and crash dialogs are suppressed.
 This does not promise exclusion of credentials from OS-managed dumps/pagefiles.
 
-Each frame starts with eight bytes `VYNXWP03` and a little-endian u32 payload size.
+Each frame starts with eight bytes `VYNXWP04` and a little-endian u32 payload size.
 Requests are limited to 16 MiB, responses to 128 MiB, individual strings to 1 MiB,
 metadata/selection arrays to 1,000,000 elements, preview blobs to 16 MiB. Decoders
 reject unknown versions, truncated/trailing fields, malformed bools/UTF-8 and

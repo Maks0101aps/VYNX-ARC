@@ -4,6 +4,12 @@ VYNX ARC uses C++20 / Qt Widgets and a Rust core statically linked through CXX.
 Qt is deployed beside the application. No service, telemetry, network client or
 external archiver participates in archive operations.
 
+0.9 adds an independent `rars` RAR5 encoder alongside the existing UnRAR reader.
+Both GUI and RAR CLI create/modify use supervised workers. RAR5 rebuilds use
+one anonymous spool; managed writer quotas and supervisor-owned backend scratch
+bound resource use. See [NATIVE_RAR.md](NATIVE_RAR.md). Persisted settings,
+working-copy records and journal schemas remain compatible; wire protocol is 4.
+
 ```mermaid
 flowchart TD
   Window[MainWindow and shared browser] --> Sessions[ArchiveSession per tab]
@@ -45,7 +51,7 @@ EditStore keeps up to 32 registered editable copies separately from disposable
 external views. Manifests and content survive process restart; no age cleanup deletes
 these copies. Flat owned-directory checks reject links/reparse points and unexpected
 subdirectories. A metadata fingerprint drives the UI indicator; save integrity uses
-SHA-256 under file locks, not that fingerprint. Explicit save rebuilds ZIP/7Z,
+SHA-256 under file locks, not that fingerprint. Explicit save rebuilds ZIP/7Z/RAR5,
 verifies payload and manifest, flushes, then publishes. The digest receipt is computed
 before publication so post-commit cancellation cannot report a false failure.
 Encryption and supported metadata are preserved. Failure retains the edited copy.

@@ -21,7 +21,7 @@ parser.add_argument('--details-only',action='store_true')
 parser.add_argument('--workspace-content',action='store_true')
 parser.add_argument('--language', choices=['en', 'uk', 'ru'])
 parser.add_argument('--recents', action='store_true')
-parser.add_argument('--state', action='append', choices=['convert','tabs','working-copies','temporary-files','review','home','archive','create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'])
+parser.add_argument('--state', action='append', choices=['convert','tabs','working-copies','temporary-files','review','home','archive','create','create-stream','create-rar','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'])
 args = parser.parse_args()
 app = args.app.resolve()
 args.output.mkdir(parents=True, exist_ok=True)
@@ -54,7 +54,7 @@ try:
             recent = f'recent={archive.as_posix()}\n' if args.recents else ''
             configuration.write_text(f'[General]\ntheme={theme}\nlanguage={language}\nhistoryEnabled=false\n{recent}', encoding='utf-8')
             for scale in (args.scale or (['1'] if args.quick or args.details_only or args.state else ['1', '1.25', '1.5', '2'])):
-                for state in (args.state or (['create','create-stream','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'] if args.details_only else ['home', 'archive'])):
+                for state in (args.state or (['create','create-stream','create-rar','extract','conflict','settings','settings-resources','batch','about','operation','queue','breadcrumb','search','preview','preview-image','preview-hex','external'] if args.details_only else ['home', 'archive'])):
                     output = args.output / f'{state}-{theme}-{language}-{scale}.png'
                     env = os.environ.copy()
                     env['QT_SCALE_FACTOR'] = scale

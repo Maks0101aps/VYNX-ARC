@@ -150,6 +150,7 @@ fn check(code: i32) -> Result<()> {
 }
 
 struct Native {
+    flags: u32,
     handle: NonNull<sys::Handle>,
     context: Box<Context>,
     _filename: Vec<u16>,
@@ -196,6 +197,7 @@ impl Native {
             return Err(error(data.open_result as i32));
         };
         let native = Self {
+            flags: data.flags,
             handle,
             context,
             _filename: filename,
@@ -222,7 +224,8 @@ impl Native {
             .position(|c| *c == 0)
             .ok_or_else(|| ArcError::new("NAME", "RAR filename is too long"))?;
         let name = String::from_utf16(&raw[..end])
-            .map_err(|_| ArcError::new("NAME", "Invalid UTF-16 RAR filename"))?;
+            .map_err(|_| ArcError::new("NAME", "Invalid UTF-16 RAR filename"))?
+            .replace('\\', "/");
         let size = ((h.unp_size_high as u64) << 32) | h.unp_size as u64;
         if h.dict_size > 512 * 1024 {
             return Err(ArcError::new("LIMIT", "RAR dictionary exceeds 512 MiB"));
@@ -265,6 +268,34 @@ impl Native {
         self.context.result(code)
     }
 }
+/// Read-only metadata used to refuse unsafe rebuilds. No encoding lives here.
+pub(crate) fn prepare_rebuild(path: &Path, password: &str, op: &Operation) -> Result<()> {
+    let _gate = UNRAR_GATE
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let native = Native::open(path, password, op, false, None)?;
+    if native.flags & (sys::ROADF_VOLUME | sys::ROADF_LOCK | sys::ROADF_SIGNED) != 0 {
+        return Err(ArcError::new(
+            "READ_ONLY",
+            "Multipart, locked and signed RAR archives cannot be rebuilt",
+        ));
+    }
+    let mut signature = [0; 8];
+    std::fs::File::open(path)?.read_exact(&mut signature)?;
+    if signature != *b"Rar!\x1a\x07\x01\0" {
+        return Err(ArcError::new(
+            "READ_ONLY",
+            "RAR rebuilding requires a RAR5 archive; convert older RAR archives to ZIP or 7Z",
+        ));
+    }
+    let mut options = op.rar_options();
+    options.solid |= native.flags & sys::ROADF_SOLID != 0;
+    options.encrypt_headers |= native.flags & sys::ROADF_ENCHEADERS != 0;
+    if native.flags & sys::ROADF_RECOVERY != 0 && options.recovery_percent == 0 {
+        options.recovery_percent = 3;
+    }
+    op.configure_rar(options)
+}
 impl Drop for Native {
     fn drop(&mut self) {
         // SAFETY: Native owns this open handle exactly once. UnRAR closes it before
@@ -275,11 +306,15 @@ impl Drop for Native {
     }
 }
 
-pub fn list(path: &Path, password: &str, op: &Operation) -> Result<Vec<Entry>> {
+pub fn list(path: &Path, password: &str, op: &Operation) -> Result<(Vec<Entry>, bool)> {
     let _gate = UNRAR_GATE
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     let mut native = Native::open(path, password, op, false, None)?;
+    let mut signature = [0; 8];
+    std::fs::File::open(path)?.read_exact(&mut signature)?;
+    let writable = signature == *b"Rar!\x1a\x07\x01\0"
+        && native.flags & (sys::ROADF_VOLUME | sys::ROADF_LOCK | sys::ROADF_SIGNED) == 0;
     let mut entries = Vec::new();
     while let Some(entry) = native.next(entries.len() as u64)? {
         if entries.len() >= 1_000_000 {
@@ -288,7 +323,7 @@ pub fn list(path: &Path, password: &str, op: &Operation) -> Result<Vec<Entry>> {
         entries.push(entry);
         native.process(false)?;
     }
-    Ok(entries)
+    Ok((entries, writable))
 }
 
 struct ChannelReader<'a> {

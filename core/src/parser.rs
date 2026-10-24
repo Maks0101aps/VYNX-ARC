@@ -22,16 +22,24 @@ fn u64_at(bytes: &[u8], offset: usize) -> u64 {
 }
 
 pub fn open_zip<R: Read + Seek>(mut reader: R) -> Result<zip::ZipArchive<R>> {
-    preflight_zip(&mut reader)?;
-    // Detection already requires a ZIP signature at byte zero. Disabling offset
-    // guessing ensures the backend reads exactly the directory we bounded.
-    let config = zip::read::Config {
-        archive_offset: zip::read::ArchiveOffset::Known(0),
-    };
-    Ok(zip::ZipArchive::with_config(config, reader)?)
+    let directory = zip_directory(&mut reader)?;
+    Ok(zip::ZipArchive::with_preflighted_directory(
+        reader,
+        directory.offset,
+        directory.count,
+        directory.comment,
+    )?)
 }
 
 pub fn preflight_zip(reader: &mut (impl Read + Seek)) -> Result<()> {
+    zip_directory(reader).map(|_| ())
+}
+struct ZipDirectory {
+    offset: u64,
+    count: usize,
+    comment: Box<[u8]>,
+}
+fn zip_directory(reader: &mut (impl Read + Seek)) -> Result<ZipDirectory> {
     let length = reader.seek(SeekFrom::End(0))?;
     // Cover the backend's entire EOCD search window, including its extra byte.
     let tail_length = length.min(65536 + 22) as usize;
@@ -39,11 +47,14 @@ pub fn preflight_zip(reader: &mut (impl Read + Seek)) -> Result<()> {
     let mut tail = vec![0; tail_length];
     reader.read_exact(&mut tail)?;
     let candidates = (0..tail.len().saturating_sub(21))
-        .filter(|&i| tail[i..].starts_with(b"PK\x05\x06"))
+        .filter(|&i| {
+            tail[i..].starts_with(b"PK\x05\x06")
+                && i + 22 + u16_at(&tail, i + 20) as usize == tail.len()
+        })
         .count();
-    // The backend may fall back to an earlier EOCD after a parse error, even
-    // with Known(0). Reject ambiguity so it cannot select unbounded metadata
-    // different from the single directory validated below.
+    // Payload signatures are harmless: the patched backend is bound to this
+    // exact validated directory and never searches/falls back to another EOCD.
+    // Multiple structurally terminal end records are still rejected.
     if candidates != 1 {
         return Err(corrupt("Missing or ambiguous ZIP end records"));
     }
@@ -143,5 +154,9 @@ pub fn preflight_zip(reader: &mut (impl Read + Seek)) -> Result<()> {
         return Err(corrupt("ZIP directory size does not match its entries"));
     }
     reader.seek(SeekFrom::Start(0))?;
-    Ok(())
+    Ok(ZipDirectory {
+        offset,
+        count: count as usize,
+        comment: end[22..].into(),
+    })
 }

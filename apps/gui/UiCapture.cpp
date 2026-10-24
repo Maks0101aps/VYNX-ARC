@@ -74,6 +74,8 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
         dialog = new CreateArchiveDialog({session_->path}, 1, this);
     else if (mode == "create-stream")
         dialog = new CreateArchiveDialog({session_->path}, 5, this);
+    else if (mode == "create-rar")
+        dialog = new CreateArchiveDialog({session_->path}, 12, this);
     else if (mode == "batch") {
         auto *batch = new BatchExtractDialog(this);
         batch->files->addItems(

@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "settings_preexisting": false,
+  "scope": "Actual per-user 0.8.0-to-0.9.0 installer upgrade, Open With registry/command, installed GUI smoke, settings and schema-1 working-copy fixture preservation; not a clean VM or unsigned Explorer identity registration",
+  "settings_preserved": true,
+  "working_copy_preserved": true,
+  "defaults_unchanged": true,
+  "open_with_registered_and_removed": true,
+  "installed_gui_smoke": "passed",
+  "uninstall": "passed",
+  "old_setup_sha256": "107bb9295302d5721e369af674ef19385ef79bc340e4bd3e24b546282d69a5b4",
+  "new_setup_sha256": "dc91c7aa7eed78ddb76cd00537cb025fbbecdfa2a362d8a0c0d1b0f2abbb3593"
+}

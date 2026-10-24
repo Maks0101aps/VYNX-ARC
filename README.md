@@ -1,14 +1,18 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains the **0.8.0
-release candidate**. The supplied master brief remains the V1 contract; this
+archive core connected through CXX. This repository contains the **0.9.0
+development candidate**. The supplied master brief remains the V1 contract; this
 milestone does not satisfy the full contract.
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
 TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
-Create all of these except RAR, including AES-encrypted ZIP and encrypted 7Z
-filenames. Choose Store/Fast/Balanced/Maximum compression and
+Create these formats, including native RAR5, AES-encrypted ZIP and encrypted 7Z
+filenames. RAR4 remains read-only. RAR5 adds solid compression, AES/header
+encryption, dictionary controls, recovery records and actual RAR5 volumes.
+See [RAR capabilities and limits](docs/NATIVE_RAR.md) and the
+[0.9 acceptance report](docs/ACCEPTANCE_0_9.md).
+Choose Store/Fast/Balanced/Maximum compression and
 Eco/Balanced/Maximum resource modes. Operations run asynchronously with
 progress and cancellation; additional archive requests enter a visible FIFO queue.
 Each archive has its own tab with independent search, navigation and selection.
@@ -42,7 +46,7 @@ with Windows memory/process limits, a wall-time budget and forced cancellation o
 unresponsive children. Other idle tabs and retained working copies survive a worker
 failure. This is resource isolation, not a separate filesystem-permission sandbox.
 
-Ctrl+Shift+Return creates an editable working copy of a supported ZIP/7Z file.
+Ctrl+Shift+Return creates an editable working copy of a supported ZIP/7Z/RAR5 file.
 Use the View > Working copies dock to explicitly save it back, save as a new
 archive, verify its contents, reload its source, export or discard it. Changed
 sources stop a save; failed saves retain the edited copy.

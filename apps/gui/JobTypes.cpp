@@ -88,7 +88,7 @@ ModifyAction ArchiveJobSpec::actionFromInt(int value) {
 }
 
 ArchiveFormat ArchiveJobSpec::formatFromInt(int value) {
-    return static_cast<ArchiveFormat>(boundedValue(value, 11, int(ArchiveFormat::Zip)));
+    return static_cast<ArchiveFormat>(boundedValue(value, 12, int(ArchiveFormat::Zip)));
 }
 
 CompressionPreset ArchiveJobSpec::presetFromInt(int value) {
@@ -150,6 +150,10 @@ JobState ArchiveJobSpec::stringToState(const QString &str) {
 
 QJsonObject ArchiveJobSpec::toJson() const {
     QJsonObject obj;
+    if (rarSolid) obj["rarSolid"] = true;
+    if (rarHeaders) obj["rarHeaders"] = true;
+    if (rarDictionary) obj["rarDictionary"] = double(rarDictionary);
+    if (rarRecovery) obj["rarRecovery"] = rarRecovery;
     obj[QStringLiteral("kind")] = kindToString(kind);
     if (!id.isEmpty())
         obj[QStringLiteral("id")] = id;
@@ -218,6 +222,10 @@ QJsonObject ArchiveJobSpec::toJson() const {
 
 ArchiveJobSpec ArchiveJobSpec::fromJson(const QJsonObject &json) {
     ArchiveJobSpec spec;
+    spec.rarSolid = json["rarSolid"].toBool();
+    spec.rarHeaders = json["rarHeaders"].toBool();
+    spec.rarDictionary = quint64(qBound(0.0, json["rarDictionary"].toDouble(), double(32ULL << 20)));
+    spec.rarRecovery = qBound(0, json["rarRecovery"].toInt(), 10);
     spec.kind = stringToKind(json[QStringLiteral("kind")].toString());
     spec.id = json[QStringLiteral("id")].toString();
     spec.destination = json[QStringLiteral("destination")].toString();

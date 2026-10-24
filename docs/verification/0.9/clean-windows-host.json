@@ -1,0 +1,6 @@
+{
+  "prepared_utc": "2026-10-24T08:44:32.9865161Z",
+  "status": "BLOCKED_HYPERVISOR_NOT_RUNNING",
+  "hypervisor_present": false,
+  "error": "Windows reports HypervisorPresent=False. Prepared guest checks have NOT run. Review Windows Sandbox virtualization prerequisites before retrying; this script does not change boot or security settings."
+}

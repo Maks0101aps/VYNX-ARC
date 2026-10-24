@@ -41,7 +41,7 @@ def main():
     for name in ('old', 'new', 'gui', 'output'):
         parser.add_argument('--' + name, type=Path, required=True)
     parser.add_argument('--old-version', default='0.6.0')
-    parser.add_argument('--new-version', default='0.8.0')
+    parser.add_argument('--new-version', default='0.9.0')
     args = parser.parse_args()
     if value(UNINSTALL, 'UninstallString') is not None:
         raise RuntimeError('An existing installation is registered; refusing to replace it for QA')

@@ -1,0 +1,53 @@
+{
+  "status": "passed",
+  "cli_sha256": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+  "worker_sha256": "8f0b0c7cce5860817f3c80561040bc76f3f47b03e91adfe7fbe121d49e183623",
+  "workspace": "C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ga_w94uk",
+  "results": [
+    {
+      "label": "pylance_attributes_none",
+      "desired_access": "0x100080",
+      "share_mode": 0,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 0,
+      "stderr": "",
+      "before_sha256": "4a4d4dcaaec0ea41e3df26abfeeec9df930b529370d9b43c8dc3f611c252146e",
+      "after_sha256": "108ac710662d687e41f01c17862f3033b975183e354c1fc525d03550dfdbc798",
+      "unchanged_on_failure": false,
+      "content": {
+        "new.txt": "original content"
+      }
+    },
+    {
+      "label": "generic_read_all_share",
+      "desired_access": "0x80000000",
+      "share_mode": 7,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 0,
+      "stderr": "",
+      "before_sha256": "4a4d4dcaaec0ea41e3df26abfeeec9df930b529370d9b43c8dc3f611c252146e",
+      "after_sha256": "108ac710662d687e41f01c17862f3033b975183e354c1fc525d03550dfdbc798",
+      "unchanged_on_failure": false,
+      "content": {
+        "new.txt": "original content"
+      }
+    },
+    {
+      "label": "generic_read_no_delete_share",
+      "desired_access": "0x80000000",
+      "share_mode": 3,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 1,
+      "stderr": "ARCHIVE_BUSY: Could not update C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ga_w94uk\\generic_read_no_delete_share.zip (OS error Some(32)): The process cannot access the file because it is being used by another process. (os error 32). The original archive was not replaced. Another application is using or locking this archive. Close that application, reload the archive, and run the operation again.\n",
+      "before_sha256": "4a4d4dcaaec0ea41e3df26abfeeec9df930b529370d9b43c8dc3f611c252146e",
+      "after_sha256": "4a4d4dcaaec0ea41e3df26abfeeec9df930b529370d9b43c8dc3f611c252146e",
+      "unchanged_on_failure": true,
+      "content": {
+        "old.txt": "original content"
+      }
+    }
+  ]
+}

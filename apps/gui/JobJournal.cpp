@@ -67,7 +67,7 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
     const QStringList strings{"kind",      "destination", "folder",        "newName",
                               "editId",    "batchId",     "retryOf",       "archiveHash",
                               "inputHash", "sourceSize",  "sourceModified", "sourceArchive", "targetArchive"};
-    const QStringList numbers{"action", "format", "preset", "resource", "conflict", "volumeSize"};
+    const QStringList numbers{"action", "format", "preset", "resource", "conflict", "volumeSize", "rarDictionary", "rarRecovery"};
     for (const auto &key : strings)
         if (spec[key].isString()) {
             if (spec[key].toString().size() > 32768)
@@ -94,7 +94,7 @@ QJsonObject JobJournal::sanitizeSpec(const QJsonObject &spec) {
         result[key] = values;
     }
     for (const auto &key : {QString("smart"), QString("needsPassword"), QString("incompleteSpec"),
-                            QString("needsOutputPassword"), QString("allowDecrypt")})
+                            QString("needsOutputPassword"), QString("allowDecrypt"), QString("rarSolid"), QString("rarHeaders")})
         if (spec[key].isBool())
             result[key] = result[key].toBool() || spec[key].toBool();
     if (spec["recoveryPlan"].isObject()) result["recoveryPlan"] = spec["recoveryPlan"].toObject(); return result;

@@ -1,6 +1,7 @@
-param([string]$OutputDirectory, [switch]$PrepareOnly)
+param([string]$OutputDirectory, [switch]$PrepareOnly, [string]$ArtifactDirectory)
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
+if(!$ArtifactDirectory){$ArtifactDirectory=Join-Path $root 'dist'}
 if(!$OutputDirectory){$OutputDirectory=Join-Path $root ('.dev\clean-windows-'+[guid]::NewGuid().ToString('N'))}
 $output=[IO.Path]::GetFullPath($OutputDirectory)
 if(Test-Path -LiteralPath $output){throw 'Evidence directory must be new'}
@@ -9,7 +10,7 @@ $payload=Join-Path $output 'input'
 $evidence=Join-Path $output 'evidence'
 New-Item -ItemType Directory $payload,$evidence | Out-Null
 foreach($name in 'VYNX-ARC-Portable-x64.zip','VYNX-ARC-Setup-x64.exe','VYNX-ARC-Explorer-x64.msix','SHA256SUMS.txt') {
-    Copy-Item -LiteralPath (Join-Path $root "dist\$name") -Destination $payload
+    Copy-Item -LiteralPath (Join-Path $ArtifactDirectory $name) -Destination $payload
 }
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'clean-windows-guest.ps1') -Destination (Join-Path $payload 'guest.ps1')
 $identity=[ordered]@{prepared_utc=[DateTime]::UtcNow.ToString('o');git_head=(& git -C $root rev-parse HEAD);dirty_files=(& git -C $root status --porcelain);status='PREPARED_NOT_RUN'}

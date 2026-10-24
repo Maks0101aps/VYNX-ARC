@@ -1,0 +1,32 @@
+{
+  "status": "passed",
+  "binaries": {
+    "VynxArc.exe": "3787cf57cfa2d1808aca6792aea2db7971955a19db14bed2aab1e8d6e4856701",
+    "vynxarc-cli.exe": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+    "vynxarc-worker.exe": "8f0b0c7cce5860817f3c80561040bc76f3f47b03e91adfe7fbe121d49e183623",
+    "VynxPresentationTests.exe": "634ff49fd068c4f540c57879750b038126235160c704d4562d5f582a82034b99"
+  },
+  "scope": "Bounded regression suite, not coverage-guided fuzzing or security certification",
+  "malformed_frames": 54,
+  "gui": {
+    "cases": [
+      "encrypted source -> .zip: MIME, folder, keep-both verified",
+      "encrypted source -> .7z: MIME, folder, keep-both verified",
+      "encrypted source -> .rar: MIME, folder, keep-both verified",
+      "four nested opens, fifth descent refused, readonly container cleanup verified",
+      "recovery planning preserves modified output and unrelated temp files",
+      "unknown Smart Extract queue recovery verifies source digest and preserves existing edits/backups",
+      "output appearing after recovery review is refused atomically and retained",
+      "native RAR5 solid/AES headers/recovery creation through typed GUI dispatch, worker, publication acknowledgement and journal"
+    ],
+    "status": "passed"
+  },
+  "independent_readers": "zipfile, py7zr, pyzipper: exact target and source bytes",
+  "cpp_regressions": [
+    "journalMigrationFrom06",
+    "workingCopiesPersistAndNeverJoinDisposableCleanup",
+    "journalSurvivesARealKilledProcess",
+    "extractionRecoveryReconciliation",
+    "archiveDragIncludesSourceIdentity"
+  ]
+}

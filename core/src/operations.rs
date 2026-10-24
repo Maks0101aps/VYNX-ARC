@@ -18,6 +18,10 @@ use zeroize::Zeroizing;
 pub struct Operation(Arc<State>);
 #[derive(Default)]
 struct State {
+    #[cfg(windows)]
+    rar_options: Mutex<crate::rar_write::Options>,
+    #[cfg(windows)]
+    rar_workspace: Mutex<Option<PathBuf>>,
     settings: Mutex<crate::settings::Settings>,
     publication_controlled: AtomicBool,
     publication: Mutex<crate::publication::Pending>,
@@ -56,6 +60,43 @@ pub struct Progress {
     pub cancelled: bool,
 }
 impl Operation {
+    #[cfg(windows)]
+    pub(crate) fn set_rar_workspace(&self, path: PathBuf) -> Result<()> {
+        security::check_ancestors(&path)?;
+        *self
+            .0
+            .rar_workspace
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "RAR workspace lock failed"))? = Some(path);
+        Ok(())
+    }
+    #[cfg(windows)]
+    pub(crate) fn rar_scratch(&self) -> Result<tempfile::TempDir> {
+        let root = self
+            .0
+            .rar_workspace
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "RAR workspace lock failed"))?;
+        Ok(if let Some(root) = &*root {
+            tempfile::tempdir_in(root)?
+        } else {
+            tempfile::tempdir()?
+        })
+    }
+    #[cfg(windows)]
+    pub fn configure_rar(&self, options: crate::rar_write::Options) -> Result<()> {
+        options.validate(self)?;
+        *self
+            .0
+            .rar_options
+            .lock()
+            .map_err(|_| ArcError::new("INTERNAL", "RAR settings lock failed"))? = options;
+        Ok(())
+    }
+    #[cfg(windows)]
+    pub fn rar_options(&self) -> crate::rar_write::Options {
+        self.0.rar_options.lock().map(|v| *v).unwrap_or_default()
+    }
     pub fn set_input_receipt(&self, receipt: &str) -> Result<()> {
         *self
             .0
@@ -393,6 +434,9 @@ pub fn extract(
     }
     let mut actual = 0u64;
     let mut effective = options.conflict;
+    // Reuse canonical parent paths only while their ancestor handles remain
+    // pinned against rename/reparse replacement. Bound the cache for large trees.
+    let mut pinned_parents = std::collections::HashMap::new();
     let reserved: std::collections::HashSet<_> = archive
         .entries
         .iter()
@@ -465,10 +509,18 @@ pub fn extract(
         let parent = output
             .parent()
             .ok_or_else(|| ArcError::new("PATH", "No output parent"))?;
-        fs::create_dir_all(parent)?;
-        let _parent_pins = security::pin_ancestors(parent)?;
+        #[cfg(not(windows))]
+        pinned_parents.clear(); // POSIX directory descriptors do not prevent rename.
+        if !pinned_parents.contains_key(parent) {
+            if pinned_parents.len() >= 128 {
+                pinned_parents.clear();
+            }
+            fs::create_dir_all(parent)?;
+            let pins = security::pin_ancestors(parent)?;
+            pinned_parents.insert(parent.to_owned(), (parent.canonicalize()?, pins));
+        }
         security::check_ancestors(parent)?;
-        let mut temp = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
+        let mut temp = tempfile::NamedTempFile::new_in(&pinned_parents[parent].0)?;
         copy_checked(
             data,
             temp.as_file_mut(),
@@ -658,7 +710,18 @@ pub fn create_as(options: &CreateOptions, format: Format, op: &Operation) -> Res
     create_internal(options, format, None, op)
 }
 pub fn create_split(options: &CreateOptions, size: u64, op: &Operation) -> Result<()> {
-    create_internal(options, Format::SevenZ, Some(size), op)
+    let format = Format::for_output(&options.output)?;
+    if !matches!(format, Format::SevenZ) {
+        #[cfg(windows)]
+        if format == Format::Rar {
+            return create_internal(options, format, Some(size), op);
+        }
+        return Err(ArcError::new(
+            "OPTIONS",
+            "Volume creation requires 7Z or RAR",
+        ));
+    }
+    create_internal(options, format, Some(size), op)
 }
 fn create_internal(
     options: &CreateOptions,
@@ -680,7 +743,18 @@ fn create_internal(
                 "Split volume must be at least 64 KiB",
             ));
         }
-        let first = PathBuf::from(format!("{}.001", options.output.display()));
+        let first = if format.name() == "RAR" {
+            options.output.with_file_name(format!(
+                "{}.part1.rar",
+                options
+                    .output
+                    .file_stem()
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("Archive")
+            ))
+        } else {
+            PathBuf::from(format!("{}.001", options.output.display()))
+        };
         security::check_ancestors(&first)?;
         if first.exists() {
             return Err(ArcError::new(
@@ -702,7 +776,10 @@ fn create_internal(
             "Output extension must match the selected format",
         ));
     }
-    if !options.password.is_empty() && !matches!(format, Format::Zip | Format::SevenZ) {
+    if !options.password.is_empty()
+        && !matches!(format, Format::Zip | Format::SevenZ)
+        && format.name() != "RAR"
+    {
         return Err(ArcError::new(
             "ENCRYPTION",
             "This format does not support encryption",
@@ -741,7 +818,13 @@ fn create_internal(
     op.total(security::validate_plan(&entries, 1, &policy)?);
     let required = sources.iter().map(|(e, _)| e.size).sum::<u64>();
     let required = required
-        .checked_mul(if split.is_some() { 2 } else { 1 })
+        .checked_mul(if format.name() == "RAR" {
+            3
+        } else if split.is_some() {
+            2
+        } else {
+            1
+        })
         .ok_or_else(|| ArcError::new("LIMIT", "Split space estimate overflow"))?;
     crate::disk::preflight(&options.output, required)?;
     let parent = options
@@ -753,9 +836,17 @@ fn create_internal(
     let _output_pins = security::pin_ancestors(parent)?;
     let mut temp = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
     op.stage("Compressing files");
+    #[cfg(windows)]
+    if format == Format::Rar
+        && let Some(size) = split
+    {
+        return crate::rar_write::create_volumes(options, &sources, size, op);
+    }
     match format {
         #[cfg(windows)]
-        Format::Rar => return Err(ArcError::new("READ_ONLY", "RAR creation is unsupported")),
+        Format::Rar => {
+            crate::rar_write::write(temp.as_file_mut(), &sources, &options.password, op)?
+        }
         Format::Zip => {
             let mut writer = zip::ZipWriter::new(temp.as_file_mut());
             let base = zip::write::SimpleFileOptions::default()
@@ -864,16 +955,23 @@ fn create_internal(
     temp.as_file().sync_all()?;
     op.check()?;
     op.phase("Verifying completed archive");
-    let archive = Archive::open(temp.path(), &options.password, op)?;
+    // Native RAR readers require no writable handle to the container during verification.
+    // Retain RAII ownership of its unique pathname while closing the writer.
+    let temp = temp.into_temp_path();
+    let archive = Archive::open(&temp, &options.password, op)?;
     test(&archive, &options.password, op)?;
+    #[cfg(windows)]
+    if format == Format::Rar {
+        crate::rar_write::verify_manifest(&archive, &entries)?;
+    }
     op.check()?;
     security::check_ancestors(&options.output)?;
     if let Some(size) = split {
         op.stage("Publishing verified volumes");
-        return crate::volumes::publish(temp.as_file_mut(), &options.output, size, op);
+        return crate::volumes::publish(&mut File::open(&temp)?, &options.output, size, op);
     }
     op.stage("Publishing verified archive");
-    op.prepare_publication(&[(options.output.clone(), temp.path().to_owned())])?;
+    op.prepare_publication(&[(options.output.clone(), temp.to_path_buf())])?;
     op.check()?;
     temp.persist_noclobber(security::publication_path(&options.output)?)
         .map_err(|e| ArcError::from(e.error))?;

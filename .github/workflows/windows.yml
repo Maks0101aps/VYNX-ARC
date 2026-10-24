@@ -46,6 +46,8 @@ jobs:
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/fuzz-parsers.py --cli target/release/vynxarc-cli.exe --cases 64 --output .dev/ci-fuzz
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/check-rar-native.py --cli target/release/vynxarc-cli.exe --output .dev/ci-rar --many-files 1000
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
       - name: Preserve verification reports
         if: always()
         uses: actions/upload-artifact@v4
@@ -59,4 +61,5 @@ jobs:
             build-msvc/presentation-tests.txt
             .dev/ci-fuzz/results.json
             .dev/ci-fuzz/case-*.bin
+            .dev/ci-rar/results.json
           include-hidden-files: true

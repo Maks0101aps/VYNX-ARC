@@ -1,0 +1,290 @@
+warning: patch `vswhom-sys v0.1.3 (C:\Users\Maksi\AppData\Local\Temp\kilo\toolchain\vswhom-sys)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+    Checking vynx-arc-core v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\core)
+    Checking vynxarc-cli v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\cli)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.46s
+warning: patch `vswhom-sys v0.1.3 (C:\Users\Maksi\AppData\Local\Temp\kilo\toolchain\vswhom-sys)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling vynx-arc-core v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\core)
+   Compiling vynxarc-cli v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\cli)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.79s
+     Running unittests src\lib.rs (target\debug\deps\vynx_arc_core-8f5e7a5b4cb3a3fe.exe)
+
+running 22 tests
+test disk::tests::rejects_exhaustion_and_overflow ... ok
+test rar::tests::password_callback_checks_capacity ... ok
+test rar::tests::callback_bounds_and_cancellation ... ok
+test priority::tests::eco_priority_is_restored_after_worker_scope ... ok
+test security::tests::checked_limits ... ok
+test security::tests::permits_unicode_and_normalizes_separators ... ok
+test security::tests::enforces_entry_count_total_size_ratio_and_duplicate_limits ... ok
+test security::tests::checks_collisions_and_prefixes ... ok
+test security::tests::rejects_windows_escapes ... ok
+test worker::job::tests::allocation_child ... ignored, Only launched by memory_cap_and_lifetime with a private handshake
+test security::tests::smart_extract_has_no_redundant_folder ... ok
+test worker::wire::tests::rejects_wrong_version_oversize_truncation_trailing_and_counts ... ok
+test worker::job::tests::memory_cap_and_lifetime ... ok
+test modification::publication_tests::cancelled_commit_preserves_original_and_cleans_staging ... ok
+test modification::publication_tests::partial_native_failure_retains_verified_replacement ... ok
+test modification::publication_tests::partial_native_failure_reports_original_backup_and_keeps_both_payloads ... ok
+test modification::publication_tests::native_replacement_preserves_named_stream_and_removes_backup_on_success ... ok
+test modification::publication_tests::persist_replaces_flushed_sibling_and_removes_temporary_name ... ok
+test modification::publication_tests::read_only_commit_reports_first_failure_and_preserves_original ... ok
+test volumes::tests::cancelled_split_cleanup_does_not_delete_a_replacement_path ... ok
+test modification::publication_tests::transient_delete_share_conflict_is_retried ... ok
+test modification::publication_tests::persistent_delete_share_conflict_preserves_original ... ok
+
+test result: ok. 21 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.80s
+
+     Running tests\conflicts.rs (target\debug\deps\conflicts-de00278a8422e050.exe)
+
+running 4 tests
+test cancel_pending_conflict_wakes_worker ... ok
+test ask_skip_all_and_reject_stale_response ... ok
+test keep_both_reserves_incoming_names ... ok
+test newer_uses_metadata_and_preserves_incoming_time ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.27s
+
+     Running tests\conversion.rs (target\debug\deps\conversion-227ac36770ade2d0.exe)
+
+running 5 tests
+test conversion_refuses_implicit_decryption_collision_stale_edits_and_cancellation ... ok
+test save_as_replaces_verified_content_without_touching_original_or_working_copy ... ok
+test converts_real_rar4_rar5_fixtures ... ok
+test conversion_cancellation_during_streaming_keeps_source_and_removes_staging ... ok
+test conversion_roundtrips_every_readable_writer_with_directories_and_encryption ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.31s
+
+     Running tests\development.rs (target\debug\deps\development-cc5d11029ff19bef.exe)
+
+running 9 tests
+test resource_caps_limit_encoder_workspace_and_preserve_zip_levels ... ok
+test oversized_lzma_dictionary_is_rejected_before_allocation ... ok
+test unsupported_combinations_do_not_publish ... ok
+test cancelled_creation_and_decoder_stop_without_output ... ok
+test compressed_tar_trailer_corruption_is_not_hidden_by_tar_end_marker ... ok
+test stored_encrypted_zip_and_7z_preserve_password_protection ... ok
+test zero_filled_standalone_payloads_are_not_mistaken_for_empty_tar ... ok
+test standalone_and_compressed_tar_roundtrip_with_verified_bytes ... ok
+test presets_change_real_zip_codec_and_roundtrip_every_7z_setting ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.46s
+
+     Running tests\editing.rs (target\debug\deps\editing-ef87c4c2847cbd01.exe)
+
+running 3 tests
+test stale_archive_or_changing_working_copy_never_overwrites_original ... ok
+test selected_zip_view_checks_its_crc_without_decoding_unrelated_payloads ... ok
+test replacing_content_preserves_names_encryption_and_selected_preset ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.29s
+
+     Running tests\hashing.rs (target\debug\deps\hashing-00aae65a6e7d4060.exe)
+
+running 2 tests
+test file_verification_and_invalid_input ... ok
+test decoded_entry_hashes_and_verification_across_formats ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.57s
+
+     Running tests\modification.rs (target\debug\deps\modification-ca1279928e13c866.exe)
+
+running 9 tests
+test explicit_format_rejects_misleading_extension ... ok
+test long_archive_path_rebuild_and_corrupt_input_preserve_bytes ... ok
+test cancelled_rebuild_leaves_original_and_no_staging_files ... ok
+test deletion_can_produce_empty_archive ... ok
+test duplicate_invalid_rename_and_wrong_password_preserve_original ... ok
+test physical_long_unicode_path_and_motw_survive_modification ... ok
+test locked_original_rejects_replacement_without_data_loss ... ok
+test add_rename_delete_unicode_and_encryption ... ok
+test one_hundred_zip_add_delete_rename_publication_cycles ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 16.23s
+
+     Running tests\parser_limits.rs (target\debug\deps\parser_limits-e2566228a049fce8.exe)
+
+running 9 tests
+test ambiguous_end_record_in_comment_cannot_trigger_backend_fallback ... ok
+test zip64_huge_count_is_rejected_before_backend_allocation ... ok
+test zip_directory_budget_rejects_sparse_large_directory ... ok
+test truncated_and_mutated_end_records_never_panic ... ok
+test stored_nested_zip_uses_exact_validated_directory_and_original_payload ... ok
+test accepts_valid_zip64_and_archive_comment_without_offset_guessing ... ok
+test sevenz_rejects_declared_header_before_reading_or_allocating_it ... ok
+test sevenz_metadata_budget_rejects_dense_file_table ... ok
+test sevenz_encoded_header_and_dictionary_budgets_precede_decoding ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests\perf_milestone.rs (target\debug\deps\perf_milestone-67f43e3c622bb1e1.exe)
+
+running 1 test
+test archive_performance_report ... ignored, Requires reproducible local benchmark corpora and output path
+
+test result: ok. 0 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\preview.rs (target\debug\deps\preview-7df54db1d2cc8623.exe)
+
+running 2 tests
+test preview_rejects_binary_oversized_wrong_password_and_cancellation ... ok
+test preview_is_verified_plain_text_and_never_publishes_plaintext ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s
+
+     Running tests\rar.rs (target\debug\deps\rar-2005b05d6a3600e0.exe)
+
+running 4 tests
+test rar_links_are_detected_and_blocked ... ok
+test rar4_and_rar5_encrypted_headers_and_data ... ok
+test rar5_stored_and_compressed_real_fixtures ... ok
+test concurrent_rar_fixtures_repeat_open_list_and_test_without_shared_state_leaks ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 2.59s
+
+     Running tests\rar_write.rs (target\debug\deps\rar_write-ad05793d859245fd.exe)
+
+running 8 tests
+test invalid_options_and_cancelled_creation_publish_nothing ... ok
+test cancellation_during_native_compression_never_publishes ... ok
+test all_presets_are_independently_decodable_and_really_compress ... ok
+test actual_multiple_volumes_missing_part_conflict_and_readonly_rebuild ... ok
+test nested_rar_paths_and_working_copy_saveback_use_canonical_names ... ok
+test locked_rar_rebuild_preserves_source_bytes ... ok
+test solid_encryption_headers_recovery_and_volumes ... ok
+test rebuild_add_delete_rename_and_failure_preserves_original ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 4.63s
+
+     Running tests\roundtrip.rs (target\debug\deps\roundtrip-73e98af9cbdb9f52.exe)
+
+running 10 tests
+test cancellation_has_no_published_output ... ok
+test hashes_match_known_vectors ... ok
+test malicious_archive_is_rejected_before_any_file_output ... ok
+test corrupted_archives_fail_safely ... ok
+test corrupt_payload_is_not_published_and_temp_is_cleaned ... ok
+test refuses_existing_output_preserves_user_data ... ok
+test changed_zip_count_or_crc_since_open_is_rejected_without_publication ... ok
+test cancellation_mid_stream_keeps_existing_files_and_removes_partial ... ok
+test encrypted_zip_and_7z_correct_and_wrong_passwords ... ok
+test real_roundtrips_all_writable_formats ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.72s
+
+     Running tests\selected_extraction.rs (target\debug\deps\selected_extraction-803f2d0d49633097.exe)
+
+running 1 test
+test unselected_destination_is_not_inspected_or_created ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests\viewer.rs (target\debug\deps\viewer-294cfeaabc9fa243.exe)
+
+running 4 tests
+test viewer_limits_cancellation_and_unsafe_manifests_leave_no_output ... ok
+test corrupt_data_is_not_returned_or_published ... ok
+test materialized_password_files_are_readonly_unique_and_keep_zone_marker ... ok
+test binary_content_is_verified_for_every_writable_format_without_disk_output ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.42s
+
+     Running tests\volumes.rs (target\debug\deps\volumes-cda9ea9f96e7a74d.exe)
+
+running 4 tests
+test multivolume_link_archive_remains_blocked ... ok
+test split_refuses_existing_parts_and_bad_configuration ... ok
+test rar4_rar5_multivolume_fixtures_and_exact_missing_path ... ok
+test split_7z_roundtrip_missing_part_and_read_only ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.89s
+
+     Running tests\windows_fs.rs (target\debug\deps\windows_fs-5ffac632e78ade09.exe)
+
+running 5 tests
+test pinned_directory_cannot_be_renamed ... ok
+test rejects_junction_destination ... ok
+test modification_succeeds_when_destination_held_by_read_attributes ... ok
+test locked_extraction_output_preserves_bytes_and_cleans_staging ... ok
+test motw_propagates_and_oversized_zone_is_not_published ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running unittests src\main.rs (target\debug\deps\vynxarc_cli-ec10b8f350a1b9e0.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src\worker.rs (target\debug\deps\vynxarc_worker-45f6b8f22b8dbb4f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\worker.rs (target\debug\deps\worker-c602fb47cfbc2b80.exe)
+
+running 10 tests
+test interrupted_writer_never_claims_original_was_preserved ... ok
+test timeout_kills_child_and_next_operation_still_works ... ok
+test malformed_protocol_exits_without_writing_requested_files ... ok
+test conversion_uses_worker_and_keeps_original_bytes ... ok
+test cli_source_password_does_not_select_destination_encryption ... ok
+test publication_acknowledgement_precedes_creation_and_replacement ... ok
+test encrypted_worker_and_cancelled_or_missing_worker ... ok
+test extraction_conflict_reply_crosses_process_boundary ... ok
+test native_rar_options_cross_worker_boundary_and_preserve_encryption ... ok
+test isolated_open_preview_test_hash_and_stale_metadata ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 3.56s
+
+   Doc-tests vynx_arc_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1352 security advisories (from C:\Users\Maksi\.cargo\advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (113 crate dependencies)
+-- Could NOT find WrapVulkanHeaders (missing: Vulkan_INCLUDE_DIR) 
+-- Configuring done (0.7s)
+-- Generating done (0.3s)
+-- Build files have been written to: C:/Users/Maksi/Documents/projects/VYNX-ARC/build-msvc
+[0/2] Re-checking globbed directories...
+[1/5] Generating C:/Users/Maksi/Documents/projects/VYNX-ARC/target/release/vynx_arc_core.lib
+warning: patch `vswhom-sys v0.1.3 (C:\Users\Maksi\AppData\Local\Temp\kilo\toolchain\vswhom-sys)` was not used in the crate graph
+help: Check that the patched package version and available features are compatible
+      with the dependency requirements. If the patch has a different version from
+      what is locked in the Cargo.lock file, run `cargo update` to use the new
+      version. This may also occur with an optional dependency that is not enabled.
+   Compiling vynx-arc-core v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\core)
+   Compiling vynxarc-cli v0.9.0 (C:\Users\Maksi\Documents\projects\VYNX-ARC\apps\cli)
+    Finished `release` profile [optimized] target(s) in 40.56s
+[2/5] C:\WINDOWS\system32\cmd.exe /C "cd /D C:\Users\Maksi\Documents\projects\VYNX-ARC\build-msvc && C:\Users\Maksi\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\cmake\data\bin\cmake.exe -E make_directory C:/Users/Maksi/Documents/projects/VYNX-ARC/build-msvc && C:\Users\Maksi\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\cmake\data\bin\cmake.exe -E copy_if_different C:/Users/Maksi/Documents/projects/VYNX-ARC/target/release/vynxarc-worker.exe C:/Users/Maksi/Documents/projects/VYNX-ARC/build-msvc && C:\Users\Maksi\AppData\Local\hermes\hermes-agent\venv\Lib\site-packages\cmake\data\bin\cmake.exe -E copy_if_different C:/Users/Maksi/Documents/projects/VYNX-ARC/target/release/vynxarc-cli.exe C:/Users/Maksi/Documents/projects/VYNX-ARC/build-msvc"
+[3/5] Linking CXX executable VynxPresentationTests.exe
+[4/5] Linking CXX executable VynxArc.exe
+Test project C:/Users/Maksi/Documents/projects/VYNX-ARC/build-msvc
+    Start 1: presentation
+1/5 Test #1: presentation .....................   Passed    2.03 sec
+    Start 2: shell_smoke
+2/5 Test #2: shell_smoke ......................   Passed    2.16 sec
+    Start 3: gui_smoke
+3/5 Test #3: gui_smoke ........................   Passed    4.63 sec
+    Start 4: gui_batch
+4/5 Test #4: gui_batch ........................   Passed    1.55 sec
+    Start 5: gui_product
+5/5 Test #5: gui_product ......................   Passed    7.64 sec
+
+100% tests passed out of 5
+
+Total Test time (real) =  18.08 sec

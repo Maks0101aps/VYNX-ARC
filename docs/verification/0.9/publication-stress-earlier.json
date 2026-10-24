@@ -1,0 +1,172 @@
+{
+  "location": "project",
+  "work": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\zip-stress-rqilwl3l",
+  "cycles": 100,
+  "started_utc": "2026-10-23T16:51:02.344337+00:00",
+  "portable_sha256": "a62df2dcf737dd484221bb875d6ef658bafc77f22c846edf7856e60897aa1d3f",
+  "continue_on_failure": false,
+  "cli_sha256": "92ad8c6d3c68b6e83ea4ae4f85c6bb056e2c241e4c97c5403e2f9dcfeee07f47",
+  "categories": [
+    {
+      "category": "add",
+      "motw": false,
+      "completed": 17,
+      "attempted_cycles": 18,
+      "publication_attempts": 18,
+      "publication_successes": 17,
+      "failures": [
+        {
+          "cycle": 17,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:03.240913+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\added-17.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "a9bcd0bec0b36a965709f52ee7452c269519940eab01e43ca7ae3d8730425c4d",
+          "after_sha256": "a9bcd0bec0b36a965709f52ee7452c269519940eab01e43ca7ae3d8730425c4d",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:03.240913+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\added-17.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "delete",
+      "motw": false,
+      "completed": 15,
+      "attempted_cycles": 16,
+      "publication_attempts": 16,
+      "publication_successes": 15,
+      "failures": [
+        {
+          "cycle": 15,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:06.120128+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\delete.zip', 'added-15.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "62a441e50d167931da99af803c818388960c8dd948bcf32245a21842d6736c30",
+          "after_sha256": "62a441e50d167931da99af803c818388960c8dd948bcf32245a21842d6736c30",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:06.120128+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\delete.zip', 'added-15.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "rename",
+      "motw": false,
+      "completed": 26,
+      "attempted_cycles": 27,
+      "publication_attempts": 27,
+      "publication_successes": 26,
+      "failures": [
+        {
+          "cycle": 26,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:09.017305+00:00', 'command': ['rename', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\rename.zip', '\u0434\u0430\u043d\u0456.txt', 'renamed.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "after_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:09.017305+00:00', 'command': ['rename', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\rename.zip', '\u0434\u0430\u043d\u0456.txt', 'renamed.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "mixed",
+      "motw": false,
+      "completed": 6,
+      "attempted_cycles": 7,
+      "publication_attempts": 25,
+      "publication_successes": 24,
+      "failures": [
+        {
+          "cycle": 6,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:11.917961+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\mixed.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\added-6.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\mixed.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "after_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:11.917961+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\mixed.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\added-6.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\plain\\\\mixed.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "add",
+      "motw": true,
+      "completed": 18,
+      "attempted_cycles": 19,
+      "publication_attempts": 19,
+      "publication_successes": 18,
+      "failures": [
+        {
+          "cycle": 18,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:14.777829+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\added-18.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "8c9059bddbf22cd484675c44e0937b0a75ecdbb26aebb91ad0e92d62f432cafb",
+          "after_sha256": "8c9059bddbf22cd484675c44e0937b0a75ecdbb26aebb91ad0e92d62f432cafb",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:14.777829+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\added-18.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "delete",
+      "motw": true,
+      "completed": 14,
+      "attempted_cycles": 15,
+      "publication_attempts": 15,
+      "publication_successes": 14,
+      "failures": [
+        {
+          "cycle": 14,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:17.639292+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\delete.zip', 'added-14.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "ade0f0ef1ecc2226826a5a844678fa569c700540bcdef103d809bb33bc1e87f2",
+          "after_sha256": "ade0f0ef1ecc2226826a5a844678fa569c700540bcdef103d809bb33bc1e87f2",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:17.639292+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\delete.zip', 'added-14.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\delete.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "rename",
+      "motw": true,
+      "completed": 24,
+      "attempted_cycles": 25,
+      "publication_attempts": 25,
+      "publication_successes": 24,
+      "failures": [
+        {
+          "cycle": 24,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:20.527569+00:00', 'command': ['rename', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\rename.zip', '\u0434\u0430\u043d\u0456.txt', 'renamed.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "after_sha256": "f60a0c2c0c852c877fc65793154288f085eaea1c35ca904d0927c5b0d41a4a55",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:20.527569+00:00', 'command': ['rename', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\rename.zip', '\u0434\u0430\u043d\u0456.txt', 'renamed.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\rename.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "mixed",
+      "motw": true,
+      "completed": 5,
+      "attempted_cycles": 6,
+      "publication_attempts": 23,
+      "publication_successes": 22,
+      "failures": [
+        {
+          "cycle": 5,
+          "error": "{'timestamp_utc': '2026-10-23T16:51:23.369004+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\mixed.zip', 'added-5.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\mixed.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "2f6e178c19d245050a06991c87b9f0d106b39e4680fc514e954fdf945bf86b57",
+          "after_sha256": "2f6e178c19d245050a06991c87b9f0d106b39e4680fc514e954fdf945bf86b57",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:51:23.369004+00:00', 'command': ['delete', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\mixed.zip', 'added-5.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-rqilwl3l\\\\motw\\\\mixed.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    }
+  ],
+  "finished_utc": "2026-10-23T16:51:30.388292+00:00"
+}

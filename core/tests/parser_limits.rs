@@ -162,3 +162,38 @@ fn ambiguous_end_record_in_comment_cannot_trigger_backend_fallback() {
     let error = parser::preflight_zip(&mut Cursor::new(bytes)).unwrap_err();
     assert!(error.message.contains("ambiguous"));
 }
+
+#[test]
+fn stored_nested_zip_uses_exact_validated_directory_and_original_payload() {
+    use std::io::{Read, Write};
+    let mut inner = zip::ZipWriter::new(Cursor::new(Vec::new()));
+    inner
+        .start_file("note.txt", zip::write::SimpleFileOptions::default())
+        .unwrap();
+    inner.write_all(b"nested payload").unwrap();
+    let inner = inner.finish().unwrap().into_inner();
+    let mut outer = zip::ZipWriter::new(Cursor::new(Vec::new()));
+    outer
+        .start_file(
+            "nested.zip",
+            zip::write::SimpleFileOptions::default()
+                .compression_method(zip::CompressionMethod::Stored),
+        )
+        .unwrap();
+    outer.write_all(&inner).unwrap();
+    let bytes = outer.finish().unwrap().into_inner();
+    let mut parsed = parser::open_zip(Cursor::new(bytes.clone())).unwrap();
+    assert_eq!(parsed.len(), 1);
+    let mut actual = Vec::new();
+    parsed
+        .by_index(0)
+        .unwrap()
+        .read_to_end(&mut actual)
+        .unwrap();
+    assert_eq!(actual, inner);
+    // A damaged real directory may not cause fallback to the nested directory.
+    let start = parsed.central_directory_start() as usize;
+    let mut damaged = bytes;
+    damaged[start] ^= 0x20;
+    assert!(parser::open_zip(Cursor::new(damaged)).is_err());
+}

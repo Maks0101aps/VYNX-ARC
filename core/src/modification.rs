@@ -53,7 +53,7 @@ pub fn modify_with_receipt(
     op: &Operation,
 ) -> Result<String> {
     op.check()?;
-    if !matches!(archive.format, Format::Zip | Format::SevenZ)
+    if !matches!(archive.format, Format::Zip | Format::SevenZ) && archive.format.name() != "RAR"
         || crate::volumes::first_part(&archive.path).is_some()
     {
         return Err(ArcError::new(
@@ -74,6 +74,10 @@ pub fn modify_with_receipt(
         ));
     }
     let source_guard = lock_source(&archive.path)?;
+    #[cfg(windows)]
+    if archive.format == Format::Rar {
+        crate::rar::prepare_rebuild(&archive.path, password, op)?;
+    }
     let mut edit_guard = None;
     if let Change::Replace {
         input,
@@ -324,10 +328,11 @@ pub fn modify_with_receipt(
     diagnostic("REBUILD_FINISHED", &archive.path, Some(replacement.path()));
     replacement.as_file().sync_all()?;
     diagnostic("TEMP_SYNCED", &archive.path, Some(replacement.path()));
+    let replacement = replacement.into_temp_path();
     op.check()?;
     op.phase("Verifying replacement archive");
-    diagnostic("VERIFY_OPEN", &archive.path, Some(replacement.path()));
-    let verified = Archive::open(replacement.path(), password, op)?;
+    diagnostic("VERIFY_OPEN", &archive.path, Some(&replacement));
+    let verified = Archive::open(&replacement, password, op)?;
     operations::test(&verified, password, op)?;
     if let Change::Replace {
         name,
@@ -350,7 +355,7 @@ pub fn modify_with_receipt(
             ));
         }
     }
-    diagnostic("VERIFY_FINISHED", &archive.path, Some(replacement.path()));
+    diagnostic("VERIFY_FINISHED", &archive.path, Some(&replacement));
     let wanted: HashSet<_> = planned
         .iter()
         .map(|e| {
@@ -379,7 +384,14 @@ pub fn modify_with_receipt(
         ));
     }
     drop(verified);
-    diagnostic("VERIFY_DROPPED", &archive.path, Some(replacement.path()));
+    diagnostic("VERIFY_DROPPED", &archive.path, Some(&replacement));
+    let replacement = tempfile::NamedTempFile::from_parts(
+        OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&replacement)?,
+        replacement,
+    );
     #[cfg(windows)]
     operations::propagate_zone(&archive.path, replacement.path())?;
     replacement.as_file().sync_all()?;
@@ -415,49 +427,161 @@ pub fn modify_with_receipt(
     Ok(receipt)
 }
 
-fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
-    commit_with_budget(replacement, path, op, Duration::from_secs(2))
+fn failed_publication(
+    replacement: tempfile::TempPath,
+    failure: std::io::Error,
+    path: &Path,
+) -> ArcError {
+    #[cfg(windows)]
+    if matches!(failure.raw_os_error(), Some(1176 | 1177))
+        || failure
+            .get_ref()
+            .is_some_and(|e| e.is::<PublicationRecovery>())
+    {
+        let detail = failure.to_string();
+        let staged = replacement.to_path_buf();
+        std::mem::forget(replacement);
+        return ArcError::new(
+            "RECOVERY_NEEDED",
+            format!(
+                "Windows could not complete replacement of {}. {detail}. Verified replacement retained at {}. Keep all recovery files; reload and inspect the archive before continuing.",
+                path.display(),
+                staged.display()
+            ),
+        );
+    }
+    drop(replacement);
+    modification_error(failure, path)
 }
 
-/// Retry the final rename only while the native failure is consistent with a
+fn commit(replacement: tempfile::NamedTempFile, path: &Path, op: &Operation) -> Result<()> {
+    commit_with_budget(
+        replacement.into_temp_path(),
+        path,
+        op,
+        Duration::from_secs(2),
+    )
+}
+
+/// Retry the final publication only while the native failure is consistent with a
 /// transient competing handle. The verified replacement is retained between
 /// attempts, so a persistent denial still leaves the original untouched.
 fn commit_with_budget(
-    mut replacement: tempfile::NamedTempFile,
+    replacement: tempfile::TempPath,
     path: &Path,
     op: &Operation,
     budget: Duration,
 ) -> Result<()> {
     op.check()?;
     let publication_path = security::publication_path(path)?;
-    op.prepare_publication(&[(path.to_owned(), replacement.path().to_owned())])?;
+    op.prepare_publication(&[(path.to_owned(), replacement.to_path_buf())])?;
     op.check()?;
     let deadline = Instant::now() + budget;
     let delays = [25u64, 50, 100, 200, 400, 600, 800];
     let mut attempt = 0;
     loop {
         op.check()?;
-        diagnostic("PUBLISH_BEGIN", path, Some(replacement.path()));
-        match replacement.persist(&publication_path) {
+        diagnostic("PUBLISH_BEGIN", path, Some(&replacement));
+        match publish_replacement(&replacement, &publication_path) {
             Ok(_) => {
                 diagnostic("PUBLISH_SUCCESS", path, None);
+                std::mem::forget(replacement);
                 return Ok(());
             }
-            Err(error) => {
-                diagnostic("PUBLISH_FAIL", path, Some(error.file.path()));
-                let failure = error.error;
-                replacement = error.file;
+            Err(failure) => {
+                diagnostic("PUBLISH_FAIL", path, Some(&replacement));
                 let retryable = publication_retryable(&failure, &publication_path);
                 let pause = Duration::from_millis(delays.get(attempt).copied().unwrap_or(800));
                 attempt += 1;
                 let remaining = deadline.saturating_duration_since(Instant::now());
                 if !retryable || remaining.is_zero() {
-                    return Err(modification_error(failure, path));
+                    return Err(failed_publication(replacement, failure, path));
                 }
                 wait_cancellable(op, pause.min(remaining))?;
             }
         }
     }
+}
+
+#[cfg(windows)]
+#[derive(Debug)]
+struct PublicationRecovery {
+    error: std::io::Error,
+    backup: PathBuf,
+}
+#[cfg(windows)]
+impl std::fmt::Display for PublicationRecovery {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}; original recovery backup retained at {}",
+            self.error,
+            self.backup.display()
+        )
+    }
+}
+#[cfg(windows)]
+impl std::error::Error for PublicationRecovery {}
+
+#[cfg(windows)]
+fn publish_replacement(staged: &Path, target: &Path) -> std::io::Result<()> {
+    use std::os::windows::ffi::OsStrExt;
+    // ReplaceFile can partially move the original on errors 1176/1177. Always
+    // supply a unique sibling backup; never discard either recovery candidate.
+    let backup = tempfile::Builder::new()
+        .prefix(".vynx-recovery-")
+        .tempfile_in(
+            target
+                .parent()
+                .ok_or_else(|| std::io::Error::other("Missing archive parent"))?,
+        )?
+        .into_temp_path();
+    let target_w: Vec<u16> = target.as_os_str().encode_wide().chain(Some(0)).collect();
+    let staged_w: Vec<u16> = staged.as_os_str().encode_wide().chain(Some(0)).collect();
+    let backup_w: Vec<u16> = backup.as_os_str().encode_wide().chain(Some(0)).collect();
+
+    #[link(name = "kernel32")]
+    unsafe extern "system" {
+        fn ReplaceFileW(
+            lpReplacedFileName: *const u16,
+            lpReplacementFileName: *const u16,
+            lpBackupFileName: *const u16,
+            dwReplaceFlags: u32,
+            lpExclude: *mut std::ffi::c_void,
+            lpReserved: *mut std::ffi::c_void,
+        ) -> i32;
+    }
+    let ok = unsafe {
+        ReplaceFileW(
+            target_w.as_ptr(),
+            staged_w.as_ptr(),
+            backup_w.as_ptr(),
+            0, // Fail rather than silently discard ACL/attribute merge failures.
+            std::ptr::null_mut(),
+            std::ptr::null_mut(),
+        )
+    };
+
+    if ok != 0 {
+        Ok(())
+    } else {
+        let err = std::io::Error::last_os_error();
+        if matches!(err.raw_os_error(), Some(1176 | 1177)) {
+            let backup_path = backup.to_path_buf();
+            std::mem::forget(backup);
+            Err(std::io::Error::other(PublicationRecovery {
+                error: err,
+                backup: backup_path,
+            }))
+        } else {
+            Err(err)
+        }
+    }
+}
+
+#[cfg(not(windows))]
+fn publish_replacement(staged: &Path, target: &Path) -> std::io::Result<()> {
+    std::fs::rename(staged, target)
 }
 
 fn wait_cancellable(op: &Operation, pause: Duration) -> Result<()> {
@@ -588,6 +712,8 @@ fn modification_error(error: std::io::Error, path: &Path) -> ArcError {
 pub(crate) enum Sink<'a> {
     Zip(Box<zip::ZipWriter<&'a mut File>>),
     Seven(sevenz_rust2::ArchiveWriter<&'a mut File>),
+    #[cfg(windows)]
+    Rar(crate::rar_write::Rebuild<'a>),
 }
 impl<'a> Sink<'a> {
     pub(crate) fn new(
@@ -596,6 +722,12 @@ impl<'a> Sink<'a> {
         password: &str,
         op: &Operation,
     ) -> Result<Self> {
+        #[cfg(windows)]
+        if format == Format::Rar {
+            return Ok(Self::Rar(crate::rar_write::Rebuild::new(
+                file, password, op,
+            )?));
+        }
         if format == Format::Zip {
             return Ok(Self::Zip(Box::new(zip::ZipWriter::new(file))));
         }
@@ -619,6 +751,8 @@ impl<'a> Sink<'a> {
     ) -> Result<()> {
         op.check()?;
         match self {
+            #[cfg(windows)]
+            Self::Rar(writer) => writer.add(entry, data, policy)?,
             Self::Zip(writer) => {
                 let mut base = zip::write::SimpleFileOptions::default()
                     .compression_method(if op.settings().preset == crate::settings::Preset::Store {
@@ -680,6 +814,8 @@ impl<'a> Sink<'a> {
     }
     pub(crate) fn finish(self) -> Result<()> {
         match self {
+            #[cfg(windows)]
+            Self::Rar(writer) => writer.finish()?,
             Self::Zip(w) => {
                 w.finish()?;
             }
@@ -722,6 +858,54 @@ mod publication_tests {
         file.write_all(b"replacement").unwrap();
         file.as_file().sync_all().unwrap();
         file
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn partial_native_failure_retains_verified_replacement() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        let replacement = staged(dir.path()).into_temp_path();
+        let temp = replacement.to_path_buf();
+        let error = failed_publication(replacement, std::io::Error::from_raw_os_error(1176), &path);
+        assert_eq!(error.code, "RECOVERY_NEEDED");
+        assert_eq!(std::fs::read(&temp).unwrap(), b"replacement");
+        assert!(error.message.contains(&temp.display().to_string()));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn partial_native_failure_reports_original_backup_and_keeps_both_payloads() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        let backup = dir.path().join(".vynx-recovery-original");
+        std::fs::write(&backup, b"original").unwrap();
+        let replacement = staged(dir.path()).into_temp_path();
+        let temp = replacement.to_path_buf();
+        // Deterministic model of Windows error 1177 after the original moved.
+        let failure = std::io::Error::other(PublicationRecovery {
+            error: std::io::Error::from_raw_os_error(1177),
+            backup: backup.clone(),
+        });
+        let error = failed_publication(replacement, failure, &path);
+        assert_eq!(error.code, "RECOVERY_NEEDED");
+        assert_eq!(std::fs::read(&backup).unwrap(), b"original");
+        assert_eq!(std::fs::read(&temp).unwrap(), b"replacement");
+        assert!(error.message.contains(&backup.display().to_string()));
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn native_replacement_preserves_named_stream_and_removes_backup_on_success() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("archive.zip");
+        std::fs::write(&path, b"original").unwrap();
+        let stream = path.with_file_name("archive.zip:UserMetadata");
+        std::fs::write(&stream, b"retained metadata").unwrap();
+        commit(staged(dir.path()), &path, &Operation::default()).unwrap();
+        assert_eq!(std::fs::read(&path).unwrap(), b"replacement");
+        assert_eq!(std::fs::read(&stream).unwrap(), b"retained metadata");
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 1);
     }
 
     #[test]
@@ -798,7 +982,7 @@ mod publication_tests {
         let replacement = staged(dir.path());
         let temp = replacement.path().to_owned();
         commit_with_budget(
-            replacement,
+            replacement.into_temp_path(),
             &path,
             &Operation::default(),
             Duration::from_secs(2),
@@ -819,14 +1003,14 @@ mod publication_tests {
         let replacement = staged(dir.path());
         let temp = replacement.path().to_owned();
         let error = commit_with_budget(
-            replacement,
+            replacement.into_temp_path(),
             &path,
             &Operation::default(),
             Duration::from_millis(200),
         )
         .unwrap_err();
         drop(held);
-        assert_eq!(error.code, "ACCESS_DENIED");
+        assert!(matches!(error.code, "ARCHIVE_BUSY" | "ACCESS_DENIED"));
         assert_eq!(std::fs::read(path).unwrap(), b"original");
         assert!(!temp.exists());
     }

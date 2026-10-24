@@ -252,7 +252,7 @@ void MainWindow::pasteFromClipboard() {
     if (!writableArchive()) {
         QMessageBox::warning(this, tr("Paste between archives"),
                              tr("The active destination archive cannot be modified directly. "
-                                "Only ZIP and 7Z archives support adding copied files."));
+                                "Only ZIP, 7Z and unlocked RAR5 archives support adding copied files."));
         return;
     }
 

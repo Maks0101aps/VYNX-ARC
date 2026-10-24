@@ -1,9 +1,12 @@
-# Transactional ZIP / 7Z modification
+# Transactional ZIP / 7Z / RAR5 modification
 
 Add files/folders, delete selected entries (including folder descendants), and
 rename files/folders rebuild the archive through bounded streams. No extracted
-plaintext workspace is used. Duplicate/case-colliding paths fail before rebuilding.
-RAR and the other formats remain read only for modification.
+plaintext workspace is used for ZIP/7Z. RAR5 stages retained bytes in one anonymous
+delete-on-close spool. Duplicate/case-colliding paths fail before rebuilding.
+Single-volume unlocked/unsigned RAR5 supports the same actions and working-copy
+save-back. RAR4, multipart RAR and other formats remain read-only. RAR details
+and metadata limits: [NATIVE_RAR.md](NATIVE_RAR.md).
 
 The original is opened with a Windows sharing mode that permits readers but denies
 writes/deletion while it is decoded. The replacement is a unique sibling temporary
@@ -13,12 +16,23 @@ remove the temporary file. A locked-target publication failure preserves the ori
 No cancellation is reported after the final commit decision, so a completed commit
 always refreshes the GUI. Mark-of-the-Web is copied to the replacement.
 
-Publication makes one attempt through pinned `tempfile::NamedTempFile::persist`.
-On Windows this first clears the temporary attribute with `SetFileAttributesW`,
-then calls `MoveFileExW(MOVEFILE_REPLACE_EXISTING)`. Failures are reported without
-retry/sleep masking. The historical location-associated error 5 remains
-unresolved; see [PUBLICATION_DIAGNOSTICS.md](PUBLICATION_DIAGNOSTICS.md).
-Passing stress runs alone do not identify or fix that historical failure.
+Publication keeps the existing bounded Windows retry classification and uses
+native `ReplaceFileW` with a unique same-volume `.vynx-recovery-*` backup.
+Writable staging handles are closed before verification and publication. Metadata
+merge flags are zero: ACL/attribute transfer errors are never ignored. There is
+no fallback that deletes the source or renames over a missing source.
+On Windows partial-move errors 1176/1177 both backup and verified replacement are
+retained and `RECOVERY_NEEDED` reports their paths across the worker boundary.
+The backup is removed after successful publication; a supervisor/host crash can
+leave a recovery sibling. Manual inspection is required before deleting it.
+The native semantics and partial-error cases are documented by
+[Microsoft](https://learn.microsoft.com/en-us/windows/win32/api/winbase/nf-winbase-replacefilew).
+
+The final candidate has repeated passing strict project-path matrices and
+controlled compatible/incompatible-handle checks. Historical MoveFileExW error-5
+failures remain in the evidence. This qualifies the new native replacement;
+it does not identify which external process caused every historical failure.
+See [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
 
 Outputs are recompressed using the current ZIP/7Z defaults, not a raw block edit.
 ZIP archive comments and file modification dates, and retained 7Z file timestamps

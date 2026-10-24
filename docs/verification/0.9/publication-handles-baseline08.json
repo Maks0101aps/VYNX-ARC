@@ -1,0 +1,53 @@
+{
+  "status": "measured baseline",
+  "cli_sha256": "02d33d398626f3d78173f55febb044bed003dd21d4c7ae82bf0f1c743d2d2ade",
+  "worker_sha256": "c98af768487c5bc0a9f1532eed73188ea93e3c44b7eea92ff05129aea09b3486",
+  "workspace": "C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ior_iegy",
+  "results": [
+    {
+      "label": "pylance_attributes_none",
+      "desired_access": "0x100080",
+      "share_mode": 0,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 1,
+      "stderr": "ACCESS_DENIED: Could not update C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ior_iegy\\pylance_attributes_none.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "before_sha256": "ee0ec6b1c1c1627dac0f66afbb7c7758c2b7c051829049531306d5f3ba77f4e9",
+      "after_sha256": "ee0ec6b1c1c1627dac0f66afbb7c7758c2b7c051829049531306d5f3ba77f4e9",
+      "unchanged_on_failure": true,
+      "content": {
+        "old.txt": "original content"
+      }
+    },
+    {
+      "label": "generic_read_all_share",
+      "desired_access": "0x80000000",
+      "share_mode": 7,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 1,
+      "stderr": "ACCESS_DENIED: Could not update C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ior_iegy\\generic_read_all_share.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "before_sha256": "f8dacefa580e86943c4e5d6bcb71229ddb6c70c6918402743779fbea6295ae93",
+      "after_sha256": "f8dacefa580e86943c4e5d6bcb71229ddb6c70c6918402743779fbea6295ae93",
+      "unchanged_on_failure": true,
+      "content": {
+        "old.txt": "original content"
+      }
+    },
+    {
+      "label": "generic_read_no_delete_share",
+      "desired_access": "0x80000000",
+      "share_mode": 3,
+      "independent_unheld_control_exit": 0,
+      "independent_unheld_control_stderr": "",
+      "exit_code": 1,
+      "stderr": "ACCESS_DENIED: Could not update C:\\Users\\Maksi\\AppData\\Local\\Temp\\vynx-share-probe-ior_iegy\\generic_read_no_delete_share.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\n",
+      "before_sha256": "2d48317fced02f284b45fd9d886f93cb4f5f8ed23a336a7f55c12edd19bfa773",
+      "after_sha256": "2d48317fced02f284b45fd9d886f93cb4f5f8ed23a336a7f55c12edd19bfa773",
+      "unchanged_on_failure": true,
+      "content": {
+        "old.txt": "original content"
+      }
+    }
+  ]
+}

@@ -1,0 +1,849 @@
+{
+  "status": "passed",
+  "cli_sha256": "92ad8c6d3c68b6e83ea4ae4f85c6bb056e2c241e4c97c5403e2f9dcfeee07f47",
+  "cases": [
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-0.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.24904449999985445,
+      "sampled_tree_rss_bytes": 30154752,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-0.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.14902149999988978,
+        "sampled_tree_rss_bytes": 36294656
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-1.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16388450000022203,
+      "sampled_tree_rss_bytes": 33169408,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-1"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11499659999981304,
+        "sampled_tree_rss_bytes": 28393472
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-2.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1657796999998027,
+      "sampled_tree_rss_bytes": 33329152,
+      "preset": "balanced",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-2.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-2"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1163989000001493,
+        "sampled_tree_rss_bytes": 31449088
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-3.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16537659999994503,
+      "sampled_tree_rss_bytes": 30982144,
+      "preset": "maximum",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-3.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-3"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1171598000000813,
+        "sampled_tree_rss_bytes": 32174080
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-4.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16029530000014347,
+      "sampled_tree_rss_bytes": 33558528,
+      "preset": "store",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-4.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-4"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11447779999980412,
+        "sampled_tree_rss_bytes": 33243136
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-5.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16119079999998576,
+      "sampled_tree_rss_bytes": 33067008,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-5.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-5"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1150830000001406,
+        "sampled_tree_rss_bytes": 28758016
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-6.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16811379999990095,
+      "sampled_tree_rss_bytes": 34836480,
+      "preset": "balanced",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-6.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-6"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.10986769999999524,
+        "sampled_tree_rss_bytes": 28364800
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-7.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1682860000000801,
+      "sampled_tree_rss_bytes": 32100352,
+      "preset": "maximum",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-7.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-7"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11271529999976337,
+        "sampled_tree_rss_bytes": 28741632
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-8.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.15893899999991845,
+      "sampled_tree_rss_bytes": 28938240,
+      "preset": "store",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-8.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-8"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11473410000007789,
+        "sampled_tree_rss_bytes": 33251328
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-9.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16311899999982415,
+      "sampled_tree_rss_bytes": 33247232,
+      "preset": "fast",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-9.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-9"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1111350000001039,
+        "sampled_tree_rss_bytes": 28381184
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-10.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2742881999997735,
+      "sampled_tree_rss_bytes": 32026624,
+      "preset": "balanced",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-10.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-10"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11721720000014102,
+        "sampled_tree_rss_bytes": 34168832
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-11.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.27739059999976234,
+      "sampled_tree_rss_bytes": 32014336,
+      "preset": "maximum",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-11.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-11"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11599210000031235,
+        "sampled_tree_rss_bytes": 34480128
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-12.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.264895499999966,
+      "sampled_tree_rss_bytes": 32690176,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525191,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-12.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-12",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1828112999996847,
+        "sampled_tree_rss_bytes": 34570240
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-13.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2807615000001533,
+      "sampled_tree_rss_bytes": 37023744,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525543,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-13.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-13",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1860049000001709,
+        "sampled_tree_rss_bytes": 31965184
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-14.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--encrypt-headers",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.27050910000025397,
+      "sampled_tree_rss_bytes": 33869824,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525450,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-14.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-14",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.17474899999979243,
+        "sampled_tree_rss_bytes": 29356032
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-15.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.37444200000027195,
+      "sampled_tree_rss_bytes": 36286464,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 551662,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-15.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-15",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.22166820000029475,
+        "sampled_tree_rss_bytes": 34947072
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-16.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3904612999999699,
+      "sampled_tree_rss_bytes": 35221504,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 526006,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-16.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-16",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.13936269999976503,
+        "sampled_tree_rss_bytes": 34881536
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-17.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3796850999997332,
+      "sampled_tree_rss_bytes": 38195200,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 527170,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-17.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-17",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.23210160000007818,
+        "sampled_tree_rss_bytes": 34844672
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-18.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--recovery-percent",
+        "3",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3805164999998851,
+      "sampled_tree_rss_bytes": 38293504,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 5,
+      "archive_bytes": 552012,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-18.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-18",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.15174359999991793,
+        "sampled_tree_rss_bytes": 29372416
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-19.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16140500000028624,
+      "sampled_tree_rss_bytes": 29122560,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 1127441,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-19.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-19"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11968920000026628,
+        "sampled_tree_rss_bytes": 28409856
+      },
+      "vynx_hashes": "passed",
+      "libarchive_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-20.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.29637830000001486,
+      "sampled_tree_rss_bytes": 32972800,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 525509,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\case-20.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-libarchive-qualified\\vynx-20"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1088196999999127,
+        "sampled_tree_rss_bytes": 34217984
+      },
+      "vynx_hashes": "passed",
+      "independent_encryption_or_volumes": "not available",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    }
+  ],
+  "external_tools_are_test_only": true,
+  "environment": "isolated host test directories; not a clean Windows VM",
+  "worker_sha256": "4d0c064c7c1e705391f3a1c69bd8a40cdcd5b39328853f465214ce64ddbc1d2f",
+  "winrar": null,
+  "input_file_count": 3,
+  "input_bytes": 1084288,
+  "rebuild_add_rename_delete": "passed"
+}

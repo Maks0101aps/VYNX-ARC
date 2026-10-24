@@ -1,0 +1,98 @@
+{
+  "status": "failed",
+  "started_utc": "2026-10-23T16:43:49.143317+00:00",
+  "finished_utc": "2026-10-23T16:44:45.052833+00:00",
+  "cli_sha256": "6e8f07768304508be79d5e7b3e67e38a62d59bba88235b629783c027738c650d",
+  "seed": 393216,
+  "workers": [
+    {
+      "cases": 89,
+      "seconds": 55.86000000000013,
+      "formats": {
+        "rar": 4,
+        "zip": 4,
+        "7z": 4,
+        "tar": 4,
+        "tar.gz": 4,
+        "gz": 4,
+        "xz": 4,
+        "bz2": 4,
+        "zst": 4,
+        "lzma": 4,
+        "tar.xz": 4,
+        "tar.bz2": 4,
+        "tar.zst": 4,
+        "RAR:test_read_format_rar.rar": 4,
+        "RAR:test_read_format_rar4_encrypted.rar": 4,
+        "RAR:test_read_format_rar4_encrypted_filenames.rar": 4,
+        "RAR:test_read_format_rar5_compressed.rar": 4,
+        "RAR:test_read_format_rar5_encrypted.rar": 3,
+        "RAR:test_read_format_rar5_encrypted_filenames.rar": 3,
+        "RAR:test_read_format_rar5_multiple_files.rar": 3,
+        "RAR:test_read_format_rar5_stored.rar": 3,
+        "RAR:test_read_format_rar5_unicode.rar": 3,
+        "RAR:test_read_format_rar_binary_data.rar": 3,
+        "RAR:test_read_format_rar_compress_normal.rar": 3
+      },
+      "errors": [
+        {
+          "case": 88,
+          "seed_format": "RAR:test_read_format_rar5_compressed.rar",
+          "operation": "list",
+          "sha256": "d786bf37a5dfa92372389a5e007533f701f93757cda5f3f1ec813fa9702ef916",
+          "seconds": 19.452999999999975,
+          "passed": false,
+          "error": "campaign child exceeded 7 seconds",
+          "input": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-fuzz-campaign\\worker-0\\failure-88.bin"
+        }
+      ]
+    },
+    {
+      "cases": 84,
+      "seconds": 55.84400000000005,
+      "formats": {
+        "rar": 4,
+        "zip": 4,
+        "7z": 4,
+        "tar": 4,
+        "tar.gz": 4,
+        "gz": 4,
+        "xz": 4,
+        "bz2": 4,
+        "zst": 4,
+        "lzma": 4,
+        "tar.xz": 4,
+        "tar.bz2": 4,
+        "tar.zst": 3,
+        "RAR:test_read_format_rar.rar": 3,
+        "RAR:test_read_format_rar4_encrypted.rar": 3,
+        "RAR:test_read_format_rar4_encrypted_filenames.rar": 3,
+        "RAR:test_read_format_rar5_compressed.rar": 3,
+        "RAR:test_read_format_rar5_encrypted.rar": 3,
+        "RAR:test_read_format_rar5_encrypted_filenames.rar": 3,
+        "RAR:test_read_format_rar5_multiple_files.rar": 3,
+        "RAR:test_read_format_rar5_stored.rar": 3,
+        "RAR:test_read_format_rar5_unicode.rar": 3,
+        "RAR:test_read_format_rar_binary_data.rar": 3,
+        "RAR:test_read_format_rar_compress_normal.rar": 3
+      },
+      "errors": [
+        {
+          "case": 83,
+          "seed_format": "tar.bz2",
+          "operation": "list",
+          "sha256": "a9897f5dec79097b19d8dc74857f867a007af89062808b4f9b5c7573be811319",
+          "seconds": 19.452999999999975,
+          "passed": false,
+          "error": "campaign child exceeded 7 seconds",
+          "input": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-fuzz-campaign\\worker-1\\failure-83.bin"
+        }
+      ]
+    }
+  ],
+  "aggregate_campaign_seconds": 111.70400000000018,
+  "cases": 173,
+  "job_memory_mib": 512,
+  "case_timeout_seconds": 4,
+  "scope": "Native core list/test deterministic mutation campaigns in independent bounded child jobs; aggregate active campaign wall time includes process startup. Not coverage-guided fuzzing, sanitizer coverage or security certification."
+}

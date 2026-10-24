@@ -57,7 +57,8 @@ def main():
     startup.wShowWindow = 0
     report = {'location': args.location, 'work': str(work), 'cycles': args.cycles,
               'started_utc': datetime.datetime.now(datetime.timezone.utc).isoformat(),
-              'portable_sha256': hashlib.sha256((ROOT / 'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),
+              'portable_sha256': None if args.cli else hashlib.sha256((ROOT / 'dist/VYNX-ARC-Portable-x64.zip').read_bytes()).hexdigest(),
+              'binary_selection': 'explicit CLI' if args.cli else 'default portable',
               'continue_on_failure': args.continue_on_failure,
               'cli_sha256': hashlib.sha256(cli.read_bytes()).hexdigest(), 'categories': []}
     log = evidence / 'commands.jsonl'

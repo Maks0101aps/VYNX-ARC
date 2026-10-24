@@ -1,5 +1,14 @@
 # Security model
 
+0.9: RAR encoding uses independent rars with streaming sources and managed
+memory/preparation/spool budgets. See [NATIVE_RAR.md](NATIVE_RAR.md) for limits.
+Windows extraction caches at most 128 canonical parents only while their
+rename-denying ancestor handles remain live; per-output path/publication checks
+remain. POSIX does not reuse this cache. ZIP construction is now bound to the
+preflighted directory: payload end signatures no longer cause rejection, and
+failed parsing cannot fall back to another unbounded directory. Ambiguous
+structurally terminal end records remain rejected.
+
 Archives and their metadata are attacker controlled. The destination directory and
 source files are user owned. Operations run as the current user, with no elevation.
 

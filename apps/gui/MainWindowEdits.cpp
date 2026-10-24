@@ -33,7 +33,7 @@ void MainWindow::editSelected() {
     QMessageBox consent(QMessageBox::Question, tr("Edit working copy"),
                         tr("Create an editable copy of %1? Decrypted content and its source path "
                            "will remain on this computer until you discard the working copy. "
-                           "Changes return to ZIP/7Z only when you explicitly save them.")
+                           "Changes return to ZIP/7Z/RAR5 only when you explicitly save them.")
                             .arg(row.fullPath),
                         QMessageBox::Ok | QMessageBox::Cancel, this);
     consent.setTextFormat(Qt::PlainText);

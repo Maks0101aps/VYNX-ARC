@@ -1,5 +1,10 @@
 # Split volumes
 
+Native RAR5 volume creation is also available in 0.9. Its payload-size setting,
+framing overhead, encryption/recovery, first-part naming and read-only modification
+limits differ from byte-split 7Z; see [NATIVE_RAR.md](NATIVE_RAR.md). Both paths
+verify before no-clobber publication and cannot publish a multi-file set atomically.
+
 Open numbered `.7z.001` volumes for browsing, testing, hashing and extraction.
 Opening another numbered part selects `.001`. The reader keeps one data handle
 open at a time and indexes at most 4096 parts. It supports standard equal-size

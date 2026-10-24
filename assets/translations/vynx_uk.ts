@@ -29,6 +29,15 @@
         <translation>Налагоджувальна збірка · версія в розробці</translation>
     </message>
     <message>
+        <location filename="../../apps/gui/dialogs/AboutDialog.cpp" line="18"/>
+        <source>Offline archive operations. No telemetry.
+ZIP, 7Z, native RAR, TAR and compressed streams.
+File preview, external opening and batch extraction.</source>
+        <translation>Робота з архівами без інтернету. Без телеметрії.
+ZIP, 7Z, вбудована підтримка RAR, TAR і стиснені потоки.
+Перегляд файлів, відкриття в інших програмах і пакетне розпакування.</translation>
+    </message>
+    <message>
         <location filename="../../apps/gui/dialogs/AboutDialog.cpp" line="24"/>
         <source>Source repository</source>
         <translation>Вихідний код</translation>
@@ -45,11 +54,10 @@
         <translation>Ліцензії включені до пакета програми.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/AboutDialog.cpp" line="18"/>
         <source>Offline archive operations. No telemetry.
 ZIP, 7Z, read-only RAR, TAR and compressed streams.
 File preview, external opening and batch extraction.</source>
-        <translation>Робота з архівами без мережі й телеметрії.
+        <translation type="vanished">Робота з архівами без мережі й телеметрії.
 ZIP, 7Z, RAR лише для читання, TAR і стиснені потоки.
 Перегляд файлів, відкриття в інших програмах і пакетне розпакування.</translation>
     </message>
@@ -518,161 +526,210 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
     <name>CreateArchiveDialog</name>
     <message>
         <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="8"/>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="100"/>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="176"/>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="182"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="109"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="228"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="232"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="238"/>
         <source>Create archive</source>
         <translation>Створити архів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="168"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="129"/>
+        <source>Advanced: split volumes</source>
+        <translation>Додатково: поділ на томи</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="158"/>
+        <source>RAR5 options</source>
+        <translation>Параметри RAR5</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="161"/>
+        <source>Solid compression</source>
+        <translation>Безперервне стиснення (solid)</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="163"/>
+        <source>Encrypt filenames (requires password)</source>
+        <translation>Шифрувати імена файлів (потрібен пароль)</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="167"/>
+        <source>Automatic</source>
+        <translation>Автоматично</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="176"/>
+        <source>Dictionary</source>
+        <translation>Словник</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="177"/>
+        <source>Recovery record (0 = off)</source>
+        <translation>Дані відновлення (0 = вимкнено)</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="178"/>
+        <source>RAR volumes use a payload size; headers add overhead. Output: name.part1.rar, name.part2.rar. Recovery repair is not available in this version.</source>
+        <translation>Розмір тома RAR задає обсяг даних без заголовків. Результат: name.part1.rar, name.part2.rar. Відновлення пошкоджених архівів у цій версії недоступне.</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="195"/>
+        <source>ZIP and RAR5 use AES-256. 7Z encrypts data and filenames.</source>
+        <translation>ZIP і RAR5 використовують AES-256. 7Z шифрує дані та імена файлів.</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="215"/>
         <source>Sources</source>
         <translation>Джерела</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="15"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="24"/>
         <source>Add files…</source>
         <translation>Додати файли…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="16"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="25"/>
         <source>Add folder…</source>
         <translation>Додати папку…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="17"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="26"/>
         <source>Remove</source>
         <translation>Прибрати</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="22"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="31"/>
         <source>Source files</source>
         <translation>Вхідні файли</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="24"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="33"/>
         <source>Source folder</source>
         <translation>Вхідна папка</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="46"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="55"/>
         <source>Format</source>
         <translation>Формат</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="41"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="50"/>
         <source>Browse…</source>
         <translation>Огляд…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="35"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="44"/>
         <source>Archive name or full path</source>
         <translation>Назва архіву або повний шлях</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="45"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="54"/>
         <source>Output archive</source>
         <translation>Новий архів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="68"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="77"/>
         <source>Compression</source>
         <translation>Стиснення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="102"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="111"/>
         <source>All files (*)</source>
         <translation>Усі файли (*)</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="108"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="117"/>
         <source>Add password</source>
         <translation>Додати пароль</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="116"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="125"/>
         <source>Password (optional)</source>
         <translation>Пароль (необов’язково)</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="120"/>
         <source>Advanced: split 7Z volumes</source>
-        <translation>Додатково: томи 7Z</translation>
+        <translation type="vanished">Додатково: томи 7Z</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="127"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="136"/>
         <source>No split</source>
         <translation>Без поділу</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="127"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="136"/>
         <source>Custom</source>
         <translation>Інший розмір</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="133"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="142"/>
         <source>Volume size</source>
         <translation>Розмір тому</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="149"/>
         <source>ZIP uses AES-256. 7Z encrypts data and filenames.</source>
-        <translation>ZIP використовує AES-256. 7Z шифрує дані та назви файлів.</translation>
+        <translation type="vanished">ZIP використовує AES-256. 7Z шифрує дані та назви файлів.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="171"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="218"/>
         <source>Create</source>
         <translation>Створити</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="177"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="228"/>
+        <source>Enter a password to encrypt RAR filenames.</source>
+        <translation>Введіть пароль для шифрування імен файлів RAR.</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="233"/>
         <source>Choose source files and an output archive.</source>
         <translation>Виберіть вхідні файли та шлях нового архіву.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="62"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="71"/>
         <source>Store / None</source>
         <translation>Без стиснення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="62"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="71"/>
         <source>Fast</source>
         <translation>Швидко</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="62"/>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="66"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="71"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="75"/>
         <source>Balanced</source>
         <translation>Збалансовано</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="62"/>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="66"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="71"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="75"/>
         <source>Maximum</source>
         <translation>Максимум</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="66"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="75"/>
         <source>Eco</source>
         <translation>Економний</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="69"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="78"/>
         <source>Resources</source>
         <translation>Ресурси</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="74"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="83"/>
         <source>Effective settings</source>
         <translation>Застосовані параметри</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="48"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="57"/>
         <source>This format compresses one file. Use TAR.XZ, TAR.BZ2 or TAR.ZST for folders.</source>
         <translation>Цей формат стискає один файл. Для папок оберіть TAR.XZ, TAR.BZ2 або TAR.ZST.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="183"/>
+        <location filename="../../apps/gui/dialogs/CreateArchiveDialog.cpp" line="239"/>
         <source>Choose exactly one file, or select a TAR format for folders and multiple files.</source>
         <translation>Оберіть один файл або формат TAR для папок і кількох файлів.</translation>
     </message>
@@ -1201,38 +1258,43 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Хеш скопійовано</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1071"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="819"/>
+        <source>This archive is read only. Modification supports single-file ZIP, 7Z and unlocked RAR5.</source>
+        <translation>Цей архів доступний лише для читання. Змінювати можна однотомні ZIP, 7Z і незаблоковані RAR5.</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1078"/>
         <source> · read only</source>
         <translation> · лише читання</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1080"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1087"/>
         <source>%1 items · %2</source>
         <translation>%1 елементів · %2</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1108"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1115"/>
         <source>Name</source>
         <translation>Назва</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1109"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1116"/>
         <source>Archive path</source>
         <translation>Шлях в архіві</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1111"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1118"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="299"/>
         <source>Size</source>
         <translation>Розмір</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1112"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1119"/>
         <source>Packed</source>
         <translation>Стиснуто</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1113"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1120"/>
         <source>Modified</source>
         <translation>Змінено</translation>
     </message>
@@ -1263,9 +1325,9 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Операцію завершено</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1035"/>
-        <location filename="../../apps/gui/MainWindowPreview.cpp" line="62"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1042"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="244"/>
+        <location filename="../../apps/gui/MainWindowPreview.cpp" line="62"/>
         <source>Operation stopped</source>
         <translation>Операцію зупинено</translation>
     </message>
@@ -1290,40 +1352,39 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Не вдалося відкрити архів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="281"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="291"/>
         <source>Destination</source>
         <translation>Призначення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="285"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="295"/>
         <source>Stop on conflict</source>
         <translation>Зупинити при конфлікті</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="812"/>
         <source>This archive is read only. Modification supports single-file ZIP and 7Z.</source>
-        <translation>Цей архів доступний лише для читання. Зміни підтримуються для однотомних ZIP і 7Z.</translation>
+        <translation type="vanished">Цей архів доступний лише для читання. Зміни підтримуються для однотомних ZIP і 7Z.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="289"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="299"/>
         <source>Existing files</source>
         <translation>Наявні файли</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="860"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="307"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="867"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="317"/>
         <source>Password, if needed</source>
         <translation>Пароль, якщо потрібен</translation>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindow.cpp" line="570"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1390"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1397"/>
         <source>Extracting…</source>
         <translation>Розпакування…</translation>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindow.cpp" line="186"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1098"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1105"/>
         <source>Properties</source>
         <translation>Властивості</translation>
     </message>
@@ -1340,7 +1401,7 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
     </message>
     <message>
         <location filename="../../apps/gui/MainWindow.cpp" line="602"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1427"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1434"/>
         <source>Testing archive…</source>
         <translation>Перевірка архіву…</translation>
     </message>
@@ -1361,7 +1422,7 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Копіювати хеші</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="664"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="672"/>
         <source>Sources</source>
         <translation>Джерела</translation>
     </message>
@@ -1376,29 +1437,29 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Додати папку…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="286"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
         <source>Replace if newer</source>
         <translation>Замінити, якщо новіший</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1376"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1383"/>
         <source>File already exists</source>
         <translation>Файл уже існує</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1112"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1117"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1119"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1124"/>
         <source>Unknown</source>
         <translation>Невідомо</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1381"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1388"/>
         <source>Skip</source>
         <translation>Пропустити</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="286"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="656"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="664"/>
         <source>Keep both</source>
         <translation>Зберегти обидва</translation>
     </message>
@@ -1429,63 +1490,63 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Хеші записів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="822"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="829"/>
         <source>Source files</source>
         <translation>Вхідні файли</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="818"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="825"/>
         <source>Source folder</source>
         <translation>Вхідна папка</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="769"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="996"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="776"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1003"/>
         <source>Creating archive…</source>
         <translation>Створення архіву…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="828"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="835"/>
         <source>Select files or folders first.</source>
         <translation>Спочатку виберіть файли або папки.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="834"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="841"/>
         <source>Select one entry to rename.</source>
         <translation>Виберіть один запис для перейменування.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="838"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="848"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="326"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="845"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="855"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="336"/>
         <source>Rename entry</source>
         <translation>Перейменувати запис</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="838"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="331"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="845"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="341"/>
         <source>New archive path</source>
         <translation>Новий шлях в архіві</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="844"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="851"/>
         <source>Modify archive</source>
         <translation>Змінити архів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="846"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="324"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="853"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="334"/>
         <source>Add files and folders</source>
         <translation>Додати файли й папки</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="847"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="325"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="854"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="335"/>
         <source>Delete entries</source>
         <translation>Видалити записи</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="850"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="857"/>
         <source>%1: %2 item(s)
 Destination in archive: %3
 A verified replacement will be published only after completion.
@@ -1496,64 +1557,64 @@ Duplicate paths are rejected. Contents are recompressed.</source>
 Повторювані шляхи відхиляються. Вміст стискається повторно.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="965"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="972"/>
         <source>Selected archives</source>
         <translation>Вибрані архіви</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1007"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1014"/>
         <source>Processing selected archives…</source>
         <translation>Обробка вибраних архівів…</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1075"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1082"/>
         <source> · %1 packed</source>
         <translation> · стиснуто %1</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1077"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1084"/>
         <source> · %1% saved</source>
         <translation> · економія %1%</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1087"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1094"/>
         <source>%1 selected · %2</source>
         <translation>Вибрано: %1 · %2</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1224"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1231"/>
         <location filename="../../apps/gui/MainWindowSessions.cpp" line="98"/>
         <source>Operation in progress</source>
         <translation>Операція виконується</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1225"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1232"/>
         <source>Cancel the operation and close after it stops?</source>
         <translation>Скасувати операцію та закрити вікно після її зупинки?</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/UiCapture.cpp" line="98"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="100"/>
         <source>Extracting Project.7z</source>
         <translation>Розпакування Project.7z</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="922"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="929"/>
         <source>Archive was not updated</source>
         <translation>Архів не оновлено</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="927"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="934"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="178"/>
         <source>Reload archive</source>
         <translation>Перечитати архів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="917"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="924"/>
         <source>Another application is using this archive. Close it, reload the archive, and run the operation again.</source>
         <translation>Інша програма використовує цей архів. Закрийте її, перечитайте архів і повторіть операцію.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="920"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="927"/>
         <source>Access was denied. Check permissions and the read-only attribute, then reload the archive before trying again.</source>
         <translation>Відмовлено в доступі. Перевірте дозволи й атрибут «лише читання», потім перечитайте архів перед повторною спробою.</translation>
     </message>
@@ -1635,7 +1696,7 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="402"/>
-        <location filename="../../apps/gui/UiCapture.cpp" line="113"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="115"/>
         <source>Pending — %1</source>
         <translation>Очікує — %1</translation>
     </message>
@@ -1647,15 +1708,15 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="213"/>
-        <location filename="../../apps/gui/UiCapture.cpp" line="108"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="110"/>
         <source>Completed — %1</source>
         <translation>Завершено — %1</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="169"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="255"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="216"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="384"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="169"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="265"/>
         <source>Stopped — %1</source>
         <translation>Зупинено — %1</translation>
     </message>
@@ -1667,44 +1728,44 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Скасовано — %1</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="950"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="957"/>
         <source>Requested operation — %1</source>
         <translation>Операція — %1</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1445"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="38"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1452"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="37"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="38"/>
         <source>Pending</source>
         <translation>Очікує</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1459"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1460"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1466"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1467"/>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="25"/>
         <source>Completed</source>
         <translation>Завершено</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1449"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1456"/>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="29"/>
         <source>Cancelled</source>
         <translation>Скасовано</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1438"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1445"/>
         <source>Queue control</source>
         <translation>Перевірка черги</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/UiCapture.cpp" line="100"/>
-        <location filename="../../apps/gui/UiCapture.cpp" line="104"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="102"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="106"/>
         <source>Extracting and verifying files</source>
         <translation>Розпакування й перевірка файлів</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/UiCapture.cpp" line="101"/>
-        <location filename="../../apps/gui/UiCapture.cpp" line="104"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="103"/>
+        <location filename="../../apps/gui/UiCapture.cpp" line="106"/>
         <source>7Z decoder worker limit 2</source>
         <translation>До 2 потоків декодування 7Z</translation>
     </message>
@@ -1724,13 +1785,13 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Відкрити в іншій програмі...</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="784"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="791"/>
         <source>Create %1</source>
         <translation>Створити %1</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1489"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="373"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1496"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="383"/>
         <location filename="../../apps/gui/UiCapture.cpp" line="63"/>
         <source>Stopped</source>
         <translation>Зупинено</translation>
@@ -1853,63 +1914,63 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Робочі копії (змінено: %1)...</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="862"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="293"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="869"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="303"/>
         <source>Store / None</source>
         <translation>Без стиснення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="862"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="293"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="869"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="303"/>
         <source>Fast</source>
         <translation>Швидко</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="862"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="865"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="293"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="869"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="872"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="303"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="306"/>
         <source>Balanced</source>
         <translation>Збалансовано</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="862"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="865"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="293"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="869"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="872"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="303"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="306"/>
         <source>Maximum</source>
         <translation>Максимум</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="865"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="872"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="306"/>
         <source>Eco</source>
         <translation>Економний</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="867"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="299"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="874"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="309"/>
         <source>Compression</source>
         <translation>Стиснення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="868"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="300"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="875"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="310"/>
         <source>Resources</source>
         <translation>Ресурси</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1151"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1158"/>
         <source>Queue history</source>
         <translation>Історія завдань</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1152"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1159"/>
         <source>Could not update queue history settings. Close other instances and retry.</source>
         <translation>Не вдалося змінити налаштування історії. Закрийте інші примірники та повторіть.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1238"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1245"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="30"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="51"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="151"/>
@@ -1917,19 +1978,19 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="267"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="297"/>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="470"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="534"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="542"/>
         <source>Working copies</source>
         <translation>Робочі копії</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1239"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1246"/>
         <source>Keep working copies on disk and close? They can be recovered from View &gt; Working copies next time.</source>
         <translation>Залишити робочі копії на диску та закрити? Вони будуть доступні в меню «Вигляд &gt; Робочі копії» після запуску.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1530"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1569"/>
-        <location filename="../../apps/gui/MainWindow.cpp" line="1572"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1537"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1576"/>
+        <location filename="../../apps/gui/MainWindow.cpp" line="1579"/>
         <source>Session ownership test</source>
         <translation>Перевірка належності операції</translation>
     </message>
@@ -1946,9 +2007,13 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Цей тип файлу не можна редагувати напряму. Розпакуйте його у вибрану теку.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowEdits.cpp" line="34"/>
         <source>Create an editable copy of %1? Decrypted content and its source path will remain on this computer until you discard the working copy. Changes return to ZIP/7Z only when you explicitly save them.</source>
-        <translation>Створити редаговану копію %1? Розшифрований вміст і шлях до джерела залишаться на комп&apos;ютері до видалення копії. Правки потраплять у ZIP/7Z лише після явного збереження.</translation>
+        <translation type="vanished">Створити редаговану копію %1? Розшифрований вміст і шлях до джерела залишаться на комп&apos;ютері до видалення копії. Правки потраплять у ZIP/7Z лише після явного збереження.</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/MainWindowEdits.cpp" line="34"/>
+        <source>Create an editable copy of %1? Decrypted content and its source path will remain on this computer until you discard the working copy. Changes return to ZIP/7Z/RAR5 only when you explicitly save them.</source>
+        <translation>Створити редаговану копію %1? Розшифровані дані та шлях до джерела залишатимуться на цьому комп’ютері, доки ви не видалите робочу копію. Зміни потраплять до ZIP/7Z/RAR5 лише після явного збереження.</translation>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="52"/>
@@ -2069,8 +2134,8 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowEdits.cpp" line="343"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="33"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="443"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="33"/>
         <source>Review required</source>
         <translation>Потрібна перевірка</translation>
     </message>
@@ -2190,8 +2255,8 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Перервано — потрібна перевірка</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="35"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="37"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="35"/>
         <source>Running</source>
         <translation>Виконується</translation>
     </message>
@@ -2229,7 +2294,7 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     <message>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="196"/>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="212"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="406"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="417"/>
         <source>Retry operation</source>
         <translation>Повторити операцію</translation>
     </message>
@@ -2240,18 +2305,18 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="222"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="263"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="273"/>
         <source>Review and retry</source>
         <translation>Перевірити та повторити</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="267"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="277"/>
         <source>Review parameters before starting a new attempt.</source>
         <translation>Перевірте параметри перед новою спробою.</translation>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowJournal.cpp" line="225"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="268"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="278"/>
         <source>A source changed or is missing. Review the current files carefully; the new attempt will use their current content.</source>
         <translation>Джерело змінено або відсутнє. Перевірте файли: нова спроба використає їхній поточний вміст.</translation>
     </message>
@@ -2286,148 +2351,148 @@ Duplicate paths are rejected. Contents are recompressed.</source>
         <translation>Запис міг завершитися. Перевірте призначення перед повтором. Початковий запит збережено й не буде запущено автоматично.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="278"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="288"/>
         <source>Sources (one path per line)</source>
         <translation>Джерела (один шлях у рядку)</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="285"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="655"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="295"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="663"/>
         <source>Skip existing</source>
         <translation>Пропускати наявні</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="285"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="655"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="295"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="663"/>
         <source>Replace existing</source>
         <translation>Замінювати наявні</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="286"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="655"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="296"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="663"/>
         <source>Ask</source>
         <translation>Запитувати</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="323"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="333"/>
         <source>Requested change</source>
         <translation>Запитана зміна</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="328"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="338"/>
         <source>Input paths</source>
         <translation>Вхідні шляхи</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="328"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="338"/>
         <source>Archive entries</source>
         <translation>Записи архіву</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="335"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="345"/>
         <source>Destination in archive</source>
         <translation>Тека в архіві</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="340"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="350"/>
         <source>Start new attempt</source>
         <translation>Почати нову спробу</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="475"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="483"/>
         <source>Operation stopped. Review details in the queue.</source>
         <translation>Операцію зупинено. Подробиці доступні в черзі.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="492"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="557"/>
         <location filename="../../apps/gui/MainWindowJobs.cpp" line="98"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="500"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="565"/>
         <source>Verify result</source>
         <translation>Перевірити результат</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="493"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="501"/>
         <source>No publication identity was recorded. Inspect the destination and source manually. This request will not be retried automatically.</source>
         <translation>Ідентифікатор публікації не записано. Перевірте призначення та джерело вручну. Запит не буде повторено автоматично.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="535"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="543"/>
         <source>The archive was verified, but recovery metadata could not be updated. Keep the working copy.</source>
         <translation>Архів перевірено, але метадані відновлення оновити не вдалося. Збережіть робочу копію.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="540"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="548"/>
         <source>Verified destination matches the recorded result.</source>
         <translation>Призначення перевірено й відповідає записаному результату.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="541"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="549"/>
         <source>Verified destination matches the pre-publication state. Review parameters before explicitly retrying.</source>
         <translation>Призначення відповідає стану до публікації. Перевірте параметри перед явним повтором.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="543"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="551"/>
         <source>Destination differs or cannot be checked. Preserve files and inspect it before any retry.</source>
         <translation>Призначення відрізняється або недоступне для перевірки. Збережіть файли та перевірте їх перед повтором.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="561"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="569"/>
         <source>Verifying interrupted publication...</source>
         <translation>Перевірка перерваної публікації...</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="626"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="631"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="634"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="639"/>
         <source>Retry batch</source>
         <translation>Повтор пакета</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="627"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="635"/>
         <source>This batch has no failed jobs available for retry.</source>
         <translation>У цьому пакеті немає невдалих завдань для повтору.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="644"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="652"/>
         <source>Review failed batch jobs</source>
         <translation>Перевірити невдалі завдання пакета</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="646"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="654"/>
         <source>%1 failed jobs will receive new attempts. Review their destination and overwrite policy.</source>
         <translation>Нових спроб для невдалих завдань: %1. Перевірте призначення та правила перезапису.</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="653"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="661"/>
         <source>Output folder</source>
         <translation>Тека призначення</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="655"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="663"/>
         <source>Refuse</source>
         <translation>Відмова</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="656"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="664"/>
         <source>Newer only</source>
         <translation>Лише новіші</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="658"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="666"/>
         <source>Conflicts</source>
         <translation>Конфлікти</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="661"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="669"/>
         <source>Source password</source>
         <translation>Пароль джерела</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="666"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="674"/>
         <source>Queue new attempts</source>
         <translation>Додати нові спроби до черги</translation>
     </message>
     <message>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="686"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="694"/>
         <source>Retry %1</source>
         <translation>Повтор: %1</translation>
     </message>
@@ -2478,7 +2543,7 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowConversion.cpp" line="18"/>
-        <location filename="../../apps/gui/MainWindowJournal.cpp" line="632"/>
+        <location filename="../../apps/gui/MainWindowJournal.cpp" line="640"/>
         <source>The queue supports up to 32 pending jobs.</source>
         <translation>Черга вміщує до 32 завдань в очікуванні.</translation>
     </message>
@@ -2564,8 +2629,12 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowNested.cpp" line="254"/>
+        <source>The active destination archive cannot be modified directly. Only ZIP, 7Z and unlocked RAR5 archives support adding copied files.</source>
+        <translation>Активний архів призначення не можна змінювати безпосередньо. Додавання скопійованих файлів підтримують лише ZIP, 7Z і незаблоковані RAR5.</translation>
+    </message>
+    <message>
         <source>The active destination archive cannot be modified directly. Only ZIP and 7Z archives support adding copied files.</source>
-        <translation>Активний архів призначення не можна змінити напряму. Додавання скопійованих файлів підтримують лише архіви ZIP і 7Z.</translation>
+        <translation type="vanished">Активний архів призначення не можна змінити напряму. Додавання скопійованих файлів підтримують лише архіви ZIP і 7Z.</translation>
     </message>
     <message>
         <location filename="../../apps/gui/MainWindowNested.cpp" line="262"/>

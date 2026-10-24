@@ -1,0 +1,32 @@
+{
+  "version": "0.9.0",
+  "status": "development candidate; stable release blocked",
+  "branch": "development/0.9.0",
+  "base_commit": "122528571d0857fa058d82da5df52a9e1ec12945",
+  "uncommitted": true,
+  "source_tree_sha256": "86b13f18c25076615f90166d93d8ea63511b700070e0d0e04c64f65345eae225",
+  "source_file_count": 362,
+  "artifacts": {
+    "VYNX-ARC-Explorer-x64.msix": {
+      "sha256": "9414974ab75521776474cadc20f28bc6cd89c405458ebb49200f302844fe8748",
+      "bytes": 13188
+    },
+    "VYNX-ARC-Portable-x64.zip": {
+      "sha256": "64d9a8b5b252c9a60081c08b1b7fa20245325c1d92ca3492f52e5bea41cb0e04",
+      "bytes": 26867939
+    },
+    "VYNX-ARC-Setup-x64.exe": {
+      "sha256": "dc91c7aa7eed78ddb76cd00537cb025fbbecdfa2a362d8a0c0d1b0f2abbb3593",
+      "bytes": 18891254
+    }
+  },
+  "binaries": {
+    "vynxarc-cli.exe": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+    "vynxarc-worker.exe": "8f0b0c7cce5860817f3c80561040bc76f3f47b03e91adfe7fbe121d49e183623",
+    "VynxArc.exe": "3787cf57cfa2d1808aca6792aea2db7971955a19db14bed2aab1e8d6e4856701"
+  },
+  "unsigned": true,
+  "msix_scope": "Explorer sparse identity; not a full application MSIX",
+  "date": "2026-10-24",
+  "push_tag_publication": false
+}

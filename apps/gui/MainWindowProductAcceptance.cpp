@@ -72,7 +72,7 @@ bool MainWindow::productAcceptance(const QString &root) {
         for (const auto &input : inputs) values.push_back(input.toUtf8().toStdString());
         auto op = vynx::new_operation();
         vynx::create_archive_as(path.toUtf8().toStdString(), {values.data(), values.size()},
-                                path.endsWith(".7z") ? 1 : 0, password, *op);
+                                path.endsWith(".rar") ? 12 : path.endsWith(".7z") ? 1 : 0, password, *op);
     };
     auto open = [&](const QString &path, const QString &password = {}) {
         openWithSecret(path, secret(password));
@@ -91,6 +91,10 @@ bool MainWindow::productAcceptance(const QString &root) {
     auto fail = [&](int line) {
         qWarning("Product acceptance failed at line %d", line);
         for (const auto &notice : notices) qWarning().noquote() << notice;
+        for (const auto &value : journal_.records()) {
+            const auto record = value.toObject();
+            if (!record["error"].toString().isEmpty()) qWarning().noquote() << record["spec"] << record["error"];
+        }
         return false;
     };
     QJsonArray results;
@@ -103,7 +107,7 @@ bool MainWindow::productAcceptance(const QString &root) {
         const QString original = root + "/original/note.txt";
         const QString reserved = root + "/original/note (1).txt";
         if (!write(original, "original") || !write(reserved, "reserved")) return fail(__LINE__);
-        for (const auto &suffix : {QString(".zip"), QString(".7z")}) {
+        for (const auto &suffix : {QString(".zip"), QString(".7z"), QString(".rar")}) {
             const QString target = root + "/target" + suffix;
             create(target, {original, reserved});
             if (!open(source, "test-secret")) return fail(__LINE__);
@@ -216,6 +220,30 @@ bool MainWindow::productAcceptance(const QString &root) {
             if (record.toObject()["error"].toString().contains("CONFLICT")) conflictRecorded = true;
         if (!conflictRecorded) return fail(__LINE__);
         results.append("output appearing after recovery review is refused atomically and retained");
+        ArchiveJobSpec rarJob;
+        rarJob.kind = JobKind::Create;
+        rarJob.sources = {note, folder};
+        rarJob.destination = root + "/native.rar";
+        rarJob.format = ArchiveFormat::Rar;
+        rarJob.preset = CompressionPreset::Fast;
+        rarJob.rarSolid = true;
+        rarJob.rarHeaders = true;
+        rarJob.rarRecovery = 3;
+        rarJob.needsPassword = true;
+        dispatchSpec(rarJob, secret("test-secret"));
+        if (!idle() || !QFile::exists(rarJob.destination) || !open(rarJob.destination, "test-secret") || !writableArchive()) return fail(__LINE__);
+        auto rarOp = vynx::new_operation();
+        vynx::test_archive(**session_->archive, "test-secret", *rarOp);
+        bool recordedRar = false;
+        for (const auto &value : journal_.records()) {
+            const auto record = value.toObject();
+            const auto spec = record["spec"].toObject();
+            if (spec["destination"] == rarJob.destination && record["state"] == "completed" &&
+                spec["rarSolid"].toBool() && spec["rarHeaders"].toBool() && spec["rarRecovery"].toInt() == 3)
+                recordedRar = true;
+        }
+        if (!recordedRar) return fail(__LINE__);
+        results.append("native RAR5 solid/AES headers/recovery creation through typed GUI dispatch, worker, publication acknowledgement and journal");
         nestedStore_->cleanup({});
         QSaveFile report(root + "/product.json");
         const auto bytes = QJsonDocument(QJsonObject{{"status", "passed"}, {"cases", results}}).toJson();

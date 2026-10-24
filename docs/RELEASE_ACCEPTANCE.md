@@ -1,3 +1,9 @@
+# Current candidate
+
+0.9.0 status and exact artifacts: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
+The remainder preserves historical release/recovery evidence.
+
+
 # 0.2.0 engineering acceptance: B — still blocked
 
 Recorded 2026-10-03 on the existing Windows 11 development workstation.

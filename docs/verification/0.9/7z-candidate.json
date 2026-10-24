@@ -1,0 +1,79 @@
+{
+  "cli_sha256": "c4e5c831a422e79d39a760ab3ab205dcad164ff452c77fe2184f7eb20c371420",
+  "source_sha256": "9066fc5b288e75c5659a2689f61c4d481669117a30756fdcb19613d5366d13c9",
+  "samples": [
+    {
+      "resource": "eco",
+      "trial": 1,
+      "rss_bytes": 35360768,
+      "seconds": 3.970523900000444,
+      "settings": "LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "eco",
+      "trial": 2,
+      "rss_bytes": 35377152,
+      "seconds": 4.037288999999873,
+      "settings": "LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "eco",
+      "trial": 3,
+      "rss_bytes": 35377152,
+      "seconds": 4.39763849999963,
+      "settings": "LZMA2 level 5; dictionary/window 2 MiB; codec threads 1; 7Z decoder workers 1; encoder budget 64 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "balanced",
+      "trial": 1,
+      "rss_bytes": 233938944,
+      "seconds": 2.3620718000001943,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "balanced",
+      "trial": 2,
+      "rss_bytes": 230088704,
+      "seconds": 2.2581561999995756,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "balanced",
+      "trial": 3,
+      "rss_bytes": 229031936,
+      "seconds": 2.1179434999994555,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 2; 7Z decoder workers 2; encoder budget 384 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "maximum",
+      "trial": 1,
+      "rss_bytes": 229220352,
+      "seconds": 2.3096575999998095,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "maximum",
+      "trial": 2,
+      "rss_bytes": 233435136,
+      "seconds": 2.1520252999998775,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)",
+      "independent_roundtrip": true
+    },
+    {
+      "resource": "maximum",
+      "trial": 3,
+      "rss_bytes": 229560320,
+      "seconds": 2.1648450000002413,
+      "settings": "LZMA2 level 5; dictionary/window 8 MiB; codec threads 8; 7Z decoder workers 8; encoder budget 1024 MiB (estimate)",
+      "independent_roundtrip": true
+    }
+  ],
+  "method": "10 ms sampled CLI RSS, 16 MiB deterministic random input; warm filesystem cache; not a hard memory bound"
+}

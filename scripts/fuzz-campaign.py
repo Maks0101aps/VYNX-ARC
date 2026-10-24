@@ -41,7 +41,7 @@ def main():
     if sibling.exists():shutil.copy2(sibling,binary/sibling.name)
     source=root/'source.txt';source.write_text('bounded mutation corpus\n'*120,encoding='utf-8')
     seed_dir=root/'seeds';seed_dir.mkdir();seeds=[]
-    for ext in ['zip','7z','tar','tar.gz','gz','xz','bz2','zst','lzma','tar.xz','tar.bz2','tar.zst']:
+    for ext in ['rar','zip','7z','tar','tar.gz','gz','xz','bz2','zst','lzma','tar.xz','tar.bz2','tar.zst']:
         path=seed_dir/f'valid.{ext}'
         subprocess.run([str(cli),'create',str(path),str(source)],check=True,capture_output=True,timeout=30)
         seeds.append((ext,path.read_bytes()))

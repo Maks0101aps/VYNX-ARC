@@ -1,11 +1,12 @@
 [workspace]
 members = ["core", "apps/cli"]
 resolver = "2"
-exclude = ["third_party/unrar-sys", "third_party/sevenz-rust2"]
+exclude = ["third_party/unrar-sys", "third_party/sevenz-rust2", "third_party/zip"]
 
 [patch.crates-io]
 unrar-ng-sys = { path = "third_party/unrar-sys" }
 sevenz-rust2 = { path = "third_party/sevenz-rust2" }
+zip = { path = "third_party/zip" }
 
 [profile.release]
 lto = "thin"

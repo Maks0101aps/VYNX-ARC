@@ -47,7 +47,8 @@ enum class ArchiveFormat {
     Lzma = 8,
     TarXz = 9,
     TarBz2 = 10,
-    TarZst = 11
+    TarZst = 11,
+    Rar = 12
 };
 
 enum class CompressionPreset { Store = 0, Fast = 1, Balanced = 2, Maximum = 3 };
@@ -65,6 +66,9 @@ enum class ConflictPolicy {
 };
 
 struct ArchiveJobSpec {
+    bool rarSolid = false, rarHeaders = false;
+    quint64 rarDictionary = 0;
+    int rarRecovery = 0;
     JobKind kind = JobKind::Unknown;
     QString id;
     QString title;

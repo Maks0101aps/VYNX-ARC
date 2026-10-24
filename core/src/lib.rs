@@ -13,6 +13,8 @@ mod priority;
 pub mod publication;
 #[cfg(windows)]
 pub mod rar;
+#[cfg(windows)]
+pub mod rar_write;
 pub mod security;
 pub mod settings;
 pub mod timestamps;

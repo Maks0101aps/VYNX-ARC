@@ -64,6 +64,11 @@ impl Format {
             Ok(Self::Zip)
         } else if name.ends_with(".7z") {
             Ok(Self::SevenZ)
+        } else if cfg!(windows) && name.ends_with(".rar") {
+            #[cfg(windows)]
+            return Ok(Self::Rar);
+            #[cfg(not(windows))]
+            return Err(ArcError::new("FORMAT", "RAR encoding requires Windows"));
         } else if name.ends_with(".tar.gz") || name.ends_with(".tgz") {
             Ok(Self::TarGz)
         } else if name.ends_with(".tar") {
@@ -95,6 +100,7 @@ pub struct Entry {
 
 #[derive(Clone)]
 pub struct Archive {
+    pub writable: bool,
     pub path: PathBuf,
     pub format: Format,
     pub entries: Vec<Entry>,
@@ -173,11 +179,13 @@ impl Archive {
             file = crate::volumes::Reader::open(&path)?;
         }
         let mut entries = Vec::new();
+        let mut writable = matches!(format, Format::Zip | Format::SevenZ)
+            && crate::volumes::first_part(&path).is_none();
         let max_entries = Policy::default().max_entries;
         match format {
             #[cfg(windows)]
             Format::Rar => {
-                entries = crate::rar::list(&path, password, op)?;
+                (entries, writable) = crate::rar::list(&path, password, op)?;
             }
             Format::Zip => {
                 let mut zip = crate::parser::open_zip(file)?;
@@ -302,6 +310,7 @@ impl Archive {
             }
         }
         Ok(Self {
+            writable,
             path: path.to_owned(),
             format,
             entries,

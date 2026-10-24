@@ -744,9 +744,13 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     const quint64 splitSizes[] = {0,          100ULL << 20, 500ULL << 20,
                                   1ULL << 30, 4ULL << 30,   quint64(customSplit->value()) << 20};
     const auto volumeSize =
-        selectedFormat == 1 && advanced->isChecked() ? splitSizes[split->currentIndex()] : 0;
+        (selectedFormat == 1 || selectedFormat == 12) && advanced->isChecked() ? splitSizes[split->currentIndex()] : 0;
     const auto preset = uint8_t(d.preset->currentIndex());
     const auto resource = uint8_t(d.resource->currentIndex());
+    const bool rarSolid = selectedFormat == 12 && d.rarSolid->isChecked();
+    const bool rarHeaders = selectedFormat == 12 && d.rarHeaders->isChecked();
+    const auto rarDictionary = selectedFormat == 12 ? d.rarDictionary->currentData().toULongLong() : 0;
+    const auto rarRecovery = selectedFormat == 12 ? d.rarRecovery->value() : 0;
     settings_->setValue("resourceMode", resource);
     settings_->setValue("compressionPreset", preset);
     QJsonArray sourcePaths;
@@ -759,13 +763,16 @@ void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
                                  {"volumeSize", double(volumeSize)},
                                  {"preset", int(preset)},
                                  {"resource", int(resource)},
+                                 {"rarSolid", rarSolid}, {"rarHeaders", rarHeaders},
+                                 {"rarDictionary", double(rarDictionary)}, {"rarRecovery", rarRecovery},
                                  {"needsPassword", !pw->bytes().empty()}};
     auto createJob = [this, sources, out, pw, selectedFormat, volumeSize, preset, resource,
-                      createSpec] {
+                      createSpec, rarSolid, rarHeaders, rarDictionary, rarRecovery] {
         beginOperation();
         activeSpec_ = createSpec;
         auto op = operations_.operation;
         vynx::configure_operation(**op, preset, resource);
+        vynx::configure_rar_operation(**op, rarSolid, rarDictionary, rarHeaders, uint8_t(rarRecovery));
         runJob(tr("Creating archive…"), [sources, out, pw, op, selectedFormat, volumeSize] {
             if (volumeSize)
                 vynx::create_split_archive(
@@ -809,7 +816,7 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
         return;
     if (!writableArchive()) {
         statusBar()->showMessage(
-            tr("This archive is read only. Modification supports single-file ZIP and 7Z."), 10000);
+            tr("This archive is read only. Modification supports single-file ZIP, 7Z and unlocked RAR5."), 10000);
         return;
     }
     QStringList names = sources;

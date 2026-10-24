@@ -6,7 +6,16 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
                                          QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Create archive"));
-    auto *form = new QFormLayout(this);
+    auto *outer = new QVBoxLayout(this);
+    auto *scroll = new QScrollArea;
+    scroll->setObjectName("createOptionsScroll");
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    auto *body = new QWidget;
+    auto *form = new QFormLayout(body);
+    form->setObjectName("createForm");
+    scroll->setWidget(body);
+    outer->addWidget(scroll, 1);
     inputs = new QListWidget;
     inputs->addItems(initial);
     inputs->setMinimumWidth(380);
@@ -29,7 +38,7 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
             [this] { delete inputs->takeItem(inputs->currentRow()); });
     format = new QComboBox;
     format->addItems({"ZIP", "7Z", "TAR", "TAR.GZ", "GZIP", "XZ", "BZIP2", "ZSTD", "LZMA", "TAR.XZ",
-                      "TAR.BZ2", "TAR.ZST"});
+                      "TAR.BZ2", "TAR.ZST", "RAR5"});
     format->setCurrentIndex(initialFormat);
     output = new QLineEdit;
     output->setPlaceholderText(tr("Archive name or full path"));
@@ -75,11 +84,11 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     auto refresh = [this, effective] {
         if (format->currentIndex() == 2)
             preset->setCurrentIndex(0);
-        if (format->currentIndex() >= 5 && preset->currentIndex() == 0)
+        if (format->currentIndex() >= 5 && format->currentIndex() != 12 && preset->currentIndex() == 0)
             preset->setCurrentIndex(2);
         auto *model = qobject_cast<QStandardItemModel *>(preset->model());
         if (model)
-            model->item(0)->setEnabled(format->currentIndex() < 5);
+            model->item(0)->setEnabled(format->currentIndex() < 5 || format->currentIndex() == 12);
         preset->setEnabled(format->currentIndex() != 2);
         try {
             auto s = vynx::compression_details(uint8_t(format->currentIndex()),
@@ -96,7 +105,7 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     refresh();
     connect(save, &QPushButton::clicked, this, [this] {
         const QStringList extensions{"zip", "7z",  "tar",  "tar.gz", "gz",      "xz",
-                                     "bz2", "zst", "lzma", "tar.xz", "tar.bz2", "tar.zst"};
+                                     "bz2", "zst", "lzma", "tar.xz", "tar.bz2", "tar.zst", "rar"};
         auto p = QFileDialog::getSaveFileName(this, tr("Create archive"),
                                               "Archive." + extensions[format->currentIndex()],
                                               tr("All files (*)"));
@@ -117,11 +126,11 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     auto *passwordLabel = form->labelForField(password);
     passwordLabel->hide();
     connect(addPassword, &QCheckBox::toggled, passwordLabel, &QWidget::setVisible);
-    advanced = new QGroupBox(tr("Advanced: split 7Z volumes"));
+    advanced = new QGroupBox(tr("Advanced: split volumes"));
     advanced->setCheckable(true);
     advanced->setChecked(false);
     advanced->setMaximumHeight(advanced->fontMetrics().height() + 18);
-    advanced->setVisible(initialFormat == 1);
+    advanced->setVisible(initialFormat == 1 || initialFormat == 12);
     auto *splitForm = new QFormLayout(advanced);
     split = new QComboBox;
     split->addItems({tr("No split"), "100 MiB", "500 MiB", "1 GiB", "4 GiB", tr("Custom")});
@@ -146,32 +155,79 @@ CreateArchiveDialog::CreateArchiveDialog(const QStringList &initial, int initial
     connect(split, &QComboBox::currentIndexChanged, this,
             [this](int index) { customSplit->setVisible(index == 5 && advanced->isChecked()); });
     form->addRow(advanced);
-    auto *encryptionLabel = new QLabel(tr("ZIP uses AES-256. 7Z encrypts data and filenames."));
+    auto *rarOptions = new QGroupBox(tr("RAR5 options"));
+    rarOptions->setObjectName("rarOptions");
+    auto *rarForm = new QFormLayout(rarOptions);
+    rarSolid = new QCheckBox(tr("Solid compression"));
+    rarSolid->setObjectName("rarSolid");
+    rarHeaders = new QCheckBox(tr("Encrypt filenames (requires password)"));
+    rarHeaders->setObjectName("rarHeaders");
+    rarDictionary = new QComboBox;
+    rarDictionary->setObjectName("rarDictionary");
+    rarDictionary->addItem(tr("Automatic"), qulonglong(0));
+    for (quint64 size = 1; size <= 32; size *= 2)
+        rarDictionary->addItem(QString::number(size) + " MiB", qulonglong(size << 20));
+    rarRecovery = new QSpinBox;
+    rarRecovery->setObjectName("rarRecovery");
+    rarRecovery->setRange(0, 10);
+    rarRecovery->setSuffix(" %");
+    rarForm->addRow(rarSolid);
+    rarForm->addRow(rarHeaders);
+    rarForm->addRow(tr("Dictionary"), rarDictionary);
+    rarForm->addRow(tr("Recovery record (0 = off)"), rarRecovery);
+    auto *rarHint = new QLabel(tr("RAR volumes use a payload size; headers add overhead. Output: name.part1.rar, name.part2.rar. Recovery repair is not available in this version."));
+    rarHint->setWordWrap(true);
+    rarHint->setMaximumWidth(480);
+    rarForm->addRow(rarHint);
+    form->addRow(rarOptions);
+    rarOptions->setVisible(initialFormat == 12);
+    connect(format, &QComboBox::currentIndexChanged, this, [rarOptions](int i) { rarOptions->setVisible(i == 12); });
+    auto refreshDictionary = [this](int i) {
+        const quint64 cap = (i == 0 ? 2ULL : i == 1 ? 8ULL : 32ULL) << 20;
+        auto *model = qobject_cast<QStandardItemModel *>(rarDictionary->model());
+        for (int row = 1; row < rarDictionary->count(); ++row)
+            model->item(row)->setEnabled(rarDictionary->itemData(row).toULongLong() <= cap);
+        if (rarDictionary->currentData().toULongLong() > cap)
+            rarDictionary->setCurrentIndex(0);
+    };
+    connect(resource, &QComboBox::currentIndexChanged, this, refreshDictionary);
+    refreshDictionary(resource->currentIndex());
+    auto *encryptionLabel = new QLabel(tr("ZIP and RAR5 use AES-256. 7Z encrypts data and filenames."));
     encryptionLabel->setWordWrap(true);
     form->addRow(encryptionLabel);
     connect(format, &QComboBox::currentIndexChanged, this,
             [this, encryptionLabel, addPassword](int i) {
-                addPassword->setEnabled(i < 2);
-                if (i >= 2)
+                const bool encrypted = i < 2 || i == 12;
+                addPassword->setEnabled(encrypted);
+                if (!encrypted)
                     addPassword->setChecked(false);
-                password->setEnabled(i < 2);
+                password->setEnabled(encrypted);
                 if (!output->text().isEmpty())
                     output->setText(outputForFormat(output->text(), i));
-                if (i >= 2)
+                if (!encrypted)
                     password->clear();
-                encryptionLabel->setVisible(i < 2);
-                advanced->setVisible(i == 1);
+                encryptionLabel->setVisible(encrypted);
+                advanced->setVisible(i == 1 || i == 12);
             });
-    password->setEnabled(initialFormat < 2);
-    addPassword->setEnabled(initialFormat < 2);
-    encryptionLabel->setVisible(initialFormat < 2);
+    password->setEnabled(initialFormat < 2 || initialFormat == 12);
+    addPassword->setEnabled(initialFormat < 2 || initialFormat == 12);
+    encryptionLabel->setVisible(initialFormat < 2 || initialFormat == 12);
     form->addRow(tr("Sources"), inputs);
     form->addRow(sourceButtons);
     auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText(tr("Create"));
     buttons->button(QDialogButtonBox::Ok)->setObjectName("primary");
-    form->addRow(buttons);
+    // Keep the action buttons reachable when RAR controls exceed a small or
+    // high-DPI screen; keyboard focus also scrolls the relevant field into view.
+    outer->addWidget(buttons);
+    const auto available = screen()->availableGeometry().size();
+    setMaximumSize(qMax(320, available.width() - 32), qMax(240, available.height() - 64));
+    resize(qMin(560, maximumWidth()), qMin(body->sizeHint().height() + 80, maximumHeight()));
     connect(buttons, &QDialogButtonBox::accepted, this, [this] {
+        if (format->currentIndex() == 12 && rarHeaders->isChecked() && password->text().isEmpty()) {
+            QMessageBox::information(this, tr("Create archive"), tr("Enter a password to encrypt RAR filenames."));
+            return;
+        }
         if (inputs->count() == 0 || output->text().isEmpty()) {
             QMessageBox::information(this, tr("Create archive"),
                                      tr("Choose source files and an output archive."));

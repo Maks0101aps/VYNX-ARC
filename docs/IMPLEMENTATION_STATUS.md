@@ -1,3 +1,12 @@
+# Current status: 0.9.0 development candidate
+
+Native RAR5 implementation and boundaries: [NATIVE_RAR.md](NATIVE_RAR.md).
+Exact verification and open release gates: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
+No stable release, push, tag or publication is claimed.
+
+The following 0.8 report is historical baseline evidence.
+
+
 # Implementation status — 2026-10-23
 
 Version: **0.8.0 release candidate**. The accepted baseline is 0.7.0.

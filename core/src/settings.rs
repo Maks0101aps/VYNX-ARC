@@ -138,7 +138,21 @@ impl Settings {
                 ("ZSTD", level, dictionary_cap, cpus.min(cap) as u32)
             }
             #[cfg(windows)]
-            Format::Rar => return Err(ArcError::new("READ_ONLY", "RAR creation is unsupported")),
+            Format::Rar => (
+                if self.preset == Preset::Store {
+                    "RAR5 Store"
+                } else {
+                    "RAR5 LZ"
+                },
+                match self.preset {
+                    Preset::Store => 0,
+                    Preset::Fast => 1,
+                    Preset::Balanced => 3,
+                    Preset::Maximum => 5,
+                },
+                dictionary,
+                1,
+            ),
         };
         Ok(Effective {
             codec,
@@ -146,7 +160,13 @@ impl Settings {
             dictionary,
             threads,
             workers,
-            encoder_budget: budget,
+            // rars' 1 MiB block parser needs up to 197 MiB even with the Eco
+            // dictionary at level 5. Keep the other codecs' budgets unchanged.
+            encoder_budget: if format.name() == "RAR" && self.resource == ResourceMode::Eco {
+                256 << 20
+            } else {
+                budget
+            },
         })
     }
 }

@@ -1,0 +1,884 @@
+{
+  "status": "passed",
+  "cli_sha256": "9a2a60d253a40d76579283e10499abf5eed2d0031a06eb8bc04b970112a3736a",
+  "cases": [
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-0.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2778588999999556,
+      "sampled_tree_rss_bytes": 30797824,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-0.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-0"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.12403630000062549,
+        "sampled_tree_rss_bytes": 29626368
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-1.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1663808000002973,
+      "sampled_tree_rss_bytes": 31711232,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-1"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11666200000036042,
+        "sampled_tree_rss_bytes": 29417472
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-2.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.17281009999987873,
+      "sampled_tree_rss_bytes": 39079936,
+      "preset": "balanced",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-2.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-2"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1205537000005279,
+        "sampled_tree_rss_bytes": 29413376
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-3.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "eco"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16660529999990104,
+      "sampled_tree_rss_bytes": 31850496,
+      "preset": "maximum",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-3.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-3"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1145012000006318,
+        "sampled_tree_rss_bytes": 29388800
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-4.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1782427000007374,
+      "sampled_tree_rss_bytes": 29569024,
+      "preset": "store",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-4.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-4"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11932849999993778,
+        "sampled_tree_rss_bytes": 33927168
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-5.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1642385999994076,
+      "sampled_tree_rss_bytes": 32456704,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-5.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-5"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.12233710000054998,
+        "sampled_tree_rss_bytes": 29020160
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-6.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16443710000021383,
+      "sampled_tree_rss_bytes": 32849920,
+      "preset": "balanced",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-6.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-6"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11540669999976672,
+        "sampled_tree_rss_bytes": 29011968
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-7.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "balanced"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.16409909999947558,
+      "sampled_tree_rss_bytes": 34476032,
+      "preset": "maximum",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-7.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-7"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11614009999993868,
+        "sampled_tree_rss_bytes": 29265920
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-8.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1591856999993979,
+      "sampled_tree_rss_bytes": 29548544,
+      "preset": "store",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 1084818,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-8.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-8"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.10914839999986725,
+        "sampled_tree_rss_bytes": 33910784
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-9.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1652510000003531,
+      "sampled_tree_rss_bytes": 34103296,
+      "preset": "fast",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-9.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-9"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11815299999943818,
+        "sampled_tree_rss_bytes": 34816000
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-10.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "balanced",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1616946000003736,
+      "sampled_tree_rss_bytes": 34238464,
+      "preset": "balanced",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-10.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-10"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11658449999958975,
+        "sampled_tree_rss_bytes": 34799616
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-11.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "maximum",
+        "--resource",
+        "maximum"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.18317019999994955,
+      "sampled_tree_rss_bytes": 35713024,
+      "preset": "maximum",
+      "resource": "maximum",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 524890,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-11.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-11"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.15343970000049012,
+        "sampled_tree_rss_bytes": 37347328
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-12.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.27187580000008893,
+      "sampled_tree_rss_bytes": 36036608,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525191,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-12.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-12",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.1577850000003309,
+        "sampled_tree_rss_bytes": 33435648
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-13.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.2801673000003575,
+      "sampled_tree_rss_bytes": 38088704,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525543,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-13.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-13",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.20268329999998969,
+        "sampled_tree_rss_bytes": 35647488
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-14.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--encrypt-headers",
+        "--password-stdin"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.28377050000017334,
+      "sampled_tree_rss_bytes": 36024320,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 1,
+      "archive_bytes": 525450,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-14.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-14",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.21487530000013066,
+        "sampled_tree_rss_bytes": 30023680
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-15.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.5422008000005007,
+      "sampled_tree_rss_bytes": 38813696,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 551662,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-15.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-15",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.2691287999996348,
+        "sampled_tree_rss_bytes": 35876864
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-16.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.39472769999974844,
+      "sampled_tree_rss_bytes": 39198720,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 526006,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-16.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-16",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.15043489999970916,
+        "sampled_tree_rss_bytes": 30089216
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-17.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--solid",
+        "--encrypt-headers",
+        "--password-stdin",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.6140593000000081,
+      "sampled_tree_rss_bytes": 37711872,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": true,
+      "encrypted": true,
+      "header_encryption": true,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 527170,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-17.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-17",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.24500309999984893,
+        "sampled_tree_rss_bytes": 30003200
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-18.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "balanced",
+        "--password-stdin",
+        "--recovery-percent",
+        "3",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.3995900999998412,
+      "sampled_tree_rss_bytes": 35844096,
+      "preset": "fast",
+      "resource": "balanced",
+      "solid": false,
+      "encrypted": true,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 5,
+      "archive_bytes": 552012,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-18.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-18",
+          "--password-stdin"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.14959429999998974,
+        "sampled_tree_rss_bytes": 33390592
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-19.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "store",
+        "--resource",
+        "eco",
+        "--recovery-percent",
+        "3"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.1616649999996298,
+      "sampled_tree_rss_bytes": 29720576,
+      "preset": "store",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 3,
+      "parts": 1,
+      "archive_bytes": 1127441,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-19.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-19"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.12346859999979642,
+        "sampled_tree_rss_bytes": 28999680
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true
+    },
+    {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "create",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-20.rar",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\corpus",
+        "--preset",
+        "fast",
+        "--resource",
+        "eco",
+        "--split-bytes",
+        "131072"
+      ],
+      "exit": 0,
+      "wall_seconds": 0.28572889999941253,
+      "sampled_tree_rss_bytes": 43466752,
+      "preset": "fast",
+      "resource": "eco",
+      "solid": false,
+      "encrypted": false,
+      "header_encryption": false,
+      "recovery_percent": 0,
+      "parts": 5,
+      "archive_bytes": 525509,
+      "extraction": {
+        "command": [
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+          "isolated-extract",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\case-20.part1.rar",
+          "--output",
+          "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\vynx-20"
+        ],
+        "exit": 0,
+        "wall_seconds": 0.11786919999940437,
+        "sampled_tree_rss_bytes": 32251904
+      },
+      "vynx_hashes": "passed",
+      "winrar_test_and_hashes": "passed",
+      "damaged_header_rejected": true,
+      "missing_volume_rejected": true
+    }
+  ],
+  "external_tools_are_test_only": true,
+  "environment": "isolated host test directories; not a clean Windows VM",
+  "worker_sha256": "c4374698fc52b8a9a2242a9dc06f3476631d07cae6f3cec65ef63312caa299ed",
+  "winrar": "C:\\Program Files\\WinRAR\\WinRAR.exe",
+  "winrar_sha256": "dc0291966214c8794c72e946f18c3e945c3c8a5217754fd033106a1252e43d69",
+  "input_file_count": 3,
+  "input_bytes": 1084288,
+  "rebuild_add_rename_delete": "passed",
+  "independent_recovery_repair": {
+    "status": "passed",
+    "mutated_offset": 560629,
+    "repaired_sha256": "c8222bf368163c902d5605d2267e41f917614d47660fc871d467e92eac928872"
+  },
+  "many_files": {
+    "command": [
+      "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+      "create",
+      "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\many.rar",
+      "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\many",
+      "--preset",
+      "fast",
+      "--resource",
+      "eco"
+    ],
+    "exit": 0,
+    "wall_seconds": 150.3533655000001,
+    "sampled_tree_rss_bytes": 62492672,
+    "files": 20000,
+    "archive_bytes": 1929027,
+    "extraction": {
+      "command": [
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\bin\\vynxarc-cli.exe",
+        "isolated-extract",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\many.rar",
+        "--output",
+        "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-resume-large\\many-decoded"
+      ],
+      "exit": 0,
+      "wall_seconds": 366.4565126000007,
+      "sampled_tree_rss_bytes": 45035520
+    }
+  }
+}

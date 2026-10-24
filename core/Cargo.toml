@@ -1,6 +1,6 @@
 [package]
 name = "vynx-arc-core"
-version = "0.8.0"
+version = "0.9.0"
 edition = "2024"
 license = "MIT"
 
@@ -28,6 +28,7 @@ lzma-rust2 = "=0.22.0"
 
 [target.'cfg(windows)'.dependencies]
 unrar-ng-sys = { version = "=0.7.7", default-features = false, features = ["std"] }
+rars = { version = "=0.12.0", default-features = false, features = ["write", "encryption", "recovery"] }
 
 [build-dependencies]
 cxx-build = "=1.0.202"

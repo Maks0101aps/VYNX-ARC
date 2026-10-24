@@ -22,6 +22,11 @@ impl fmt::Display for ArcError {
 impl std::error::Error for ArcError {}
 impl From<std::io::Error> for ArcError {
     fn from(e: std::io::Error) -> Self {
+        // Streaming adapters carry typed core failures through std::io. Preserve
+        // missing-volume, cancellation and limit codes across this boundary.
+        if let Some(inner) = e.get_ref().and_then(|v| v.downcast_ref::<ArcError>()) {
+            return Self::new(inner.code, inner.message.clone());
+        }
         Self::new("IO", e.to_string())
     }
 }

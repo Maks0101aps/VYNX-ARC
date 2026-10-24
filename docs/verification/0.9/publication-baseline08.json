@@ -1,0 +1,52 @@
+{
+  "location": "project",
+  "work": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\zip-stress-c1yr2ho8",
+  "cycles": 100,
+  "started_utc": "2026-10-23T16:52:36.783703+00:00",
+  "portable_sha256": "a62df2dcf737dd484221bb875d6ef658bafc77f22c846edf7856e60897aa1d3f",
+  "continue_on_failure": false,
+  "cli_sha256": "02d33d398626f3d78173f55febb044bed003dd21d4c7ae82bf0f1c743d2d2ade",
+  "categories": [
+    {
+      "category": "add",
+      "motw": false,
+      "completed": 16,
+      "attempted_cycles": 17,
+      "publication_attempts": 17,
+      "publication_successes": 16,
+      "failures": [
+        {
+          "cycle": 16,
+          "error": "{'timestamp_utc': '2026-10-23T16:52:37.626620+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\added-16.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "58214c72855ac166b0ac0be2b91a4d28d71f0d1c04b2739ce31dc5500a523443",
+          "after_sha256": "58214c72855ac166b0ac0be2b91a4d28d71f0d1c04b2739ce31dc5500a523443",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:52:37.626620+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\added-16.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\plain\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    },
+    {
+      "category": "add",
+      "motw": true,
+      "completed": 10,
+      "attempted_cycles": 11,
+      "publication_attempts": 11,
+      "publication_successes": 10,
+      "failures": [
+        {
+          "cycle": 10,
+          "error": "{'timestamp_utc': '2026-10-23T16:52:40.140854+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\added-10.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}",
+          "before_sha256": "1a9195bdb4d3e2c6c5e140166bc5a10b2a6bf77ed45f6748b9be1fa25fe4b8ac",
+          "after_sha256": "1a9195bdb4d3e2c6c5e140166bc5a10b2a6bf77ed45f6748b9be1fa25fe4b8ac",
+          "original_preserved": true
+        }
+      ],
+      "original_preserved": true,
+      "status": "failed",
+      "error": "{'timestamp_utc': '2026-10-23T16:52:40.140854+00:00', 'command': ['add', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\add.zip', 'C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\added-10.txt'], 'exit_code': 1, 'stderr': 'ACCESS_DENIED: Could not update C:\\\\Users\\\\Maksi\\\\Documents\\\\projects\\\\VYNX-ARC\\\\.dev\\\\zip-stress-c1yr2ho8\\\\motw\\\\add.zip (OS error Some(5)): Access is denied. (os error 5). The original archive was not replaced. Access was denied. Check permissions and the read-only attribute; another application may also prevent replacement. Reload the archive before trying again.\\n', 'stdout': ''}"
+    }
+  ],
+  "finished_utc": "2026-10-23T16:52:42.184099+00:00"
+}

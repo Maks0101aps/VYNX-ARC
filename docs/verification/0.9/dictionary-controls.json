@@ -1,0 +1,27 @@
+{
+  "status": "passed",
+  "cases": [
+    {
+      "resource": "eco",
+      "dictionary_mib": 2,
+      "native_exit": 0,
+      "winrar_exit": 0,
+      "sha256": "390d27efbb2acfe1b6363a500ceff9ab11efeb03a11142ebb9964fb866c38d35"
+    },
+    {
+      "resource": "balanced",
+      "dictionary_mib": 4,
+      "native_exit": 0,
+      "winrar_exit": 0,
+      "sha256": "a847b356ddbb1e338b1ec4dcd0feed9f988ee513731ba80f543e0fd67083c21d"
+    },
+    {
+      "resource": "maximum",
+      "dictionary_mib": 16,
+      "native_exit": 0,
+      "winrar_exit": 0,
+      "sha256": "b00e0fb9de7a94808e76173ddc1171df3f4526951fc4881fcc2abf3fd20a3bf1"
+    }
+  ],
+  "over_budget_refused": true
+}

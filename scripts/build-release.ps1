@@ -1,11 +1,11 @@
-param([string]$QtRoot=$env:VYNX_QT_ROOT, [switch]$SkipInstaller)
+param([string]$QtRoot=$env:VYNX_QT_ROOT, [switch]$SkipInstaller, [string]$OutputDirectory)
 $ErrorActionPreference='Stop'
 . (Join-Path $PSScriptRoot 'env.ps1') -QtRoot $QtRoot
 $repoRoot=Split-Path $PSScriptRoot -Parent
 Push-Location $repoRoot
 try {
     & (Join-Path $PSScriptRoot 'build.ps1') -QtRoot $env:VYNX_QT_ROOT
-    $distRoot=Join-Path $repoRoot 'dist'
+    $distRoot=if($OutputDirectory){[System.IO.Path]::GetFullPath($OutputDirectory)}else{Join-Path $repoRoot 'dist'}
     New-Item -ItemType Directory -Force $distRoot | Out-Null
     $stage=Join-Path $distRoot ('stage-'+[guid]::NewGuid().ToString('N'))
     New-Item -ItemType Directory $stage | Out-Null

@@ -1,0 +1,9 @@
+{
+  "status": "passed",
+  "cli_sha256": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+  "worker_sha256": "8f0b0c7cce5860817f3c80561040bc76f3f47b03e91adfe7fbe121d49e183623",
+  "archive_sha256": "18a9c26936acba00c5f4c4af759b2b0a8500d6141b9d94fa9ce434e337c7201d",
+  "files": 20000,
+  "seconds": 13.55782950000048,
+  "output": "All streams decoded successfully\n"
+}

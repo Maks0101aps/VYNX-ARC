@@ -4,7 +4,7 @@ use std::io::{Read, Write};
 use zeroize::Zeroizing;
 pub const REQUEST_LIMIT: usize = 16 << 20;
 pub const RESPONSE_LIMIT: usize = 128 << 20;
-const MAGIC: &[u8; 8] = b"VYNXWP03";
+const MAGIC: &[u8; 8] = b"VYNXWP04";
 fn invalid() -> ArcError {
     ArcError::new("WORKER_PROTOCOL", "Invalid or oversized worker message")
 }
@@ -129,6 +129,7 @@ impl Wire for Archive {
         self.format.put(o);
         self.entries.put(o);
         self.physical_size.put(o);
+        self.writable.put(o);
     }
     fn get(i: &mut &[u8]) -> Result<Self> {
         Ok(Self {
@@ -136,6 +137,7 @@ impl Wire for Archive {
             format: Wire::get(i)?,
             entries: Wire::get(i)?,
             physical_size: Wire::get(i)?,
+            writable: Wire::get(i)?,
         })
     }
 }

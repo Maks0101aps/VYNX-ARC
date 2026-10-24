@@ -15,7 +15,7 @@ AboutDialog::AboutDialog(QWidget *parent) : QDialog(parent) {
 #else
     layout->addWidget(new QLabel(tr("Debug build · development milestone")));
 #endif
-    auto *details = new QLabel(tr("Offline archive operations. No telemetry.\nZIP, 7Z, read-only "
+    auto *details = new QLabel(tr("Offline archive operations. No telemetry.\nZIP, 7Z, native "
                                   "RAR, TAR and compressed streams.\n"
                                   "File preview, external opening and batch extraction."));
     details->setWordWrap(true);

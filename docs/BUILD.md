@@ -1,5 +1,14 @@
 # Developer build (Windows x64)
 
+For local 0.9 artifacts without replacing prior packages:
+`scripts/build-release.ps1 -OutputDirectory dist/0.9.0`.
+Set `VYNX_VERIFY_DIST` to that directory for `scripts/verify-portable.py`.
+`check-clean-windows.ps1 -ArtifactDirectory dist/0.9.0` prepares/checks the
+matching guest payload. Test-only RAR interoperability:
+`python scripts/check-rar-native.py --cli target/release/vynxarc-cli.exe --output .dev/rar-new --many-files 20000`.
+WinRAR is optional and never bundled; Windows libarchive provides a smaller
+unencrypted single-volume oracle when it is absent.
+
 The current build uses Rust **1.99.0** `x86_64-pc-windows-msvc`, Qt **6.12.0**
 MSVC 2022 x64, Visual Studio Build Tools **17.14.41** / MSVC **14.44.35207**,
 Windows SDK **10.0.26100.0**, CMake **4.4.3**, and Ninja **1.13.2**.

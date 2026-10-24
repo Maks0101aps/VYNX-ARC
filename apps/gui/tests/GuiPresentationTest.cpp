@@ -686,6 +686,7 @@ class GuiPresentationTest : public QObject {
         dialog.format->setCurrentIndex(1);
         QVERIFY(dialog.output->text().endsWith(".7z"));
         QVERIFY(dialog.advanced->isVisible());
+        QVERIFY(dialog.findChild<QScrollArea *>("createOptionsScroll"));
         dialog.password->setText("private");
         dialog.format->setCurrentIndex(2);
         QVERIFY(dialog.output->text().endsWith(".tar"));
@@ -705,6 +706,36 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!panel.rate->text().contains("remaining"));
         panel.updateProgress(20, 0, "unknown total", 9000);
         QVERIFY(!panel.rate->text().contains("remaining"));
+    }
+    void nativeRarCreationControlsAndJournalParameters() {
+        CreateArchiveDialog dialog({"C:/Test/source.txt"}, 12);
+        dialog.show();
+        QVERIFY(dialog.output->text().endsWith(".rar"));
+        QVERIFY(dialog.findChild<QGroupBox *>("rarOptions")->isVisible());
+        QVERIFY(dialog.password->isEnabled());
+        QVERIFY(dialog.advanced->isVisible());
+        dialog.preset->setCurrentIndex(0);
+        QCOMPARE(dialog.preset->currentIndex(), 0);
+        QVERIFY(dialog.findChild<QLabel *>("effectiveCompression")->text().contains("RAR5 Store"));
+        dialog.rarDictionary->setCurrentIndex(6);
+        dialog.resource->setCurrentIndex(0);
+        QCOMPARE(dialog.rarDictionary->currentIndex(), 0);
+        ArchiveJobSpec spec;
+        spec.kind = JobKind::Create;
+        spec.sources = {"C:/Test/source.txt"};
+        spec.destination = "C:/Test/out.rar";
+        spec.format = ArchiveFormat::Rar;
+        spec.rarSolid = true;
+        spec.rarHeaders = true;
+        spec.rarDictionary = 1ULL << 20;
+        spec.rarRecovery = 3;
+        const auto restored = ArchiveJobSpec::fromJson(JobJournal::sanitizeSpec(spec.toJson()));
+        QVERIFY(restored.rarSolid && restored.rarHeaders);
+        QCOMPARE(restored.rarDictionary, 1ULL << 20);
+        QCOMPARE(restored.rarRecovery, 3);
+        QVERIFY(restored.validationError().isEmpty());
+        const auto capture = qEnvironmentVariable("VYNX_RAR_DIALOG_CAPTURE");
+        if (!capture.isEmpty()) QVERIFY(dialog.grab().save(capture));
     }
     void effectivePresetAndCancellationAreVisible() {
         CreateArchiveDialog dialog({}, 0);
@@ -1055,7 +1086,8 @@ class GuiPresentationTest : public QObject {
         QCOMPARE(int(ArchiveJobSpec::conflictFromInt(5)), int(ConflictPolicy::Newer));
         QCOMPARE(int(ArchiveJobSpec::conflictFromInt(9)), int(ConflictPolicy::Refuse));
         QCOMPARE(int(ArchiveJobSpec::formatFromInt(11)), int(ArchiveFormat::TarZst));
-        QCOMPARE(int(ArchiveJobSpec::formatFromInt(12)), int(ArchiveFormat::Zip));
+        QCOMPARE(int(ArchiveJobSpec::formatFromInt(12)), int(ArchiveFormat::Rar));
+        QCOMPARE(int(ArchiveJobSpec::formatFromInt(13)), int(ArchiveFormat::Zip));
 
         ArchiveJobSpec spec;
         spec.kind = JobKind::Modify;

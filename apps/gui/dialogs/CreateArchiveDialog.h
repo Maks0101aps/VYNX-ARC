@@ -6,6 +6,7 @@ class QComboBox;
 class QLineEdit;
 class QGroupBox;
 class QSpinBox;
+class QCheckBox;
 class CreateArchiveDialog : public QDialog {
     Q_OBJECT
   public:
@@ -15,4 +16,7 @@ class CreateArchiveDialog : public QDialog {
     QLineEdit *output, *password;
     QGroupBox *advanced;
     QSpinBox *customSplit;
+    QCheckBox *rarSolid, *rarHeaders;
+    QComboBox *rarDictionary;
+    QSpinBox *rarRecovery;
 };

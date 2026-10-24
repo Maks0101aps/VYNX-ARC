@@ -218,18 +218,23 @@ void MainWindow::retrySelectedJob() {
         QStringList initial;
         for (const auto &path : spec["sources"].toArray())
             initial << path.toString();
-        CreateArchiveDialog create(initial, qBound(0, spec["format"].toInt(), 11), this);
+        CreateArchiveDialog create(initial, qBound(0, spec["format"].toInt(), 12), this);
         create.setWindowTitle(tr("Review and retry"));
         if (!JobJournal::sourcesUnchanged(record)) {
             auto *notice =
                 new QLabel(tr("A source changed or is missing. Review the current files carefully; "
                               "the new attempt will use their current content."));
             notice->setWordWrap(true);
-            static_cast<QFormLayout *>(create.layout())->insertRow(0, notice);
+            create.findChild<QFormLayout *>("createForm")->insertRow(0, notice);
         }
         create.output->setText(spec["destination"].toString());
         create.preset->setCurrentIndex(qBound(0, spec["preset"].toInt(2), 3));
         create.resource->setCurrentIndex(qBound(0, spec["resource"].toInt(1), 2));
+        create.rarSolid->setChecked(spec["rarSolid"].toBool());
+        create.rarHeaders->setChecked(spec["rarHeaders"].toBool());
+        create.rarRecovery->setValue(spec["rarRecovery"].toInt());
+        const int dictionaryRow = create.rarDictionary->findData(qulonglong(spec["rarDictionary"].toDouble()));
+        create.rarDictionary->setCurrentIndex(qMax(0, dictionaryRow));
         if (create.exec() != QDialog::Accepted)
             return;
         QJsonArray inputs;
@@ -240,10 +245,15 @@ void MainWindow::retrySelectedJob() {
         spec["format"] = create.format->currentIndex();
         spec["preset"] = create.preset->currentIndex();
         spec["resource"] = create.resource->currentIndex();
+        const bool rar = create.format->currentIndex() == 12;
+        spec["rarSolid"] = rar && create.rarSolid->isChecked();
+        spec["rarHeaders"] = rar && create.rarHeaders->isChecked();
+        spec["rarDictionary"] = rar ? double(create.rarDictionary->currentData().toULongLong()) : 0;
+        spec["rarRecovery"] = rar ? create.rarRecovery->value() : 0;
         const quint64 sizes[]{0,          100ULL << 20, 500ULL << 20,
                               1ULL << 30, 4ULL << 30,   quint64(create.customSplit->value()) << 20};
         spec["volumeSize"] =
-            double(create.format->currentIndex() == 1 && create.advanced->isChecked()
+            double((create.format->currentIndex() == 1 || rar) && create.advanced->isChecked()
                        ? sizes[create.split->currentIndex()]
                        : 0);
         const auto pw = secret(create.password->text());
@@ -402,6 +412,7 @@ void MainWindow::dispatchSpec(const ArchiveJobSpec &job, const std::shared_ptr<S
     activeSpec_ = job.toJson();
     auto op = operations_.operation;
     vynx::configure_operation(**op, uint8_t(job.preset), uint8_t(job.resource));
+    vynx::configure_rar_operation(**op, job.rarSolid, job.rarDictionary, job.rarHeaders, uint8_t(job.rarRecovery));
     runJob(
         tr("Retry operation"),
         [job, kind, paths, pw, op] {

@@ -10,7 +10,8 @@ Rust dependency graph.
 | Qt Core / Gui / Widgets / Concurrent | 6.12.0 | LGPL-3.0-or-later (selected open-source terms) | https://www.qt.io/ |
 | MSVC VC143 runtime | SDK-selected redistributable; exact files in package | Microsoft distributable-code terms in licenses/MSVC-Redist.txt | https://visualstudio.microsoft.com/ |
 | CXX / cxx-build | 1.0.202 | MIT OR Apache-2.0 | https://github.com/dtolnay/cxx |
-| zip | 9.0.4 | MIT | https://github.com/zip-rs/zip2 |
+| zip | 9.0.4 with preflighted-directory patch | MIT | https://github.com/zip-rs/zip2 |
+| rars | 0.12.0; native RAR5 encoding only | Apache-2.0 | https://github.com/bitplane/rars |
 | sevenz-rust2 | 0.23.0 with local parser-budget changes | Apache-2.0 | https://github.com/hasenbanck/sevenz-rust2 |
 | sha2 | 0.11.0 | MIT OR Apache-2.0 | https://github.com/RustCrypto/hashes |
 | crc32fast | 1.5.2 | MIT OR Apache-2.0 | https://github.com/srijs/rust-crc32fast |

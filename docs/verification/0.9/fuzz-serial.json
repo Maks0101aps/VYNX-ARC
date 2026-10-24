@@ -1,0 +1,45 @@
+{
+  "status": "passed",
+  "started_utc": "2026-10-24T08:42:50.609917+00:00",
+  "finished_utc": "2026-10-24T08:43:50.731006+00:00",
+  "cli_sha256": "8d6a21ebcc02f1a427c5e1c30a2fb5abc7e42847b552c2d911b96865057e94d4",
+  "seed": 393216,
+  "workers": [
+    {
+      "cases": 285,
+      "seconds": 60.10899999999947,
+      "formats": {
+        "rar": 12,
+        "zip": 12,
+        "7z": 12,
+        "tar": 12,
+        "tar.gz": 12,
+        "gz": 12,
+        "xz": 12,
+        "bz2": 12,
+        "zst": 12,
+        "lzma": 12,
+        "tar.xz": 12,
+        "tar.bz2": 12,
+        "tar.zst": 12,
+        "RAR:test_read_format_rar.rar": 12,
+        "RAR:test_read_format_rar4_encrypted.rar": 12,
+        "RAR:test_read_format_rar4_encrypted_filenames.rar": 12,
+        "RAR:test_read_format_rar5_compressed.rar": 12,
+        "RAR:test_read_format_rar5_encrypted.rar": 12,
+        "RAR:test_read_format_rar5_encrypted_filenames.rar": 12,
+        "RAR:test_read_format_rar5_multiple_files.rar": 12,
+        "RAR:test_read_format_rar5_stored.rar": 12,
+        "RAR:test_read_format_rar5_unicode.rar": 11,
+        "RAR:test_read_format_rar_binary_data.rar": 11,
+        "RAR:test_read_format_rar_compress_normal.rar": 11
+      },
+      "errors": []
+    }
+  ],
+  "aggregate_campaign_seconds": 60.10899999999947,
+  "cases": 285,
+  "job_memory_mib": 512,
+  "case_timeout_seconds": 4,
+  "scope": "Native core list/test deterministic mutation campaigns in independent bounded child jobs; aggregate active campaign wall time includes process startup. Not coverage-guided fuzzing, sanitizer coverage or security certification."
+}

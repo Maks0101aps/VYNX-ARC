@@ -119,6 +119,19 @@ struct Request {
     text: String,
     smart: bool,
     volume: u64,
+    rar_solid: bool,
+    rar_dictionary: u64,
+    rar_headers: bool,
+    rar_recovery: u8,
+    scratch: String,
+}
+#[cfg(not(windows))]
+#[derive(Default)]
+struct RarDefaults {
+    solid: bool,
+    dictionary: u64,
+    encrypt_headers: bool,
+    recovery_percent: u8,
 }
 record!(Request {
     kind,
@@ -134,7 +147,12 @@ record!(Request {
     action,
     text,
     smart,
-    volume
+    volume,
+    rar_solid,
+    rar_dictionary,
+    rar_headers,
+    rar_recovery,
+    scratch
 });
 struct Reply {
     kind: u8,
@@ -192,6 +210,10 @@ fn fingerprint(a: &Archive) -> String {
 impl Request {
     fn new(kind: JobKind, path: &Path, password: &str, op: &Operation) -> Self {
         let s = op.settings();
+        #[cfg(windows)]
+        let rar = op.rar_options();
+        #[cfg(not(windows))]
+        let rar = RarDefaults::default();
         Self {
             kind,
             path: path.to_string_lossy().into_owned(),
@@ -207,6 +229,11 @@ impl Request {
             text: String::new(),
             smart: false,
             volume: 0,
+            rar_solid: rar.solid,
+            rar_dictionary: rar.dictionary,
+            rar_headers: rar.encrypt_headers,
+            rar_recovery: rar.recovery_percent,
+            scratch: String::new(),
         }
     }
     fn archive(kind: JobKind, a: &Archive, password: &str, op: &Operation) -> Self {
@@ -381,8 +408,17 @@ impl Client {
     pub fn hash_file(&self, path: &Path, op: &Operation) -> Result<String> {
         Ok(self.run(Request::new(HASH_FILE, path, "", op), op)?.text)
     }
-    fn run(&self, request: Request, op: &Operation) -> Result<Reply> {
+    fn run(&self, mut request: Request, op: &Operation) -> Result<Reply> {
         op.check()?;
+        // Parent owns this workspace and removes backend spools after child death,
+        // including forced cancellation. Declare it before the child guard.
+        let scratch = matches!(request.kind, CREATE | MODIFY)
+            .then(tempfile::tempdir)
+            .transpose()?;
+        request.scratch = scratch
+            .as_ref()
+            .map(|p| p.path().to_string_lossy().into_owned())
+            .unwrap_or_default();
         let writes = matches!(request.kind, EXTRACT | CREATE | MODIFY | CONVERT);
         let _slot = Slot::acquire(op)?;
         let mut cmd = Command::new(&self.executable);
@@ -595,6 +631,7 @@ fn remote_error(code: &str, message: &str) -> ArcError {
         "ARCHIVE_BUSY" => "ARCHIVE_BUSY",
         "ACCESS_DENIED" => "ACCESS_DENIED",
         "REPLACE" => "REPLACE",
+        "RECOVERY_NEEDED" => "RECOVERY_NEEDED",
         "OPTIONS" => "OPTIONS",
         "CONFLICT" => "CONFLICT",
         "VERIFY" => "VERIFY",
@@ -607,6 +644,17 @@ fn execute(r: Request, op: &Operation) -> Result<Reply> {
     #[cfg(feature = "worker-diagnostics")]
     diagnostics::before(&r)?;
     op.configure(crate::settings::Settings::from_ids(r.preset, r.resource)?);
+    #[cfg(windows)]
+    if !r.scratch.is_empty() {
+        op.set_rar_workspace(PathBuf::from(&r.scratch))?;
+    }
+    #[cfg(windows)]
+    op.configure_rar(crate::rar_write::Options {
+        solid: r.rar_solid,
+        dictionary: r.rar_dictionary,
+        encrypt_headers: r.rar_headers,
+        recovery_percent: r.rar_recovery,
+    })?;
     if r.kind == CREATE {
         let options = crate::CreateOptions {
             output: r.path.into(),
@@ -629,6 +677,8 @@ fn execute(r: Request, op: &Operation) -> Result<Reply> {
                 9 => crate::Format::TarXz,
                 10 => crate::Format::TarBz2,
                 11 => crate::Format::TarZst,
+                #[cfg(windows)]
+                12 => crate::Format::Rar,
                 _ => return Err(protocol()),
             };
             crate::operations::create_as(&options, format, op)?;

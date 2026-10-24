@@ -65,6 +65,13 @@ pub mod bridge {
         fn operation_input_hash(op: &Operation) -> String;
         fn reply_publication(op: &Operation, id: u64, accepted: bool) -> bool;
         fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()>;
+        fn configure_rar_operation(
+            op: &Operation,
+            solid: bool,
+            dictionary: u64,
+            headers: bool,
+            recovery: u8,
+        ) -> Result<()>;
         fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String>;
         fn clone_operation(op: &Operation) -> Box<Operation>;
         fn cancel(op: &Operation);
@@ -280,6 +287,26 @@ fn configure_operation(op: &Operation, preset: u8, resource: u8) -> Result<()> {
     op.configure(crate::settings::Settings::from_ids(preset, resource)?);
     Ok(())
 }
+fn configure_rar_operation(
+    op: &Operation,
+    solid: bool,
+    dictionary: u64,
+    headers: bool,
+    recovery: u8,
+) -> Result<()> {
+    #[cfg(windows)]
+    return op.configure_rar(crate::rar_write::Options {
+        solid,
+        dictionary,
+        encrypt_headers: headers,
+        recovery_percent: recovery,
+    });
+    #[cfg(not(windows))]
+    {
+        let _ = (op, solid, dictionary, headers, recovery);
+        Err(ArcError::new("FORMAT", "RAR encoding requires Windows"))
+    }
+}
 fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
     let format = match format {
         0 => crate::Format::Zip,
@@ -294,6 +321,8 @@ fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
         9 => crate::Format::TarXz,
         10 => crate::Format::TarBz2,
         11 => crate::Format::TarZst,
+        #[cfg(windows)]
+        12 => crate::Format::Rar,
         _ => return Err(ArcError::new("FORMAT", "Unsupported format")),
     };
     Ok(crate::settings::Settings::from_ids(preset, resource)?
@@ -362,8 +391,7 @@ fn archive_format(archive: &Archive) -> String {
     archive.format.name().into()
 }
 fn archive_writable(archive: &Archive) -> bool {
-    matches!(archive.format, crate::Format::Zip | crate::Format::SevenZ)
-        && crate::volumes::first_part(&archive.path).is_none()
+    archive.writable
 }
 fn create_split_archive(
     output: &str,
@@ -379,7 +407,7 @@ fn create_split_archive(
                 inputs: inputs.iter().map(PathBuf::from).collect(),
                 password: Zeroizing::new(password.into()),
             },
-            crate::Format::SevenZ,
+            crate::Format::for_output(Path::new(output))?,
             volume_size,
             op,
         )
@@ -493,6 +521,8 @@ fn create_archive_as(
             9 => crate::Format::TarXz,
             10 => crate::Format::TarBz2,
             11 => crate::Format::TarZst,
+            #[cfg(windows)]
+            12 => crate::Format::Rar,
             _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
         };
         crate::worker::Client::sibling()?.create(

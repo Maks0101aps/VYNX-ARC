@@ -1,0 +1,16 @@
+[
+  {
+    "input": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-fuzz-campaign\\worker-0\\failure-88.bin",
+    "exit": 0,
+    "seconds": 0.19151229999988573,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "input": "C:\\Users\\Maksi\\Documents\\projects\\VYNX-ARC\\.dev\\09-fuzz-campaign\\worker-1\\failure-83.bin",
+    "exit": 0,
+    "seconds": 0.18581329999960872,
+    "stdout": "",
+    "stderr": ""
+  }
+]
