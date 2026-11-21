@@ -1127,6 +1127,42 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>VYNX ARC</translation>
     </message>
     <message>
+        <source>Check for updates…</source>
+        <translation>Перевірити оновлення…</translation>
+    </message>
+    <message>
+        <source>Check for updates</source>
+        <translation>Перевірка оновлень</translation>
+    </message>
+    <message>
+        <source>A new version of VYNX ARC is available (%1)</source>
+        <translation>Доступна нова версія VYNX ARC (%1)</translation>
+    </message>
+    <message>
+        <source>Update</source>
+        <translation>Оновити</translation>
+    </message>
+    <message>
+        <source>Dismiss</source>
+        <translation>Закрити</translation>
+    </message>
+    <message>
+        <source>You are using the latest version of VYNX ARC (%1).</source>
+        <translation>Ви використовуєте найновішу версію VYNX ARC (%1).</translation>
+    </message>
+    <message>
+        <source>Unsaved Changes</source>
+        <translation>Незбережені зміни</translation>
+    </message>
+    <message>
+        <source>You have unsaved changes or active archive operations. Would you like to proceed and restart VYNX ARC anyway?</source>
+        <translation>У вас є незбережені зміни або активні операції з архівами. Продовжити та перезапустити VYNX ARC?</translation>
+    </message>
+    <message>
+        <source>Update Error</source>
+        <translation>Помилка оновлення</translation>
+    </message>
+    <message>
         <location filename="../../apps/gui/MainWindow.cpp" line="65"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
@@ -2808,6 +2844,11 @@ Duplicate paths are rejected. Contents are recompressed.</source>
     </message>
     <message>
         <location filename="../../apps/gui/dialogs/SettingsDialog.cpp" line="20"/>
+        <source>Check for updates automatically on startup</source>
+        <translation>Перевіряти оновлення автоматично під час запуску</translation>
+    </message>
+    <message>
+        <location filename="../../apps/gui/dialogs/SettingsDialog.cpp" line="20"/>
         <source>General</source>
         <translation>Загальні</translation>
     </message>
@@ -3121,6 +3162,84 @@ Proceed with cleanup?</source>
         <location filename="../../apps/gui/widgets/ToastOverlay.cpp" line="8"/>
         <source>Notification</source>
         <translation>Сповіщення</translation>
+    </message>
+</context>
+<context>
+    <name>UpdateDialog</name>
+    <message>
+        <source>Update Available</source>
+        <translation>Доступне оновлення</translation>
+    </message>
+    <message>
+        <source>A new version (%1) of VYNX ARC is available.</source>
+        <translation>Доступна нова версія (%1) VYNX ARC.</translation>
+    </message>
+    <message>
+        <source>Release notes:</source>
+        <translation>Примітки до випуску:</translation>
+    </message>
+    <message>
+        <source>No release notes provided for this version.</source>
+        <translation>Для цієї версії немає приміток до випуску.</translation>
+    </message>
+    <message>
+        <source>Cancel</source>
+        <translation>Скасувати</translation>
+    </message>
+    <message>
+        <source>Download &amp; Update</source>
+        <translation>Завантажити та оновити</translation>
+    </message>
+    <message>
+        <source>Downloading update...</source>
+        <translation>Завантаження оновлення...</translation>
+    </message>
+    <message>
+        <source>Downloading update (%1%)...</source>
+        <translation>Завантаження оновлення (%1%)...</translation>
+    </message>
+    <message>
+        <source>Update ready! Click Install &amp; Relaunch to complete the update.</source>
+        <translation>Оновлення готове! Натисніть «Встановити та перезапустити», щоб завершити оновлення.</translation>
+    </message>
+    <message>
+        <source>Install &amp; Relaunch</source>
+        <translation>Встановити та перезапустити</translation>
+    </message>
+    <message>
+        <source>Close</source>
+        <translation>Закрити</translation>
+    </message>
+    <message>
+        <source>Download failed: %1</source>
+        <translation>Помилка завантаження: %1</translation>
+    </message>
+    <message>
+        <source>Retry</source>
+        <translation>Повторити</translation>
+    </message>
+</context>
+<context>
+    <name>UpdateService</name>
+    <message>
+        <source>Insecure HTTP connections are not permitted.</source>
+        <translation>Небезпечні HTTP-з'єднання заборонені.</translation>
+    </message>
+    <message>
+        <source>Cryptographic release integrity verification failed: checksum missing or invalid.</source>
+        <translation>Криптографічна перевірка цілісності випуску не вдалася: контрольна сума відсутня або недійсна.</translation>
+    </message>
+    <message>
+        <source>Failed to fetch update information</source>
+        <translation>Не вдалося отримати відомості про оновлення</translation>
+    </message>
+    <message>
+        <source>Invalid release response from GitHub</source>
+        <translation>Недійсна відповідь про випуск від GitHub</translation>
+    </message>
+    <message>
+        <source>Asset download failed</source>
+        <translation>Не вдалося завантажити файл оновлення</translation>
     </message>
 </context>
 </TS>

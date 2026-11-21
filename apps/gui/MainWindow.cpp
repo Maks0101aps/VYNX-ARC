@@ -422,6 +422,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
     connect(&updateService_, &UpdateService::updateAvailable, this, [this](const ReleaseInfo &release) {
         availableRelease_ = release;
+        settings_->setValue(QStringLiteral("updates/lastCheckTime"), QDateTime::currentSecsSinceEpoch());
         updateBannerLabel_->setText(tr("A new version of VYNX ARC is available (%1)").arg(release.version));
         updateBanner_->show();
         if (updateCheckInteractive_) {
@@ -433,6 +434,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 
     connect(&updateService_, &UpdateService::noUpdateAvailable, this, [this] {
+        settings_->setValue(QStringLiteral("updates/lastCheckTime"), QDateTime::currentSecsSinceEpoch());
         if (updateCheckInteractive_) {
             updateCheckInteractive_ = false;
             QMessageBox::information(this, tr("Check for updates"),
@@ -448,9 +450,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
 
     if (!QCoreApplication::arguments().contains(QStringLiteral("--smoke-test"))) {
-        QTimer::singleShot(2000, this, [this] {
-            updateService_.checkForUpdates(false);
-        });
+        const bool checkOnStartup = settings_->value(QStringLiteral("updates/checkOnStartup"), true).toBool();
+        const qint64 lastCheckTime = settings_->value(QStringLiteral("updates/lastCheckTime"), 0).toLongLong();
+        const qint64 now = QDateTime::currentSecsSinceEpoch();
+        if (UpdateService::shouldCheckForUpdates(checkOnStartup, lastCheckTime, now)) {
+            QTimer::singleShot(2000, this, [this] {
+                updateService_.checkForUpdates(false);
+            });
+        }
     }
 }
 MainWindow::~MainWindow() {
@@ -494,6 +501,10 @@ void MainWindow::handleInstallRequested(const QString &downloadedPath, bool isPo
         if (reply != QMessageBox::Yes) {
             return;
         }
+    }
+
+    if (auto *dlg = qobject_cast<QDialog*>(sender())) {
+        dlg->accept();
     }
 
     const QString err = UpdateInstaller::launchAndExit(
@@ -1249,17 +1260,20 @@ void MainWindow::updateRecent() {
 void MainWindow::settings() {
     SettingsDialog d(settings_->value("theme", "system").toString(),
                      settings_->value("language", "en").toString(),
-                     settings_->value("historyEnabled", true).toBool(), this);
+                     settings_->value("historyEnabled", true).toBool(),
+                     settings_->value("updates/checkOnStartup", true).toBool(), this);
     d.resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
     auto *theme = d.theme;
     auto *language = d.language;
     auto *history = d.history;
+    auto *checkUpdates = d.checkUpdates;
     const QStringList ids{"system", "light", "dark"}, languages{"en", "uk", "ru"};
     if (d.exec() == QDialog::Accepted) {
         settings_->setValue("language", languages[language->currentIndex()]);
         settings_->setValue("theme", ids[theme->currentIndex()]);
         settings_->setValue("resourceMode", d.resource->currentIndex());
         settings_->setValue("historyEnabled", history->isChecked());
+        settings_->setValue("updates/checkOnStartup", checkUpdates->isChecked());
         if (!journal_.setEnabled(history->isChecked()))
             QMessageBox::warning(
                 this, tr("Queue history"),

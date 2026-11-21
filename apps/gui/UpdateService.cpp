@@ -138,9 +138,15 @@ bool executeWinHttpRequest(
             return false;
         }
 
-        QString host = currentUrl.host();
         bool isHttps = (currentUrl.scheme().compare(QStringLiteral("https"), Qt::CaseInsensitive) == 0);
-        int port = currentUrl.port(isHttps ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT);
+        if (!isHttps) {
+            if (outError) *outError = QStringLiteral("Insecure HTTP connections are not permitted.");
+            WinHttpCloseHandle(hSession);
+            return false;
+        }
+
+        QString host = currentUrl.host();
+        int port = currentUrl.port(INTERNET_DEFAULT_HTTPS_PORT);
 
         HINTERNET hConnect = WinHttpConnect(
             hSession,
@@ -376,7 +382,33 @@ UpdateService::UpdateService(QObject *parent)
     qRegisterMetaType<ReleaseInfo>("ReleaseInfo");
 }
 
-UpdateService::~UpdateService() = default;
+UpdateService::~UpdateService() {
+    m_cancelled.store(true);
+    QList<QFuture<void>> futures;
+    {
+        QMutexLocker locker(&m_futuresMutex);
+        futures = m_activeFutures;
+    }
+    for (auto &f : futures) {
+        f.waitForFinished();
+    }
+}
+
+void UpdateService::trackFuture(const QFuture<void> &future) {
+    QMutexLocker locker(&m_futuresMutex);
+    m_activeFutures.removeIf([](const QFuture<void> &f) { return f.isFinished(); });
+    m_activeFutures.append(future);
+}
+
+bool UpdateService::shouldCheckForUpdates(bool checkOnStartup, qint64 lastCheckTime, qint64 currentTime) {
+    if (!checkOnStartup) {
+        return false;
+    }
+    if (lastCheckTime <= 0) {
+        return true;
+    }
+    return (currentTime - lastCheckTime) >= 86400;
+}
 
 bool UpdateService::isVersionNewer(const QString &currentVersion, const QString &candidateVersion) {
     const auto cur = SemVer::parse(currentVersion);
@@ -481,19 +513,25 @@ void UpdateService::checkForUpdates(const QString &currentVersion, const QString
     const QString endpoint = apiUrl.isEmpty() ?
         QStringLiteral("https://api.github.com/repos/Maks0101aps/VYNX-ARC/releases/latest") : apiUrl;
 
-    (void)QtConcurrent::run([this, ver, endpoint]() {
+    const QUrl checkUrl(endpoint);
+    if (checkUrl.scheme().compare(QStringLiteral("https"), Qt::CaseInsensitive) != 0) {
+        emit updateCheckError(tr("Insecure HTTP connections are not permitted."));
+        return;
+    }
+
+    auto future = QtConcurrent::run([this, ver, endpoint]() {
         QByteArray body;
         int statusCode = 0;
         QString error;
         bool ok = executeWinHttpRequest(QUrl(endpoint), QString(), &body, &statusCode, &error, nullptr, &m_cancelled);
         if (!ok) {
-            emit updateCheckError(error.isEmpty() ? QStringLiteral("Failed to fetch update information") : error);
+            emit updateCheckError(error.isEmpty() ? tr("Failed to fetch update information") : error);
             return;
         }
 
         ReleaseInfo info = parseReleaseJson(body, ver);
         if (info.version.isEmpty()) {
-            emit updateCheckError(QStringLiteral("Invalid release response from GitHub"));
+            emit updateCheckError(tr("Invalid release response from GitHub"));
             return;
         }
 
@@ -503,11 +541,19 @@ void UpdateService::checkForUpdates(const QString &currentVersion, const QString
             emit noUpdateAvailable();
         }
     });
+    trackFuture(future);
 }
 
 void UpdateService::downloadAsset(const QUrl &url, const QString &destinationFilePath) {
     m_cancelled.store(false);
-    (void)QtConcurrent::run([this, url, destinationFilePath]() {
+    if (url.scheme().compare(QStringLiteral("https"), Qt::CaseInsensitive) != 0) {
+        const QString err = tr("Insecure HTTP connections are not permitted.");
+        emit downloadError(err);
+        emit updateError(err);
+        return;
+    }
+
+    auto future = QtConcurrent::run([this, url, destinationFilePath]() {
         int statusCode = 0;
         QString error;
         auto progressCb = [this](qint64 received, qint64 total) {
@@ -518,11 +564,12 @@ void UpdateService::downloadAsset(const QUrl &url, const QString &destinationFil
             emit downloadComplete(destinationFilePath);
             emit updateReady(destinationFilePath);
         } else {
-            const QString err = error.isEmpty() ? QStringLiteral("Asset download failed") : error;
+            const QString err = error.isEmpty() ? tr("Asset download failed") : error;
             emit downloadError(err);
             emit updateError(err);
         }
     });
+    trackFuture(future);
 }
 
 void UpdateService::downloadAndVerify(const ReleaseInfo &release, bool isPortable, const QString &targetDirectory) {
@@ -530,6 +577,9 @@ void UpdateService::downloadAndVerify(const ReleaseInfo &release, bool isPortabl
     const QString dir = targetDirectory.isEmpty() ? QDir::tempPath() : targetDirectory;
     const QString assetUrlStr = isPortable ? release.portableUrl : release.setupUrl;
     const QString filename = isPortable ? QStringLiteral("VYNX-ARC-Portable-x64.zip") : QStringLiteral("VYNX-ARC-Setup-x64.exe");
+    const QString destFilePath = QDir(dir).filePath(filename);
+
+    const QString failClosedError = tr("Cryptographic release integrity verification failed: checksum missing or invalid.");
 
     if (assetUrlStr.isEmpty()) {
         const QString err = QStringLiteral("Download URL not found in release assets for %1").arg(filename);
@@ -538,20 +588,51 @@ void UpdateService::downloadAndVerify(const ReleaseInfo &release, bool isPortabl
         return;
     }
 
-    const QString sha256UrlStr = release.sha256Url;
-    const QString destFilePath = QDir(dir).filePath(filename);
+    const QUrl assetUrl(assetUrlStr);
+    if (assetUrl.scheme().compare(QStringLiteral("https"), Qt::CaseInsensitive) != 0) {
+        QFile::remove(destFilePath);
+        const QString err = tr("Insecure HTTP connections are not permitted.");
+        emit downloadError(err);
+        emit updateError(err);
+        return;
+    }
 
-    (void)QtConcurrent::run([this, assetUrlStr, sha256UrlStr, destFilePath, filename]() {
-        // Step 1: If sha256Url is provided, download SHA256SUMS.txt
-        QString expectedHash;
-        if (!sha256UrlStr.isEmpty()) {
-            QByteArray shaBody;
-            int sc = 0;
-            QString err;
-            if (executeWinHttpRequest(QUrl(sha256UrlStr), QString(), &shaBody, &sc, &err, nullptr, &m_cancelled)) {
-                auto sums = parseSha256Sums(QString::fromUtf8(shaBody));
-                expectedHash = sums.value(filename);
-            }
+    const QString sha256UrlStr = release.sha256Url;
+    if (sha256UrlStr.isEmpty()) {
+        QFile::remove(destFilePath);
+        emit downloadError(failClosedError);
+        emit updateError(failClosedError);
+        return;
+    }
+
+    const QUrl sha256Url(sha256UrlStr);
+    if (sha256Url.scheme().compare(QStringLiteral("https"), Qt::CaseInsensitive) != 0) {
+        QFile::remove(destFilePath);
+        const QString err = tr("Insecure HTTP connections are not permitted.");
+        emit downloadError(err);
+        emit updateError(err);
+        return;
+    }
+
+    auto future = QtConcurrent::run([this, assetUrlStr, sha256UrlStr, destFilePath, filename, failClosedError]() {
+        // Step 1: Download SHA256SUMS.txt - must succeed and contain expected hash
+        QByteArray shaBody;
+        int sc = 0;
+        QString err;
+        if (!executeWinHttpRequest(QUrl(sha256UrlStr), QString(), &shaBody, &sc, &err, nullptr, &m_cancelled)) {
+            QFile::remove(destFilePath);
+            emit downloadError(failClosedError);
+            emit updateError(failClosedError);
+            return;
+        }
+
+        auto sums = parseSha256Sums(QString::fromUtf8(shaBody));
+        const QString expectedHash = sums.value(filename);
+        if (expectedHash.isEmpty()) {
+            QFile::remove(destFilePath);
+            emit downloadError(failClosedError);
+            emit updateError(failClosedError);
+            return;
         }
 
         // Step 2: Download asset
@@ -562,26 +643,25 @@ void UpdateService::downloadAndVerify(const ReleaseInfo &release, bool isPortabl
         };
         bool ok = executeWinHttpRequest(QUrl(assetUrlStr), destFilePath, nullptr, &statusCode, &error, progressCb, &m_cancelled);
         if (!ok) {
-            const QString err = error.isEmpty() ? QStringLiteral("Asset download failed") : error;
-            emit downloadError(err);
-            emit updateError(err);
+            QFile::remove(destFilePath);
+            const QString downloadErr = error.isEmpty() ? tr("Asset download failed") : error;
+            emit downloadError(downloadErr);
+            emit updateError(downloadErr);
             return;
         }
 
-        // Step 3: Verify SHA-256 if expectedHash is present
-        if (!expectedHash.isEmpty()) {
-            if (!verifySha256(destFilePath, expectedHash)) {
-                QFile::remove(destFilePath);
-                const QString verifyErr = QStringLiteral("SHA-256 verification failed for downloaded asset");
-                emit downloadError(verifyErr);
-                emit updateError(verifyErr);
-                return;
-            }
+        // Step 3: Verify SHA-256 integrity
+        if (!verifySha256(destFilePath, expectedHash)) {
+            QFile::remove(destFilePath);
+            emit downloadError(failClosedError);
+            emit updateError(failClosedError);
+            return;
         }
 
         emit downloadComplete(destFilePath);
         emit updateReady(destFilePath);
     });
+    trackFuture(future);
 }
 
 void UpdateService::cancelDownload() {

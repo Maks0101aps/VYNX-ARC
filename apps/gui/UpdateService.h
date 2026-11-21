@@ -1,8 +1,11 @@
 #pragma once
 
 #include <QByteArray>
+#include <QFuture>
+#include <QList>
 #include <QMap>
 #include <QMetaType>
+#include <QMutex>
 #include <QObject>
 #include <QString>
 #include <QUrl>
@@ -57,6 +60,9 @@ public:
     // Release JSON parsing
     static ReleaseInfo parseReleaseJson(const QByteArray &jsonData, const QString &currentVersion = QString());
 
+    // 24-hour rate limit helper
+    static bool shouldCheckForUpdates(bool checkOnStartup, qint64 lastCheckTime, qint64 currentTime);
+
     // API query & downloads
     void checkForUpdates(const QString &currentVersion = QString(), const QString &apiUrl = QString());
     void checkForUpdates(bool interactive);
@@ -79,6 +85,10 @@ signals:
     void updateError(const QString &error);
 
 private:
+    void trackFuture(const QFuture<void> &future);
+
     std::atomic<bool> m_cancelled{false};
     bool m_interactiveCheck{false};
+    mutable QMutex m_futuresMutex;
+    QList<QFuture<void>> m_activeFutures;
 };

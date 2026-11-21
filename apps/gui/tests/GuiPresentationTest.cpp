@@ -21,6 +21,7 @@
 #include "../UpdateService.h"
 #include "../dialogs/UpdateDialog.h"
 #include "../UpdateInstaller.h"
+#include "../dialogs/SettingsDialog.h"
 #include <QDesktopServices>
 #include <QImageReader>
 #include <QJsonDocument>
@@ -1314,10 +1315,11 @@ class GuiPresentationTest : public QObject {
 
     void updateInstallerArgsGeneration() {
         const QStringList args = UpdateInstaller::installerArgs();
-        QCOMPARE(args.size(), 3);
+        QCOMPARE(args.size(), 4);
         QCOMPARE(args.at(0), QStringLiteral("/SILENT"));
         QCOMPARE(args.at(1), QStringLiteral("/CLOSEAPPLICATIONS"));
         QCOMPARE(args.at(2), QStringLiteral("/RESTARTAPPLICATIONS"));
+        QCOMPARE(args.at(3), QStringLiteral("/relaunch=1"));
     }
 
     void updateInstallerPortableBatchScript() {
@@ -1325,13 +1327,90 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!script.isEmpty());
         QVERIFY(script.contains("tasklist /FI \"PID eq %1\""));
         QVERIFY(script.contains("timeout /t 1 /nobreak"));
-        QVERIFY(script.contains("tar.exe -xf \"%~2\" -C \"%~3\""));
+        QVERIFY(script.contains("\"%SystemRoot%\\System32\\tar.exe\" -xf \"%~2\" -C \"%~3\""));
+        QVERIFY(!script.contains("pause"));
         QVERIFY(script.contains("start \"\" \"%~3\\VynxArc.exe\""));
         QVERIFY(script.contains("(goto) 2>nul & del \"%~f0\""));
 
         const QString path = UpdateInstaller::portableScriptPath();
         QVERIFY(!path.isEmpty());
         QVERIFY(path.endsWith("vynx-update-portable.bat"));
+    }
+
+    void updateServiceRateLimiting() {
+        // Disabled at startup: never checks
+        QVERIFY(!UpdateService::shouldCheckForUpdates(false, 0, 1000));
+        QVERIFY(!UpdateService::shouldCheckForUpdates(false, 1000, 200000));
+
+        // Enabled at startup, never checked previously (lastCheckTime <= 0): checks immediately
+        QVERIFY(UpdateService::shouldCheckForUpdates(true, 0, 1000));
+        QVERIFY(UpdateService::shouldCheckForUpdates(true, -1, 1000));
+
+        // Enabled at startup, less than 24 hours (86400 seconds) elapsed: does not check
+        const qint64 baseTime = 1700000000;
+        QVERIFY(!UpdateService::shouldCheckForUpdates(true, baseTime, baseTime + 3600)); // 1 hour
+        QVERIFY(!UpdateService::shouldCheckForUpdates(true, baseTime, baseTime + 86399)); // 23h 59m 59s
+
+        // Enabled at startup, exactly or more than 24 hours elapsed: checks
+        QVERIFY(UpdateService::shouldCheckForUpdates(true, baseTime, baseTime + 86400)); // 24 hours
+        QVERIFY(UpdateService::shouldCheckForUpdates(true, baseTime, baseTime + 90000)); // > 24 hours
+    }
+
+    void updateServiceFailClosedSha256AndHttps() {
+        UpdateService service;
+
+        // Insecure HTTP update check URL is immediately rejected
+        QSignalSpy checkErrorSpy(&service, &UpdateService::updateCheckError);
+        service.checkForUpdates("1.0.0", "http://insecure.example.com/releases/latest");
+        QCOMPARE(checkErrorSpy.count(), 1);
+        QVERIFY(checkErrorSpy.at(0).at(0).toString().contains("Insecure HTTP connections are not permitted"));
+
+        // Release with empty sha256Url fails closed
+        ReleaseInfo missingShaRelease;
+        missingShaRelease.version = "v1.0.1";
+        missingShaRelease.setupUrl = "https://example.com/VYNX-ARC-Setup-x64.exe";
+        missingShaRelease.sha256Url = "";
+
+        QSignalSpy downloadErrorSpy(&service, &UpdateService::downloadError);
+        QSignalSpy downloadCompleteSpy(&service, &UpdateService::downloadComplete);
+
+        service.downloadAndVerify(missingShaRelease, false);
+        QCOMPARE(downloadErrorSpy.count(), 1);
+        QCOMPARE(downloadCompleteSpy.count(), 0);
+        QVERIFY(downloadErrorSpy.at(0).at(0).toString().contains("checksum missing or invalid"));
+
+        // Release with insecure HTTP asset URL fails closed
+        ReleaseInfo httpRelease;
+        httpRelease.version = "v1.0.1";
+        httpRelease.setupUrl = "http://example.com/VYNX-ARC-Setup-x64.exe";
+        httpRelease.sha256Url = "https://example.com/SHA256SUMS.txt";
+
+        downloadErrorSpy.clear();
+        service.downloadAndVerify(httpRelease, false);
+        QCOMPARE(downloadErrorSpy.count(), 1);
+        QVERIFY(downloadErrorSpy.at(0).at(0).toString().contains("Insecure HTTP connections are not permitted"));
+
+        // Release with insecure HTTP sha256Url fails closed
+        ReleaseInfo httpShaRelease;
+        httpShaRelease.version = "v1.0.1";
+        httpShaRelease.setupUrl = "https://example.com/VYNX-ARC-Setup-x64.exe";
+        httpShaRelease.sha256Url = "http://example.com/SHA256SUMS.txt";
+
+        downloadErrorSpy.clear();
+        service.downloadAndVerify(httpShaRelease, false);
+        QCOMPARE(downloadErrorSpy.count(), 1);
+        QVERIFY(downloadErrorSpy.at(0).at(0).toString().contains("Insecure HTTP connections are not permitted"));
+    }
+
+    void settingsDialogUpdateToggle() {
+        SettingsDialog dialog("system", "en", true, true);
+        QVERIFY(dialog.checkUpdates != nullptr);
+        QVERIFY(dialog.checkUpdates->isChecked());
+        dialog.checkUpdates->setChecked(false);
+        QVERIFY(!dialog.checkUpdates->isChecked());
+
+        SettingsDialog dialogFalse("system", "en", true, false);
+        QVERIFY(!dialogFalse.checkUpdates->isChecked());
     }
 
     void updateInstallerErrorHandlingWhenPackageMissing() {

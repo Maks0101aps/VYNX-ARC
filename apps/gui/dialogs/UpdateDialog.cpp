@@ -135,7 +135,6 @@ void UpdateDialog::onActionButtonClicked() {
         startDownload();
     } else {
         emit installRequested(downloadedPath_, isPortable_);
-        accept();
     }
 }
 

@@ -12,7 +12,8 @@ QStringList installerArgs() {
     return QStringList{
         QStringLiteral("/SILENT"),
         QStringLiteral("/CLOSEAPPLICATIONS"),
-        QStringLiteral("/RESTARTAPPLICATIONS")
+        QStringLiteral("/RESTARTAPPLICATIONS"),
+        QStringLiteral("/relaunch=1")
     };
 }
 
@@ -27,10 +28,9 @@ QString generatePortableScriptContent() {
         "    goto waitloop\r\n"
         ")\r\n"
         "timeout /t 1 /nobreak >nul\r\n"
-        "tar.exe -xf \"%~2\" -C \"%~3\"\r\n"
+        "\"%SystemRoot%\\System32\\tar.exe\" -xf \"%~2\" -C \"%~3\"\r\n"
         "if errorlevel 1 (\r\n"
         "    echo Update extraction failed.\r\n"
-        "    pause\r\n"
         "    exit /b 1\r\n"
         ")\r\n"
         "start \"\" \"%~3\\VynxArc.exe\"\r\n"
@@ -69,17 +69,25 @@ QString launchAndExit(const QString &packagePath, bool isPortable, qint64 curren
 
         QProcess process;
         process.setProgram(QStringLiteral("cmd.exe"));
-        process.setArguments(QStringList{
-            QStringLiteral("/c"),
-            QDir::toNativeSeparators(scriptPath),
-            QString::number(currentPid),
-            QDir::toNativeSeparators(packagePath),
-            QDir::toNativeSeparators(appDir)
-        });
-
 #if defined(Q_OS_WIN)
+        // With /s /c, cmd.exe strips the outermost quotes and preserves inner quoted arguments
+        process.setNativeArguments(QStringLiteral("/s /c \"\"%1\" %2 \"%3\" \"%4\"\"")
+            .arg(QDir::toNativeSeparators(scriptPath))
+            .arg(currentPid)
+            .arg(QDir::toNativeSeparators(packagePath))
+            .arg(QDir::toNativeSeparators(appDir)));
+
         process.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) {
             args->flags |= 0x08000000; // CREATE_NO_WINDOW
+        });
+#else
+        process.setArguments(QStringList{
+            QStringLiteral("/s"),
+            QStringLiteral("/c"),
+            scriptPath,
+            QString::number(currentPid),
+            packagePath,
+            appDir
         });
 #endif
 

@@ -1,6 +1,7 @@
 #include "SettingsDialog.h"
 #include <QtWidgets>
 SettingsDialog::SettingsDialog(const QString &themeId, const QString &languageId, bool remember,
+                               bool checkUpdatesOnStartup,
                                QWidget *parent)
     : QDialog(parent) {
     setWindowTitle(tr("Settings"));
@@ -17,6 +18,10 @@ SettingsDialog::SettingsDialog(const QString &themeId, const QString &languageId
     history = new QCheckBox(tr("Remember recent archives locally"));
     history->setChecked(remember);
     form->addRow(history);
+    checkUpdates = new QCheckBox(tr("Check for updates automatically on startup"));
+    checkUpdates->setObjectName("checkUpdatesOnStartup");
+    checkUpdates->setChecked(checkUpdatesOnStartup);
+    form->addRow(checkUpdates);
     tabs->addTab(general, tr("General"));
     auto *appearance = new QWidget;
     auto *appearanceForm = new QFormLayout(appearance);

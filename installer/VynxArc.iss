@@ -58,7 +58,14 @@ Root: HKCU; Subkey: "Software\Classes\.lzma\OpenWithProgids"; ValueType: string;
 #ifdef SignedIdentity
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -File ""{app}\Register-Explorer.ps1"" -InstallDirectory ""{app}"""; Tasks: explorer; Flags: waituntilterminated runhidden
 #endif
-Filename: "{app}\VynxArc.exe"; Description: "Launch VYNX ARC"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\VynxArc.exe"; Parameters: "--updated"; Description: "Launch VYNX ARC"; Flags: nowait postinstall; Check: ShouldLaunchAfterInstall
+Filename: "{app}\VynxArc.exe"; Description: "Launch VYNX ARC"; Flags: nowait postinstall skipifsilent; Check: not ShouldLaunchAfterInstall
+
+[Code]
+function ShouldLaunchAfterInstall: Boolean;
+begin
+  Result := (ExpandConstant('{param:relaunch|0}') = '1');
+end;
 
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -File ""{app}\Unregister-Explorer.ps1"""; Flags: waituntilterminated runhidden; RunOnceId: "RemoveVynxExplorerIdentity"
