@@ -1,0 +1,79 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore verified local RAR test fixtures
+        run: python scripts/fetch-rar-fixtures.py
+
+      - name: Rust MSVC toolchain
+        run: rustup toolchain install 1.99.0-x86_64-pc-windows-msvc --profile minimal --component rustfmt --component clippy
+
+      - name: Install Inno Setup 6
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress
+          "C:\Program Files (x86)\Inno Setup 6" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      - name: Qt SDK
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.12.0'
+          arch: win64_msvc2022_64
+          # Released aqt 3.3.0 looks in the pre-6.11 repository layout.
+          # Pin upstream's architecture-split repository support until released.
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7'
+          py7zrversion: '==1.1.3'
+          cache: true
+          cache-key-prefix: vynx-qt-076e165
+
+      - name: Install pinned audit tool
+        shell: pwsh
+        run: |
+          . scripts/env.ps1 -QtRoot $env:QT_ROOT_DIR
+          cargo install cargo-audit --version 0.22.2 --locked
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Install packaged verification tools
+        run: python -m pip install -r scripts/verification-requirements.txt
+
+      - name: Source gates, native tests, and release packaging
+        shell: pwsh
+        run: |
+          scripts/build-release.ps1 -QtRoot $env:QT_ROOT_DIR -OutputDirectory dist/1.0.0
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Copy-Item dist/1.0.0/* dist/ -Force -ErrorAction SilentlyContinue
+
+      - name: Verify release integrity
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .dev | Out-Null
+          $env:VYNX_VERIFY_REPORT = Join-Path $PWD '.dev/ci-portable.json'
+          $env:VYNX_VERIFY_DIST = Join-Path $PWD 'dist/1.0.0'
+          python scripts/verify-portable.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/1.0.0/VYNX-ARC-Setup-x64.exe
+            dist/1.0.0/VYNX-ARC-Portable-x64.zip
+            dist/1.0.0/VYNX-ARC-Explorer-x64.msix
+            dist/1.0.0/SHA256SUMS.txt
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
