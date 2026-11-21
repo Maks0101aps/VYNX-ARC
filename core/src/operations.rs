@@ -951,6 +951,12 @@ fn create_internal(
                 },
             )?;
         }
+        Format::Iso => {
+            return Err(ArcError::new(
+                "READ_ONLY",
+                "ISO disc images are read only and cannot be created",
+            ));
+        }
     }
     temp.as_file().sync_all()?;
     op.check()?;

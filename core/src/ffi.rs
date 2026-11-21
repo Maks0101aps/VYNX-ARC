@@ -323,6 +323,7 @@ fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
         11 => crate::Format::TarZst,
         #[cfg(windows)]
         12 => crate::Format::Rar,
+        13 => return Err(ArcError::new("FORMAT", "ISO is a read-only format")),
         _ => return Err(ArcError::new("FORMAT", "Unsupported format")),
     };
     Ok(crate::settings::Settings::from_ids(preset, resource)?
@@ -523,6 +524,7 @@ fn create_archive_as(
             11 => crate::Format::TarZst,
             #[cfg(windows)]
             12 => crate::Format::Rar,
+            13 => return Err(ArcError::new("FORMAT", "ISO is a read-only format")),
             _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
         };
         crate::worker::Client::sibling()?.create(
@@ -655,4 +657,27 @@ fn save_copy_as(
             op,
         )
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_ffi_iso_properties() {
+        let archive = Archive {
+            writable: false,
+            path: PathBuf::from("test.iso"),
+            format: crate::Format::Iso,
+            entries: Vec::new(),
+            physical_size: 34816,
+        };
+        assert_eq!(archive_format(&archive), "ISO");
+        assert!(!archive_writable(&archive));
+
+        // Format 13 should reject compression details & creation
+        assert!(compression_details(13, 0, 0).is_err());
+        let op = Operation::default();
+        assert!(create_archive_as("out.iso", &[], 13, "", &op).is_err());
+    }
 }
