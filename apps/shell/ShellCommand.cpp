@@ -35,7 +35,7 @@ static std::wstring directory() {
 static bool archiveName(std::wstring path) {
     std::transform(path.begin(), path.end(), path.begin(), ::towlower);
     for (const auto *suffix : {L".zip", L".7z", L".rar", L".tar", L".tar.gz", L".tgz", L".7z.001",
-                               L".gz", L".xz", L".bz2", L".zst", L".lzma", L".iso"})
+                               L".gz", L".xz", L".bz2", L".zst", L".lzma", L".iso", L".wim", L".esd", L".swm"})
         if (path.ends_with(suffix))
             return true;
     return false;

@@ -33,7 +33,7 @@ bool isArchiveEntry(const QString &name) {
     const QString lower = name.toLower();
     for (const auto &ext : {".zip", ".7z", ".tar", ".gz", ".tgz", ".tar.gz",
                             ".xz", ".tar.xz", ".bz2", ".tar.bz2", ".zst",
-                            ".tar.zst", ".rar", ".lzma", ".iso"}) {
+                            ".tar.zst", ".rar", ".lzma", ".iso", ".wim", ".esd", ".swm"}) {
         if (lower.endsWith(ext))
             return true;
     }
