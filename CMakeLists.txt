@@ -61,6 +61,7 @@ target_sources(VynxArc PRIVATE
     apps/gui/widgets/RecentDelegate.cpp apps/gui/widgets/RecentDelegate.h
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
     apps/gui/widgets/ToastOverlay.cpp apps/gui/widgets/ToastOverlay.h
+    apps/gui/dialogs/UpdateDialog.cpp apps/gui/dialogs/UpdateDialog.h
     apps/gui/UpdateService.cpp apps/gui/UpdateService.h)
 target_compile_definitions(VynxArc PRIVATE VYNX_VERSION="${PROJECT_VERSION}")
 target_include_directories(VynxArc PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
@@ -111,7 +112,7 @@ add_executable(VynxPresentationTests
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
     apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h)
-target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h apps/gui/UpdateService.cpp apps/gui/UpdateService.h)
+target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h apps/gui/dialogs/UpdateDialog.cpp apps/gui/dialogs/UpdateDialog.h apps/gui/UpdateService.cpp apps/gui/UpdateService.h)
 target_include_directories(VynxPresentationTests PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
 target_compile_definitions(VynxPresentationTests PRIVATE VYNX_VERSION="${PROJECT_VERSION}")
 target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test Qt6::Concurrent vynx_core)

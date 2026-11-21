@@ -11,6 +11,7 @@
 #include "ShellRequest.h"
 #include "Theme.h"
 #include "dialogs/AboutDialog.h"
+#include "dialogs/UpdateDialog.h"
 #include "dialogs/BatchExtractDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "dialogs/ExtractDialog.h"
@@ -134,6 +135,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                     [this] { showWorkingCopies(); });
     addAction(viewMenu, tr("Temporary files..."), {}, [this] { showTemporaryFiles(); });
     auto *help = menuBar()->addMenu(tr("&Help"));
+    addAction(help, tr("Check for updates…"), {}, [this] {
+        updateCheckInteractive_ = true;
+        updateService_.checkForUpdates(true);
+    });
     addAction(help, tr("About VYNX ARC"), {}, [this] {
         AboutDialog dialog(this);
         dialog.exec();
@@ -144,6 +149,35 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     layout->setContentsMargins(16, 12, 16, 12);
     layout->setSpacing(12);
     setCentralWidget(central);
+
+    updateBanner_ = new QFrame(this);
+    updateBanner_->setObjectName("updateBanner");
+    auto *bannerLayout = new QHBoxLayout(updateBanner_);
+    bannerLayout->setContentsMargins(12, 8, 12, 8);
+    bannerLayout->setSpacing(12);
+
+    updateBannerLabel_ = new QLabel(updateBanner_);
+    updateBannerLabel_->setObjectName("updateBannerMessage");
+    bannerLayout->addWidget(updateBannerLabel_, 1);
+
+    updateBannerButton_ = new QPushButton(tr("Update"), updateBanner_);
+    updateBannerButton_->setObjectName("primary");
+    bannerLayout->addWidget(updateBannerButton_);
+
+    updateBannerDismiss_ = new QToolButton(updateBanner_);
+    updateBannerDismiss_->setObjectName("ghost");
+    updateBannerDismiss_->setText(tr("Dismiss"));
+    bannerLayout->addWidget(updateBannerDismiss_);
+
+    updateBanner_->hide();
+    layout->addWidget(updateBanner_);
+
+    connect(updateBannerDismiss_, &QToolButton::clicked, updateBanner_, &QFrame::hide);
+    connect(updateBannerButton_, &QPushButton::clicked, this, [this] {
+        UpdateDialog dialog(availableRelease_, this, &updateService_);
+        dialog.exec();
+    });
+
     tabs_ = new QTabBar;
     tabs_->setObjectName("archiveTabs");
     tabs_->setTabsClosable(true);
@@ -382,6 +416,36 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(qApp->styleHints(), &QStyleHints::colorSchemeChanged, this, [this] {
         if (settings_->value("theme", "system") == "system")
             applyTheme("system");
+    });
+
+    connect(&updateService_, &UpdateService::updateAvailable, this, [this](const ReleaseInfo &release) {
+        availableRelease_ = release;
+        updateBannerLabel_->setText(tr("A new version of VYNX ARC is available (%1)").arg(release.version));
+        updateBanner_->show();
+        if (updateCheckInteractive_) {
+            updateCheckInteractive_ = false;
+            UpdateDialog dialog(availableRelease_, this, &updateService_);
+            dialog.exec();
+        }
+    });
+
+    connect(&updateService_, &UpdateService::noUpdateAvailable, this, [this] {
+        if (updateCheckInteractive_) {
+            updateCheckInteractive_ = false;
+            QMessageBox::information(this, tr("Check for updates"),
+                tr("You are using the latest version of VYNX ARC (%1).").arg(QStringLiteral(VYNX_VERSION)));
+        }
+    });
+
+    connect(&updateService_, &UpdateService::updateCheckError, this, [this](const QString &error) {
+        if (updateCheckInteractive_) {
+            updateCheckInteractive_ = false;
+            QMessageBox::warning(this, tr("Check for updates"), error);
+        }
+    });
+
+    QTimer::singleShot(2000, this, [this] {
+        updateService_.checkForUpdates(false);
     });
 }
 MainWindow::~MainWindow() {
@@ -1295,6 +1359,8 @@ bool MainWindow::smokeTest() {
         applyTheme("system");
         const bool systemDark = qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark;
         if ((qApp->palette().color(QPalette::Window).lightness() < 80) != systemDark)
+            return smokeFailure(__LINE__);
+        if (!updateBanner_ || updateBanner_->objectName() != "updateBanner" || !updateBanner_->isHidden())
             return smokeFailure(__LINE__);
         QTemporaryDir temp;
         if (!temp.isValid())

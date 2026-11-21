@@ -52,6 +52,7 @@ void applyUiTheme(const QString &theme) {
             "QLabel#dropTarget {border:1px dashed %5;border-radius:10px;color:%1;background:%6;} "
             "QWidget#operation,QLabel#toast {background:%2;border:1px solid "
             "%5;border-radius:10px;} QLabel#toast {padding:12px;} "
+            "QFrame#updateBanner {background:%2;border:1px solid %5;border-radius:8px;padding:8px 12px;} "
             "QProgressBar "
             "{min-height:14px;border:0;border-radius:4px;text-align:center;background:%3;} "
             "QProgressBar::chunk {background:#2563eb;border-radius:4px;} "

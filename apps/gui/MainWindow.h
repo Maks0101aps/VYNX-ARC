@@ -4,6 +4,7 @@
 #include "JobJournal.h"
 #include "OperationController.h"
 #include "OperationQueue.h"
+#include "UpdateService.h"
 #include <QElapsedTimer>
 #include <QFutureWatcher>
 #include <QJsonObject>
@@ -27,6 +28,8 @@ class QSettings;
 class QTimer;
 class QAction;
 class QVBoxLayout;
+class QFrame;
+class QToolButton;
 class SecretUtf8;
 struct ArchiveJobSpec;
 class ExternalFiles;
@@ -205,4 +208,11 @@ class MainWindow : public QMainWindow {
     std::function<void(QString)> failure_;
     bool closePending_ = false;
     quint64 shownConflict_ = 0;
+    QFrame *updateBanner_ = nullptr;
+    QLabel *updateBannerLabel_ = nullptr;
+    QPushButton *updateBannerButton_ = nullptr;
+    QToolButton *updateBannerDismiss_ = nullptr;
+    ReleaseInfo availableRelease_;
+    UpdateService updateService_;
+    bool updateCheckInteractive_ = false;
 };

@@ -19,6 +19,7 @@
 #include "../widgets/IconProvider.h"
 #include "../widgets/OperationPanel.h"
 #include "../UpdateService.h"
+#include "../dialogs/UpdateDialog.h"
 #include <QDesktopServices>
 #include <QImageReader>
 #include <QJsonDocument>
@@ -1260,6 +1261,56 @@ class GuiPresentationTest : public QObject {
         const auto olderRelease = UpdateService::parseReleaseJson(json, "1.0.2");
         QVERIFY(!olderRelease.isNewerThanCurrent);
     }
+
+    void updateDialogShowsReleaseNotesAndInitialState() {
+        ReleaseInfo info;
+        info.version = "v1.0.1";
+        info.title = "VYNX ARC 1.0.1";
+        info.notes = "### Highlights\n- Fixed RAR5 parsing\n- Added auto-update mechanism";
+        info.setupUrl = "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Setup-x64.exe";
+        info.portableUrl = "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Portable-x64.zip";
+        info.sha256Url = "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/SHA256SUMS.txt";
+
+        UpdateDialog dialog(info);
+        QVERIFY(dialog.windowTitle().contains("Update"));
+        QCOMPARE(dialog.titleLabel()->text(), "VYNX ARC 1.0.1");
+        QVERIFY(dialog.subtitleLabel()->text().contains("v1.0.1"));
+        QVERIFY(dialog.notesBrowser()->isReadOnly());
+        QVERIFY(dialog.notesBrowser()->toPlainText().contains("Fixed RAR5 parsing"));
+        QVERIFY(dialog.notesBrowser()->toPlainText().contains("Added auto-update mechanism"));
+        QVERIFY(dialog.progressBar()->isHidden());
+        QCOMPARE(dialog.progressBar()->value(), 0);
+        QCOMPARE(dialog.actionButton()->text(), "Download & Update");
+        QCOMPARE(dialog.actionButton()->objectName(), "primary");
+        QVERIFY(dialog.actionButton()->isEnabled());
+        QCOMPARE(dialog.cancelButton()->text(), "Cancel");
+        QVERIFY(dialog.cancelButton()->isEnabled());
+    }
+
+    void updateDialogStateTransitionsAndSignal() {
+        ReleaseInfo info;
+        info.version = "v1.0.1";
+        info.title = "VYNX ARC 1.0.1";
+        info.notes = "Test notes";
+
+        UpdateService service;
+        UpdateDialog dialog(info, nullptr, &service);
+
+        QSignalSpy readySpy(&dialog, &UpdateDialog::readyToInstall);
+
+        const QString samplePath = "C:/fake/path/VYNX-ARC-Setup-x64.exe";
+        dialog.onDownloadComplete(samplePath);
+
+        QCOMPARE(readySpy.count(), 1);
+        QCOMPARE(readySpy.at(0).at(0).toString(), samplePath);
+        QCOMPARE(dialog.downloadedPath(), samplePath);
+        QCOMPARE(dialog.progressBar()->value(), 100);
+        QCOMPARE(dialog.statusLabel()->text(), "Update ready! Click Install & Relaunch to complete the update.");
+        QCOMPARE(dialog.actionButton()->text(), "Install & Relaunch");
+        QVERIFY(dialog.actionButton()->isEnabled());
+        QCOMPARE(dialog.cancelButton()->text(), "Close");
+    }
+
 };
 int main(int argc, char **argv) {
     QApplication application(argc, argv);
