@@ -100,16 +100,16 @@ Packages built in `dist/1.0.0/` using `scripts/build-release.ps1`:
 
 | Artifact | Size (Bytes) | SHA-256 Checksum |
 | :--- | :--- | :--- |
-| **`VYNX-ARC-Setup-x64.exe`** | 18,879,052 | `af5f1a551ec6a8ea5adc93d2ec4ab00a30e95d2e6dc4fc4aa209fb6d9711af5b` |
-| **`VYNX-ARC-Portable-x64.zip`** | 26,933,552 | `ef657842d5c5ce63c9467122030630d3fc50bb2941515e285aa1c7bdcd901aef` |
-| **`VYNX-ARC-Explorer-x64.msix`** | 13,180 | `939b4b133adb6add14190dde44591516089f176398c7eb7e73881a6919ebbb5f` |
+| **`VYNX-ARC-Setup-x64.exe`** | 18,913,568 | `7eb8444740d302310a91d2ca19b9a8ebe72e8b132c3f655d2bb1e17550d12586` |
+| **`VYNX-ARC-Portable-x64.zip`** | 26,942,674 | `2968dcb2d0dcf3192f319fa1a0b378517f8bcb345852bfbd3425a63d48c1d535` |
+| **`VYNX-ARC-Explorer-x64.msix`** | 13,180 | `eec454a21189142d68b2eddaad44ba6caf69637188f7c414d88b2f01000f9999` |
 | **`SHA256SUMS.txt`** | 277 | Included in release package directory |
 
 ### `SHA256SUMS.txt` Content
 ```text
-939b4b133adb6add14190dde44591516089f176398c7eb7e73881a6919ebbb5f  VYNX-ARC-Explorer-x64.msix
-ef657842d5c5ce63c9467122030630d3fc50bb2941515e285aa1c7bdcd901aef  VYNX-ARC-Portable-x64.zip
-af5f1a551ec6a8ea5adc93d2ec4ab00a30e95d2e6dc4fc4aa209fb6d9711af5b  VYNX-ARC-Setup-x64.exe
+eec454a21189142d68b2eddaad44ba6caf69637188f7c414d88b2f01000f9999  VYNX-ARC-Explorer-x64.msix
+2968dcb2d0dcf3192f319fa1a0b378517f8bcb345852bfbd3425a63d48c1d535  VYNX-ARC-Portable-x64.zip
+7eb8444740d302310a91d2ca19b9a8ebe72e8b132c3f655d2bb1e17550d12586  VYNX-ARC-Setup-x64.exe
 ```
 
 ---
