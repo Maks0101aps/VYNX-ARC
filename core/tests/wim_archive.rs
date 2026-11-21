@@ -107,7 +107,11 @@ fn test_wim_archive_read_only_constraints() {
 #[cfg(windows)]
 fn test_wim_native_api_loading() {
     let api = vynx_arc_core::wim_native::WimApi::load();
-    assert!(api.is_ok(), "wimgapi.dll should load on Windows 10/11: {:?}", api.err());
+    assert!(
+        api.is_ok(),
+        "wimgapi.dll should load on Windows 10/11: {:?}",
+        api.err()
+    );
 }
 
 #[test]

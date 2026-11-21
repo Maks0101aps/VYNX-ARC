@@ -162,7 +162,10 @@ fn test_wim_unsafe_image_name_rejected() {
     let mut cursor = Cursor::new(data);
     let op = Operation::default();
     let res = wim::list(&mut cursor, std::path::Path::new("evil.wim"), &op);
-    assert!(res.is_err(), "Path traversal in image name must be rejected");
+    assert!(
+        res.is_err(),
+        "Path traversal in image name must be rejected"
+    );
 }
 
 #[test]

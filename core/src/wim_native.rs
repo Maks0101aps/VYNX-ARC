@@ -23,7 +23,8 @@ pub type FnWimCloseHandle = unsafe extern "system" fn(h_object: WimHandle) -> i3
 pub type FnWimGetImageCount = unsafe extern "system" fn(h_wim: WimHandle) -> u32;
 
 /// Signature for `WIMLoadImage`.
-pub type FnWimLoadImage = unsafe extern "system" fn(h_wim: WimHandle, dw_image_index: u32) -> WimHandle;
+pub type FnWimLoadImage =
+    unsafe extern "system" fn(h_wim: WimHandle, dw_image_index: u32) -> WimHandle;
 
 /// Signature for `WIMApplyImage` / `WIMExtractImage`.
 pub type FnWimExtractImage = unsafe extern "system" fn(
@@ -196,14 +197,7 @@ pub fn extract_image(
         // dwDesiredAccess = 0x8000_0000 (GENERIC_READ / WIM_GENERIC_READ)
         // dwCreationDisposition = 3 (OPEN_EXISTING / WIM_OPEN_EXISTING)
         let raw_wim = unsafe {
-            (api.create_file)(
-                wim_w.as_ptr(),
-                0x8000_0000,
-                3,
-                0,
-                0,
-                std::ptr::null_mut(),
-            )
+            (api.create_file)(wim_w.as_ptr(), 0x8000_0000, 3, 0, 0, std::ptr::null_mut())
         };
         if raw_wim.is_null() {
             return Err(ArcError::new(

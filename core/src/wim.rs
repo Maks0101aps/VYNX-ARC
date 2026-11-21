@@ -1,10 +1,6 @@
 //! Pure safe Rust parser for Windows Imaging Format (WIM / SWM / ESD) headers and XML metadata.
 
-use crate::{
-    ArcError, Entry, Result,
-    operations::Operation,
-    security::validate_name,
-};
+use crate::{ArcError, Entry, Result, operations::Operation, security::validate_name};
 use std::{
     io::{Read, Seek, SeekFrom},
     path::Path,
@@ -300,7 +296,10 @@ fn parse_image_index(tag_header: &str, fallback_index: u32) -> u32 {
                     return idx;
                 }
             } else {
-                let digits: String = val_part.chars().take_while(|c| c.is_ascii_digit()).collect();
+                let digits: String = val_part
+                    .chars()
+                    .take_while(|c| c.is_ascii_digit())
+                    .collect();
                 if let Ok(idx) = digits.parse::<u32>() {
                     return idx;
                 }
@@ -378,8 +377,7 @@ fn parse_images_xml(xml: &str) -> Vec<WimImageInfo> {
                     fallback_index = index.saturating_add(1);
 
                     let name = extract_tag_value(block, "name").unwrap_or_default();
-                    let description =
-                        extract_tag_value(block, "description").unwrap_or_default();
+                    let description = extract_tag_value(block, "description").unwrap_or_default();
                     let total_bytes = extract_number(block, "totalbytes");
                     let file_count = extract_number(block, "filecount");
                     let dir_count = extract_number(block, "dircount");

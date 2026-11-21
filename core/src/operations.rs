@@ -431,12 +431,7 @@ pub fn extract(
                 op.phase(&entry.name);
                 let image_dest = security::output_path(&root, &entry.name)?;
                 fs::create_dir_all(&image_dest)?;
-                crate::wim_native::extract_image(
-                    &archive.path,
-                    entry.id as u32,
-                    &image_dest,
-                    op,
-                )?;
+                crate::wim_native::extract_image(&archive.path, entry.id as u32, &image_dest, op)?;
             }
             return Ok(root);
         }

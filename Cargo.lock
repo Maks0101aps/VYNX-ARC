@@ -806,7 +806,7 @@ dependencies = [
 
 [[package]]
 name = "vynx-arc-core"
-version = "1.0.2"
+version = "1.0.5"
 dependencies = [
  "bzip2",
  "crc32fast",
@@ -827,7 +827,7 @@ dependencies = [
 
 [[package]]
 name = "vynxarc-cli"
-version = "1.0.2"
+version = "1.0.5"
 dependencies = [
  "tempfile",
  "vynx-arc-core",
