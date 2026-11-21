@@ -18,6 +18,7 @@
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
 #include "../widgets/OperationPanel.h"
+#include "../UpdateService.h"
 #include <QDesktopServices>
 #include <QImageReader>
 #include <QJsonDocument>
@@ -1151,6 +1152,113 @@ class GuiPresentationTest : public QObject {
         int cleaned = store.cleanItems({item});
         QCOMPARE(cleaned, 1);
         QVERIFY(nested.record(id).isEmpty());
+    }
+
+    void updateServiceVersionComparison() {
+        // Basic version bump
+        QVERIFY(UpdateService::isVersionNewer("1.0.0", "v1.0.1"));
+        QVERIFY(UpdateService::isVersionNewer("1.0.0", "1.0.1"));
+        QVERIFY(!UpdateService::isVersionNewer("1.0.0", "1.0.0"));
+        QVERIFY(!UpdateService::isVersionNewer("1.0.0", "v1.0.0"));
+        QVERIFY(!UpdateService::isVersionNewer("v1.0.0", "1.0.0"));
+
+        // Major / Minor comparison
+        QVERIFY(UpdateService::isVersionNewer("1.0.0", "v2.0.0"));
+        QVERIFY(UpdateService::isVersionNewer("1.0.9", "1.1.0"));
+        QVERIFY(!UpdateService::isVersionNewer("1.1.0", "1.0.9"));
+        QVERIFY(!UpdateService::isVersionNewer("1.0.0", "0.9.0"));
+        QVERIFY(UpdateService::isVersionNewer("0.9.0", "1.0.0"));
+
+        // Pre-release versions
+        QVERIFY(!UpdateService::isVersionNewer("1.0.0", "1.0.0-rc"));
+        QVERIFY(UpdateService::isVersionNewer("1.0.0-rc", "1.0.0"));
+        QVERIFY(UpdateService::isVersionNewer("0.9.0", "1.0.0-rc"));
+        QVERIFY(UpdateService::isVersionNewer("1.0.0-rc.1", "1.0.0-rc.2"));
+        QVERIFY(!UpdateService::isVersionNewer("1.0.0-rc.2", "1.0.0-rc.1"));
+        QVERIFY(UpdateService::isVersionNewer("1.0.0", "v1.0.1-rc1"));
+    }
+
+    void updateServiceParseSha256Sums() {
+        const QString sampleText = QStringLiteral(
+            "# SHA256 checksums for VYNX ARC 1.0.0\n"
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  VYNX-ARC-Setup-x64.exe\r\n"
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad *VYNX-ARC-Portable-x64.zip\n"
+            "cb8379ac2098aa165029e3938a51da0bcecfc008fd6795f401178647f96c5b34  ./VYNX-ARC-Explorer-x64.msix\n"
+            "\n"
+            "# Another comment\n"
+        );
+
+        const auto sums = UpdateService::parseSha256Sums(sampleText);
+        QCOMPARE(sums.size(), 3);
+        QCOMPARE(sums.value("VYNX-ARC-Setup-x64.exe"), "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        QCOMPARE(sums.value("VYNX-ARC-Portable-x64.zip"), "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
+        QCOMPARE(sums.value("VYNX-ARC-Explorer-x64.msix"), "cb8379ac2098aa165029e3938a51da0bcecfc008fd6795f401178647f96c5b34");
+    }
+
+    void updateServiceVerifySha256() {
+        QTemporaryFile tempFile;
+        QVERIFY(tempFile.open());
+        const QByteArray payload = "VYNX ARC update verification test payload\n";
+        tempFile.write(payload);
+        tempFile.flush();
+        tempFile.close();
+
+        const QString expectedHash = QString::fromLatin1(QCryptographicHash::hash(payload, QCryptographicHash::Sha256).toHex());
+        QVERIFY(!expectedHash.isEmpty());
+
+        // Exact match
+        QVERIFY(UpdateService::verifySha256(tempFile.fileName(), expectedHash));
+        // Case-insensitive match
+        QVERIFY(UpdateService::verifySha256(tempFile.fileName(), expectedHash.toUpper()));
+        // Mismatch
+        QVERIFY(!UpdateService::verifySha256(tempFile.fileName(), "0000000000000000000000000000000000000000000000000000000000000000"));
+        // Nonexistent file
+        QVERIFY(!UpdateService::verifySha256(tempFile.fileName() + "_nonexistent", expectedHash));
+        // Empty hash or path
+        QVERIFY(!UpdateService::verifySha256(tempFile.fileName(), ""));
+        QVERIFY(!UpdateService::verifySha256("", expectedHash));
+    }
+
+    void updateServiceParseReleaseJson() {
+        const QByteArray json =
+            "{\n"
+            "  \"tag_name\": \"v1.0.1\",\n"
+            "  \"name\": \"VYNX ARC 1.0.1\",\n"
+            "  \"body\": \"### Release Notes\\n- Fixed RAR5 parsing\\n- Added auto-update\",\n"
+            "  \"assets\": [\n"
+            "    {\n"
+            "      \"name\": \"VYNX-ARC-Setup-x64.exe\",\n"
+            "      \"browser_download_url\": \"https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Setup-x64.exe\",\n"
+            "      \"size\": 52428800\n"
+            "    },\n"
+            "    {\n"
+            "      \"name\": \"VYNX-ARC-Portable-x64.zip\",\n"
+            "      \"browser_download_url\": \"https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Portable-x64.zip\",\n"
+            "      \"size\": 48234496\n"
+            "    },\n"
+            "    {\n"
+            "      \"name\": \"SHA256SUMS.txt\",\n"
+            "      \"browser_download_url\": \"https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/SHA256SUMS.txt\",\n"
+            "      \"size\": 256\n"
+            "    }\n"
+            "  ]\n"
+            "}";
+
+        const auto release = UpdateService::parseReleaseJson(json, "1.0.0");
+        QCOMPARE(release.version, "v1.0.1");
+        QCOMPARE(release.title, "VYNX ARC 1.0.1");
+        QVERIFY(release.notes.contains("Fixed RAR5 parsing"));
+        QCOMPARE(release.setupUrl, "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Setup-x64.exe");
+        QCOMPARE(release.setupDownloadUrl, release.setupUrl);
+        QCOMPARE(release.portableUrl, "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/VYNX-ARC-Portable-x64.zip");
+        QCOMPARE(release.portableDownloadUrl, release.portableUrl);
+        QCOMPARE(release.sha256Url, "https://github.com/Maks0101aps/VYNX-ARC/releases/download/v1.0.1/SHA256SUMS.txt");
+        QCOMPARE(release.sha256SumsUrl, release.sha256Url);
+        QVERIFY(release.isNewerThanCurrent);
+
+        // When candidate is older or same
+        const auto olderRelease = UpdateService::parseReleaseJson(json, "1.0.2");
+        QVERIFY(!olderRelease.isNewerThanCurrent);
     }
 };
 int main(int argc, char **argv) {

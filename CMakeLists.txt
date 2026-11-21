@@ -60,7 +60,8 @@ target_sources(VynxArc PRIVATE
     apps/gui/widgets/IconProvider.cpp apps/gui/widgets/IconProvider.h
     apps/gui/widgets/RecentDelegate.cpp apps/gui/widgets/RecentDelegate.h
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
-    apps/gui/widgets/ToastOverlay.cpp apps/gui/widgets/ToastOverlay.h)
+    apps/gui/widgets/ToastOverlay.cpp apps/gui/widgets/ToastOverlay.h
+    apps/gui/UpdateService.cpp apps/gui/UpdateService.h)
 target_compile_definitions(VynxArc PRIVATE VYNX_VERSION="${PROJECT_VERSION}")
 target_include_directories(VynxArc PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
 target_link_libraries(VynxArc PRIVATE Qt6::Widgets Qt6::Concurrent vynx_core)
@@ -80,7 +81,7 @@ if(WIN32)
         target_compile_definitions(VynxArc PRIVATE VYNX_MSVC)
         target_sources(VynxArc PRIVATE apps/gui/app.manifest)
     endif()
-    target_link_libraries(VynxArc PRIVATE ws2_32 userenv bcrypt ntdll advapi32 crypt32 powrprof shell32)
+    target_link_libraries(VynxArc PRIVATE ws2_32 userenv bcrypt ntdll advapi32 crypt32 powrprof shell32 winhttp)
     if(NOT MSVC)
         target_link_libraries(VynxArc PRIVATE winpthread)
     endif()
@@ -110,11 +111,12 @@ add_executable(VynxPresentationTests
     apps/gui/widgets/OperationPanel.cpp apps/gui/widgets/OperationPanel.h
     apps/gui/pages/ArchivePage.cpp apps/gui/pages/ArchivePage.h
     apps/gui/dialogs/CreateArchiveDialog.cpp apps/gui/dialogs/CreateArchiveDialog.h)
-target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h)
+target_sources(VynxPresentationTests PRIVATE apps/gui/dialogs/ConversionDialog.cpp apps/gui/dialogs/ConversionDialog.h apps/gui/dialogs/InterArchiveCopyDialog.cpp apps/gui/dialogs/InterArchiveCopyDialog.h apps/gui/dialogs/ExtractionRecoveryDialog.cpp apps/gui/dialogs/ExtractionRecoveryDialog.h apps/gui/UpdateService.cpp apps/gui/UpdateService.h)
 target_include_directories(VynxPresentationTests PRIVATE "${RUST_TARGET_DIR}/cxxbridge")
+target_compile_definitions(VynxPresentationTests PRIVATE VYNX_VERSION="${PROJECT_VERSION}")
 target_link_libraries(VynxPresentationTests PRIVATE Qt6::Widgets Qt6::Test Qt6::Concurrent vynx_core)
 if(WIN32)
-    target_link_libraries(VynxPresentationTests PRIVATE bcrypt ntdll userenv ws2_32 advapi32 shell32 ole32 crypt32)
+    target_link_libraries(VynxPresentationTests PRIVATE bcrypt ntdll userenv ws2_32 advapi32 shell32 ole32 crypt32 winhttp)
     target_compile_options(VynxPresentationTests PRIVATE /utf-8)
 endif()
 set_target_properties(VynxPresentationTests PROPERTIES WIN32_EXECUTABLE FALSE)
