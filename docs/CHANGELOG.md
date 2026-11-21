@@ -1,3 +1,13 @@
+# 1.0.0 - official release (2026-11-21)
+
+- Production release of VYNX ARC.
+- Full native RAR5 creation and single-volume modification through rars 0.12.0 (Store/Fast/Balanced/Maximum, solid blocks, dictionary tuning, AES-256 encryption, recovery records, split volumes).
+- Windows file replacement hardening using native same-volume recovery backup (`ReplaceFileW`), preserving ADS (alternate data streams) and maintaining atomic archive updates.
+- In-app automatic update notification and one-click updater integrated with GitHub Releases.
+- Complete English, Ukrainian, and Russian localizations; WCAG accessibility compliance across all major dialogs and plan tables.
+- Automated CI/CD release packaging for Inno Setup installer, standalone Portable ZIP, and MSIX sparse identity package.
+
+
 # 0.9.0 - development candidate (2026-10-24)
 
 - Native RAR5 through rars 0.12.0: Store/Fast/Balanced/Maximum, solid, dictionaries,

@@ -806,7 +806,7 @@ dependencies = [
 
 [[package]]
 name = "vynx-arc-core"
-version = "0.9.0"
+version = "1.0.0"
 dependencies = [
  "bzip2",
  "crc32fast",
@@ -827,7 +827,7 @@ dependencies = [
 
 [[package]]
 name = "vynxarc-cli"
-version = "0.9.0"
+version = "1.0.0"
 dependencies = [
  "tempfile",
  "vynx-arc-core",
@@ -1023,7 +1023,3 @@ dependencies = [
  "cc",
  "pkg-config",
 ]
-
-[[patch.unused]]
-name = "vswhom-sys"
-version = "0.1.3"
