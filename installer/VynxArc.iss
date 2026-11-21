@@ -7,7 +7,7 @@
 [Setup]
 AppId={{957C2CE0-1072-43F7-98E5-4930AF16C309}
 AppName=VYNX ARC
-AppVersion=1.0.0
+AppVersion=1.0.2
 AppPublisher=VYNX ARC contributors
 AppPublisherURL=https://github.com/Maks0101aps/VYNX-ARC
 DefaultDirName={localappdata}\Programs\VYNX ARC
@@ -36,18 +36,19 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Messages]
 en.WelcomeLabel1=Welcome to the VYNX ARC Setup Wizard
-en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC 1.0.0, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Native RAR5, 7Z, ZIP, TAR, and compressed streams%n• Supervised worker isolation with memory limits%n• Integrated one-click auto-updater%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
+en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC 1.0.2, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Native RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, and compressed streams%n• Supervised worker isolation with memory limits%n• Integrated one-click auto-updater%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
 
-ru.WelcomeLabel1=Мастер установки VYNX ARC 1.0.0
-ru.WelcomeLabel2=Программа установит VYNX ARC 1.0.0 — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Нативная работа с RAR5, 7Z, ZIP, TAR и потоками сжатия%n• Изоляция процессов под контролем ресурсов%n• Встроенное автообновление в один клик%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
+ru.WelcomeLabel1=Мастер установки VYNX ARC 1.0.2
+ru.WelcomeLabel2=Программа установит VYNX ARC 1.0.2 — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Нативная работа с RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet и потоками сжатия%n• Изоляция процессов под контролем ресурсов%n• Встроенное автообновление в один клик%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
 
-uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.0.0
-uk.WelcomeLabel2=Програма встановить VYNX ARC 1.0.0 — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Нативна робота з RAR5, 7Z, ZIP, TAR та потоками стиснення%n• Ізоляція процесів під контролем ресурсів%n• Вбудоване автооновлення в один клік%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
+uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.0.2
+uk.WelcomeLabel2=Програма встановить VYNX ARC 1.0.2 — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Нативна робота з RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet та потоками стиснення%n• Ізоляція процесів під контролем ресурсів%n• Вбудоване автооновлення в один клік%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
 
 [Tasks]
 Name: "startmenu"; Description: "Create Start menu shortcut"; Flags: checkedonce
 Name: "openwith"; Description: "Add VYNX ARC to Open With (does not change defaults)"; Flags: checkedonce
 Name: "desktop"; Description: "Create desktop shortcut"; Flags: unchecked
+Name: "iso"; Description: "Associate with .iso files (Optical Disc Images)"; Flags: unchecked
 #ifdef SignedIdentity
 Name: "explorer"; Description: "Enable Windows 11 Explorer commands"; Flags: unchecked
 #endif
@@ -60,9 +61,9 @@ Name: "{autoprograms}\VYNX ARC"; Filename: "{app}\VynxArc.exe"; Tasks: startmenu
 Name: "{autodesktop}\VYNX ARC"; Filename: "{app}\VynxArc.exe"; Tasks: desktop
 
 [Registry]
-Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive"; ValueType: string; ValueData: "VYNX ARC archive"; Flags: uninsdeletekey; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\DefaultIcon"; ValueType: string; ValueData: "{app}\VynxArc.exe,0"; Tasks: openwith
-Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\shell\open\command"; ValueType: string; ValueData: """{app}\VynxArc.exe"" ""%1"""; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive"; ValueType: string; ValueData: "VYNX ARC archive"; Flags: uninsdeletekey; Tasks: openwith or iso
+Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\DefaultIcon"; ValueType: string; ValueData: "{app}\VynxArc.exe,0"; Tasks: openwith or iso
+Root: HKCU; Subkey: "Software\Classes\VynxArc.Archive\shell\open\command"; ValueType: string; ValueData: """{app}\VynxArc.exe"" ""%1"""; Tasks: openwith or iso
 Root: HKCU; Subkey: "Software\Classes\.zip\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.7z\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.tar\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
@@ -72,6 +73,9 @@ Root: HKCU; Subkey: "Software\Classes\.xz\OpenWithProgids"; ValueType: string; V
 Root: HKCU; Subkey: "Software\Classes\.bz2\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.zst\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
 Root: HKCU; Subkey: "Software\Classes\.lzma\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.iso\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: openwith
+Root: HKCU; Subkey: "Software\Classes\.iso"; ValueType: string; ValueData: "VynxArc.Archive"; Flags: uninsdeletevalue; Tasks: iso
+Root: HKCU; Subkey: "Software\Classes\.iso\OpenWithProgids"; ValueType: string; ValueName: "VynxArc.Archive"; ValueData: ""; Flags: uninsdeletevalue; Tasks: iso
 
 [Run]
 #ifdef SignedIdentity

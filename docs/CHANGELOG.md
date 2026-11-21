@@ -1,3 +1,17 @@
+# 1.0.2 - official release (2026-11-21)
+
+- Native ISO 9660 & Joliet optical disc image (.iso) support:
+  - Read, browse, test, and extract optical disc images without third-party tools.
+  - Sector-level Primary Volume Descriptor (PVD) and Supplementary Volume Descriptor (SVD) parsing with Big/Little Endian 733 and 723 integer decoders.
+  - Full Unicode filename and long path support via Joliet UCS-2 Big-Endian encoding.
+  - Strict path traversal sanitization and directory escape protection.
+  - Supervised worker isolation for listing, testing, extracting, and previewing `.iso` disc images.
+  - Nested container navigation: open `.iso` disc images nested inside `.zip`, `.7z`, or `.rar` archives seamlessly.
+  - Fast single-file and stream preview for text, images, and binary contents within `.iso` disc images.
+  - Windows Explorer Shell context menu integration for `.iso` files (Browse, Extract here, Extract to named folder, Smart Extract, Test archive).
+  - Inno Setup installer file association task and Open With registry support for `.iso`.
+
+
 # 1.0.0 - official release (2026-11-21)
 
 - Production release of VYNX ARC.
