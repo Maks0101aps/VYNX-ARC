@@ -23,7 +23,7 @@ zeroize = "=1.9.0"
 tar = "=0.4.46"
 flate2 = "=1.1.10"
 bzip2 = "=0.6.1"
-zstd = { version = "=0.14.2", features = ["zstdmt"] }
+zstd = { version = "=0.14.4", features = ["zstdmt"] }
 lzma-rust2 = "=0.22.0"
 
 [target.'cfg(windows)'.dependencies]

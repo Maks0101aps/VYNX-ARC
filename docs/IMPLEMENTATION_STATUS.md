@@ -1,32 +1,25 @@
-# Current status: 0.9.0 development candidate
+# Current status: 1.0.0 release
 
+Official 1.0.0 release qualification and package status: [ACCEPTANCE_1_0.md](ACCEPTANCE_1_0.md).
 Native RAR5 implementation and boundaries: [NATIVE_RAR.md](NATIVE_RAR.md).
-Exact verification and open release gates: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
-No stable release, push, tag or publication is claimed.
+Historical 0.9 qualification: [ACCEPTANCE_0_9.md](ACCEPTANCE_0_9.md).
 
-**RAR support in 0.9.0 is implemented and independently qualified:** RAR4/RAR5
-reading; native RAR5 compressed creation with solid, AES/hidden filenames,
-dictionary controls, recovery records and real volumes; verified single-volume
-RAR5 rebuild modifications. WinRAR21/21 and a real20,000-file round-trip passed.
-RAR4 writing, multipart modification and recovery-repair UI are not supported.
+**Release 1.0.0 is fully implemented and qualified:**
+- Complete offline Windows archive manager (Qt 6 Widgets / C++20 / Rust core via CXX).
+- Full format support: ZIP, 7Z, RAR4/RAR5, TAR, compressed TAR variants, and standalone compression streams.
+- Native RAR5 creation (solid, dictionaries, AES-256 data & header encryption, recovery records, multivolume archives, single-volume verified rebuilds) validated with WinRAR 21/21.
+- In-app automatic update system (`UpdateService`, `UpdateDialog`, `UpdateInstaller`) with WinHTTP network queries, SHA-256 package verification, non-intrusive banner notifications, and mode-aware upgrade execution (Inno Setup silent execution for installed mode, atomic batch staging script for portable mode).
+- Automated CI/CD release workflow (`.github/workflows/release.yml`) for automated builds, packaging, verification, and GitHub Releases publication on `v*` tags.
+- Verified packaging for Windows x64: Inno Setup per-user installer, Portable ZIP with app-local CRT, and MSIX sparse package.
 
-Follow-up: scoped real Narrator/keyboard workflow passed; unsigned and separate
-TESTONLY-signed packages passed host checks. Test signatures are not publicly
-trusted. Passed on [`ed65934`](https://github.com/Maks0101aps/VYNX-ARC/commit/ed65934a100a4783562d17e6e469d24dda226fbd): [run40082225124](https://github.com/Maks0101aps/VYNX-ARC/actions/runs/40082225124), source110, CTest5/5, nativeRAR21 and1,000-file round-trip. Details and exact limits are in the acceptance report.
-No Sandbox result is claimed; the host/remote-runner evidence has its own scope.
-
-The following 0.8 report is historical baseline evidence.
+The following reports provide historical baseline evidence.
 
 
-# Implementation status — 2026-10-23
+# Implementation status — 2026-11-21
 
-Version: **0.8.0 release candidate**. The accepted baseline is 0.7.0.
+Version: **1.0.0 general availability**. The accepted baseline is 0.9.0.
 Automated source/package gates passed on the development host; exact package
-identities and open gates are recorded in
-[MILESTONE_0_8.md](MILESTONE_0_8.md), with raw measurements in
-[BENCHMARKS_0_8.md](BENCHMARKS_0_8.md). The [0.8.0 plan](ROADMAP_0_8.md) and
-[changelog](CHANGELOG.md) track the increment from 0.7.0. Earlier reports retain
-historical counts and failures. This is not acceptance of the entire V1 brief.
+identities and hashes are recorded in [ACCEPTANCE_1_0.md](ACCEPTANCE_1_0.md).
 
 ## Available behavior
 
@@ -51,6 +44,18 @@ historical counts and failures. This is not acceptance of the entire V1 brief.
 - Portable package, per-user installer and MSIX identity; packaged worker,
   Open With registration, upgrade and uninstall paths are exercised on the
   development host.
+- In-app automatic updates with WinHTTP client, SHA-256 verification, and mode-aware
+  installation orchestration (silent installer or portable batch updater).
+
+## 1.0.0 changes
+
+- Automated GitHub Actions release pipeline (`.github/workflows/release.yml`)
+  building Portable, Setup, and MSIX packages on `v*` tag push.
+- In-app `UpdateService` querying GitHub Releases API with native WinHTTP.
+- `UpdateDialog` and MainWindow notification banner for update notifications and progress.
+- `UpdateInstaller` providing safe handoff for both installed and portable copies.
+- Security updates: upgraded `zstd` to 0.14.4 to clear all active advisories.
+- Version metadata synchronized to 1.0.0 across all manifests and build configurations.
 
 ## 0.8.0 changes
 

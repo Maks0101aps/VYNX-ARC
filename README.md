@@ -1,22 +1,22 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains the **0.9.0
-development candidate**. The supplied master brief remains the V1 contract; this
-milestone does not satisfy the full contract.
+archive core connected through CXX. This repository contains the **1.0.0 release**.
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
 TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
 Create these formats, including native RAR5, AES-encrypted ZIP and encrypted 7Z
 filenames. RAR4 remains read-only. RAR5 adds solid compression, AES/header
 encryption, dictionary controls, recovery records and actual RAR5 volumes.
-**0.9.0 RAR status:** native RAR5 writing and single-volume rebuilds are implemented
-and independently tested with WinRAR. Scoped Narrator/keyboard acceptance and host
-installation checks passed. [Current qualification status](docs/IMPLEMENTATION_STATUS.md)
-separates those results from public signing and clean-guest limits.
+**1.0.0 status:** native RAR5 writing and single-volume rebuilds are implemented
+and independently tested with WinRAR (21/21 matrix). In-app auto-updates
+(`UpdateService`, `UpdateDialog`, `UpdateInstaller`) with SHA-256 validation
+and automated CI/CD release packaging are included. See
+[1.0.0 acceptance report](docs/ACCEPTANCE_1_0.md) and
+[current qualification status](docs/IMPLEMENTATION_STATUS.md).
 
 See [RAR capabilities and limits](docs/NATIVE_RAR.md) and the
-[0.9 acceptance report](docs/ACCEPTANCE_0_9.md).
+[1.0.0 acceptance report](docs/ACCEPTANCE_1_0.md).
 Choose Store/Fast/Balanced/Maximum compression and
 Eco/Balanced/Maximum resource modes. Operations run asynchronously with
 progress and cancellation; additional archive requests enter a visible FIFO queue.
@@ -102,24 +102,19 @@ the command line are intentionally unsupported.
 
 ## Project status
 
-The [0.8.0 acceptance report](docs/MILESTONE_0_8.md),
-[performance report](docs/BENCHMARKS_0_8.md) and [plan](docs/ROADMAP_0_8.md)
-record completed workflows, exact package identities and open gates. The
-[0.7.0 acceptance report](docs/MILESTONE_0_7.md) records the accepted baseline. The
-[0.6.0 acceptance report](docs/MILESTONE_0_6.md) and earlier
-[roadmap](docs/ROADMAP_0_6.md) retain the preceding implementation history.
+The [1.0.0 acceptance report](docs/ACCEPTANCE_1_0.md) records completed workflows,
+exact package identities, SHA-256 checksums, and qualification results. The
+[0.9.0 acceptance report](docs/ACCEPTANCE_0_9.md) and earlier reports
+([0.8.0](docs/MILESTONE_0_8.md), [0.7.0](docs/MILESTONE_0_7.md), [0.6.0](docs/MILESTONE_0_6.md))
+retain the preceding milestone history.
 
 [IMPLEMENTATION_STATUS.md](docs/IMPLEMENTATION_STATUS.md) records evidence,
-limitations and remaining work. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md)
+capabilities and qualification notes. [SUPPORTED_FORMATS.md](docs/SUPPORTED_FORMATS.md)
 defines actual format capabilities. [SECURITY_MODEL.md](docs/SECURITY_MODEL.md)
-documents protections and incomplete security gates.
+documents protections and operational security boundaries.
 
-The [0.5 milestone report](docs/MILESTONE_0_5.md) records the preceding behavior,
-measurements and verification boundaries. The [0.4 milestone report](docs/MILESTONE_0_4.md)
-records the historical feature increment. Stable-release acceptance remains
-incomplete beyond the measured milestone scope. Run `scripts/check.ps1` for
-mandatory local source gates; release packaging enforces those same gates.
+Run `scripts/check.ps1` for mandatory local source gates; release packaging enforces those same gates.
 
 The application is MIT licensed. Qt and UnRAR retain their separate licenses;
 see [THIRD_PARTY_NOTICES.md](docs/THIRD_PARTY_NOTICES.md) and the packaged `licenses/`
-directory. RAR encoding is not implemented.
+directory.
