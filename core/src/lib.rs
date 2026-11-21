@@ -5,6 +5,7 @@ pub mod disk;
 pub mod error;
 pub mod ffi;
 pub mod hashing;
+pub mod iso;
 pub mod modification;
 pub mod operations;
 pub mod parser;
