@@ -52,17 +52,23 @@ jobs:
       - name: Source gates, native tests, and release packaging
         shell: pwsh
         run: |
-          scripts/build-release.ps1 -QtRoot $env:QT_ROOT_DIR -OutputDirectory dist/1.0.0
+          $tag = $env:GITHUB_REF_NAME
+          $ver = if ($tag -match '^v?(\d+\.\d+\.\d+)') { $Matches[1] } else { '1.0.2' }
+          $outDir = "dist/$ver"
+          scripts/build-release.ps1 -QtRoot $env:QT_ROOT_DIR -OutputDirectory $outDir
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item dist/1.0.0/* dist/ -Force -ErrorAction SilentlyContinue
+          Copy-Item "$outDir/*" dist/ -Force -ErrorAction SilentlyContinue
 
       - name: Verify release integrity
         shell: pwsh
         run: |
+          $tag = $env:GITHUB_REF_NAME
+          $ver = if ($tag -match '^v?(\d+\.\d+\.\d+)') { $Matches[1] } else { '1.0.2' }
+          $outDir = "dist/$ver"
           New-Item -ItemType Directory -Force .dev | Out-Null
           $env:VYNX_VERIFY_REPORT = Join-Path $PWD '.dev/ci-portable.json'
-          $env:VYNX_VERIFY_DIST = Join-Path $PWD 'dist/1.0.0'
+          $env:VYNX_VERIFY_DIST = Join-Path $PWD $outDir
           python scripts/verify-portable.py
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
 
@@ -70,10 +76,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/1.0.0/VYNX-ARC-Setup-x64.exe
-            dist/1.0.0/VYNX-ARC-Portable-x64.zip
-            dist/1.0.0/VYNX-ARC-Explorer-x64.msix
-            dist/1.0.0/SHA256SUMS.txt
+            dist/VYNX-ARC-Setup-x64.exe
+            dist/VYNX-ARC-Portable-x64.zip
+            dist/VYNX-ARC-Explorer-x64.msix
+            dist/SHA256SUMS.txt
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
