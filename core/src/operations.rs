@@ -423,6 +423,31 @@ pub fn extract(
             ));
         }
     }
+    if archive.format == Format::Wim {
+        #[cfg(windows)]
+        {
+            for entry in archive.entries.iter().filter(|e| selected(e)) {
+                op.check()?;
+                op.phase(&entry.name);
+                let image_dest = security::output_path(&root, &entry.name)?;
+                fs::create_dir_all(&image_dest)?;
+                crate::wim_native::extract_image(
+                    &archive.path,
+                    entry.id as u32,
+                    &image_dest,
+                    op,
+                )?;
+            }
+            return Ok(root);
+        }
+        #[cfg(not(windows))]
+        {
+            return Err(ArcError::new(
+                "UNSUPPORTED",
+                "WIM extraction requires Windows wimgapi",
+            ));
+        }
+    }
     op.total(total);
     for entry in archive
         .entries
@@ -955,6 +980,12 @@ fn create_internal(
             return Err(ArcError::new(
                 "READ_ONLY",
                 "ISO disc images are read only and cannot be created",
+            ));
+        }
+        Format::Wim => {
+            return Err(ArcError::new(
+                "READ_ONLY",
+                "WIM images are read-only and cannot be created",
             ));
         }
     }

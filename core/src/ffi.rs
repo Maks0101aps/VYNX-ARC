@@ -307,7 +307,7 @@ fn configure_rar_operation(
         Err(ArcError::new("FORMAT", "RAR encoding requires Windows"))
     }
 }
-fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
+pub fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
     let format = match format {
         0 => crate::Format::Zip,
         1 => crate::Format::SevenZ,
@@ -324,6 +324,7 @@ fn compression_details(format: u8, preset: u8, resource: u8) -> Result<String> {
         #[cfg(windows)]
         12 => crate::Format::Rar,
         13 => return Err(ArcError::new("FORMAT", "ISO is a read-only format")),
+        14 => return Err(ArcError::new("FORMAT", "WIM is a read-only format")),
         _ => return Err(ArcError::new("FORMAT", "Unsupported format")),
     };
     Ok(crate::settings::Settings::from_ids(preset, resource)?
@@ -388,10 +389,10 @@ fn extraction_root(archive: &Archive, destination: &str, smart: bool) -> Result<
         Ok(root.to_string_lossy().into_owned())
     })
 }
-fn archive_format(archive: &Archive) -> String {
+pub fn archive_format(archive: &Archive) -> String {
     archive.format.name().into()
 }
-fn archive_writable(archive: &Archive) -> bool {
+pub fn archive_writable(archive: &Archive) -> bool {
     archive.writable
 }
 fn create_split_archive(
@@ -501,7 +502,7 @@ fn reply_conflict(op: &Operation, id: u64, choice: u8, all: bool) -> bool {
     };
     op.reply_conflict(id, choice, all)
 }
-fn create_archive_as(
+pub fn create_archive_as(
     output: &str,
     inputs: &[String],
     format: u8,
@@ -525,6 +526,7 @@ fn create_archive_as(
             #[cfg(windows)]
             12 => crate::Format::Rar,
             13 => return Err(ArcError::new("FORMAT", "ISO is a read-only format")),
+            14 => return Err(ArcError::new("FORMAT", "WIM is a read-only format")),
             _ => return Err(ArcError::new("FORMAT", "Invalid selected format")),
         };
         crate::worker::Client::sibling()?.create(
@@ -679,5 +681,23 @@ mod tests {
         assert!(compression_details(13, 0, 0).is_err());
         let op = Operation::default();
         assert!(create_archive_as("out.iso", &[], 13, "", &op).is_err());
+    }
+
+    #[test]
+    fn test_ffi_wim_properties() {
+        let archive = Archive {
+            writable: false,
+            path: PathBuf::from("test.wim"),
+            format: crate::Format::Wim,
+            entries: Vec::new(),
+            physical_size: 1024,
+        };
+        assert_eq!(archive_format(&archive), "WIM");
+        assert!(!archive_writable(&archive));
+
+        // Format 14 should reject compression details & creation
+        assert!(compression_details(14, 0, 0).is_err());
+        let op = Operation::default();
+        assert!(create_archive_as("out.wim", &[], 14, "", &op).is_err());
     }
 }

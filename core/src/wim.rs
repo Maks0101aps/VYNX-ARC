@@ -10,6 +10,8 @@ use std::{
     path::Path,
 };
 
+pub use crate::wim_native::extract_image;
+
 /// Header size in bytes of a standard WIM v1 file.
 pub const WIM_HEADER_SIZE: usize = 208;
 
