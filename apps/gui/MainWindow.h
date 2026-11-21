@@ -215,4 +215,5 @@ class MainWindow : public QMainWindow {
     ReleaseInfo availableRelease_;
     UpdateService updateService_;
     bool updateCheckInteractive_ = false;
+    void handleInstallRequested(const QString &downloadedPath, bool isPortable);
 };

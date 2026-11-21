@@ -91,12 +91,7 @@ UpdateDialog::UpdateDialog(const ReleaseInfo &release, QWidget *parent, UpdateSe
     mainLayout->addLayout(buttonLayout);
 
     connect(actionButton_, &QPushButton::clicked, this, &UpdateDialog::onActionButtonClicked);
-    connect(cancelButton_, &QPushButton::clicked, this, [this] {
-        if (downloading_ && updateService_) {
-            updateService_->cancelDownload();
-        }
-        reject();
-    });
+    connect(cancelButton_, &QPushButton::clicked, this, &UpdateDialog::reject);
 
     connect(updateService_, &UpdateService::downloadProgress, this, &UpdateDialog::onDownloadProgress);
     connect(updateService_, &UpdateService::downloadComplete, this, &UpdateDialog::onDownloadComplete);
@@ -107,6 +102,13 @@ UpdateDialog::~UpdateDialog() {
     if (updateService_ && !ownsUpdateService_) {
         updateService_->disconnect(this);
     }
+}
+
+void UpdateDialog::reject() {
+    if (downloading_ && updateService_) {
+        updateService_->cancelDownload();
+    }
+    QDialog::reject();
 }
 
 void UpdateDialog::startDownload() {

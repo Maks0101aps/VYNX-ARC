@@ -12,6 +12,7 @@
 #include "Theme.h"
 #include "dialogs/AboutDialog.h"
 #include "dialogs/UpdateDialog.h"
+#include "UpdateInstaller.h"
 #include "dialogs/BatchExtractDialog.h"
 #include "dialogs/CreateArchiveDialog.h"
 #include "dialogs/ExtractDialog.h"
@@ -175,6 +176,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     connect(updateBannerDismiss_, &QToolButton::clicked, updateBanner_, &QFrame::hide);
     connect(updateBannerButton_, &QPushButton::clicked, this, [this] {
         UpdateDialog dialog(availableRelease_, this, &updateService_);
+        connect(&dialog, &UpdateDialog::installRequested, this, &MainWindow::handleInstallRequested);
         dialog.exec();
     });
 
@@ -425,6 +427,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         if (updateCheckInteractive_) {
             updateCheckInteractive_ = false;
             UpdateDialog dialog(availableRelease_, this, &updateService_);
+            connect(&dialog, &UpdateDialog::installRequested, this, &MainWindow::handleInstallRequested);
             dialog.exec();
         }
     });
@@ -444,9 +447,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
     });
 
-    QTimer::singleShot(2000, this, [this] {
-        updateService_.checkForUpdates(false);
-    });
+    if (!QCoreApplication::arguments().contains(QStringLiteral("--smoke-test"))) {
+        QTimer::singleShot(2000, this, [this] {
+            updateService_.checkForUpdates(false);
+        });
+    }
 }
 MainWindow::~MainWindow() {
     queue_.clear();
@@ -460,6 +465,44 @@ MainWindow::~MainWindow() {
         vynx::cancel(**operations_.operation);
     operations_.watcher().waitForFinished();
     session_->password.reset();
+}
+
+void MainWindow::handleInstallRequested(const QString &downloadedPath, bool isPortable) {
+    bool hasPending = operations_.busy || (edits_ && !edits_->records().isEmpty()) || (queue_.size() > 0);
+    if (!hasPending) {
+        for (const auto &session : sessions_) {
+            if (session && session->busy) {
+                hasPending = true;
+                break;
+            }
+        }
+    }
+    if (!hasPending) {
+        for (const auto &reader : readers_) {
+            if (reader && reader->busy) {
+                hasPending = true;
+                break;
+            }
+        }
+    }
+
+    if (hasPending) {
+        const QMessageBox::StandardButton reply = QMessageBox::question(
+            this, tr("Unsaved Changes"),
+            tr("You have unsaved changes or active archive operations. Would you like to proceed and restart VYNX ARC anyway?"),
+            QMessageBox::Yes | QMessageBox::No);
+        if (reply != QMessageBox::Yes) {
+            return;
+        }
+    }
+
+    const QString err = UpdateInstaller::launchAndExit(
+        downloadedPath, isPortable,
+        QCoreApplication::applicationPid(),
+        QCoreApplication::applicationDirPath());
+    if (!err.isEmpty()) {
+        QMessageBox::critical(this, tr("Update Error"), err);
+    }
 }
 void MainWindow::chooseOpen() {
     const auto paths =

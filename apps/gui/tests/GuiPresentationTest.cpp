@@ -20,6 +20,7 @@
 #include "../widgets/OperationPanel.h"
 #include "../UpdateService.h"
 #include "../dialogs/UpdateDialog.h"
+#include "../UpdateInstaller.h"
 #include <QDesktopServices>
 #include <QImageReader>
 #include <QJsonDocument>
@@ -1309,6 +1310,54 @@ class GuiPresentationTest : public QObject {
         QCOMPARE(dialog.actionButton()->text(), "Install & Relaunch");
         QVERIFY(dialog.actionButton()->isEnabled());
         QCOMPARE(dialog.cancelButton()->text(), "Close");
+    }
+
+    void updateInstallerArgsGeneration() {
+        const QStringList args = UpdateInstaller::installerArgs();
+        QCOMPARE(args.size(), 3);
+        QCOMPARE(args.at(0), QStringLiteral("/SILENT"));
+        QCOMPARE(args.at(1), QStringLiteral("/CLOSEAPPLICATIONS"));
+        QCOMPARE(args.at(2), QStringLiteral("/RESTARTAPPLICATIONS"));
+    }
+
+    void updateInstallerPortableBatchScript() {
+        const QString script = UpdateInstaller::generatePortableScriptContent();
+        QVERIFY(!script.isEmpty());
+        QVERIFY(script.contains("tasklist /FI \"PID eq %1\""));
+        QVERIFY(script.contains("timeout /t 1 /nobreak"));
+        QVERIFY(script.contains("tar.exe -xf \"%~2\" -C \"%~3\""));
+        QVERIFY(script.contains("start \"\" \"%~3\\VynxArc.exe\""));
+        QVERIFY(script.contains("(goto) 2>nul & del \"%~f0\""));
+
+        const QString path = UpdateInstaller::portableScriptPath();
+        QVERIFY(!path.isEmpty());
+        QVERIFY(path.endsWith("vynx-update-portable.bat"));
+    }
+
+    void updateInstallerErrorHandlingWhenPackageMissing() {
+        const QString nonExistent = "C:/non/existent/path/package.zip";
+        const QString err = UpdateInstaller::launchAndExit(nonExistent, true, 12345, "C:/fake/appdir", false);
+        QVERIFY(!err.isEmpty());
+        QVERIFY(err.contains("Update package not found"));
+
+        const QString errEmpty = UpdateInstaller::launchAndExit("", false, 12345, "C:/fake/appdir", false);
+        QVERIFY(!errEmpty.isEmpty());
+
+        QTemporaryFile tempPkg;
+        QVERIFY(tempPkg.open());
+        const QString errAppDir = UpdateInstaller::launchAndExit(tempPkg.fileName(), true, 12345, "C:/non/existent/appdir", false);
+        QVERIFY(!errAppDir.isEmpty());
+        QVERIFY(errAppDir.contains("Application directory not found"));
+    }
+
+    void updateDialogRejectCancelsDownload() {
+        ReleaseInfo info;
+        info.version = "v1.0.1";
+        UpdateService service;
+        UpdateDialog dialog(info, nullptr, &service);
+        dialog.startDownload();
+        dialog.reject();
+        QCOMPARE(dialog.result(), int(QDialog::Rejected));
     }
 
 };

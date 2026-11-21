@@ -30,6 +30,7 @@ public:
 
 public slots:
     void startDownload();
+    void reject() override;
 
 signals:
     void readyToInstall(const QString &downloadedPath, bool isPortable);
