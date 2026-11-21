@@ -65,11 +65,17 @@ struct RootRecord {
 
 fn parse_root_record(rec: &[u8]) -> Result<RootRecord> {
     if rec.len() < 34 {
-        return Err(ArcError::new("CORRUPT", "Root directory record is truncated"));
+        return Err(ArcError::new(
+            "CORRUPT",
+            "Root directory record is truncated",
+        ));
     }
     let rec_len = rec[0] as usize;
     if rec_len < 34 || rec_len > rec.len() {
-        return Err(ArcError::new("CORRUPT", "Invalid root directory record length"));
+        return Err(ArcError::new(
+            "CORRUPT",
+            "Invalid root directory record length",
+        ));
     }
     let lba = u32::from_le_bytes(rec[2..6].try_into().unwrap());
     let len = u32::from_le_bytes(rec[10..14].try_into().unwrap());

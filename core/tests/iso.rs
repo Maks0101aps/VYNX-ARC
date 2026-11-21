@@ -30,7 +30,10 @@ fn make_synthetic_iso() -> Vec<u8> {
     // Sector 18: Root directory sector
     let dir = &mut data[32768 + 4096..32768 + 6144];
     // Record 1: file test.txt at LBA 19, size 5 bytes ("HELLO")
-    let name_utf16: Vec<u8> = "test.txt".encode_utf16().flat_map(|u| u.to_be_bytes()).collect();
+    let name_utf16: Vec<u8> = "test.txt"
+        .encode_utf16()
+        .flat_map(|u| u.to_be_bytes())
+        .collect();
     let rec_len = (33 + name_utf16.len() + 1) & !1;
     dir[0] = rec_len as u8;
     dir[2..6].copy_from_slice(&19u32.to_le_bytes());
@@ -65,8 +68,7 @@ fn test_iso_stream_and_read_entry() {
     let raw = make_synthetic_iso();
     let mut cursor = Cursor::new(raw);
     let op = Operation::default();
-    let (entries, _) =
-        iso::list(&mut cursor, std::path::Path::new("test.iso"), &op).expect("list");
+    let (entries, _) = iso::list(&mut cursor, std::path::Path::new("test.iso"), &op).expect("list");
     assert_eq!(entries.len(), 1);
 
     // Test read_entry
@@ -133,8 +135,7 @@ fn test_iso_pvd_ascii_fallback_and_version_stripping() {
 
     let mut cursor = Cursor::new(data);
     let op = Operation::default();
-    let (entries, _) =
-        iso::list(&mut cursor, std::path::Path::new("test.iso"), &op).expect("list");
+    let (entries, _) = iso::list(&mut cursor, std::path::Path::new("test.iso"), &op).expect("list");
     assert_eq!(entries.len(), 2);
     assert_eq!(entries[0].name, "FILE.TXT");
     assert_eq!(entries[1].name, "README");
