@@ -10,7 +10,7 @@ void MainWindow::chooseConversion(const QStringList &initial, const QString &edi
     if (paths.isEmpty())
         paths = QFileDialog::getOpenFileNames(
             this, tr("Archives to convert"), {},
-            tr("Archives (*.zip *.7z *.rar *.tar *.gz *.xz *.bz2 *.zst *.lzma);;All files (*)"));
+            tr("Archives (*.zip *.7z *.rar *.tar *.gz *.xz *.bz2 *.zst *.lzma *.iso);;All files (*)"));
     if (paths.isEmpty())
         return;
     if (queue_.size() + size_t(paths.size()) > 32) {

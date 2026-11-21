@@ -22,6 +22,7 @@
 #include "../dialogs/UpdateDialog.h"
 #include "../UpdateInstaller.h"
 #include "../dialogs/SettingsDialog.h"
+#include "../FormatUtils.h"
 #include <QDesktopServices>
 #include <QImageReader>
 #include <QJsonDocument>
@@ -1437,6 +1438,51 @@ class GuiPresentationTest : public QObject {
         dialog.startDownload();
         dialog.reject();
         QCOMPARE(dialog.result(), int(QDialog::Rejected));
+    }
+
+    void isoFormatHandlingAndFilterIntegrity() {
+        // outputForFormat strips .iso and maps format 13 to iso
+        QCOMPARE(outputForFormat("image.iso", 0), QString("image.zip"));
+        QCOMPARE(outputForFormat("archive.zip", 13), QString("archive.iso"));
+        QCOMPARE(outputForFormat("disc.tar.gz", 13), QString("disc.iso"));
+        QCOMPARE(outputForFormat("SETUP.ISO", 1), QString("SETUP.7z"));
+
+        // Batch destination stripping for .iso
+        const auto destinations = batchDestinations({"C:/images/installer.iso", "C:/images/INSTALLER.iso"}, "C:/target");
+        QCOMPARE(destinations.size(), 2);
+        QCOMPARE(QFileInfo(destinations[0]).fileName(), QString("installer"));
+        QCOMPARE(QFileInfo(destinations[1]).fileName(), QString("INSTALLER (2)"));
+
+        // Verify open file dialog filters contain *.iso
+        auto findRepoFile = [](const QString &relativePath) -> QString {
+            for (const auto &prefix : {QString(), QString("../"), QString("../../")}) {
+                if (QFile::exists(prefix + relativePath))
+                    return prefix + relativePath;
+            }
+            return relativePath;
+        };
+
+        QFile mwFile(findRepoFile("apps/gui/MainWindow.cpp"));
+        QVERIFY(mwFile.open(QIODevice::ReadOnly));
+        QVERIFY(mwFile.readAll().contains("*.iso"));
+
+        QFile batchFile(findRepoFile("apps/gui/dialogs/BatchExtractDialog.cpp"));
+        QVERIFY(batchFile.open(QIODevice::ReadOnly));
+        const auto batchContent = batchFile.readAll();
+        QVERIFY(batchContent.contains("*.iso"));
+        QVERIFY(batchContent.contains("\".iso\""));
+
+        QFile convFile(findRepoFile("apps/gui/MainWindowConversion.cpp"));
+        QVERIFY(convFile.open(QIODevice::ReadOnly));
+        QVERIFY(convFile.readAll().contains("*.iso"));
+
+        QFile nestedFile(findRepoFile("apps/gui/MainWindowNested.cpp"));
+        QVERIFY(nestedFile.open(QIODevice::ReadOnly));
+        QVERIFY(nestedFile.readAll().contains("\".iso\""));
+
+        QFile shellFile(findRepoFile("apps/shell/ShellCommand.cpp"));
+        QVERIFY(shellFile.open(QIODevice::ReadOnly));
+        QVERIFY(shellFile.readAll().contains("L\".iso\""));
     }
 
 };

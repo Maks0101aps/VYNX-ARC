@@ -153,6 +153,12 @@ impl Settings {
                 dictionary,
                 1,
             ),
+            Format::Iso => {
+                return Err(ArcError::new(
+                    "OPTIONS",
+                    "ISO is a read-only disc image format with no compression presets",
+                ));
+            }
         };
         Ok(Effective {
             codec,

@@ -119,6 +119,7 @@ impl Wire for Format {
             "TAR.ZST" => Self::TarZst,
             #[cfg(windows)]
             "RAR" => Self::Rar,
+            "ISO" => Self::Iso,
             _ => return Err(invalid()),
         })
     }

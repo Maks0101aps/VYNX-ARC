@@ -24,6 +24,7 @@ pub enum Format {
     TarZst,
     #[cfg(windows)]
     Rar,
+    Iso,
 }
 impl Format {
     pub fn name(self) -> &'static str {
@@ -42,6 +43,7 @@ impl Format {
             Self::TarZst => "TAR.ZST",
             #[cfg(windows)]
             Self::Rar => "RAR",
+            Self::Iso => "ISO",
         }
     }
     pub fn for_output(path: &Path) -> Result<Self> {
@@ -75,6 +77,11 @@ impl Format {
             Ok(Self::Tar)
         } else if name.ends_with(".gz") {
             Ok(Self::Gzip)
+        } else if name.ends_with(".iso") {
+            Err(ArcError::new(
+                "FORMAT",
+                "ISO disc images are read-only and cannot be created",
+            ))
         } else {
             Err(ArcError::new(
                 "FORMAT",
@@ -133,7 +140,13 @@ pub fn detect(file: &mut (impl Read + Seek)) -> Result<Format> {
     if header[..n].starts_with(&[0x28, 0xb5, 0x2f, 0xfd]) {
         return Ok(Format::Zstd);
     }
-    if n >= 512 && (&header[257..262] == b"ustar" || header.iter().all(|x| *x == 0)) {
+    if n >= 512 && &header[257..262] == b"ustar" {
+        return Ok(Format::Tar);
+    }
+    if crate::iso::detect(file)? {
+        return Ok(Format::Iso);
+    }
+    if n >= 512 && header.iter().all(|x| *x == 0) {
         return Ok(Format::Tar);
     }
     if n >= 13 && header[0] < 225 {
@@ -186,6 +199,11 @@ impl Archive {
             #[cfg(windows)]
             Format::Rar => {
                 (entries, writable) = crate::rar::list(&path, password, op)?;
+            }
+            Format::Iso => {
+                let (parsed_entries, _) = crate::iso::list(&mut file, &path, op)?;
+                entries = parsed_entries;
+                writable = false;
             }
             Format::Zip => {
                 let mut zip = crate::parser::open_zip(file)?;
@@ -359,17 +377,36 @@ impl Archive {
         op.check()
     }
 
+    pub fn iso_entry(
+        &self,
+        id: u64,
+        op: &Operation,
+        consume: impl FnOnce(&Entry, &mut dyn Read) -> Result<()>,
+    ) -> Result<()> {
+        op.check()?;
+        let entry = self
+            .entries
+            .iter()
+            .find(|e| e.id == id && !e.directory)
+            .ok_or_else(|| ArcError::new("SELECTION", "Unknown regular entry"))?;
+        let mut file = crate::volumes::Reader::open(&self.path)?;
+        crate::iso::read_entry(&mut file, entry, op, consume)
+    }
+
     pub fn streams(
         &self,
         password: &str,
         op: &Operation,
         mut consume: impl FnMut(&Entry, &mut dyn Read) -> Result<()>,
     ) -> Result<()> {
-        let file = crate::volumes::Reader::open(&self.path)?;
+        let mut file = crate::volumes::Reader::open(&self.path)?;
         match self.format {
             #[cfg(windows)]
             Format::Rar => {
                 crate::rar::streams(&self.path, password, &self.entries, op, consume)?;
+            }
+            Format::Iso => {
+                crate::iso::stream(&mut file, &self.entries, op, consume)?;
             }
             Format::Zip => {
                 let mut zip = crate::parser::open_zip(file)?;

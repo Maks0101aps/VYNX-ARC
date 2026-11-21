@@ -41,6 +41,12 @@ fn read_into(
             copy_checked(data, target, entry, op, &policy, &mut 0)
         });
     }
+    if archive.format == crate::Format::Iso {
+        op.total(selected.size);
+        return archive.iso_entry(id, op, |entry, data| {
+            copy_checked(data, target, entry, op, &policy, &mut 0)
+        });
+    }
     op.total(archive.entries.iter().map(|e| e.size).sum());
     let mut actual = 0;
     let mut found = false;
