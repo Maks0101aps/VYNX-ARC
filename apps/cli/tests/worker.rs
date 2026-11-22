@@ -426,3 +426,110 @@ fn conversion_uses_worker_and_keeps_original_bytes() {
     );
     assert_eq!(std::fs::read(&path).unwrap(), before);
 }
+
+#[test]
+fn test_cli_multivolume_7z_modification() {
+    let dir = tempfile::tempdir().unwrap();
+    let file1 = dir.path().join("file1.bin");
+    let file2 = dir.path().join("file2.bin");
+
+    // Pseudo-random data to prevent excessive compression and force multi-volume split
+    let mut data1 = vec![0u8; 70_000];
+    let mut state = 123456789u32;
+    for b in data1.iter_mut() {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        *b = (state & 0xFF) as u8;
+    }
+    let mut data2 = vec![0u8; 70_000];
+    for b in data2.iter_mut() {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        *b = (state & 0xFF) as u8;
+    }
+
+    std::fs::write(&file1, &data1).unwrap();
+    std::fs::write(&file2, &data2).unwrap();
+
+    let output = dir.path().join("archive.7z");
+    let op = Operation::default();
+    operations::create_split(
+        &CreateOptions {
+            output: output.clone(),
+            inputs: vec![file1, file2],
+            password: String::new().into(),
+        },
+        65536,
+        &op,
+    )
+    .unwrap();
+
+    let first_part = dir.path().join("archive.7z.001");
+    let second_part = dir.path().join("archive.7z.002");
+    assert!(first_part.is_file(), "First part .001 must exist");
+    assert!(second_part.is_file(), "Second part .002 must exist");
+
+    let cli_exe = env!("CARGO_BIN_EXE_vynxarc-cli");
+
+    // 1. CLI add
+    let extra_file = dir.path().join("extra.txt");
+    std::fs::write(&extra_file, b"extra content to add").unwrap();
+    let status_add = Command::new(cli_exe)
+        .arg("add")
+        .arg(&first_part)
+        .arg(&extra_file)
+        .status()
+        .unwrap();
+    assert!(status_add.success(), "CLI add should succeed");
+
+    let archive = vynx_arc_core::Archive::open(&first_part, "", &Operation::default()).unwrap();
+    assert!(
+        archive.entries.iter().any(|e| e.name == "extra.txt"),
+        "extra.txt must be added"
+    );
+    assert!(
+        second_part.is_file(),
+        "Multi-volume parts must be maintained"
+    );
+
+    // 2. CLI rename
+    let status_rename = Command::new(cli_exe)
+        .arg("rename")
+        .arg(&first_part)
+        .arg("extra.txt")
+        .arg("renamed.txt")
+        .status()
+        .unwrap();
+    assert!(status_rename.success(), "CLI rename should succeed");
+
+    let archive = vynx_arc_core::Archive::open(&first_part, "", &Operation::default()).unwrap();
+    assert!(
+        archive.entries.iter().any(|e| e.name == "renamed.txt"),
+        "renamed.txt must exist"
+    );
+    assert!(
+        !archive.entries.iter().any(|e| e.name == "extra.txt"),
+        "extra.txt must be removed"
+    );
+
+    // 3. CLI delete
+    let status_delete = Command::new(cli_exe)
+        .arg("delete")
+        .arg(&first_part)
+        .arg("renamed.txt")
+        .status()
+        .unwrap();
+    assert!(status_delete.success(), "CLI delete should succeed");
+
+    let archive = vynx_arc_core::Archive::open(&first_part, "", &Operation::default()).unwrap();
+    assert!(
+        !archive.entries.iter().any(|e| e.name == "renamed.txt"),
+        "renamed.txt must be deleted"
+    );
+
+    // Verify final archive integrity
+    operations::test(&archive, "", &Operation::default()).unwrap();
+    assert!(vynx_arc_core::split_rebuild::detect_volume_pattern(&first_part).is_some());
+}

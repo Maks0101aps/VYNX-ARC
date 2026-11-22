@@ -4,10 +4,11 @@
 #ifndef OutputDir
   #define OutputDir "..\dist"
 #endif
+#define MyAppVersion "1.0.9"
 [Setup]
 AppId={{957C2CE0-1072-43F7-98E5-4930AF16C309}
 AppName=VYNX ARC
-AppVersion=1.0.5
+AppVersion={#MyAppVersion}
 AppPublisher=VYNX ARC contributors
 AppPublisherURL=https://github.com/Maks0101aps/VYNX-ARC
 DefaultDirName={localappdata}\Programs\VYNX ARC
@@ -36,13 +37,13 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Messages]
 en.WelcomeLabel1=Welcome to the VYNX ARC Setup Wizard
-en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC 1.0.5, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Native RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, and compressed streams%n• Supervised worker isolation with memory limits%n• Integrated one-click auto-updater%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
+en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC {#MyAppVersion}, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Native RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, multi-volume archives, and compressed streams%n• Safe staged modification for multi-volume (.7z, .rar) archives%n• Supervised worker isolation with memory limits%n• Integrated one-click auto-updater%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
 
-ru.WelcomeLabel1=Мастер установки VYNX ARC 1.0.5
-ru.WelcomeLabel2=Программа установит VYNX ARC 1.0.5 — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Нативная работа с RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM и потоками сжатия%n• Изоляция процессов под контролем ресурсов%n• Встроенное автообновление в один клик%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
+ru.WelcomeLabel1=Мастер установки VYNX ARC 1.0.9
+ru.WelcomeLabel2=Программа установит VYNX ARC {#MyAppVersion} — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Нативная работа с RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, многотомными архивами и потоками сжатия%n• Безопасное транзакционное редактирование многотомных архивов%n• Изоляция процессов под контролем ресурсов%n• Встроенное автообновление в один клик%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
 
-uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.0.5
-uk.WelcomeLabel2=Програма встановить VYNX ARC 1.0.5 — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Нативна робота з RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM та потоками стиснення%n• Ізоляція процесів під контролем ресурсів%n• Вбудоване автооновлення в один клік%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
+uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.0.9
+uk.WelcomeLabel2=Програма встановить VYNX ARC {#MyAppVersion} — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Нативна робота з RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, багатотомними архівами та потоками стиснення%n• Безпечне транзакційне редагування багатотомних архівів%n• Ізоляція процесів під контролем ресурсів%n• Вбудоване автооновлення в один клік%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
 
 [Tasks]
 Name: "startmenu"; Description: "Create Start menu shortcut"; Flags: checkedonce

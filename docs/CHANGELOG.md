@@ -1,3 +1,22 @@
+# 1.0.9 - official release (2026-11-22)
+
+- Atomic Split Matrix multi-volume archive modification (`.7z.001`..`.NNN`, `.part1.rar`..`.partN.rar`):
+  - Staged transactional rebuild architecture: add, delete, rename, and replace files within multi-volume 7Z and RAR5 archives.
+  - Zero in-place mutation: new volume chain staged in isolated temporary directory (`.001.tmp`..`.NNN.tmp`), ensuring original archive is never corrupted during compression.
+  - Preflight disk space verification: ensures target disk volume has at least 115% capacity of required rebuild space (existing archive + new archive + 15% safety buffer).
+  - Transactional 3-phase atomic swap engine (`atomic_swap_volumes`):
+    - Phase 1: Rename existing volumes to temporary backup files (`.vynx-bak-<uuid>`).
+    - Phase 2: Atomically move and position staged parts to target volume filenames (`MoveFileExW` with `MOVEFILE_REPLACE_EXISTING`).
+    - Phase 3: Verify new volume chain integrity and purge backup files.
+  - Fail-safe rollback on error, cancellation, or file lock: if an external process locks any volume or an I/O failure occurs, all backed-up volumes are restored immediately, leaving original multi-part sets 100% intact.
+  - Dynamic volume shrinking and trailing cleanup: automatically prunes stale trailing volume parts when archive modifications reduce overall volume count (e.g., shrinking from 5 parts down to 3 parts).
+  - Preserved archive parameters: retains original volume split size, solid block configuration, compression levels, and encryption settings.
+  - FFI bridge integration: `archive_writable` reports `true` for split 7Z and RAR archives.
+  - GUI integration: edit action buttons (Add, Delete, Rename, Replace) and context menus are fully enabled for split archives.
+  - CLI integration: commands `add`, `delete`, and `rename` operate seamlessly on `.7z.001` and `.part1.rar` multi-volume sets.
+  - Inno Setup installer: version bump to 1.0.9 with updated English, Ukrainian, and Russian welcome announcements.
+
+
 # 1.0.5 - official release (2026-11-21)
 
 - Native WIM, ESD, and SWM Windows Imaging Format support:

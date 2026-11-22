@@ -1551,6 +1551,70 @@ class GuiPresentationTest : public QObject {
         QVERIFY(shellContent.contains("L\".swm\""));
     }
 
+    void multivolumeModificationPresentation() {
+        auto findRepoFile = [](const QString &relativePath) -> QString {
+            for (const auto &prefix : {QString(), QString("../"), QString("../../")}) {
+                if (QFile::exists(prefix + relativePath))
+                    return prefix + relativePath;
+            }
+            return relativePath;
+        };
+
+        // 1. MainWindow.cpp contains updated message mentioning multi-volume sets
+        QFile mwFile(findRepoFile("apps/gui/MainWindow.cpp"));
+        QVERIFY(mwFile.open(QIODevice::ReadOnly));
+        const auto mwContent = QString::fromUtf8(mwFile.readAll());
+        QVERIFY(mwContent.contains(
+            "This archive is read only. Modification supports ZIP, 7Z and unlocked RAR5 (including multi-volume sets)."));
+
+        // 2. Multi-volume 7Z and RAR5 archives allow modification (archive_writable returns true)
+        QTemporaryDir root;
+        QVERIFY(root.isValid());
+
+        const auto inputPath = root.path() + "/data.bin";
+        QFile inputFile(inputPath);
+        QVERIFY(inputFile.open(QIODevice::WriteOnly));
+        QByteArray data(140000, 0);
+        uint32_t state = 123456789;
+        for (int i = 0; i < data.size(); ++i) {
+            state ^= state << 13;
+            state ^= state >> 17;
+            state ^= state << 5;
+            data[i] = static_cast<char>(state & 0xFF);
+        }
+        inputFile.write(data);
+        inputFile.close();
+
+        rust::Vec<rust::String> inputs;
+        inputs.push_back(inputPath.toUtf8().toStdString());
+
+        // Multi-volume 7Z
+        const auto split7zOut = root.path() + "/archive7z.7z";
+        auto op = vynx::new_operation();
+        vynx::create_split_archive(split7zOut.toUtf8().toStdString(),
+                                   {inputs.data(), inputs.size()},
+                                   65536, "", *op);
+        const auto first7z = root.path() + "/archive7z.7z.001";
+        QVERIFY(QFile::exists(first7z));
+        QVERIFY(QFile::exists(root.path() + "/archive7z.7z.002"));
+        auto archive7z = vynx::open_archive(first7z.toUtf8().toStdString(), "", *op);
+        QVERIFY(vynx::archive_writable(*archive7z));
+        QVERIFY(vynx::archive_is_multivolume(*archive7z));
+
+#if defined(Q_OS_WIN)
+        // Multi-volume RAR5
+        const auto splitRarOut = root.path() + "/archiverar.rar";
+        vynx::create_split_archive(splitRarOut.toUtf8().toStdString(),
+                                   {inputs.data(), inputs.size()},
+                                   65536, "", *op);
+        const auto firstRar = root.path() + "/archiverar.part1.rar";
+        QVERIFY(QFile::exists(firstRar));
+        QVERIFY(QFile::exists(root.path() + "/archiverar.part2.rar"));
+        auto archiveRar = vynx::open_archive(firstRar.toUtf8().toStdString(), "", *op);
+        QVERIFY(vynx::archive_writable(*archiveRar));
+        QVERIFY(vynx::archive_is_multivolume(*archiveRar));
+#endif
+    }
 };
 int main(int argc, char **argv) {
     QApplication application(argc, argv);

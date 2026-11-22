@@ -8,11 +8,11 @@
 
 ## 1. Release Milestone Map
 
-| Version | Codename | Primary Feature Focus | Key Capabilities |
-|---|---|---|---|
-| **v1.0.2** | *Optical Vanguard* | ISO 9660 & UDF Optical Disc Image Support | Pure Rust zero-allocation sector parser, Joliet UCS-2BE Unicode directory trees, Level 1/2/3 fallback, instant random-access preview/extraction, CRC32 verification, Windows Explorer & Inno Setup `.iso` association. |
-| **v1.0.5** | *Windows Image Studio* | WIM & ESD Windows Imaging Format Support | Windows native `wimgapi.dll` dynamic bindings with fallback structured header reader, multi-image index browsing (Install.wim / Boot.wim / WinRE.wim), metadata inspection (Build, Architecture, Edition, Languages), LZX/XPRESS extraction, split `.swm` span reader. |
-| **v1.0.9** | *Atomic Split Matrix* | Multi-Volume Archive Modification & Staged Rebuild | Safe modification of split archives (`.7z.001`..`.7z.NNN` and `.part1.rar`..`.partN.rar`), atomic volume staging in isolated temp directories, volume quota calculation, fail-safe rollback preserving original sets, recovery record recalculation. |
+| Version | Codename | Primary Feature Focus | Key Capabilities | Status |
+|---|---|---|---|---|
+| **v1.0.2** | *Optical Vanguard* | ISO 9660 & UDF Optical Disc Image Support | Pure Rust zero-allocation sector parser, Joliet UCS-2BE Unicode directory trees, Level 1/2/3 fallback, instant random-access preview/extraction, CRC32 verification, Windows Explorer & Inno Setup `.iso` association. | **Released** (2026-11-21) |
+| **v1.0.5** | *Windows Image Studio* | WIM & ESD Windows Imaging Format Support | Windows native `wimgapi.dll` dynamic bindings with fallback structured header reader, multi-image index browsing (Install.wim / Boot.wim / WinRE.wim), metadata inspection (Build, Architecture, Edition, Languages), LZX/XPRESS extraction, split `.swm` span reader. | **Released** (2026-11-21) |
+| **v1.0.9** | *Atomic Split Matrix* | Multi-Volume Archive Modification & Staged Rebuild | Safe modification of split archives (`.7z.001`..`.7z.NNN` and `.part1.rar`..`.partN.rar`), atomic volume staging in isolated temp directories, volume quota calculation, fail-safe rollback preserving original sets, recovery record recalculation. | **Released** (2026-11-22) |
 
 ---
 
@@ -63,6 +63,8 @@ System administrators, power users, and Windows enthusiasts frequently inspect `
 ---
 
 ### 2.3. Version 1.0.9: Multi-Volume Archive Modification & Staged Rebuild
+
+*Status: Completed & Released in v1.0.9 (2026-11-22).*
 
 #### 2.3.1. Motivation & User Value
 Multi-volume archives (`.7z.001`, `.part1.rar`) are historically strictly read-only in all modern archivers because updating a split archive requires rebuilding the entire multi-part chain, recalculating volume boundaries, and re-splitting. If interrupted, the entire archive set is destroyed.

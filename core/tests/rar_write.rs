@@ -195,8 +195,7 @@ fn invalid_options_and_cancelled_creation_publish_nothing() {
 }
 
 #[test]
-fn actual_multiple_volumes_missing_part_conflict_and_readonly_rebuild() {
-    use vynx_arc_core::modification::{Change, modify};
+fn actual_multiple_volumes_missing_part_and_conflict() {
     let root = tempfile::tempdir().unwrap();
     let input = root.path().join("random.bin");
     let mut seed = 90u64;
@@ -226,20 +225,7 @@ fn actual_multiple_volumes_missing_part_conflict_and_readonly_rebuild() {
     let second = root.path().join("split.part2.rar");
     assert!(second.exists());
     let archive = Archive::open(&first, "secret", &op).unwrap();
-    assert!(!archive.writable);
-    assert_eq!(
-        modify(
-            &archive,
-            &Change::Delete {
-                names: vec!["random.bin".into()]
-            },
-            "secret",
-            &op
-        )
-        .unwrap_err()
-        .code,
-        "READ_ONLY"
-    );
+    assert!(archive.writable);
     let held = second.with_extension("held");
     fs::rename(&second, &held).unwrap();
     let error = operations::test(&archive, "secret", &op).unwrap_err();

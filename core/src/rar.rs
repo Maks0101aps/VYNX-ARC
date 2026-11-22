@@ -274,10 +274,10 @@ pub(crate) fn prepare_rebuild(path: &Path, password: &str, op: &Operation) -> Re
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
     let native = Native::open(path, password, op, false, None)?;
-    if native.flags & (sys::ROADF_VOLUME | sys::ROADF_LOCK | sys::ROADF_SIGNED) != 0 {
+    if native.flags & (sys::ROADF_LOCK | sys::ROADF_SIGNED) != 0 {
         return Err(ArcError::new(
             "READ_ONLY",
-            "Multipart, locked and signed RAR archives cannot be rebuilt",
+            "Locked and signed RAR archives cannot be rebuilt",
         ));
     }
     let mut signature = [0; 8];
@@ -314,7 +314,7 @@ pub fn list(path: &Path, password: &str, op: &Operation) -> Result<(Vec<Entry>, 
     let mut signature = [0; 8];
     std::fs::File::open(path)?.read_exact(&mut signature)?;
     let writable = signature == *b"Rar!\x1a\x07\x01\0"
-        && native.flags & (sys::ROADF_VOLUME | sys::ROADF_LOCK | sys::ROADF_SIGNED) == 0;
+        && native.flags & (sys::ROADF_LOCK | sys::ROADF_SIGNED) == 0;
     let mut entries = Vec::new();
     while let Some(entry) = native.next(entries.len() as u64)? {
         if entries.len() >= 1_000_000 {

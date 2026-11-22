@@ -84,6 +84,7 @@ pub mod bridge {
         fn extraction_root(archive: &Archive, destination: &str, smart: bool) -> Result<String>;
         fn archive_format(archive: &Archive) -> String;
         fn archive_writable(archive: &Archive) -> bool;
+        fn archive_is_multivolume(archive: &Archive) -> bool;
         fn preview_text(
             archive: &Archive,
             id: u64,
@@ -395,6 +396,9 @@ pub fn archive_format(archive: &Archive) -> String {
 pub fn archive_writable(archive: &Archive) -> bool {
     archive.writable
 }
+pub fn archive_is_multivolume(archive: &Archive) -> bool {
+    crate::split_rebuild::detect_volume_pattern(&archive.path).is_some()
+}
 fn create_split_archive(
     output: &str,
     inputs: &[String],
@@ -699,5 +703,39 @@ mod tests {
         assert!(compression_details(14, 0, 0).is_err());
         let op = Operation::default();
         assert!(create_archive_as("out.wim", &[], 14, "", &op).is_err());
+    }
+
+    #[test]
+    fn test_ffi_multivolume_properties() {
+        let archive_7z = Archive {
+            writable: true,
+            path: PathBuf::from("test.7z.001"),
+            format: crate::Format::SevenZ,
+            entries: Vec::new(),
+            physical_size: 65536,
+        };
+        assert_eq!(archive_format(&archive_7z), "7Z");
+        assert!(archive_writable(&archive_7z));
+        assert!(archive_is_multivolume(&archive_7z));
+
+        let archive_rar = Archive {
+            writable: true,
+            path: PathBuf::from("test.part1.rar"),
+            format: crate::Format::Rar,
+            entries: Vec::new(),
+            physical_size: 65536,
+        };
+        assert!(archive_writable(&archive_rar));
+        assert!(archive_is_multivolume(&archive_rar));
+
+        let archive_single = Archive {
+            writable: true,
+            path: PathBuf::from("test.7z"),
+            format: crate::Format::SevenZ,
+            entries: Vec::new(),
+            physical_size: 65536,
+        };
+        assert!(archive_writable(&archive_single));
+        assert!(!archive_is_multivolume(&archive_single));
     }
 }
