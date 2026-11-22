@@ -1,10 +1,5 @@
 use std::{fs, path::Path};
-use vynx_arc_core::{
-    modification::{self, Change},
-    operations,
-    security::Policy,
-    *,
-};
+use vynx_arc_core::{operations, security::Policy, *};
 fn noise() -> Vec<u8> {
     let mut state = 123456789u64;
     (0..256 * 1024 + 17)
@@ -17,7 +12,7 @@ fn noise() -> Vec<u8> {
         .collect()
 }
 #[test]
-fn split_7z_roundtrip_missing_part_and_read_only() {
+fn split_7z_roundtrip_and_missing_part() {
     for password in ["", "private"] {
         let t = tempfile::tempdir().unwrap();
         let input = t.path().join("дані.bin");
@@ -43,6 +38,7 @@ fn split_7z_roundtrip_missing_part_and_read_only() {
         )
         .unwrap();
         assert_eq!(archive.path, first);
+        assert!(archive.writable);
         operations::test(&archive, password, &Operation::default()).unwrap();
         operations::extract(
             &archive,
@@ -58,19 +54,6 @@ fn split_7z_roundtrip_missing_part_and_read_only() {
         )
         .unwrap();
         assert_eq!(fs::read(t.path().join("out/дані.bin")).unwrap(), data);
-        assert_eq!(
-            modification::modify(
-                &archive,
-                &Change::Delete {
-                    names: vec!["дані.bin".into()]
-                },
-                password,
-                &Operation::default()
-            )
-            .unwrap_err()
-            .code,
-            "READ_ONLY"
-        );
         fs::rename(
             t.path().join("archive.7z.002"),
             t.path().join("hidden-part"),

@@ -202,8 +202,7 @@ impl Archive {
             file = crate::volumes::Reader::open(&path)?;
         }
         let mut entries = Vec::new();
-        let mut writable = matches!(format, Format::Zip | Format::SevenZ)
-            && crate::volumes::first_part(&path).is_none();
+        let mut writable = matches!(format, Format::Zip | Format::SevenZ);
         let max_entries = Policy::default().max_entries;
         match format {
             #[cfg(windows)]

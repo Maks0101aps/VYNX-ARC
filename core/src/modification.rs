@@ -6,7 +6,7 @@ use crate::{
 use std::{
     collections::{HashMap, HashSet},
     fs::{File, OpenOptions},
-    io::Read,
+    io::{Read, Seek, SeekFrom, Write},
     path::{Path, PathBuf},
     time::{Duration, Instant},
 };
@@ -53,14 +53,13 @@ pub fn modify_with_receipt(
     op: &Operation,
 ) -> Result<String> {
     op.check()?;
-    if !matches!(archive.format, Format::Zip | Format::SevenZ) && archive.format.name() != "RAR"
-        || crate::volumes::first_part(&archive.path).is_some()
-    {
+    if !matches!(archive.format, Format::Zip | Format::SevenZ) && archive.format.name() != "RAR" {
         return Err(ArcError::new(
             "READ_ONLY",
             "This format is read only; modification supports ZIP and 7Z",
         ));
     }
+    let is_multivolume = crate::split_rebuild::detect_volume_pattern(&archive.path).is_some();
     let policy = Policy::default();
     let source_total = archive.validate(&policy)?;
     let _priority = crate::priority::WorkerPriority::enter(op.settings().resource);
@@ -223,8 +222,6 @@ pub fn modify_with_receipt(
         .checked_mul(2)
         .and_then(|n| n.checked_add(archive.physical_size))
         .ok_or_else(|| ArcError::new("LIMIT", "Replacement estimate overflow"))?;
-    disk::preflight(parent, estimate)?;
-    op.stage("Rebuilding archive");
     let extra = match change {
         Change::Replace { input, .. } => input.metadata()?.len(),
         _ => additions
@@ -233,6 +230,12 @@ pub fn modify_with_receipt(
             .map(|(e, _)| e.size)
             .sum(),
     };
+    if is_multivolume {
+        crate::split_rebuild::preflight_multivolume_space(&archive.path, extra)?;
+    } else {
+        disk::preflight(parent, estimate)?;
+    }
+    op.stage("Rebuilding archive");
     op.total(
         source_total
             .checked_add(extra)
@@ -246,7 +249,10 @@ pub fn modify_with_receipt(
         None
     };
     let seven_metadata = if archive.format == Format::SevenZ {
-        let r = sevenz_rust2::ArchiveReader::new(File::open(&archive.path)?, password.into())?;
+        let r = sevenz_rust2::ArchiveReader::new(
+            crate::volumes::Reader::open(&archive.path)?,
+            password.into(),
+        )?;
         Some(
             r.archive()
                 .files
@@ -423,7 +429,61 @@ pub fn modify_with_receipt(
     // as success so the GUI refreshes instead of claiming the old archive survived.
     drop(edit_guard);
     op.stage("Publishing verified archive");
-    commit(replacement, &archive.path, op)?;
+    if is_multivolume {
+        let volume_size = crate::split_rebuild::detect_volume_size(&archive.path)?;
+        let mut source = File::open(replacement.path())?;
+        let length = source.metadata()?.len();
+        let count = if length == 0 {
+            1
+        } else {
+            length.div_ceil(volume_size)
+        };
+        if count == 0 || count > crate::split_rebuild::MAX_PARTS as u64 {
+            return Err(ArcError::new("LIMIT", "Too many split volumes"));
+        }
+        source.seek(SeekFrom::Start(0))?;
+        let mut staged_temps = Vec::new();
+        let mut staged_paths = Vec::new();
+        let mut copied = 0u64;
+        op.phase("Staging split volumes");
+        for _ in 0..count {
+            op.check()?;
+            let mut part = tempfile::NamedTempFile::new_in(parent.canonicalize()?)?;
+            let mut remaining = volume_size;
+            let mut buffer = [0u8; 128 * 1024];
+            while remaining > 0 {
+                op.check()?;
+                let wanted = buffer.len().min(remaining as usize);
+                let n = source.read(&mut buffer[..wanted])?;
+                if n == 0 {
+                    break;
+                }
+                part.write_all(&buffer[..n])?;
+                copied += n as u64;
+                remaining -= n as u64;
+            }
+            part.as_file().sync_all()?;
+            let temp_path = part.into_temp_path();
+            staged_paths.push(temp_path.to_path_buf());
+            staged_temps.push(temp_path);
+        }
+        if copied != length {
+            return Err(ArcError::new(
+                "CHANGED",
+                "Archive changed while staging split volumes",
+            ));
+        }
+        drop(source);
+        drop(replacement);
+
+        crate::split_rebuild::atomic_swap_volumes(&archive.path, &staged_paths, op)?;
+
+        for t in staged_temps {
+            std::mem::forget(t);
+        }
+    } else {
+        commit(replacement, &archive.path, op)?;
+    }
     Ok(receipt)
 }
 
