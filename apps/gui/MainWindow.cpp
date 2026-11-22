@@ -934,7 +934,7 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
         return;
     if (!writableArchive()) {
         statusBar()->showMessage(
-            tr("This archive is read only. Modification supports single-file ZIP, 7Z and unlocked RAR5."), 10000);
+            tr("This archive is read only. Modification supports ZIP, 7Z and unlocked RAR5 (including multi-volume sets)."), 10000);
         return;
     }
     QStringList names = sources;
