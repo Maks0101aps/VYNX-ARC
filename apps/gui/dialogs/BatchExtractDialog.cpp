@@ -7,7 +7,7 @@ QStringList batchDestinations(const QStringList &archives, const QString &destin
         QString base = QFileInfo(path).fileName();
         for (const auto &suffix :
              {".tar.gz", ".tar.xz", ".tar.bz2", ".tar.zst", ".7z.001", ".zip", ".7z", ".rar",
-              ".tar", ".tgz", ".gz", ".xz", ".bz2", ".zst", ".lzma", ".iso"}) {
+              ".tar", ".tgz", ".gz", ".xz", ".bz2", ".zst", ".lzma", ".iso", ".wim", ".esd", ".swm"}) {
             if (base.endsWith(suffix, Qt::CaseInsensitive)) {
                 base.chop(qsizetype(strlen(suffix)));
                 break;
@@ -57,7 +57,7 @@ BatchExtractDialog::BatchExtractDialog(QWidget *parent) : QDialog(parent) {
         const auto paths =
             QFileDialog::getOpenFileNames(this, tr("Choose archives"), {},
                                           tr("Archives (*.zip *.7z *.rar *.tar *.tgz *.gz *.xz "
-                                             "*.bz2 *.zst *.lzma *.iso *.001);;All files (*)"));
+                                             "*.bz2 *.zst *.lzma *.iso *.wim *.esd *.swm *.001);;All files (*)"));
         for (const auto &path : paths) {
             if (files->count() >= 32)
                 break;

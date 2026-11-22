@@ -120,6 +120,7 @@ impl Wire for Format {
             #[cfg(windows)]
             "RAR" => Self::Rar,
             "ISO" => Self::Iso,
+            "WIM" => Self::Wim,
             _ => return Err(invalid()),
         })
     }

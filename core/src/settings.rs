@@ -159,6 +159,12 @@ impl Settings {
                     "ISO is a read-only disc image format with no compression presets",
                 ));
             }
+            Format::Wim => {
+                return Err(ArcError::new(
+                    "OPTIONS",
+                    "WIM is a read-only image format with no compression presets",
+                ));
+            }
         };
         Ok(Effective {
             codec,

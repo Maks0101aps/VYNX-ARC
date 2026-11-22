@@ -25,6 +25,7 @@ pub enum Format {
     #[cfg(windows)]
     Rar,
     Iso,
+    Wim,
 }
 impl Format {
     pub fn name(self) -> &'static str {
@@ -44,6 +45,7 @@ impl Format {
             #[cfg(windows)]
             Self::Rar => "RAR",
             Self::Iso => "ISO",
+            Self::Wim => "WIM",
         }
     }
     pub fn for_output(path: &Path) -> Result<Self> {
@@ -81,6 +83,11 @@ impl Format {
             Err(ArcError::new(
                 "FORMAT",
                 "ISO disc images are read-only and cannot be created",
+            ))
+        } else if name.ends_with(".wim") || name.ends_with(".swm") || name.ends_with(".esd") {
+            Err(ArcError::new(
+                "FORMAT",
+                "WIM images are read-only and cannot be created",
             ))
         } else {
             Err(ArcError::new(
@@ -146,6 +153,9 @@ pub fn detect(file: &mut (impl Read + Seek)) -> Result<Format> {
     if crate::iso::detect(file)? {
         return Ok(Format::Iso);
     }
+    if crate::wim::detect(file)? {
+        return Ok(Format::Wim);
+    }
     if n >= 512 && header.iter().all(|x| *x == 0) {
         return Ok(Format::Tar);
     }
@@ -202,6 +212,11 @@ impl Archive {
             }
             Format::Iso => {
                 let (parsed_entries, _) = crate::iso::list(&mut file, &path, op)?;
+                entries = parsed_entries;
+                writable = false;
+            }
+            Format::Wim => {
+                let (parsed_entries, _) = crate::wim::list(&mut file, &path, op)?;
                 entries = parsed_entries;
                 writable = false;
             }
@@ -393,6 +408,22 @@ impl Archive {
         crate::iso::read_entry(&mut file, entry, op, consume)
     }
 
+    pub fn wim_entry(
+        &self,
+        id: u64,
+        op: &Operation,
+        consume: impl FnOnce(&Entry, &mut dyn Read) -> Result<()>,
+    ) -> Result<()> {
+        op.check()?;
+        let entry = self
+            .entries
+            .iter()
+            .find(|e| e.id == id && !e.directory)
+            .ok_or_else(|| ArcError::new("SELECTION", "Unknown regular entry"))?;
+        let mut empty = std::io::empty();
+        consume(entry, &mut empty)
+    }
+
     pub fn streams(
         &self,
         password: &str,
@@ -407,6 +438,16 @@ impl Archive {
             }
             Format::Iso => {
                 crate::iso::stream(&mut file, &self.entries, op, consume)?;
+            }
+            Format::Wim => {
+                for entry in &self.entries {
+                    op.check()?;
+                    if entry.directory {
+                        continue;
+                    }
+                    let mut empty = std::io::empty();
+                    consume(entry, &mut empty)?;
+                }
             }
             Format::Zip => {
                 let mut zip = crate::parser::open_zip(file)?;

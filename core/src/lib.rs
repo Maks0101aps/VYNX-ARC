@@ -20,6 +20,8 @@ pub mod security;
 pub mod settings;
 pub mod timestamps;
 pub mod volumes;
+pub mod wim;
+pub mod wim_native;
 
 pub use archive::{Archive, Entry, Format};
 pub use error::{ArcError, Result};

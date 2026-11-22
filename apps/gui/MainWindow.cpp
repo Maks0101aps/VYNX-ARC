@@ -519,7 +519,7 @@ void MainWindow::chooseOpen() {
     const auto paths =
         QFileDialog::getOpenFileNames(this, tr("Open archives"), {},
                                       tr("Archives (*.zip *.7z *.rar *.tar *.tar.gz *.tgz *.gz "
-                                         "*.xz *.bz2 *.zst *.lzma *.iso);;All files (*)"));
+                                         "*.xz *.bz2 *.zst *.lzma *.iso *.wim *.esd *.swm);;All files (*)"));
     for (const auto &path : paths)
         openPath(path);
 }

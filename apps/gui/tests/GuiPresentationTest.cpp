@@ -1485,6 +1485,72 @@ class GuiPresentationTest : public QObject {
         QVERIFY(shellFile.readAll().contains("L\".iso\""));
     }
 
+    void wimFormatHandlingAndFilterIntegrity() {
+        // outputForFormat strips .wim, .esd, .swm and maps format 14 to wim
+        QCOMPARE(outputForFormat("install.wim", 0), QString("install.zip"));
+        QCOMPARE(outputForFormat("boot.esd", 0), QString("boot.zip"));
+        QCOMPARE(outputForFormat("part.swm", 0), QString("part.zip"));
+        QCOMPARE(outputForFormat("archive.zip", 14), QString("archive.wim"));
+        QCOMPARE(outputForFormat("disc.tar.gz", 14), QString("disc.wim"));
+        QCOMPARE(outputForFormat("INSTALL.WIM", 1), QString("INSTALL.7z"));
+        QCOMPARE(outputForFormat("BOOT.ESD", 1), QString("BOOT.7z"));
+        QCOMPARE(outputForFormat("PART.SWM", 1), QString("PART.7z"));
+
+        // Batch destination stripping for .wim, .esd, .swm
+        const auto destinations = batchDestinations({"C:/images/install.wim", "C:/images/boot.esd", "C:/images/part.swm"}, "C:/target");
+        QCOMPARE(destinations.size(), 3);
+        QCOMPARE(QFileInfo(destinations[0]).fileName(), QString("install"));
+        QCOMPARE(QFileInfo(destinations[1]).fileName(), QString("boot"));
+        QCOMPARE(QFileInfo(destinations[2]).fileName(), QString("part"));
+
+        // Verify open file dialog filters contain *.wim, *.esd, *.swm
+        auto findRepoFile = [](const QString &relativePath) -> QString {
+            for (const auto &prefix : {QString(), QString("../"), QString("../../")}) {
+                if (QFile::exists(prefix + relativePath))
+                    return prefix + relativePath;
+            }
+            return relativePath;
+        };
+
+        QFile mwFile(findRepoFile("apps/gui/MainWindow.cpp"));
+        QVERIFY(mwFile.open(QIODevice::ReadOnly));
+        const auto mwContent = mwFile.readAll();
+        QVERIFY(mwContent.contains("*.wim"));
+        QVERIFY(mwContent.contains("*.esd"));
+        QVERIFY(mwContent.contains("*.swm"));
+
+        QFile batchFile(findRepoFile("apps/gui/dialogs/BatchExtractDialog.cpp"));
+        QVERIFY(batchFile.open(QIODevice::ReadOnly));
+        const auto batchContent = batchFile.readAll();
+        QVERIFY(batchContent.contains("*.wim"));
+        QVERIFY(batchContent.contains("*.esd"));
+        QVERIFY(batchContent.contains("*.swm"));
+        QVERIFY(batchContent.contains("\".wim\""));
+        QVERIFY(batchContent.contains("\".esd\""));
+        QVERIFY(batchContent.contains("\".swm\""));
+
+        QFile convFile(findRepoFile("apps/gui/MainWindowConversion.cpp"));
+        QVERIFY(convFile.open(QIODevice::ReadOnly));
+        const auto convContent = convFile.readAll();
+        QVERIFY(convContent.contains("*.wim"));
+        QVERIFY(convContent.contains("*.esd"));
+        QVERIFY(convContent.contains("*.swm"));
+
+        QFile nestedFile(findRepoFile("apps/gui/MainWindowNested.cpp"));
+        QVERIFY(nestedFile.open(QIODevice::ReadOnly));
+        const auto nestedContent = nestedFile.readAll();
+        QVERIFY(nestedContent.contains("\".wim\""));
+        QVERIFY(nestedContent.contains("\".esd\""));
+        QVERIFY(nestedContent.contains("\".swm\""));
+
+        QFile shellFile(findRepoFile("apps/shell/ShellCommand.cpp"));
+        QVERIFY(shellFile.open(QIODevice::ReadOnly));
+        const auto shellContent = shellFile.readAll();
+        QVERIFY(shellContent.contains("L\".wim\""));
+        QVERIFY(shellContent.contains("L\".esd\""));
+        QVERIFY(shellContent.contains("L\".swm\""));
+    }
+
 };
 int main(int argc, char **argv) {
     QApplication application(argc, argv);
