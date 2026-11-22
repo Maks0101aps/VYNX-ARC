@@ -24,15 +24,14 @@ fn missing(path: &Path) -> ArcError {
         format!("Archive part is missing: {}", path.display()),
     )
 }
-fn part_path(first: &Path, index: usize) -> PathBuf {
-    let base = first
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .strip_suffix(".001")
-        .unwrap();
-    first.with_file_name(format!("{base}.{index:03}"))
+pub fn part_path(first: &Path, index: usize) -> PathBuf {
+    if let Some((pattern, _)) = crate::split_rebuild::detect_volume_pattern(first) {
+        pattern.part_path(first, index)
+    } else {
+        let name = first.file_name().and_then(|n| n.to_str()).unwrap_or("");
+        let base = name.strip_suffix(".001").unwrap_or(name);
+        first.with_file_name(format!("{base}.{index:03}"))
+    }
 }
 struct Part {
     path: PathBuf,

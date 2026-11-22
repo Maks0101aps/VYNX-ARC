@@ -18,6 +18,7 @@ pub mod rar;
 pub mod rar_write;
 pub mod security;
 pub mod settings;
+pub mod split_rebuild;
 pub mod timestamps;
 pub mod volumes;
 pub mod wim;
