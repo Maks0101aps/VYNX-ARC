@@ -6,11 +6,11 @@
   - Multi-image index extraction and UTF-16LE XML metadata parsing (displaying image name, description, architecture, file count, and uncompressed size).
   - Virtual root directory structure (`[1] Image Name/`, `[2] Image Name/`) cleanly partitioning multi-image WIMs for conflict-free browsing and extraction.
   - High-performance extraction powered by native Windows `wimgapi.dll` integration with dynamic loading and graceful fallback.
-  - Single-pass integrity testing and SHA-1 resource verification against WIM lookup tables.
+  - Header, resource table, and XML metadata verification for container integrity during testing.
   - Strict security controls: fail-closed filename sanitization, rejection of path traversal (`..`), directory escape prevention, and bounded directory depth (64 levels).
   - Supervised worker isolation for listing, testing, extracting, and previewing `.wim`, `.esd`, and `.swm` files.
   - Nested container navigation: seamlessly open and explore `.wim` and `.esd` archives nested inside `.zip`, `.7z`, `.rar`, or `.iso` images.
-  - Single-file and stream preview of text, images, and binary contents within WIM/ESD images without extracting the entire archive.
+  - Image-level metadata inspection and container verification for `.wim`, `.esd`, and `.swm` files without extracting the entire archive.
   - Windows Explorer Shell context menu integration for `.wim`, `.esd`, and `.swm` files (Browse, Extract here, Extract to named folder, Smart Extract, Test archive).
   - Inno Setup installer file association tasks (`.wim`, `.esd`) and Open With registry integration.
 

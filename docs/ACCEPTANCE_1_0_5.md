@@ -25,7 +25,7 @@ The 1.0.5 release introduces comprehensive read-only support for Windows Imaging
 - **Dynamic `wimgapi.dll` Integration**: Safely and dynamically loads Windows Imaging API functions (`WIMCreateFile`, `WIMCloseHandle`, `WIMLoadImage`, `WIMExtractImage` / `WIMApplyImage`, `WIMGetImageCount`) from `System32` at runtime. No static link-time dependency or Windows SDK headers required.
 - **Fail-Closed Error Handling**: Translates Win32 error codes (`GetLastError()`) into descriptive `ArcError` types. If `wimgapi.dll` is absent or entry points cannot be loaded, clear diagnostics are reported without crashing.
 - **Read-Only Media Protection**: `Format::Wim` is strictly marked immutable (`archive.writable == false`). Mutation attempts (add, delete, rename within WIM/ESD) are immediately rejected by `vynx-arc-core`.
-- **Preview & Stream Access**: Integrated with `preview.rs` to allow safe, fast single-file previewing of text, image, and binary files contained within WIM archives without extracting the whole image.
+- **Image Metadata Inspection**: Integrated with metadata viewing to allow safe, fast inspection of image names, architectures, descriptions, and file counts within WIM archives without extracting the whole image.
 - **FFI Bridge Integration**: Exposes `Format::Wim` to C++20 / Qt 6 with format name `"WIM"`.
 
 ### GUI, CLI & Windows Shell Integration

@@ -85,7 +85,7 @@ impl WimApi {
             if ptr.is_null() { None } else { Some(ptr) }
         }
 
-        unsafe {
+        let result: Result<Self> = (|| unsafe {
             let create_file = get_proc(module, b"WIMCreateFile\0").ok_or_else(|| {
                 ArcError::new("UNSUPPORTED", "Missing WIMCreateFile in wimgapi.dll")
             })?;
@@ -125,7 +125,15 @@ impl WimApi {
                 ),
                 module,
             })
+        })();
+
+        if result.is_err() {
+            unsafe {
+                FreeLibrary(module);
+            }
         }
+
+        result
     }
 }
 
