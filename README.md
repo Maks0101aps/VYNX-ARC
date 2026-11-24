@@ -1,17 +1,40 @@
 # VYNX ARC
 
 An offline Windows archive manager built with C++20 / Qt 6 Widgets and a Rust
-archive core connected through CXX. This repository contains the **1.0.0 release**.
+archive core connected through CXX. This repository contains the **1.1.0 release**.
+
+<p align="center">
+  <img src="docs/screenshots/1.1/winrar-light-en.png" alt="VYNX ARC 1.1.0 Light Theme" width="49%">
+  <img src="docs/screenshots/1.1/winrar-dark-en.png" alt="VYNX ARC 1.1.0 Dark Theme" width="49%">
+</p>
+
+## ✨ Modern WinRAR-Inspired Interface (1.1.0)
+
+VYNX ARC combines the beloved ergonomics and efficiency of classic WinRAR with modern high-DPI vector graphics, fluid light and dark themes, and high-performance interaction:
+
+- **Command Action Toolbar**: 32×32 custom vector icons with descriptive labels underneath (`Add`, `Extract To`, `Test`, `View`, `Delete`, `Rename`, `Find`, `Wizard`, `Info`, `Repair`), grouped with clean visual dividers.
+- **Sub-Navigation Bar**: `↑` (Up to parent folder), `←` (Back), interactive breadcrumbs, and fast real-time search filtering.
+- **Parent Folder Navigation (`..`)**: Fixed at row 0 during all sorting, instantly returning to parent directories via double-click or Enter.
+- **Rubberband Marquee Selection**: Drag-to-select multiple files with continuous rectangular visual feedback, full keyboard modifier support (Ctrl, Shift, Esc), and sub-millisecond O(1) performance even on 100,000 files.
+- **Custom Vector SVG Suite**: 28 custom-crafted vector SVGs for all file types (`.exe`, `.pdf`, `.zip`, `.code`, `.txt`, `.doc`, `.iso`, `.audio`, `.video`, etc.) and UI operations, with theme-adaptive dual-tone rendering.
+
+| Light Theme | Dark Theme |
+| :---: | :---: |
+| ![Light Theme](docs/screenshots/1.1/winrar-light-en.png) | ![Dark Theme](docs/screenshots/1.1/winrar-dark-en.png) |
+
+| Multi-File Extended Selection | Russian Localization |
+| :---: | :---: |
+| ![Selection Mode](docs/screenshots/1.1/winrar-selection-light.png) | ![Russian UI](docs/screenshots/1.1/winrar-light-ru.png) |
+
+## Features & Capabilities
 
 Open, browse, search, test and extract ZIP, 7Z, RAR4/RAR5, TAR, TAR.GZ,
 TAR.XZ, TAR.BZ2, TAR.ZST and standalone GZIP/XZ/BZIP2/ZSTD/LZMA streams.
 Create these formats, including native RAR5, AES-encrypted ZIP and encrypted 7Z
 filenames. RAR4 remains read-only. RAR5 adds solid compression, AES/header
 encryption, dictionary controls, recovery records and actual RAR5 volumes.
-**1.0.0 status:** native RAR5 writing and single-volume rebuilds are implemented
-and independently tested with WinRAR (21/21 matrix). In-app auto-updates
-(`UpdateService`, `UpdateDialog`, `UpdateInstaller`) with SHA-256 validation
-and automated CI/CD release packaging are included. See
+**1.1.0 status:** Modern WinRAR UI overhaul with vector icons and rubberband selection, native RAR5 writing and single-volume rebuilds tested with WinRAR (21/21 matrix), in-app auto-updates (`UpdateService`, `UpdateDialog`, `UpdateInstaller`) with SHA-256 validation, and automated CI/CD release packaging. See
+[WinRAR UI acceptance report](docs/ACCEPTANCE_WINRAR_UI.md),
 [1.0.0 acceptance report](docs/ACCEPTANCE_1_0.md) and
 [current qualification status](docs/IMPLEMENTATION_STATUS.md).
 
@@ -64,7 +87,7 @@ streams. Existing files are preserved by default. These protections are tested,
 but complete parser allocation budgets and filesystem race hardening still need
 review before a production release.
 
-![Working copies](docs/screenshots/0.6/working-copies-dark-uk-1.25.png)
+![VYNX ARC 1.1.0 Dark Theme Selection](docs/screenshots/1.1/winrar-selection-dark.png)
 
 ## Run
 

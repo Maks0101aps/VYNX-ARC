@@ -54,6 +54,7 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
                                                 const QString &iconName,
                                                 const QString &objectName = {}) {
         auto *btn = new QToolButton;
+        action->setText(label);
         btn->setDefaultAction(action);
         const auto icon = Icons::get(iconName);
         action->setIcon(icon);
@@ -61,8 +62,9 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
         btn->setText(label);
         btn->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
         btn->setIconSize({32, 32});
-        btn->setMinimumSize(64, 58);
-        btn->setToolTip(!action->toolTip().isEmpty() ? action->toolTip() : action->text());
+        btn->setMinimumSize(60, 56);
+        btn->setProperty("toolbarAction", true);
+        btn->setToolTip(!action->toolTip().isEmpty() ? action->toolTip() : label);
         btn->setAccessibleName(label);
         if (!objectName.isEmpty())
             btn->setObjectName(objectName);
@@ -76,7 +78,7 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
 
     // Cluster 1 (Core Archiving): Add, Extract To, Test, View, Delete, Rename
     addButton = createToolbarButton(addAction, tr("Add"), "tb_add");
-    extractButton = createToolbarButton(extractAction, tr("Extract To"), "tb_extract", "primary");
+    extractButton = createToolbarButton(extractAction, tr("Extract To"), "tb_extract");
     testButton = createToolbarButton(testAction, tr("Test"), "tb_test");
     viewButton = createToolbarButton(viewAction, tr("View"), "tb_view");
     deleteButton = createToolbarButton(removeAction, tr("Delete"), "tb_delete");

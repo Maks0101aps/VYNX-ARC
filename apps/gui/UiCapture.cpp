@@ -136,8 +136,22 @@ QWidget *MainWindow::prepareCapture(const QString &mode) {
                 QTimer::singleShot(0, this, &MainWindow::previewSelected);
         }
         return this;
-    } else if (mode == "archive" && session_->archive)
+    } else if ((mode == "archive" || mode == "archive-selected") && session_->archive) {
         navigate("Project");
+        if (mode == "archive-selected") {
+            QTimer::singleShot(50, this, [this] {
+                if (session_ && session_->filter) {
+                    for (int row : {3, 4, 5, 9}) {
+                        if (row < session_->filter->rowCount()) {
+                            table_->selectionModel()->select(
+                                session_->filter->index(row, 0),
+                                QItemSelectionModel::Select | QItemSelectionModel::Rows);
+                        }
+                    }
+                }
+            });
+        }
+    }
     else if (mode == "breadcrumb" && session_->archive)
         navigate("Project/src/components");
     if (dialog) {

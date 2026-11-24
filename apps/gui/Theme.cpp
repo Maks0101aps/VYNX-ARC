@@ -43,6 +43,7 @@ void applyUiTheme(const QString &theme) {
         "QPushButton:pressed { background: %5; } "
         "QPushButton:disabled { color: %2; } "
         "QToolButton { min-height: 24px; padding: 5px 8px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: %1; } "
+        "QToolButton[toolbarAction=\"true\"] { min-width: 54px; min-height: 54px; padding: 2px 4px; font-size: 11px; } "
         "QToolButton:hover { background: %4; } "
         "QToolButton:pressed { background: %5; } "
         "QToolButton:disabled { color: %2; } "
