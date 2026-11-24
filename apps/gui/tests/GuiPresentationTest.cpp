@@ -767,6 +767,80 @@ class GuiPresentationTest : public QObject {
         QVERIFY(light != dark);
     }
 
+    void modernVectorIconSuiteAndFileMappings() {
+        const QStringList toolbarKinds = {
+            "tb_add", "tb_extract", "tb_test", "tb_view", "tb_delete",
+            "tb_rename", "tb_find", "tb_wizard", "tb_info", "tb_repair", "lock"
+        };
+        for (const auto &kind : toolbarKinds) {
+            auto icon = Icons::get(kind);
+            QVERIFY2(!icon.isNull(), qPrintable(QString("Icon for '%1' is null").arg(kind)));
+            auto pix = icon.pixmap(32, 32);
+            QVERIFY2(!pix.isNull(), qPrintable(QString("Pixmap 32x32 for '%1' is null").arg(kind)));
+            QCOMPARE(pix.size(), QSize(32, 32));
+        }
+
+        struct FileTestCase {
+            QString name;
+            bool folder;
+            bool isUp;
+        };
+        const QList<FileTestCase> fileCases = {
+            {"test.exe", false, false},
+            {"doc.txt", false, false},
+            {"arch.zip", false, false},
+            {"code.rs", false, false},
+            {"song.mp3", false, false},
+            {"clip.mp4", false, false},
+            {"manual.pdf", false, false},
+            {"sheet.docx", false, false},
+            {"disc.iso", false, false},
+            {"image.wim", false, false},
+            {"some_dir", true, false},
+            {"..", true, false},
+            {"anything", false, true}
+        };
+
+        for (const auto &tc : fileCases) {
+            auto icon = Icons::file(tc.name, tc.folder, tc.isUp);
+            QVERIFY2(!icon.isNull(), qPrintable(QString("File icon for '%1' is null").arg(tc.name)));
+            auto pix = icon.pixmap(24, 24);
+            QVERIFY2(!pix.isNull(), qPrintable(QString("Pixmap 24x24 for '%1' is null").arg(tc.name)));
+            QCOMPARE(pix.size(), QSize(24, 24));
+        }
+
+        // Verify folder vs folder_up distinction
+        auto normalFolder = Icons::file("subfolder", true, false).pixmap(24, 24).toImage();
+        auto upFolder = Icons::file("..", true, false).pixmap(24, 24).toImage();
+        auto upFlagFolder = Icons::file("subfolder", true, true).pixmap(24, 24).toImage();
+        QVERIFY(normalFolder != upFolder);
+        QCOMPARE(upFolder, upFlagFolder);
+
+        // Verify code vs txt distinction
+        auto codeIcon = Icons::file("main.cpp", false, false).pixmap(24, 24).toImage();
+        auto txtIcon = Icons::file("readme.txt", false, false).pixmap(24, 24).toImage();
+        QVERIFY(codeIcon != txtIcon);
+
+        // Verify media and document icons
+        auto audioIcon = Icons::file("song.mp3", false, false).pixmap(24, 24).toImage();
+        auto videoIcon = Icons::file("clip.mp4", false, false).pixmap(24, 24).toImage();
+        auto pdfIcon = Icons::file("doc.pdf", false, false).pixmap(24, 24).toImage();
+        auto docIcon = Icons::file("doc.docx", false, false).pixmap(24, 24).toImage();
+        auto isoIcon = Icons::file("disc.iso", false, false).pixmap(24, 24).toImage();
+        auto wimIcon = Icons::file("sys.wim", false, false).pixmap(24, 24).toImage();
+        QVERIFY(audioIcon != videoIcon);
+        QVERIFY(pdfIcon != docIcon);
+        QVERIFY(isoIcon != wimIcon);
+
+        // Theme adaptability
+        applyUiTheme("light");
+        auto lightAdd = Icons::get("tb_add").pixmap(32, 32).toImage();
+        applyUiTheme("dark");
+        auto darkAdd = Icons::get("tb_add").pixmap(32, 32).toImage();
+        QVERIFY(!lightAdd.isNull() && !darkAdd.isNull());
+        QVERIFY(lightAdd != darkAdd);
+    }
+
     void nestedStoreLimitsAndCleanup() {
         QTemporaryDir dir;
         QVERIFY(dir.isValid());

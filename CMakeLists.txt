@@ -89,6 +89,36 @@ if(WIN32)
     endif()
 endif()
 qt_add_resources(VynxArc branding PREFIX "/" FILES assets/icons/vynx-arc.svg assets/icons/vynx-arc.png)
+set(VYNX_UI_ICONS
+    assets/icons/ui/tb_add.svg
+    assets/icons/ui/tb_extract.svg
+    assets/icons/ui/tb_test.svg
+    assets/icons/ui/tb_view.svg
+    assets/icons/ui/tb_delete.svg
+    assets/icons/ui/tb_rename.svg
+    assets/icons/ui/tb_find.svg
+    assets/icons/ui/tb_wizard.svg
+    assets/icons/ui/tb_info.svg
+    assets/icons/ui/tb_repair.svg
+    assets/icons/ui/folder_up.svg
+    assets/icons/ui/lock.svg
+    assets/icons/ui/code.svg
+    assets/icons/ui/audio.svg
+    assets/icons/ui/video.svg
+    assets/icons/ui/pdf.svg
+    assets/icons/ui/doc.svg
+    assets/icons/ui/iso.svg
+    assets/icons/ui/wim.svg
+    assets/icons/ui/folder.svg
+    assets/icons/ui/executable.svg
+    assets/icons/ui/text.svg
+    assets/icons/ui/archive.svg
+    assets/icons/ui/back.svg
+    assets/icons/ui/up.svg
+    assets/icons/ui/more.svg
+    assets/icons/ui/image.svg
+    assets/icons/ui/file.svg)
+qt_add_resources(VynxArc icons PREFIX "/icons/ui" FILES ${VYNX_UI_ICONS})
 qt_add_translations(VynxArc TS_FILES assets/translations/vynx_uk.ts assets/translations/vynx_ru.ts RESOURCE_PREFIX "/i18n")
 install(TARGETS VynxArc RUNTIME DESTINATION .)
 add_custom_target(rust_runtime ALL
@@ -121,6 +151,7 @@ if(WIN32)
     target_link_libraries(VynxPresentationTests PRIVATE bcrypt ntdll userenv ws2_32 advapi32 shell32 ole32 crypt32 winhttp)
     target_compile_options(VynxPresentationTests PRIVATE /utf-8)
 endif()
+qt_add_resources(VynxPresentationTests icons PREFIX "/icons/ui" FILES ${VYNX_UI_ICONS})
 add_dependencies(VynxPresentationTests rust_runtime)
 set_target_properties(VynxPresentationTests PROPERTIES WIN32_EXECUTABLE FALSE)
 add_test(NAME presentation COMMAND VynxPresentationTests -o presentation-tests.txt,txt)
