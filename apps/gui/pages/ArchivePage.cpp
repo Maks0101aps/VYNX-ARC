@@ -1,6 +1,7 @@
 #include "ArchivePage.h"
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
+#include "../widgets/TableRubberBand.h"
 #include <QtWidgets>
 ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction *remove,
                          QAction *rename, QAction *hash, const QList<QAction *> &overflow,
@@ -83,6 +84,7 @@ ArchivePage::ArchivePage(QAction *extract, QAction *add, QAction *test, QAction 
     table->horizontalHeader()->setStretchLastSection(false);
     table->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     table->setAccessibleName(tr("Archive contents"));
+    new TableRubberBand(table, table);
     layout->addWidget(table, 1);
 }
 void ArchivePage::setWritable(bool writable) {

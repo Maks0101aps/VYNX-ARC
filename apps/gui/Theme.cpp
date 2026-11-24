@@ -4,12 +4,15 @@ void applyUiTheme(const QString &theme) {
     bool dark = theme == "dark" ||
                 (theme == "system" && qApp->styleHints()->colorScheme() == Qt::ColorScheme::Dark);
     struct Colors {
-        QString window, surface, elevated, border, text, muted, hover, selection;
+        QString window, surface, elevated, border, text, muted, hover, selection, rubberBandFill,
+            rubberBandBorder;
     };
     Colors c = dark ? Colors{"#13151a", "#191c22", "#20242c", "#303640",
-                             "#f0f2f6", "#a5adbb", "#292f3a", "#253857"}
+                             "#f0f2f6", "#a5adbb", "#292f3a", "#253857",
+                             "rgba(59, 130, 246, 0.28)", "#3b82f6"}
                     : Colors{"#f4f5f7", "#ffffff", "#edf0f4", "#d8dde5",
-                             "#202632", "#5f6877", "#e5e9f0", "#dce8fb"};
+                             "#202632", "#5f6877", "#e5e9f0", "#dce8fb",
+                             "rgba(37, 99, 235, 0.22)", "#2563eb"};
     QPalette palette = qApp->style()->standardPalette();
     for (auto role :
          {QPalette::WindowText, QPalette::Text, QPalette::ButtonText, QPalette::ToolTipText})
@@ -57,7 +60,9 @@ void applyUiTheme(const QString &theme) {
             "{min-height:14px;border:0;border-radius:4px;text-align:center;background:%3;} "
             "QProgressBar::chunk {background:#2563eb;border-radius:4px;} "
             "QStatusBar {border-top:1px solid %5;} QStatusBar::item {border:0;} "
+            "QRubberBand {background-color:%7;border:1px solid %8;} "
             "QToolButton::menu-indicator {image:none;}")
-            .arg(c.muted, c.elevated, c.hover, c.selection, c.border, c.surface);
+            .arg(c.muted, c.elevated, c.hover, c.selection, c.border, c.surface,
+                 c.rubberBandFill, c.rubberBandBorder);
     qApp->setStyleSheet(css);
 }

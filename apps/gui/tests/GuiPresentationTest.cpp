@@ -18,6 +18,7 @@
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
 #include "../widgets/OperationPanel.h"
+#include "../widgets/TableRubberBand.h"
 #include "../UpdateService.h"
 #include "../dialogs/UpdateDialog.h"
 #include "../UpdateInstaller.h"
@@ -839,6 +840,78 @@ class GuiPresentationTest : public QObject {
         auto darkAdd = Icons::get("tb_add").pixmap(32, 32).toImage();
         QVERIFY(!lightAdd.isNull() && !darkAdd.isNull());
         QVERIFY(lightAdd != darkAdd);
+    }
+
+    void rubberBandSelectionIntersectsRows() {
+        ArchiveModel model;
+        rust::Vec<vynx::EntryInfo> entries;
+        for (int i = 0; i < 5; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = QString("item_%1.txt").arg(i).toStdString();
+            entry.size = 100 * (i + 1);
+            entries.push_back(std::move(entry));
+        }
+        model.load(std::move(entries));
+
+        QTableView table;
+        table.setModel(&model);
+        table.setSelectionBehavior(QAbstractItemView::SelectRows);
+        table.setSelectionMode(QAbstractItemView::ExtendedSelection);
+        table.verticalHeader()->setDefaultSectionSize(36);
+        table.resize(400, 300);
+        table.show();
+        QCoreApplication::processEvents();
+
+        auto *band = new TableRubberBand(&table, &table);
+
+        // Verify initial state: no selection, rubber band not visible
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 0);
+        auto *rubberBand = table.viewport()->findChild<QRubberBand *>();
+        QVERIFY(rubberBand != nullptr);
+        QVERIFY(!rubberBand->isVisible());
+
+        // Drag across row 1 and row 2 (row 0: 0..35, row 1: 36..71, row 2: 72..107, row 3: 108..143)
+        // Drag from (10, 40) in row 1 to (150, 90) in row 2
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 40));
+        QTest::mouseMove(table.viewport(), QPoint(150, 90));
+
+        // During drag: rubber band should be visible and intersected rows (1 and 2) selected
+        QVERIFY(rubberBand->isVisible());
+        QCOMPARE(table.selectionModel()->isRowSelected(0, QModelIndex()), false);
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), false);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 2);
+
+        // Move further down into row 3 (y = 120)
+        QTest::mouseMove(table.viewport(), QPoint(150, 120));
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 3);
+
+        // Release mouse: rubber band hides, selection is retained
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(150, 120));
+        QVERIFY(!rubberBand->isVisible());
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 3);
+
+        // Test modifier: Ctrl drag to toggle row 0 (y = 5 to y = 25)
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(10, 5));
+        QTest::mouseMove(table.viewport(), QPoint(150, 25));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(150, 25));
+
+        QCOMPARE(table.selectionModel()->isRowSelected(0, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 4);
+
+        // Dragging in empty area below rows (y > 180) without modifiers clears selection
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 220));
+        QTest::mouseMove(table.viewport(), QPoint(150, 250));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(150, 250));
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 0);
     }
 
     void nestedStoreLimitsAndCleanup() {
