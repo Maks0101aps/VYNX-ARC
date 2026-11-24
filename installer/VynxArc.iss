@@ -4,7 +4,7 @@
 #ifndef OutputDir
   #define OutputDir "..\dist"
 #endif
-#define MyAppVersion "1.0.9"
+#define MyAppVersion "1.1.0"
 [Setup]
 AppId={{957C2CE0-1072-43F7-98E5-4930AF16C309}
 AppName=VYNX ARC
@@ -37,13 +37,13 @@ Name: "ru"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Messages]
 en.WelcomeLabel1=Welcome to the VYNX ARC Setup Wizard
-en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC {#MyAppVersion}, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Native RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, multi-volume archives, and compressed streams%n• Safe staged modification for multi-volume (.7z, .rar) archives%n• Supervised worker isolation with memory limits%n• Integrated one-click auto-updater%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
+en.WelcomeLabel2=This wizard will guide you through installing VYNX ARC {#MyAppVersion}, an offline, high-performance archive manager built with C++20, Qt 6 Widgets, and Rust.%n%nFeatures:%n• Modern WinRAR-inspired interface with high-DPI SVG vector assets, rubberband selection, and refined Light/Dark themes%n• Native RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, multi-volume archives, and compressed streams%n• Safe staged modification for multi-volume (.7z, .rar) archives%n• Supervised worker isolation with memory limits%n• Completely offline with no telemetry%n%nClick Next to continue, or Cancel to exit Setup.
 
-ru.WelcomeLabel1=Мастер установки VYNX ARC 1.0.9
-ru.WelcomeLabel2=Программа установит VYNX ARC {#MyAppVersion} — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Нативная работа с RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, многотомными архивами и потоками сжатия%n• Безопасное транзакционное редактирование многотомных архивов%n• Изоляция процессов под контролем ресурсов%n• Встроенное автообновление в один клик%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
+ru.WelcomeLabel1=Мастер установки VYNX ARC 1.1.0
+ru.WelcomeLabel2=Программа установит VYNX ARC {#MyAppVersion} — высокопроизводительный автономный архиватор на базе C++20, Qt 6 и Rust.%n%nВозможности:%n• Новый современный неоклассический интерфейс в стиле WinRAR с векторными SVG-иконками, рамкой выделения и светлой/тёмной темами%n• Нативная работа с RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, многотомными архивами и потоками сжатия%n• Безопасное транзакционное редактирование многотомных архивов%n• Изоляция процессов под контролем ресурсов%n• Полная автономность и отсутствие телеметрии%n%nНажмите «Далее» для продолжения или «Отмена» для выхода.
 
-uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.0.9
-uk.WelcomeLabel2=Програма встановить VYNX ARC {#MyAppVersion} — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Нативна робота з RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, багатотомними архівами та потоками стиснення%n• Безпечне транзакційне редагування багатотомних архівів%n• Ізоляція процесів під контролем ресурсів%n• Вбудоване автооновлення в один клік%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
+uk.WelcomeLabel1=Майстер встановлення VYNX ARC 1.1.0
+uk.WelcomeLabel2=Програма встановить VYNX ARC {#MyAppVersion} — високопродуктивний автономний архіватор на базі C++20, Qt 6 та Rust.%n%nМожливості:%n• Новий сучасний неокласичний інтерфейс у стилі WinRAR з векторними SVG-іконками, рамкою виділення та світлою/темною темами%n• Нативна робота з RAR5, 7Z, ZIP, TAR, ISO 9660/Joliet, WIM/ESD/SWM, багатотомними архівами та потоками стиснення%n• Безпечне транзакційне редагування багатотомних архівів%n• Ізоляція процесів під контролем ресурсів%n• Повна автономність і відсутність телеметрії%n%nНатисніть «Далі» для продовження або «Скасувати» для виходу.
 
 [Tasks]
 Name: "startmenu"; Description: "Create Start menu shortcut"; Flags: checkedonce

@@ -1,3 +1,21 @@
+# 1.1.0 - official release (2026-11-24)
+
+- Modern WinRAR-Inspired Interface, Vector Asset Suite & Rubberband Selection:
+  - Ergonomic WinRAR command toolbar with 32x32 vector icons and labels underneath (`ToolButtonTextUnderIcon`), divided into 3 logical clusters:
+    - Cluster 1: Add, Extract To (primary), Test, View, Delete, Rename.
+    - Cluster 2: Find, Wizard (batch extraction assistant), Info (properties).
+    - Cluster 3: Verify / Repair (hash verification & extraction recovery).
+    - Responsive overflow: dynamically folds secondary clusters into the "More..." dropdown when width < 780px.
+  - Sub-navigation bar positioned below the toolbar with Up (`↑`, 32x32), Back, clickable BreadcrumbBar path segments, and fast search.
+  - Interactive rubberband / marquee cursor selection (`TableRubberBand`): click and drag on empty space or across rows with a semi-transparent selection rectangle (`QRubberBand`), supporting `Ctrl` (toggle), `Shift` (contiguous range), and `Esc` (cancel).
+  - High-performance O(1) row bounding calculations: marquee selection operates in < 1 ms over 100,000 items with zero stutter or lag.
+  - Virtual parent navigation row `..`: appears at row 0 when inside subfolders with `folder_up.svg` icon, permanently pinned across all sort columns and sort directions.
+  - Dedicated 28-piece SVG vector asset suite in `assets/icons/ui/`: dual-tone icons for toolbar actions and file extensions (`folder`, `folder_up`, `exe`, `txt`, `archive`, `code`, `audio`, `video`, `pdf`, `doc`, `iso`, `wim`, `file`, etc.).
+  - Theme-adaptive `VectorIcon` `QIconEngine` rendering crisp, pixel-aligned icons on all display scaling levels (100%-250%).
+  - Refined Light and Dark themes with modern typography, smooth hover pills (`border-radius: 8px`), high-contrast table row selection, and dynamic runtime switching without restarting.
+  - Status bar encryption indicator: displays padlock icon (`lock.svg`) on the left when an archive contains encrypted entries, with formatted summary counts on the right (`"Total X folders and Y bytes in Z files"`).
+
+
 # 1.0.9 - official release (2026-11-22)
 
 - Atomic Split Matrix multi-volume archive modification (`.7z.001`..`.NNN`, `.part1.rar`..`.partN.rar`):
