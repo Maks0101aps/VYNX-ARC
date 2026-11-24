@@ -189,6 +189,8 @@ void MainWindow::copySelectedToClipboard() {
 
     for (const auto &idx : rows) {
         const auto &r = session_->model->row(session_->filter->mapToSource(idx).row());
+        if (r.isParentFolder || r.name == "..")
+            continue;
         ArchiveClipboardItem it;
         it.id = r.id;
         it.name = r.name;

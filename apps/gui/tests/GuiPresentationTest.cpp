@@ -18,6 +18,7 @@
 #include "../widgets/BreadcrumbBar.h"
 #include "../widgets/IconProvider.h"
 #include "../widgets/OperationPanel.h"
+#include "../widgets/TableRubberBand.h"
 #include "../UpdateService.h"
 #include "../dialogs/UpdateDialog.h"
 #include "../UpdateInstaller.h"
@@ -528,7 +529,9 @@ class GuiPresentationTest : public QObject {
         filter.setFilterFixedString("");
         model.setSearchMode(false);
         QCOMPARE(model.folder(), QString("one"));
-        QCOMPARE(model.rowCount(), 1);
+        QCOMPARE(model.rowCount(), 2);
+        QCOMPARE(model.row(0).name, QString(".."));
+        QCOMPARE(model.row(1).name, QString("readme.txt"));
     }
     void queuedRequestsAreOrderedAndCancellable() {
         OperationQueue queue;
@@ -765,6 +768,152 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!light.isNull());
         QVERIFY(!dark.isNull());
         QVERIFY(light != dark);
+    }
+
+    void modernVectorIconSuiteAndFileMappings() {
+        const QStringList toolbarKinds = {
+            "tb_add", "tb_extract", "tb_test", "tb_view", "tb_delete",
+            "tb_rename", "tb_find", "tb_wizard", "tb_info", "tb_repair", "lock"
+        };
+        for (const auto &kind : toolbarKinds) {
+            auto icon = Icons::get(kind);
+            QVERIFY2(!icon.isNull(), qPrintable(QString("Icon for '%1' is null").arg(kind)));
+            auto pix = icon.pixmap(32, 32);
+            QVERIFY2(!pix.isNull(), qPrintable(QString("Pixmap 32x32 for '%1' is null").arg(kind)));
+            QCOMPARE(pix.size(), QSize(32, 32));
+        }
+
+        struct FileTestCase {
+            QString name;
+            bool folder;
+            bool isUp;
+        };
+        const QList<FileTestCase> fileCases = {
+            {"test.exe", false, false},
+            {"doc.txt", false, false},
+            {"arch.zip", false, false},
+            {"code.rs", false, false},
+            {"song.mp3", false, false},
+            {"clip.mp4", false, false},
+            {"manual.pdf", false, false},
+            {"sheet.docx", false, false},
+            {"disc.iso", false, false},
+            {"image.wim", false, false},
+            {"some_dir", true, false},
+            {"..", true, false},
+            {"anything", false, true}
+        };
+
+        for (const auto &tc : fileCases) {
+            auto icon = Icons::file(tc.name, tc.folder, tc.isUp);
+            QVERIFY2(!icon.isNull(), qPrintable(QString("File icon for '%1' is null").arg(tc.name)));
+            auto pix = icon.pixmap(24, 24);
+            QVERIFY2(!pix.isNull(), qPrintable(QString("Pixmap 24x24 for '%1' is null").arg(tc.name)));
+            QCOMPARE(pix.size(), QSize(24, 24));
+        }
+
+        // Verify folder vs folder_up distinction
+        auto normalFolder = Icons::file("subfolder", true, false).pixmap(24, 24).toImage();
+        auto upFolder = Icons::file("..", true, false).pixmap(24, 24).toImage();
+        auto upFlagFolder = Icons::file("subfolder", true, true).pixmap(24, 24).toImage();
+        QVERIFY(normalFolder != upFolder);
+        QCOMPARE(upFolder, upFlagFolder);
+
+        // Verify code vs txt distinction
+        auto codeIcon = Icons::file("main.cpp", false, false).pixmap(24, 24).toImage();
+        auto txtIcon = Icons::file("readme.txt", false, false).pixmap(24, 24).toImage();
+        QVERIFY(codeIcon != txtIcon);
+
+        // Verify media and document icons
+        auto audioIcon = Icons::file("song.mp3", false, false).pixmap(24, 24).toImage();
+        auto videoIcon = Icons::file("clip.mp4", false, false).pixmap(24, 24).toImage();
+        auto pdfIcon = Icons::file("doc.pdf", false, false).pixmap(24, 24).toImage();
+        auto docIcon = Icons::file("doc.docx", false, false).pixmap(24, 24).toImage();
+        auto isoIcon = Icons::file("disc.iso", false, false).pixmap(24, 24).toImage();
+        auto wimIcon = Icons::file("sys.wim", false, false).pixmap(24, 24).toImage();
+        QVERIFY(audioIcon != videoIcon);
+        QVERIFY(pdfIcon != docIcon);
+        QVERIFY(isoIcon != wimIcon);
+
+        // Theme adaptability
+        applyUiTheme("light");
+        auto lightAdd = Icons::get("tb_add").pixmap(32, 32).toImage();
+        applyUiTheme("dark");
+        auto darkAdd = Icons::get("tb_add").pixmap(32, 32).toImage();
+        QVERIFY(!lightAdd.isNull() && !darkAdd.isNull());
+        QVERIFY(lightAdd != darkAdd);
+    }
+
+    void rubberBandSelectionIntersectsRows() {
+        ArchiveModel model;
+        rust::Vec<vynx::EntryInfo> entries;
+        for (int i = 0; i < 5; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = QString("item_%1.txt").arg(i).toStdString();
+            entry.size = 100 * (i + 1);
+            entries.push_back(std::move(entry));
+        }
+        model.load(std::move(entries));
+
+        QTableView table;
+        table.setModel(&model);
+        table.setSelectionBehavior(QAbstractItemView::SelectRows);
+        table.setSelectionMode(QAbstractItemView::ExtendedSelection);
+        table.verticalHeader()->setDefaultSectionSize(36);
+        table.resize(400, 300);
+        table.show();
+        QCoreApplication::processEvents();
+
+        auto *band = new TableRubberBand(&table, &table);
+
+        // Verify initial state: no selection, rubber band not visible
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 0);
+        auto *rubberBand = table.viewport()->findChild<QRubberBand *>();
+        QVERIFY(rubberBand != nullptr);
+        QVERIFY(!rubberBand->isVisible());
+
+        // Drag across row 1 and row 2 (row 0: 0..35, row 1: 36..71, row 2: 72..107, row 3: 108..143)
+        // Drag from (10, 40) in row 1 to (150, 90) in row 2
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 40));
+        QTest::mouseMove(table.viewport(), QPoint(150, 90));
+
+        // During drag: rubber band should be visible and intersected rows (1 and 2) selected
+        QVERIFY(rubberBand->isVisible());
+        QCOMPARE(table.selectionModel()->isRowSelected(0, QModelIndex()), false);
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), false);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 2);
+
+        // Move further down into row 3 (y = 120)
+        QTest::mouseMove(table.viewport(), QPoint(150, 120));
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 3);
+
+        // Release mouse: rubber band hides, selection is retained
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(150, 120));
+        QVERIFY(!rubberBand->isVisible());
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 3);
+
+        // Test modifier: Ctrl drag to toggle row 0 (y = 5 to y = 25)
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(10, 5));
+        QTest::mouseMove(table.viewport(), QPoint(150, 25));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(150, 25));
+
+        QCOMPARE(table.selectionModel()->isRowSelected(0, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(1, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(2, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->isRowSelected(3, QModelIndex()), true);
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 4);
+
+        // Dragging in empty area below rows (y > 180) without modifiers clears selection
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 220));
+        QTest::mouseMove(table.viewport(), QPoint(150, 250));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(150, 250));
+        QCOMPARE(table.selectionModel()->selectedRows().count(), 0);
     }
 
     void nestedStoreLimitsAndCleanup() {
@@ -1614,6 +1763,348 @@ class GuiPresentationTest : public QObject {
         QVERIFY(vynx::archive_writable(*archiveRar));
         QVERIFY(vynx::archive_is_multivolume(*archiveRar));
 #endif
+    }
+
+    void winrarToolbarActionLayout() {
+        QAction extract("Extract To"), add("Add"), test("Test"), remove("Delete"),
+            rename("Rename"), hash("Hash");
+        ArchivePage page(&extract, &add, &test, &remove, &rename, &hash, {});
+        page.setWritable(true);
+        page.resize(900, 600);
+        page.show();
+        QCoreApplication::processEvents();
+
+        QToolButton *extractBtn = nullptr;
+        QToolButton *addBtn = nullptr;
+        QToolButton *testBtn = nullptr;
+        QToolButton *viewBtn = nullptr;
+        QToolButton *deleteBtn = nullptr;
+        QToolButton *renameBtn = nullptr;
+        QToolButton *findBtn = nullptr;
+        QToolButton *wizardBtn = nullptr;
+        QToolButton *infoBtn = nullptr;
+        QToolButton *repairBtn = nullptr;
+
+        for (auto *btn : page.findChildren<QToolButton *>()) {
+            const auto text = btn->text();
+            if (text.contains("Extract"))
+                extractBtn = btn;
+            else if (text == "Add")
+                addBtn = btn;
+            else if (text == "Test")
+                testBtn = btn;
+            else if (text == "View")
+                viewBtn = btn;
+            else if (text == "Delete")
+                deleteBtn = btn;
+            else if (text == "Rename")
+                renameBtn = btn;
+            else if (text == "Find")
+                findBtn = btn;
+            else if (text == "Wizard" || text.contains("Wizard"))
+                wizardBtn = btn;
+            else if (text == "Info")
+                infoBtn = btn;
+            else if (text == "Repair" || text.contains("Repair"))
+                repairBtn = btn;
+        }
+
+        // Action clusters exist
+        QVERIFY(addBtn);
+        QVERIFY(extractBtn);
+        QVERIFY(testBtn);
+        QVERIFY(viewBtn);
+        QVERIFY(deleteBtn);
+        QVERIFY(renameBtn);
+
+        QVERIFY(findBtn);
+        QVERIFY(wizardBtn);
+        QVERIFY(infoBtn);
+
+        QVERIFY(repairBtn);
+
+        // ToolButtonTextUnderIcon style
+        QCOMPARE(addBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(extractBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(testBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(viewBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(deleteBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(renameBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(findBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(wizardBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(infoBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(repairBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+
+        // Icons are 32x32
+        QCOMPARE(addBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(extractBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(testBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(viewBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(deleteBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(renameBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(findBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(wizardBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(infoBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(repairBtn->iconSize(), QSize(32, 32));
+
+        // Tooltips / accessible names
+        QVERIFY(!addBtn->accessibleName().isEmpty());
+        QVERIFY(!extractBtn->accessibleName().isEmpty());
+        QVERIFY(!testBtn->accessibleName().isEmpty());
+        QVERIFY(!viewBtn->accessibleName().isEmpty());
+        QVERIFY(!findBtn->accessibleName().isEmpty());
+        QVERIFY(!wizardBtn->accessibleName().isEmpty());
+        QVERIFY(!infoBtn->accessibleName().isEmpty());
+        QVERIFY(!repairBtn->accessibleName().isEmpty());
+
+        // Vertical separators (QFrame::VLine) exist in the toolbar layout
+        int vlineCount = 0;
+        for (auto *frame : page.findChildren<QFrame *>()) {
+            if (frame->frameShape() == QFrame::VLine)
+                ++vlineCount;
+        }
+        QVERIFY(vlineCount >= 2);
+
+        // Navigation bar exists below toolbar
+        QVERIFY(page.up);
+        QCOMPARE(page.up->size(), QSize(32, 32));
+        QVERIFY(!page.up->accessibleName().isEmpty());
+        QVERIFY(page.breadcrumb);
+        QVERIFY(page.search);
+        QVERIFY(page.table);
+
+        // Vertical order: toolbar buttons above navigation bar (up), navigation bar above table
+        const int toolbarY = extractBtn->mapToGlobal(QPoint(0, 0)).y();
+        const int navY = page.up->mapToGlobal(QPoint(0, 0)).y();
+        const int tableY = page.table->mapToGlobal(QPoint(0, 0)).y();
+        QVERIFY(toolbarY < navY);
+        QVERIFY(navY < tableY);
+
+        // Responsive folding on window resize < 780px
+        page.resize(600, 440);
+        QCoreApplication::processEvents();
+        QVERIFY(!findBtn->isVisible());
+        QVERIFY(!wizardBtn->isVisible());
+        QVERIFY(!infoBtn->isVisible());
+        QVERIFY(!repairBtn->isVisible());
+        QVERIFY(extractBtn->isVisible());
+    }
+
+    void parentFolderRowAndStatusBarLock() {
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+
+        rust::Vec<vynx::EntryInfo> entries;
+        vynx::EntryInfo e1;
+        e1.id = 1;
+        e1.name = "sub/fileA.txt";
+        e1.size = 100;
+        e1.packed = 50;
+        e1.directory = false;
+        e1.encrypted = true;
+        entries.push_back(std::move(e1));
+
+        vynx::EntryInfo e2;
+        e2.id = 2;
+        e2.name = "sub/fileB.txt";
+        e2.size = 500;
+        e2.packed = 200;
+        e2.directory = false;
+        e2.encrypted = true;
+        entries.push_back(std::move(e2));
+
+        vynx::EntryInfo e3;
+        e3.id = 3;
+        e3.name = "sub/nested/fileC.txt";
+        e3.size = 300;
+        e3.packed = 150;
+        e3.directory = false;
+        e3.encrypted = true;
+        entries.push_back(std::move(e3));
+
+        vynx::EntryInfo e4;
+        e4.id = 4;
+        e4.name = "root.txt";
+        e4.size = 10;
+        e4.packed = 5;
+        e4.directory = false;
+        e4.encrypted = false;
+        entries.push_back(std::move(e4));
+
+        model.load(std::move(entries));
+
+        // 1. In root directory, no ".." row
+        QCOMPARE(model.folder(), QString(""));
+        for (int r = 0; r < model.rowCount(); ++r) {
+            QVERIFY(model.row(r).name != "..");
+        }
+
+        // 2. Navigate into "sub", row 0 must be ".." with folder true
+        model.navigate("sub");
+        QCOMPARE(model.folder(), QString("sub"));
+        QVERIFY(model.rowCount() >= 2);
+        const auto &row0 = model.row(0);
+        QCOMPARE(row0.name, QString(".."));
+        QVERIFY(row0.folder);
+        QVERIFY(row0.isParentFolder);
+        QCOMPARE(model.data(model.index(0, 0), Qt::DisplayRole).toString(), QString(".."));
+        QCOMPARE(model.data(model.index(0, 4), Qt::DisplayRole).toString(), tr("Folder"));
+        const auto upIcon = model.data(model.index(0, 0), Qt::DecorationRole).value<QIcon>();
+        QVERIFY(!upIcon.isNull());
+
+        // 3. Sorting any column in Ascending or Descending order MUST keep ".." at index 0
+        for (int col : {0, 1, 2, 3, 5}) {
+            for (auto order : {Qt::AscendingOrder, Qt::DescendingOrder}) {
+                filter.sort(col, order);
+                const auto topIndex = filter.index(0, 0);
+                const auto &topRow = model.row(filter.mapToSource(topIndex).row());
+                QCOMPARE(topRow.name, QString(".."));
+                QVERIFY(topRow.folder);
+                QVERIFY(topRow.isParentFolder);
+            }
+        }
+
+        // 4. Status bar encryption indicator & summary text assertions
+        QVERIFY(model.isEncrypted());
+        QCOMPARE(model.folderCount(), quint64(2));
+        QCOMPARE(model.fileCount(), quint64(4));
+        QCOMPARE(model.totalSize(), quint64(910));
+
+        ArchiveModel plainModel;
+        rust::Vec<vynx::EntryInfo> plainEntries;
+        vynx::EntryInfo pe;
+        pe.id = 1;
+        pe.name = "plain.txt";
+        pe.size = 20;
+        pe.encrypted = false;
+        plainEntries.push_back(std::move(pe));
+        plainModel.load(std::move(plainEntries));
+        QVERIFY(!plainModel.isEncrypted());
+
+        auto findRepoFile = [](const QString &relativePath) -> QString {
+            for (const auto &prefix : {QString(), QString("../"), QString("../../")}) {
+                if (QFile::exists(prefix + relativePath))
+                    return prefix + relativePath;
+            }
+            return relativePath;
+        };
+
+        QFile mwFile(findRepoFile("apps/gui/MainWindow.cpp"));
+        QVERIFY(mwFile.open(QIODevice::ReadOnly));
+        const auto mwContent = QString::fromUtf8(mwFile.readAll());
+        QVERIFY(mwContent.contains("encryptionIndicator_"));
+        QVERIFY(mwContent.contains("Total %1 folders and %2 bytes in %3 files"));
+    }
+
+    void themeDynamicSwitchingAndStyles() {
+        // 1. Verify Light mode palette and stylesheet specifications
+        applyUiTheme("light");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#f4f5f7"));
+        QCOMPARE(qApp->palette().color(QPalette::Base), QColor("#ffffff"));
+        QCOMPARE(qApp->palette().color(QPalette::Highlight), QColor("#dce8fb"));
+        QCOMPARE(qApp->palette().color(QPalette::HighlightedText), QColor("#1e40af"));
+
+        const QString lightCss = qApp->styleSheet();
+        QVERIFY(lightCss.contains("QToolButton"));
+        QVERIFY(lightCss.contains("border-radius: 8px"));
+        QVERIFY(lightCss.contains("QFrame#toolbarSeparator"));
+        QVERIFY(lightCss.contains("QLabel#encryptionLock"));
+        QVERIFY(lightCss.contains("QLabel#encryptionIndicator"));
+        QVERIFY(lightCss.contains("QRubberBand"));
+        QVERIFY(lightCss.contains("rgba(37, 99, 235, 0.22)"));
+        QVERIFY(lightCss.contains("#2563eb"));
+        QVERIFY(lightCss.contains("QHeaderView::section"));
+        QVERIFY(lightCss.contains("QTableView::item:selected"));
+
+        // 2. Dynamic runtime switch to Dark mode
+        applyUiTheme("dark");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#13151a"));
+        QCOMPARE(qApp->palette().color(QPalette::Base), QColor("#191c22"));
+        QCOMPARE(qApp->palette().color(QPalette::Highlight), QColor("#253857"));
+        QCOMPARE(qApp->palette().color(QPalette::HighlightedText), QColor("#ffffff"));
+
+        const QString darkCss = qApp->styleSheet();
+        QVERIFY(darkCss.contains("QToolButton"));
+        QVERIFY(darkCss.contains("QFrame#toolbarSeparator"));
+        QVERIFY(darkCss.contains("QLabel#encryptionLock"));
+        QVERIFY(darkCss.contains("QRubberBand"));
+        QVERIFY(darkCss.contains("rgba(59, 130, 246, 0.28)"));
+        QVERIFY(darkCss.contains("#3b82f6"));
+        QVERIFY(darkCss.contains("QHeaderView::section"));
+        QVERIFY(darkCss.contains("QTableView::item:selected"));
+
+        // 3. Switch back to Light mode (idempotent, smooth runtime transition)
+        applyUiTheme("light");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#f4f5f7"));
+    }
+
+    void rubberBandPerformance100k() {
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+        filter.setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+        rust::Vec<vynx::EntryInfo> entries;
+        entries.reserve(100000);
+        for (quint64 i = 0; i < 100000; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = QString("file_%1.txt").arg(i, 6, 10, QChar('0')).toStdString();
+            entry.size = 1024;
+            entry.packed = 512;
+            entry.directory = false;
+            entry.encrypted = false;
+            entries.push_back(std::move(entry));
+        }
+
+        model.load(std::move(entries));
+        QCOMPARE(model.rowCount(), 100000);
+        QCOMPARE(filter.rowCount(), 100000);
+
+        QTableView table;
+        table.setModel(&filter);
+        table.setSelectionBehavior(QAbstractItemView::SelectRows);
+        table.setSelectionMode(QAbstractItemView::ExtendedSelection);
+        table.verticalHeader()->setDefaultSectionSize(36);
+        table.resize(1060, 720);
+        table.show();
+        QCoreApplication::processEvents();
+
+        auto *band = new TableRubberBand(&table, &table);
+        auto *rubberBand = table.viewport()->findChild<QRubberBand *>();
+        QVERIFY(rubberBand != nullptr);
+        QVERIFY(!rubberBand->isVisible());
+
+        // Benchmark marquee selection across visible rows in the 100k item corpus
+        QElapsedTimer timer;
+        timer.start();
+
+        // Drag marquee across rows 1 to 12
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 40));
+        QTest::mouseMove(table.viewport(), QPoint(300, 200));
+        QTest::mouseMove(table.viewport(), QPoint(600, 420));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(600, 420));
+
+        const qint64 marqueeElapsedMs = timer.elapsed();
+
+        QVERIFY(!rubberBand->isVisible());
+        const int selectedCount = table.selectionModel()->selectedRows().count();
+        QVERIFY(selectedCount > 0);
+
+        // Explicit requirement: marquee selection across 100k rows executes under 150ms with zero stutter
+        qDebug() << "100K rubberband marquee selection executed in:" << marqueeElapsedMs << "ms (selected:" << selectedCount << "rows)";
+        QVERIFY2(marqueeElapsedMs < 150, qPrintable(QString("Marquee selection took %1 ms, expected < 150 ms").arg(marqueeElapsedMs)));
+
+        // Modifier test: Ctrl+drag to accumulate selection across additional rows
+        timer.restart();
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(10, 450));
+        QTest::mouseMove(table.viewport(), QPoint(600, 560));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(600, 560));
+        const qint64 toggleElapsedMs = timer.elapsed();
+
+        QVERIFY(table.selectionModel()->selectedRows().count() > selectedCount);
+        QVERIFY2(toggleElapsedMs < 150, qPrintable(QString("Ctrl-toggle marquee selection took %1 ms, expected < 150 ms").arg(toggleElapsedMs)));
     }
 };
 int main(int argc, char **argv) {

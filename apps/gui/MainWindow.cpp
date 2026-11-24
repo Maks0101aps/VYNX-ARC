@@ -77,8 +77,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *create =
         addAction(fileMenu, tr("&Create archive…"), QKeySequence::New, [this] { chooseCreate(); });
     idleActions_ = {};
-    addAction(fileMenu, tr("Batch extraction..."), QKeySequence("Ctrl+Shift+E"),
-              [this] { chooseBatchExtract(); });
+    wizardAction_ = addAction(fileMenu, tr("Batch extraction wizard..."), QKeySequence("Ctrl+Shift+E"),
+                              [this] { chooseBatchExtract(); });
     addAction(fileMenu, tr("Convert archives..."), QKeySequence("Ctrl+Shift+C"),
               [this] { chooseConversion(); });
     fileMenu->addSeparator();
@@ -105,12 +105,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                       [this] { hashContents(true); });
     auto *verifyArchive = addAction(operationsMenu, tr("Verify archive file hash…"), {},
                                     [this] { hashContents(true, true); });
+    repairAction_ = addAction(operationsMenu, tr("Repair / Verify archive…"), {},
+                              [this] { repairOrVerifyArchive(); });
+    findAction_ = addAction(operationsMenu, tr("Find in archive"), QKeySequence::Find, [this] {
+        if (search_) {
+            search_->setFocus();
+            search_->selectAll();
+        }
+    });
     previewAction_ = addAction(operationsMenu, tr("Preview file"), QKeySequence("F3"),
                                [this] { previewSelected(); });
     externalAction_ = addAction(operationsMenu, tr("Open externally..."),
                                 QKeySequence("Ctrl+Return"), [this] { openSelectedExternally(); });
     archiveActions_.append({hashSelectedAction_, verifySelectedAction_, verifyArchive,
-                            previewAction_, externalAction_});
+                            repairAction_, findAction_, previewAction_, externalAction_});
     editAction_ = addAction(operationsMenu, tr("Edit working copy..."),
                             QKeySequence("Ctrl+Shift+Return"), [this] { editSelected(); });
     archiveActions_.append(editAction_);
@@ -227,7 +235,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     archivePage_ = new ArchivePage(extract, addFiles, test, remove, rename, hashSelectedAction_,
                                    {smart, here, named, hash, hashSelectedAction_,
                                     verifySelectedAction_, verifyArchive, previewAction_, addFiles,
-                                    addFolder, rename, remove, properties});
+                                    addFolder, rename, remove, properties},
+                                   previewAction_, findAction_, wizardAction_, propertiesAction_,
+                                   repairAction_);
     pages_->addWidget(archivePage_);
     connect(archivePage_->back, &QToolButton::clicked, this, &MainWindow::back);
     connect(archivePage_->up, &QToolButton::clicked, this, &MainWindow::up);
@@ -263,6 +273,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     archiveSummary_ = new QLabel;
     archiveSummary_->setObjectName("muted");
     statusBar()->addPermanentWidget(archiveSummary_);
+    encryptionIndicator_ = new QLabel;
+    encryptionIndicator_->setObjectName("encryptionIndicator");
+    encryptionIndicator_->setPixmap(Icons::get("lock").pixmap(16, 16));
+    encryptionIndicator_->setToolTip(tr("Encrypted archive"));
+    encryptionIndicator_->hide();
+    statusBar()->addWidget(encryptionIndicator_);
     toast_ = new ToastOverlay(central);
     connect(search_, &QLineEdit::textChanged, this, [this](const QString &s) {
         session_->model->setSearchMode(!s.isEmpty());
@@ -278,9 +294,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     });
     connect(table_, &QTableView::doubleClicked, this, [this](QModelIndex i) {
         const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
-        if (r.folder)
-            navigate(r.fullPath);
-        else if (isArchiveEntry(r.name))
+        if (r.folder) {
+            if (r.isParentFolder || r.name == "..")
+                up();
+            else
+                navigate(r.fullPath);
+        } else if (isArchiveEntry(r.name))
             openNestedArchive(r);
         else
             previewSelected();
@@ -323,9 +342,12 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         const auto rows = table_->selectionModel()->selectedRows();
         if (rows.size() == 1) {
             const auto &r = session_->model->row(session_->filter->mapToSource(rows.first()).row());
-            if (r.folder)
-                navigate(r.fullPath);
-            else if (isArchiveEntry(r.name))
+            if (r.folder) {
+                if (r.isParentFolder || r.name == "..")
+                    up();
+                else
+                    navigate(r.fullPath);
+            } else if (isArchiveEntry(r.name))
                 openNestedArchive(r);
             else
                 previewSelected();
@@ -342,13 +364,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                 QMenu menu;
                 const auto rows = table_->selectionModel()->selectedRows();
                 if (rows.size() == 1 &&
-                    session_->model->row(session_->filter->mapToSource(rows.first()).row()).folder)
-                    connect(menu.addAction(tr("Open folder")), &QAction::triggered, this,
-                            [this, index] {
-                                navigate(
-                                    session_->model->row(session_->filter->mapToSource(index).row())
-                                        .fullPath);
-                            });
+                    session_->model->row(session_->filter->mapToSource(rows.first()).row()).folder) {
+                    const auto &r = session_->model->row(session_->filter->mapToSource(rows.first()).row());
+                    if (r.isParentFolder || r.name == "..") {
+                        connect(menu.addAction(tr("Up one level")), &QAction::triggered, this, [this] { up(); });
+                    } else {
+                        connect(menu.addAction(tr("Open folder")), &QAction::triggered, this,
+                                [this, index] {
+                                    navigate(
+                                        session_->model->row(session_->filter->mapToSource(index).row())
+                                            .fullPath);
+                                });
+                    }
+                }
                 menu.addAction(extract);
                 menu.addAction(hashSelectedAction_);
                 menu.addAction(previewAction_);
@@ -615,7 +643,13 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     if (named)
         defaultDest += "/" + QFileInfo(session_->path).completeBaseName();
     const auto selectedRows = table_->selectionModel()->selectedRows();
-    ExtractDialog dialog(defaultDest, !selectedRows.isEmpty(), smart, here,
+    int nonParentCount = 0;
+    for (auto i : selectedRows) {
+        const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
+        if (!r.isParentFolder && r.name != "..")
+            ++nonParentCount;
+    }
+    ExtractDialog dialog(defaultDest, nonParentCount > 0, smart, here,
                          session_->password ? session_->password->text() : QString(), this);
     auto *destination = dialog.destination;
     auto *scope = dialog.scope;
@@ -630,6 +664,8 @@ void MainWindow::chooseExtract(bool smart, bool here, bool named) {
     if (scope->currentIndex() == 1) {
         for (auto i : selectedRows) {
             const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
+            if (r.isParentFolder || r.name == "..")
+                continue;
             for (auto id : r.memberIds)
                 ids->push_back(id);
         }
@@ -761,7 +797,7 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
     if (!wholeArchive) {
         for (const auto &index : table_->selectionModel()->selectedRows()) {
             const auto &row = session_->model->row(session_->filter->mapToSource(index).row());
-            if (row.folder)
+            if (row.folder || row.isParentFolder || row.name == "..")
                 continue;
             for (auto id : row.memberIds)
                 ids->push_back(id);
@@ -838,6 +874,21 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
             dialog.resize(700, 400);
             dialog.exec();
         });
+}
+void MainWindow::repairOrVerifyArchive() {
+    if (!session_->archive)
+        return;
+    if (activeSpec_.contains("recoveryPlan")) {
+        reviewInterruptedExtraction(activeSpec_);
+    } else {
+        hashContents(true, true);
+    }
+}
+void MainWindow::reviewInterruptedExtraction(const QJsonObject &spec) {
+    auto plan = spec["recoveryPlan"].toObject();
+    ExtractionRecoveryDialog dialog(session_->path, plan["destination"].toString(),
+                                   spec["archiveHash"].toString(), plan, this);
+    dialog.exec();
 }
 void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     CreateArchiveDialog d(initial, initialFormat, this);
@@ -946,8 +997,12 @@ void MainWindow::chooseModify(int kind, const QStringList &sources, bool folders
         } else
             names = QFileDialog::getOpenFileNames(this, tr("Source files"));
     } else if (kind != 0) {
-        for (const auto &index : table_->selectionModel()->selectedRows())
-            names.append(session_->model->row(session_->filter->mapToSource(index).row()).fullPath);
+        for (const auto &index : table_->selectionModel()->selectedRows()) {
+            const auto &row = session_->model->row(session_->filter->mapToSource(index).row());
+            if (row.isParentFolder || row.name == "..")
+                continue;
+            names.append(row.fullPath);
+        }
     }
     if (names.isEmpty()) {
         statusBar()->showMessage(tr("Select files or folders first."), 6000);
@@ -1168,47 +1223,79 @@ void MainWindow::up() {
     navigate(slash < 0 ? QString() : folder.left(slash));
 }
 void MainWindow::updateStatus() {
-    if (!session_->archive)
+    if (!session_->archive) {
+        if (encryptionIndicator_)
+            encryptionIndicator_->hide();
         return;
+    }
     const auto rows = table_->selectionModel()->selectedRows();
     archivePage_->back->setEnabled(!session_->busy && !session_->history.isEmpty());
     archivePage_->up->setEnabled(!session_->busy && !session_->model->folder().isEmpty());
     for (auto *action : mutationActions_)
         action->setEnabled(!operations_.busy && !session_->busy && writableArchive());
-    renameAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
-                              rows.size() == 1);
-    deleteAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
-                              !rows.isEmpty());
+
+    int nonParentSelectedCount = 0;
     bool regular = false;
-    for (const auto &index : rows)
-        regular |= !session_->model->row(session_->filter->mapToSource(index).row()).folder;
+    for (const auto &index : rows) {
+        const auto &r = session_->model->row(session_->filter->mapToSource(index).row());
+        if (r.isParentFolder || r.name == "..")
+            continue;
+        ++nonParentSelectedCount;
+        if (!r.folder)
+            regular = true;
+    }
+
+    renameAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
+                              nonParentSelectedCount == 1);
+    deleteAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() &&
+                              nonParentSelectedCount > 0);
     hashSelectedAction_->setEnabled(!operations_.busy && regular);
-    verifySelectedAction_->setEnabled(!operations_.busy && regular && rows.size() == 1);
+    verifySelectedAction_->setEnabled(!operations_.busy && regular && nonParentSelectedCount == 1);
     externalAction_->setEnabled(
-        !operations_.busy && rows.size() == 1 &&
-        !session_->model->row(session_->filter->mapToSource(rows.first()).row()).folder);
+        !operations_.busy && nonParentSelectedCount == 1 && regular);
     editAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() && regular &&
-                            rows.size() == 1);
-    previewAction_->setEnabled(!session_->busy && regular && rows.size() == 1);
-    propertiesAction_->setEnabled(!session_->busy && rows.size() == 1);
-    auto summary = text(vynx::archive_format(**session_->archive));
-    if (!writableArchive())
-        summary += tr(" · read only");
-    auto packed = session_->model->totalPacked();
-    auto total = session_->model->totalSize();
-    if (packed)
-        summary += tr(" · %1 packed").arg(displaySize(packed));
-    if (packed && total && packed <= total)
-        summary += tr(" · %1% saved").arg(qRound(100.0 * (1 - double(packed) / double(total))));
+                            nonParentSelectedCount == 1);
+    previewAction_->setEnabled(!session_->busy && regular && nonParentSelectedCount == 1);
+    propertiesAction_->setEnabled(!session_->busy && nonParentSelectedCount == 1);
+    if (findAction_)
+        findAction_->setEnabled(!session_->busy);
+    if (repairAction_)
+        repairAction_->setEnabled(!session_->busy);
+    if (wizardAction_)
+        wizardAction_->setEnabled(true);
+
+    bool isEncrypted = session_->model->isEncrypted();
+    if (!isEncrypted && session_->archive) {
+        for (const auto &e : vynx::list_entries(**session_->archive)) {
+            if (e.encrypted) {
+                isEncrypted = true;
+                break;
+            }
+        }
+    }
+    if (encryptionIndicator_)
+        encryptionIndicator_->setVisible(isEncrypted);
+
+    const auto folderCount = session_->model->folderCount();
+    const auto fileCount = session_->model->fileCount();
+    const auto totalBytes = session_->model->totalSize();
+    QString summary = tr("Total %1 folders and %2 bytes in %3 files")
+                          .arg(folderCount)
+                          .arg(totalBytes)
+                          .arg(fileCount);
     archiveSummary_->setText(summary);
+
     if (rows.isEmpty())
         statusBar()->showMessage(tr("%1 items · %2")
                                      .arg(session_->filter->rowCount())
                                      .arg(displaySize(session_->model->totalSize())));
     else {
         quint64 size = 0;
-        for (auto i : rows)
-            size += session_->model->row(session_->filter->mapToSource(i).row()).size;
+        for (auto i : rows) {
+            const auto &r = session_->model->row(session_->filter->mapToSource(i).row());
+            if (!r.isParentFolder && r.name != "..")
+                size += r.size;
+        }
         statusBar()->showMessage(tr("%1 selected · %2").arg(rows.size()).arg(displaySize(size)));
     }
 }
@@ -1216,37 +1303,62 @@ void MainWindow::showProperties() {
     if (session_->busy || !session_->archive)
         return;
     const auto rows = table_->selectionModel()->selectedRows();
-    if (rows.size() != 1)
-        return;
-    const auto &row = session_->model->row(session_->filter->mapToSource(rows.first()).row());
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Properties"));
-    dialog.setMinimumWidth(360);
-    auto *layout = new QFormLayout(&dialog);
-    auto label = [&](const QString &title, const QString &value) {
-        auto *text = new QLabel(value);
-        text->setTextFormat(Qt::PlainText);
-        text->setWordWrap(true);
-        text->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        layout->addRow(title, text);
-    };
-    label(tr("Name"), row.name);
-    label(tr("Archive path"), row.fullPath);
-    if (!row.folder) {
-        label(tr("Size"), displaySize(row.size));
-        label(tr("Packed"), row.packed ? displaySize(row.packed) : tr("Unknown"));
-        label(tr("Modified"),
-              row.modifiedKnown
-                  ? QLocale().toString(QDateTime::fromSecsSinceEpoch(row.modifiedTime),
-                                       QLocale::LongFormat)
-                  : tr("Unknown"));
-        if (!row.crc.isEmpty())
-            label("CRC32", row.crc);
+    if (rows.size() == 1) {
+        const auto &row = session_->model->row(session_->filter->mapToSource(rows.first()).row());
+        if (row.isParentFolder || row.name == "..")
+            return;
+        QDialog dialog(this);
+        dialog.setWindowTitle(tr("Properties"));
+        dialog.setMinimumWidth(360);
+        auto *layout = new QFormLayout(&dialog);
+        auto label = [&](const QString &title, const QString &value) {
+            auto *text = new QLabel(value);
+            text->setTextFormat(Qt::PlainText);
+            text->setWordWrap(true);
+            text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+            layout->addRow(title, text);
+        };
+        label(tr("Name"), row.name);
+        label(tr("Archive path"), row.fullPath);
+        if (!row.folder) {
+            label(tr("Size"), displaySize(row.size));
+            label(tr("Packed"), row.packed ? displaySize(row.packed) : tr("Unknown"));
+            label(tr("Modified"),
+                  row.modifiedKnown
+                      ? QLocale().toString(QDateTime::fromSecsSinceEpoch(row.modifiedTime),
+                                           QLocale::LongFormat)
+                      : tr("Unknown"));
+            if (!row.crc.isEmpty())
+                label("CRC32", row.crc);
+        }
+        auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        dialog.exec();
+    } else {
+        QDialog dialog(this);
+        dialog.setWindowTitle(tr("Archive Properties"));
+        dialog.setMinimumWidth(380);
+        auto *layout = new QFormLayout(&dialog);
+        auto label = [&](const QString &title, const QString &value) {
+            auto *text = new QLabel(value);
+            text->setTextFormat(Qt::PlainText);
+            text->setWordWrap(true);
+            text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+            layout->addRow(title, text);
+        };
+        label(tr("Archive name"), QFileInfo(session_->path).fileName());
+        label(tr("Full path"), session_->path);
+        label(tr("Format"), text(vynx::archive_format(**session_->archive)));
+        label(tr("Total entries"), QString::number(session_->model->rowCount()));
+        label(tr("Uncompressed size"), displaySize(session_->model->totalSize()));
+        label(tr("Compressed size"), displaySize(session_->model->totalPacked()));
+        label(tr("Writable"), writableArchive() ? tr("Yes") : tr("No (Read-only)"));
+        auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        dialog.exec();
     }
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    layout->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    dialog.exec();
 }
 void MainWindow::updateRecent() {
     recent_->clear();
@@ -1463,7 +1575,8 @@ bool MainWindow::smokeTest() {
             !session_->model->row(0).folder)
             return smokeFailure(__LINE__);
         navigate("source/nested");
-        if (session_->model->rowCount() != 1 || session_->model->row(0).name != "дані.txt")
+        if (session_->model->rowCount() != 2 || session_->model->row(0).name != ".." ||
+            !session_->model->row(0).folder || session_->model->row(1).name != "дані.txt")
             return smokeFailure(__LINE__);
         search_->setText("ДАНІ");
         if (session_->filter->rowCount() != 1)
@@ -1536,10 +1649,11 @@ bool MainWindow::smokeTest() {
         if (operations_.busy || session_->busy || !session_->archive)
             return smokeFailure(__LINE__);
         navigate("source/nested");
-        if (session_->model->rowCount() != 1 || session_->model->row(0).name != "renamed.txt")
+        if (session_->model->rowCount() != 2 || session_->model->row(0).name != ".." ||
+            session_->model->row(1).name != "renamed.txt")
             return smokeFailure(__LINE__);
         rust::Vec<quint64> hashIds;
-        hashIds.push_back(session_->model->row(0).memberIds.front());
+        hashIds.push_back(session_->model->row(1).memberIds.front());
         auto hashes =
             vynx::hash_entries(**session_->archive,
                                rust::Slice<const quint64>(hashIds.data(), hashIds.size()), "", *op);
@@ -1637,6 +1751,8 @@ bool MainWindow::smokeTest() {
             activateSession(i % sessions_.size());
         activateSession(sessions_.indexOf(encryptedSession));
         if (table_->findChildren<QItemSelectionModel *>().size() > selectionModels)
+            return smokeFailure(__LINE__);
+        if (!encryptionIndicator_ || encryptionIndicator_->isHidden())
             return smokeFailure(__LINE__);
         if (sessions_.size() != 3 || encryptedSession->password->bytes() != "private" ||
             secondSession == firstSession)

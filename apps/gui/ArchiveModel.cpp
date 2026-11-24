@@ -59,7 +59,7 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
                           : tr("Unknown"))
                    : r.fullPath;
     if (role == Qt::DecorationRole && index.column() == 0)
-        return Icons::file(r.name, r.folder);
+        return Icons::file(r.name, r.folder, r.isParentFolder || r.name == "..");
     if (role == Qt::TextAlignmentRole && index.column() >= 1 && index.column() <= 3)
         return int(Qt::AlignRight | Qt::AlignVCenter);
     if (role != Qt::DisplayRole)
@@ -93,6 +93,15 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
 static QVector<ArchiveRow> folderRows(const QVector<ArchiveRow> &flat, const QString &folder,
                                       const QCollator &collator) {
     QVector<ArchiveRow> rows;
+    if (!folder.isEmpty()) {
+        ArchiveRow parentRow;
+        parentRow.name = "..";
+        int slash = folder.lastIndexOf('/');
+        parentRow.fullPath = slash < 0 ? QString() : folder.left(slash);
+        parentRow.folder = true;
+        parentRow.isParentFolder = true;
+        rows.append(parentRow);
+    }
     QHash<QString, int> folders;
     const QString prefix = folder.isEmpty() ? QString() : folder + "/";
     for (const auto &entry : flat) {
@@ -130,6 +139,8 @@ std::shared_ptr<PreparedArchive> ArchiveModel::prepare(rust::Vec<vynx::EntryInfo
         return b > std::numeric_limits<quint64>::max() - a ? std::numeric_limits<quint64>::max()
                                                            : a + b;
     };
+    QSet<QString> folders;
+    quint64 files = 0;
     for (const auto &entry : entries) {
         ArchiveRow row;
         row.fullPath = text(entry.name);
@@ -145,6 +156,21 @@ std::shared_ptr<PreparedArchive> ArchiveModel::prepare(rust::Vec<vynx::EntryInfo
         row.crc = text(entry.crc);
         row.modified = text(entry.modified);
         row.memberIds = {entry.id};
+        if (entry.encrypted)
+            prepared->hasEncrypted = true;
+        if (entry.directory) {
+            if (!row.fullPath.isEmpty())
+                folders.insert(row.fullPath);
+        } else {
+            files++;
+            QString p = row.fullPath;
+            int s;
+            while ((s = p.lastIndexOf('/')) >= 0) {
+                p = p.left(s);
+                if (!p.isEmpty())
+                    folders.insert(p);
+            }
+        }
         if (entry.modified_known && !row.modified.startsWith("1980-01-01") &&
             entry.modified_unix <= quint64(std::numeric_limits<qint64>::max()) &&
             QDateTime::fromSecsSinceEpoch(qint64(entry.modified_unix)).isValid()) {
@@ -157,6 +183,8 @@ std::shared_ptr<PreparedArchive> ArchiveModel::prepare(rust::Vec<vynx::EntryInfo
         nested |= row.fullPath.contains('/');
         prepared->flat.append(std::move(row));
     }
+    prepared->folderCount = folders.size();
+    prepared->fileCount = files;
     if (!directories)
         prepared->search = prepared->flat;
     else {
@@ -231,6 +259,14 @@ bool ArchiveFilter::lessThan(const QModelIndex &a, const QModelIndex &b) const {
         return QSortFilterProxyModel::lessThan(a, b);
     const auto &left = model->row(a.row());
     const auto &right = model->row(b.row());
+    const bool leftIsParent = left.isParentFolder || left.name == "..";
+    const bool rightIsParent = right.isParentFolder || right.name == "..";
+    if (leftIsParent || rightIsParent) {
+        if (leftIsParent && rightIsParent)
+            return false;
+        return leftIsParent ? (sortOrder() == Qt::AscendingOrder)
+                            : (sortOrder() != Qt::AscendingOrder);
+    }
     if (left.folder != right.folder)
         return sortOrder() == Qt::AscendingOrder ? left.folder : !left.folder;
     if (a.column() == 1)
@@ -276,6 +312,8 @@ QMimeData *ArchiveModel::mimeData(const QModelIndexList &indexes) const {
     for (int r : rowSet) {
         if (r >= 0 && r < rows_.size()) {
             const auto &row = rows_[r];
+            if (row.isParentFolder || row.name == "..")
+                continue;
             QJsonObject obj;
             obj["id"] = double(row.id);
             obj["name"] = row.name;
