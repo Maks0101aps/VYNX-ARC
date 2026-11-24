@@ -143,6 +143,30 @@ ZIP, 7Z, RAR лише для читання, TAR і стиснені поток�
         <translation>Розпакувати</translation>
     </message>
     <message>
+        <source>Extract To</source>
+        <translation>Вилучити</translation>
+    </message>
+    <message>
+        <source>View</source>
+        <translation>Перегляд</translation>
+    </message>
+    <message>
+        <source>Find</source>
+        <translation>Пошук</translation>
+    </message>
+    <message>
+        <source>Wizard</source>
+        <translation>Майстер</translation>
+    </message>
+    <message>
+        <source>Info</source>
+        <translation>Інфо</translation>
+    </message>
+    <message>
+        <source>Repair</source>
+        <translation>Відновити</translation>
+    </message>
+    <message>
         <location filename="../../apps/gui/pages/ArchivePage.cpp" line="51"/>
         <source>Add</source>
         <translation>Додати</translation>

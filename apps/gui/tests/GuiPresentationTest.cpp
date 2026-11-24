@@ -591,17 +591,17 @@ class GuiPresentationTest : public QObject {
         QVERIFY(model.row(filter.mapToSource(filter.index(0, 0)).row()).folder);
         for (int column : {1, 2}) {
             filter.sort(column, Qt::AscendingOrder);
-            QCOMPARE(filter.index(1, 0).data().toString(), QString("small"));
+            QCOMPARE(filter.index(2, 0).data().toString(), QString("small"));
             filter.sort(column, Qt::DescendingOrder);
-            QCOMPARE(filter.index(1, 0).data().toString(), QString("large"));
+            QCOMPARE(filter.index(2, 0).data().toString(), QString("large"));
         }
         filter.sort(3, Qt::AscendingOrder);
-        QCOMPARE(filter.index(1, 0).data().toString(), QString("small"));
+        QCOMPARE(filter.index(2, 0).data().toString(), QString("small"));
         filter.sort(5, Qt::AscendingOrder);
-        QCOMPARE(filter.index(1, 0).data().toString(), QString("large"));
+        QCOMPARE(filter.index(2, 0).data().toString(), QString("large"));
         QCOMPARE(model.totalSize(), quint64(1044));
         QCOMPARE(model.totalPacked(), quint64(36));
-        QCOMPARE(model.row(0).size, quint64(10));
+        QCOMPARE(model.row(1).size, quint64(10));
     }
     void unknownAndDosEpochDates() {
         ArchiveModel model;
@@ -1328,7 +1328,11 @@ class GuiPresentationTest : public QObject {
         QVERIFY(UpdateService::isVersionNewer("0.9.0", "1.0.0-rc"));
         QVERIFY(UpdateService::isVersionNewer("1.0.0-rc.1", "1.0.0-rc.2"));
         QVERIFY(!UpdateService::isVersionNewer("1.0.0-rc.2", "1.0.0-rc.1"));
-        QVERIFY(UpdateService::isVersionNewer("1.0.0", "v1.0.1-rc1"));
+        // 4-part SemVer comparison
+        QVERIFY(UpdateService::isVersionNewer("1.1.0", "1.1.0.1"));
+        QVERIFY(UpdateService::isVersionNewer("1.1.0.1", "1.1.0.2"));
+        QVERIFY(!UpdateService::isVersionNewer("1.1.0.2", "1.1.0.1"));
+        QVERIFY(UpdateService::isVersionNewer("1.1.0", "1.1.1"));
     }
 
     void updateServiceParseSha256Sums() {
@@ -1934,11 +1938,12 @@ class GuiPresentationTest : public QObject {
 
         model.load(std::move(entries));
 
-        // 1. In root directory, no ".." row
+        // 1. In root directory, row 0 is ".."
         QCOMPARE(model.folder(), QString(""));
-        for (int r = 0; r < model.rowCount(); ++r) {
-            QVERIFY(model.row(r).name != "..");
-        }
+        QVERIFY(model.rowCount() >= 1);
+        QCOMPARE(model.row(0).name, QString(".."));
+        QVERIFY(model.row(0).folder);
+        QVERIFY(model.row(0).isParentFolder);
 
         // 2. Navigate into "sub", row 0 must be ".." with folder true
         model.navigate("sub");

@@ -477,12 +477,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
         }
     });
 
-    if (!QCoreApplication::arguments().contains(QStringLiteral("--smoke-test"))) {
+    if (!QCoreApplication::arguments().contains(QStringLiteral("--smoke-test")) &&
+        !QCoreApplication::arguments().contains(QStringLiteral("--capture"))) {
         const bool checkOnStartup = settings_->value(QStringLiteral("updates/checkOnStartup"), true).toBool();
-        const qint64 lastCheckTime = settings_->value(QStringLiteral("updates/lastCheckTime"), 0).toLongLong();
-        const qint64 now = QDateTime::currentSecsSinceEpoch();
-        if (UpdateService::shouldCheckForUpdates(checkOnStartup, lastCheckTime, now)) {
-            QTimer::singleShot(2000, this, [this] {
+        if (checkOnStartup) {
+            QTimer::singleShot(1000, this, [this] {
                 updateService_.checkForUpdates(false);
             });
         }
@@ -1217,8 +1216,13 @@ void MainWindow::handleShellWithSecret(quint32 action, const QStringList &paths,
 }
 void MainWindow::up() {
     QString folder = session_->model->folder();
-    if (folder.isEmpty())
+    if (folder.isEmpty()) {
+        if (session_->nestedInfo)
+            navigateToParentArchive(0);
+        else
+            closeSession(tabs_->currentIndex());
         return;
+    }
     int slash = folder.lastIndexOf('/');
     navigate(slash < 0 ? QString() : folder.left(slash));
 }
@@ -1230,7 +1234,7 @@ void MainWindow::updateStatus() {
     }
     const auto rows = table_->selectionModel()->selectedRows();
     archivePage_->back->setEnabled(!session_->busy && !session_->history.isEmpty());
-    archivePage_->up->setEnabled(!session_->busy && !session_->model->folder().isEmpty());
+    archivePage_->up->setEnabled(!session_->busy);
     for (auto *action : mutationActions_)
         action->setEnabled(!operations_.busy && !session_->busy && writableArchive());
 
@@ -1571,8 +1575,9 @@ bool MainWindow::smokeTest() {
         if (!drop.isAccepted())
             return smokeFailure(__LINE__);
         loop.exec();
-        if (operations_.busy || !session_->archive || session_->model->rowCount() != 1 ||
-            !session_->model->row(0).folder)
+        if (operations_.busy || !session_->archive || session_->model->rowCount() != 2 ||
+            session_->model->row(0).name != ".." || !session_->model->row(0).folder ||
+            session_->model->row(1).name != "source" || !session_->model->row(1).folder)
             return smokeFailure(__LINE__);
         navigate("source/nested");
         if (session_->model->rowCount() != 2 || session_->model->row(0).name != ".." ||

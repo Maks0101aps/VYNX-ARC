@@ -28,6 +28,7 @@ struct SemVer {
     int major = 0;
     int minor = 0;
     int patch = 0;
+    int build = 0;
     QString prerelease;
     bool hasPrerelease = false;
 
@@ -51,6 +52,7 @@ struct SemVer {
         if (!parts.isEmpty()) v.major = parts.value(0).toInt();
         if (parts.size() > 1) v.minor = parts.value(1).toInt();
         if (parts.size() > 2) v.patch = parts.value(2).toInt();
+        if (parts.size() > 3) v.build = parts.value(3).toInt();
         return v;
     }
 
@@ -58,6 +60,7 @@ struct SemVer {
         if (major != other.major) return major < other.major ? -1 : 1;
         if (minor != other.minor) return minor < other.minor ? -1 : 1;
         if (patch != other.patch) return patch < other.patch ? -1 : 1;
+        if (build != other.build) return build < other.build ? -1 : 1;
 
         if (hasPrerelease != other.hasPrerelease) {
             return hasPrerelease ? -1 : 1;

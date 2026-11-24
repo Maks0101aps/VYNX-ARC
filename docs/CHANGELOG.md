@@ -1,3 +1,14 @@
+# 1.1.1 - official release (2026-11-24)
+
+- Immediate Startup Update Check & WinRAR UI Visual Polish:
+  - Immediate update check on application startup: when `updates/checkOnStartup` is enabled, an update check against GitHub Releases executes immediately on application launch (without the 24-hour interval restriction).
+  - Prominent update notification banner with direct one-click "Update" button to launch the `UpdateDialog`.
+  - 4-part SemVer (`major.minor.patch.build`) version comparison support in `UpdateService`.
+  - Polished WinRAR toolbar button dimensions: large 32x32 vector icons with clearly legible text labels underneath (`ToolButtonTextUnderIcon`), sized at 60x56px minimum.
+  - Complete Russian and Ukrainian translations for all toolbar action labels (`Извлечь`, `Просмотр`, `Поиск`, `Мастер`, `Инфо`, `Исправить` / `Вилучити`, `Перегляд`, `Пошук`, `Майстер`, `Інфо`, `Відновити`).
+  - Persistent `..` parent folder row at row 0 across all directories, including the root archive folder, with double-click / Enter returning up or closing the archive.
+  - Up navigation button (`↑`) enabled across all archive views to quickly go up or exit back to the Home screen.
+
 # 1.1.0 - official release (2026-11-24)
 
 - Modern WinRAR-Inspired Interface, Vector Asset Suite & Rubberband Selection:

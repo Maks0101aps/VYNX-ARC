@@ -93,15 +93,17 @@ QVariant ArchiveModel::data(const QModelIndex &index, int role) const {
 static QVector<ArchiveRow> folderRows(const QVector<ArchiveRow> &flat, const QString &folder,
                                       const QCollator &collator) {
     QVector<ArchiveRow> rows;
+    ArchiveRow parentRow;
+    parentRow.name = "..";
     if (!folder.isEmpty()) {
-        ArchiveRow parentRow;
-        parentRow.name = "..";
         int slash = folder.lastIndexOf('/');
         parentRow.fullPath = slash < 0 ? QString() : folder.left(slash);
-        parentRow.folder = true;
-        parentRow.isParentFolder = true;
-        rows.append(parentRow);
+    } else {
+        parentRow.fullPath = QString();
     }
+    parentRow.folder = true;
+    parentRow.isParentFolder = true;
+    rows.append(parentRow);
     QHash<QString, int> folders;
     const QString prefix = folder.isEmpty() ? QString() : folder + "/";
     for (const auto &entry : flat) {

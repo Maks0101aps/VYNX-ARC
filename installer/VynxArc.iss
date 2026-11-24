@@ -4,7 +4,7 @@
 #ifndef OutputDir
   #define OutputDir "..\dist"
 #endif
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.1.1"
 [Setup]
 AppId={{957C2CE0-1072-43F7-98E5-4930AF16C309}
 AppName=VYNX ARC
