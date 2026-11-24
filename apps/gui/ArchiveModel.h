@@ -16,6 +16,7 @@ struct ArchiveRow {
     quint64 size = 0;
     quint64 packed = 0;
     bool folder = false;
+    bool isParentFolder = false;
     QString crc;
     QString modified;
     qint64 modifiedTime = 0;
@@ -27,6 +28,8 @@ struct PreparedArchive {
     QCollator collator;
     QVector<ArchiveRow> flat, root, search;
     quint64 totalSize = 0, totalPacked = 0;
+    quint64 fileCount = 0, folderCount = 0;
+    bool hasEncrypted = false;
 };
 QString displaySize(quint64 bytes);
 class ArchiveModel : public QAbstractTableModel {
@@ -47,6 +50,9 @@ class ArchiveModel : public QAbstractTableModel {
     QString folder() const { return folder_; }
     quint64 totalSize() const;
     quint64 totalPacked() const;
+    quint64 fileCount() const { return prepared_ ? prepared_->fileCount : 0; }
+    quint64 folderCount() const { return prepared_ ? prepared_->folderCount : 0; }
+    bool isEncrypted() const { return prepared_ ? prepared_->hasEncrypted : false; }
     int count() const { return prepared_ ? int(prepared_->flat.size()) : 0; }
 
     void setArchiveSource(const QString &path, const QString &sessionId) {

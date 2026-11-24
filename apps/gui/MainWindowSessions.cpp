@@ -77,6 +77,8 @@ void MainWindow::updateSessionUi() {
     else {
         archiveSummary_->clear();
         statusBar()->clearMessage();
+        if (encryptionIndicator_)
+            encryptionIndicator_->hide();
     }
 }
 void MainWindow::activateSession(int index) {

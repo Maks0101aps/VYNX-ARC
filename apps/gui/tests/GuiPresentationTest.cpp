@@ -529,7 +529,9 @@ class GuiPresentationTest : public QObject {
         filter.setFilterFixedString("");
         model.setSearchMode(false);
         QCOMPARE(model.folder(), QString("one"));
-        QCOMPARE(model.rowCount(), 1);
+        QCOMPARE(model.rowCount(), 2);
+        QCOMPARE(model.row(0).name, QString(".."));
+        QCOMPARE(model.row(1).name, QString("readme.txt"));
     }
     void queuedRequestsAreOrderedAndCancellable() {
         OperationQueue queue;
@@ -1886,6 +1888,113 @@ class GuiPresentationTest : public QObject {
         QVERIFY(!infoBtn->isVisible());
         QVERIFY(!repairBtn->isVisible());
         QVERIFY(extractBtn->isVisible());
+    }
+
+    void parentFolderRowAndStatusBarLock() {
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+
+        rust::Vec<vynx::EntryInfo> entries;
+        vynx::EntryInfo e1;
+        e1.id = 1;
+        e1.name = "sub/fileA.txt";
+        e1.size = 100;
+        e1.packed = 50;
+        e1.directory = false;
+        e1.encrypted = true;
+        entries.push_back(std::move(e1));
+
+        vynx::EntryInfo e2;
+        e2.id = 2;
+        e2.name = "sub/fileB.txt";
+        e2.size = 500;
+        e2.packed = 200;
+        e2.directory = false;
+        e2.encrypted = true;
+        entries.push_back(std::move(e2));
+
+        vynx::EntryInfo e3;
+        e3.id = 3;
+        e3.name = "sub/nested/fileC.txt";
+        e3.size = 300;
+        e3.packed = 150;
+        e3.directory = false;
+        e3.encrypted = true;
+        entries.push_back(std::move(e3));
+
+        vynx::EntryInfo e4;
+        e4.id = 4;
+        e4.name = "root.txt";
+        e4.size = 10;
+        e4.packed = 5;
+        e4.directory = false;
+        e4.encrypted = false;
+        entries.push_back(std::move(e4));
+
+        model.load(std::move(entries));
+
+        // 1. In root directory, no ".." row
+        QCOMPARE(model.folder(), QString(""));
+        for (int r = 0; r < model.rowCount(); ++r) {
+            QVERIFY(model.row(r).name != "..");
+        }
+
+        // 2. Navigate into "sub", row 0 must be ".." with folder true
+        model.navigate("sub");
+        QCOMPARE(model.folder(), QString("sub"));
+        QVERIFY(model.rowCount() >= 2);
+        const auto &row0 = model.row(0);
+        QCOMPARE(row0.name, QString(".."));
+        QVERIFY(row0.folder);
+        QVERIFY(row0.isParentFolder);
+        QCOMPARE(model.data(model.index(0, 0), Qt::DisplayRole).toString(), QString(".."));
+        QCOMPARE(model.data(model.index(0, 4), Qt::DisplayRole).toString(), tr("Folder"));
+        const auto upIcon = model.data(model.index(0, 0), Qt::DecorationRole).value<QIcon>();
+        QVERIFY(!upIcon.isNull());
+
+        // 3. Sorting any column in Ascending or Descending order MUST keep ".." at index 0
+        for (int col : {0, 1, 2, 3, 5}) {
+            for (auto order : {Qt::AscendingOrder, Qt::DescendingOrder}) {
+                filter.sort(col, order);
+                const auto topIndex = filter.index(0, 0);
+                const auto &topRow = model.row(filter.mapToSource(topIndex).row());
+                QCOMPARE(topRow.name, QString(".."));
+                QVERIFY(topRow.folder);
+                QVERIFY(topRow.isParentFolder);
+            }
+        }
+
+        // 4. Status bar encryption indicator & summary text assertions
+        QVERIFY(model.isEncrypted());
+        QCOMPARE(model.folderCount(), quint64(2));
+        QCOMPARE(model.fileCount(), quint64(4));
+        QCOMPARE(model.totalSize(), quint64(910));
+
+        ArchiveModel plainModel;
+        rust::Vec<vynx::EntryInfo> plainEntries;
+        vynx::EntryInfo pe;
+        pe.id = 1;
+        pe.name = "plain.txt";
+        pe.size = 20;
+        pe.encrypted = false;
+        plainEntries.push_back(std::move(pe));
+        plainModel.load(std::move(plainEntries));
+        QVERIFY(!plainModel.isEncrypted());
+
+        auto findRepoFile = [](const QString &relativePath) -> QString {
+            for (const auto &prefix : {QString(), QString("../"), QString("../../")}) {
+                if (QFile::exists(prefix + relativePath))
+                    return prefix + relativePath;
+            }
+            return relativePath;
+        };
+
+        QFile mwFile(findRepoFile("apps/gui/MainWindow.cpp"));
+        QVERIFY(mwFile.open(QIODevice::ReadOnly));
+        const auto mwContent = QString::fromUtf8(mwFile.readAll());
+        QVERIFY(mwContent.contains("encryptionIndicator_"));
+        QVERIFY(mwContent.contains("Total %1 folders and %2 bytes in %3 files"));
     }
 };
 int main(int argc, char **argv) {

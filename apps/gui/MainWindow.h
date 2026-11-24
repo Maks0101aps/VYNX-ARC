@@ -190,6 +190,7 @@ class MainWindow : public QMainWindow {
     OperationPanel *operationView_;
     ToastOverlay *toast_;
     QLabel *archiveSummary_;
+    QLabel *encryptionIndicator_ = nullptr;
     QList<QAction *> mutationActions_;
     QAction *renameAction_, *deleteAction_;
     QAction *hashSelectedAction_, *verifySelectedAction_, *propertiesAction_, *previewAction_,
