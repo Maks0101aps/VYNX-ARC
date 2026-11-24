@@ -1996,6 +1996,116 @@ class GuiPresentationTest : public QObject {
         QVERIFY(mwContent.contains("encryptionIndicator_"));
         QVERIFY(mwContent.contains("Total %1 folders and %2 bytes in %3 files"));
     }
+
+    void themeDynamicSwitchingAndStyles() {
+        // 1. Verify Light mode palette and stylesheet specifications
+        applyUiTheme("light");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#f4f5f7"));
+        QCOMPARE(qApp->palette().color(QPalette::Base), QColor("#ffffff"));
+        QCOMPARE(qApp->palette().color(QPalette::Highlight), QColor("#dce8fb"));
+        QCOMPARE(qApp->palette().color(QPalette::HighlightedText), QColor("#1e40af"));
+
+        const QString lightCss = qApp->styleSheet();
+        QVERIFY(lightCss.contains("QToolButton"));
+        QVERIFY(lightCss.contains("border-radius: 8px"));
+        QVERIFY(lightCss.contains("QFrame#toolbarSeparator"));
+        QVERIFY(lightCss.contains("QLabel#encryptionLock"));
+        QVERIFY(lightCss.contains("QLabel#encryptionIndicator"));
+        QVERIFY(lightCss.contains("QRubberBand"));
+        QVERIFY(lightCss.contains("rgba(37, 99, 235, 0.22)"));
+        QVERIFY(lightCss.contains("#2563eb"));
+        QVERIFY(lightCss.contains("QHeaderView::section"));
+        QVERIFY(lightCss.contains("QTableView::item:selected"));
+
+        // 2. Dynamic runtime switch to Dark mode
+        applyUiTheme("dark");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#13151a"));
+        QCOMPARE(qApp->palette().color(QPalette::Base), QColor("#191c22"));
+        QCOMPARE(qApp->palette().color(QPalette::Highlight), QColor("#253857"));
+        QCOMPARE(qApp->palette().color(QPalette::HighlightedText), QColor("#ffffff"));
+
+        const QString darkCss = qApp->styleSheet();
+        QVERIFY(darkCss.contains("QToolButton"));
+        QVERIFY(darkCss.contains("QFrame#toolbarSeparator"));
+        QVERIFY(darkCss.contains("QLabel#encryptionLock"));
+        QVERIFY(darkCss.contains("QRubberBand"));
+        QVERIFY(darkCss.contains("rgba(59, 130, 246, 0.28)"));
+        QVERIFY(darkCss.contains("#3b82f6"));
+        QVERIFY(darkCss.contains("QHeaderView::section"));
+        QVERIFY(darkCss.contains("QTableView::item:selected"));
+
+        // 3. Switch back to Light mode (idempotent, smooth runtime transition)
+        applyUiTheme("light");
+        QCOMPARE(qApp->palette().color(QPalette::Window), QColor("#f4f5f7"));
+    }
+
+    void rubberBandPerformance100k() {
+        ArchiveModel model;
+        ArchiveFilter filter;
+        filter.setSourceModel(&model);
+        filter.setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+        rust::Vec<vynx::EntryInfo> entries;
+        entries.reserve(100000);
+        for (quint64 i = 0; i < 100000; ++i) {
+            vynx::EntryInfo entry;
+            entry.id = i;
+            entry.name = QString("file_%1.txt").arg(i, 6, 10, QChar('0')).toStdString();
+            entry.size = 1024;
+            entry.packed = 512;
+            entry.directory = false;
+            entry.encrypted = false;
+            entries.push_back(std::move(entry));
+        }
+
+        model.load(std::move(entries));
+        QCOMPARE(model.rowCount(), 100000);
+        QCOMPARE(filter.rowCount(), 100000);
+
+        QTableView table;
+        table.setModel(&filter);
+        table.setSelectionBehavior(QAbstractItemView::SelectRows);
+        table.setSelectionMode(QAbstractItemView::ExtendedSelection);
+        table.verticalHeader()->setDefaultSectionSize(36);
+        table.resize(1060, 720);
+        table.show();
+        QCoreApplication::processEvents();
+
+        auto *band = new TableRubberBand(&table, &table);
+        auto *rubberBand = table.viewport()->findChild<QRubberBand *>();
+        QVERIFY(rubberBand != nullptr);
+        QVERIFY(!rubberBand->isVisible());
+
+        // Benchmark marquee selection across visible rows in the 100k item corpus
+        QElapsedTimer timer;
+        timer.start();
+
+        // Drag marquee across rows 1 to 12
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(10, 40));
+        QTest::mouseMove(table.viewport(), QPoint(300, 200));
+        QTest::mouseMove(table.viewport(), QPoint(600, 420));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::NoModifier, QPoint(600, 420));
+
+        const qint64 marqueeElapsedMs = timer.elapsed();
+
+        QVERIFY(!rubberBand->isVisible());
+        const int selectedCount = table.selectionModel()->selectedRows().count();
+        QVERIFY(selectedCount > 0);
+
+        // Explicit requirement: marquee selection across 100k rows executes under 150ms with zero stutter
+        qDebug() << "100K rubberband marquee selection executed in:" << marqueeElapsedMs << "ms (selected:" << selectedCount << "rows)";
+        QVERIFY2(marqueeElapsedMs < 150, qPrintable(QString("Marquee selection took %1 ms, expected < 150 ms").arg(marqueeElapsedMs)));
+
+        // Modifier test: Ctrl+drag to accumulate selection across additional rows
+        timer.restart();
+        QTest::mousePress(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(10, 450));
+        QTest::mouseMove(table.viewport(), QPoint(600, 560));
+        QTest::mouseRelease(table.viewport(), Qt::LeftButton, Qt::ControlModifier, QPoint(600, 560));
+        const qint64 toggleElapsedMs = timer.elapsed();
+
+        QVERIFY(table.selectionModel()->selectedRows().count() > selectedCount);
+        QVERIFY2(toggleElapsedMs < 150, qPrintable(QString("Ctrl-toggle marquee selection took %1 ms, expected < 150 ms").arg(toggleElapsedMs)));
+    }
 };
 int main(int argc, char **argv) {
     QApplication application(argc, argv);
