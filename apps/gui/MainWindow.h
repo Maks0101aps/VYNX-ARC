@@ -147,6 +147,7 @@ class MainWindow : public QMainWindow {
     void pasteFromClipboard();
     void pasteFromMimeData(const QMimeData *mime);
     void reviewInterruptedExtraction(const QJsonObject &spec);
+    void repairOrVerifyArchive();
     QAction *copyAction_ = nullptr;
     QAction *pasteAction_ = nullptr;
     void editSelected();
@@ -193,6 +194,9 @@ class MainWindow : public QMainWindow {
     QAction *renameAction_, *deleteAction_;
     QAction *hashSelectedAction_, *verifySelectedAction_, *propertiesAction_, *previewAction_,
         *externalAction_;
+    QAction *findAction_ = nullptr;
+    QAction *wizardAction_ = nullptr;
+    QAction *repairAction_ = nullptr;
     QLabel *current_;
     QLabel *rate_;
     QProgressBar *progress_;

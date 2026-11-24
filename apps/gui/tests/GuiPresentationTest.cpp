@@ -1762,6 +1762,131 @@ class GuiPresentationTest : public QObject {
         QVERIFY(vynx::archive_is_multivolume(*archiveRar));
 #endif
     }
+
+    void winrarToolbarActionLayout() {
+        QAction extract("Extract To"), add("Add"), test("Test"), remove("Delete"),
+            rename("Rename"), hash("Hash");
+        ArchivePage page(&extract, &add, &test, &remove, &rename, &hash, {});
+        page.setWritable(true);
+        page.resize(900, 600);
+        page.show();
+        QCoreApplication::processEvents();
+
+        QToolButton *extractBtn = nullptr;
+        QToolButton *addBtn = nullptr;
+        QToolButton *testBtn = nullptr;
+        QToolButton *viewBtn = nullptr;
+        QToolButton *deleteBtn = nullptr;
+        QToolButton *renameBtn = nullptr;
+        QToolButton *findBtn = nullptr;
+        QToolButton *wizardBtn = nullptr;
+        QToolButton *infoBtn = nullptr;
+        QToolButton *repairBtn = nullptr;
+
+        for (auto *btn : page.findChildren<QToolButton *>()) {
+            const auto text = btn->text();
+            if (text.contains("Extract"))
+                extractBtn = btn;
+            else if (text == "Add")
+                addBtn = btn;
+            else if (text == "Test")
+                testBtn = btn;
+            else if (text == "View")
+                viewBtn = btn;
+            else if (text == "Delete")
+                deleteBtn = btn;
+            else if (text == "Rename")
+                renameBtn = btn;
+            else if (text == "Find")
+                findBtn = btn;
+            else if (text == "Wizard" || text.contains("Wizard"))
+                wizardBtn = btn;
+            else if (text == "Info")
+                infoBtn = btn;
+            else if (text == "Repair" || text.contains("Repair"))
+                repairBtn = btn;
+        }
+
+        // Action clusters exist
+        QVERIFY(addBtn);
+        QVERIFY(extractBtn);
+        QVERIFY(testBtn);
+        QVERIFY(viewBtn);
+        QVERIFY(deleteBtn);
+        QVERIFY(renameBtn);
+
+        QVERIFY(findBtn);
+        QVERIFY(wizardBtn);
+        QVERIFY(infoBtn);
+
+        QVERIFY(repairBtn);
+
+        // ToolButtonTextUnderIcon style
+        QCOMPARE(addBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(extractBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(testBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(viewBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(deleteBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(renameBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(findBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(wizardBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(infoBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+        QCOMPARE(repairBtn->toolButtonStyle(), Qt::ToolButtonTextUnderIcon);
+
+        // Icons are 32x32
+        QCOMPARE(addBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(extractBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(testBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(viewBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(deleteBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(renameBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(findBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(wizardBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(infoBtn->iconSize(), QSize(32, 32));
+        QCOMPARE(repairBtn->iconSize(), QSize(32, 32));
+
+        // Tooltips / accessible names
+        QVERIFY(!addBtn->accessibleName().isEmpty());
+        QVERIFY(!extractBtn->accessibleName().isEmpty());
+        QVERIFY(!testBtn->accessibleName().isEmpty());
+        QVERIFY(!viewBtn->accessibleName().isEmpty());
+        QVERIFY(!findBtn->accessibleName().isEmpty());
+        QVERIFY(!wizardBtn->accessibleName().isEmpty());
+        QVERIFY(!infoBtn->accessibleName().isEmpty());
+        QVERIFY(!repairBtn->accessibleName().isEmpty());
+
+        // Vertical separators (QFrame::VLine) exist in the toolbar layout
+        int vlineCount = 0;
+        for (auto *frame : page.findChildren<QFrame *>()) {
+            if (frame->frameShape() == QFrame::VLine)
+                ++vlineCount;
+        }
+        QVERIFY(vlineCount >= 2);
+
+        // Navigation bar exists below toolbar
+        QVERIFY(page.up);
+        QCOMPARE(page.up->size(), QSize(32, 32));
+        QVERIFY(!page.up->accessibleName().isEmpty());
+        QVERIFY(page.breadcrumb);
+        QVERIFY(page.search);
+        QVERIFY(page.table);
+
+        // Vertical order: toolbar buttons above navigation bar (up), navigation bar above table
+        const int toolbarY = extractBtn->mapToGlobal(QPoint(0, 0)).y();
+        const int navY = page.up->mapToGlobal(QPoint(0, 0)).y();
+        const int tableY = page.table->mapToGlobal(QPoint(0, 0)).y();
+        QVERIFY(toolbarY < navY);
+        QVERIFY(navY < tableY);
+
+        // Responsive folding on window resize < 780px
+        page.resize(600, 440);
+        QCoreApplication::processEvents();
+        QVERIFY(!findBtn->isVisible());
+        QVERIFY(!wizardBtn->isVisible());
+        QVERIFY(!infoBtn->isVisible());
+        QVERIFY(!repairBtn->isVisible());
+        QVERIFY(extractBtn->isVisible());
+    }
 };
 int main(int argc, char **argv) {
     QApplication application(argc, argv);

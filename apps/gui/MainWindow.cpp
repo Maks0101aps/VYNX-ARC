@@ -77,8 +77,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     auto *create =
         addAction(fileMenu, tr("&Create archive…"), QKeySequence::New, [this] { chooseCreate(); });
     idleActions_ = {};
-    addAction(fileMenu, tr("Batch extraction..."), QKeySequence("Ctrl+Shift+E"),
-              [this] { chooseBatchExtract(); });
+    wizardAction_ = addAction(fileMenu, tr("Batch extraction wizard..."), QKeySequence("Ctrl+Shift+E"),
+                              [this] { chooseBatchExtract(); });
     addAction(fileMenu, tr("Convert archives..."), QKeySequence("Ctrl+Shift+C"),
               [this] { chooseConversion(); });
     fileMenu->addSeparator();
@@ -105,12 +105,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
                                       [this] { hashContents(true); });
     auto *verifyArchive = addAction(operationsMenu, tr("Verify archive file hash…"), {},
                                     [this] { hashContents(true, true); });
+    repairAction_ = addAction(operationsMenu, tr("Repair / Verify archive…"), {},
+                              [this] { repairOrVerifyArchive(); });
+    findAction_ = addAction(operationsMenu, tr("Find in archive"), QKeySequence::Find, [this] {
+        if (search_) {
+            search_->setFocus();
+            search_->selectAll();
+        }
+    });
     previewAction_ = addAction(operationsMenu, tr("Preview file"), QKeySequence("F3"),
                                [this] { previewSelected(); });
     externalAction_ = addAction(operationsMenu, tr("Open externally..."),
                                 QKeySequence("Ctrl+Return"), [this] { openSelectedExternally(); });
     archiveActions_.append({hashSelectedAction_, verifySelectedAction_, verifyArchive,
-                            previewAction_, externalAction_});
+                            repairAction_, findAction_, previewAction_, externalAction_});
     editAction_ = addAction(operationsMenu, tr("Edit working copy..."),
                             QKeySequence("Ctrl+Shift+Return"), [this] { editSelected(); });
     archiveActions_.append(editAction_);
@@ -227,7 +235,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     archivePage_ = new ArchivePage(extract, addFiles, test, remove, rename, hashSelectedAction_,
                                    {smart, here, named, hash, hashSelectedAction_,
                                     verifySelectedAction_, verifyArchive, previewAction_, addFiles,
-                                    addFolder, rename, remove, properties});
+                                    addFolder, rename, remove, properties},
+                                   previewAction_, findAction_, wizardAction_, propertiesAction_,
+                                   repairAction_);
     pages_->addWidget(archivePage_);
     connect(archivePage_->back, &QToolButton::clicked, this, &MainWindow::back);
     connect(archivePage_->up, &QToolButton::clicked, this, &MainWindow::up);
@@ -839,6 +849,21 @@ void MainWindow::hashContents(bool verify, bool wholeArchive) {
             dialog.exec();
         });
 }
+void MainWindow::repairOrVerifyArchive() {
+    if (!session_->archive)
+        return;
+    if (activeSpec_.contains("recoveryPlan")) {
+        reviewInterruptedExtraction(activeSpec_);
+    } else {
+        hashContents(true, true);
+    }
+}
+void MainWindow::reviewInterruptedExtraction(const QJsonObject &spec) {
+    auto plan = spec["recoveryPlan"].toObject();
+    ExtractionRecoveryDialog dialog(session_->path, plan["destination"].toString(),
+                                   spec["archiveHash"].toString(), plan, this);
+    dialog.exec();
+}
 void MainWindow::chooseCreate(const QStringList &initial, int initialFormat) {
     CreateArchiveDialog d(initial, initialFormat, this);
     d.resource->setCurrentIndex(qBound(0, settings_->value("resourceMode", 1).toInt(), 2));
@@ -1190,7 +1215,13 @@ void MainWindow::updateStatus() {
     editAction_->setEnabled(!operations_.busy && !session_->busy && writableArchive() && regular &&
                             rows.size() == 1);
     previewAction_->setEnabled(!session_->busy && regular && rows.size() == 1);
-    propertiesAction_->setEnabled(!session_->busy && rows.size() == 1);
+    propertiesAction_->setEnabled(!session_->busy);
+    if (findAction_)
+        findAction_->setEnabled(!session_->busy);
+    if (repairAction_)
+        repairAction_->setEnabled(!session_->busy);
+    if (wizardAction_)
+        wizardAction_->setEnabled(true);
     auto summary = text(vynx::archive_format(**session_->archive));
     if (!writableArchive())
         summary += tr(" · read only");
@@ -1216,37 +1247,60 @@ void MainWindow::showProperties() {
     if (session_->busy || !session_->archive)
         return;
     const auto rows = table_->selectionModel()->selectedRows();
-    if (rows.size() != 1)
-        return;
-    const auto &row = session_->model->row(session_->filter->mapToSource(rows.first()).row());
-    QDialog dialog(this);
-    dialog.setWindowTitle(tr("Properties"));
-    dialog.setMinimumWidth(360);
-    auto *layout = new QFormLayout(&dialog);
-    auto label = [&](const QString &title, const QString &value) {
-        auto *text = new QLabel(value);
-        text->setTextFormat(Qt::PlainText);
-        text->setWordWrap(true);
-        text->setTextInteractionFlags(Qt::TextSelectableByMouse);
-        layout->addRow(title, text);
-    };
-    label(tr("Name"), row.name);
-    label(tr("Archive path"), row.fullPath);
-    if (!row.folder) {
-        label(tr("Size"), displaySize(row.size));
-        label(tr("Packed"), row.packed ? displaySize(row.packed) : tr("Unknown"));
-        label(tr("Modified"),
-              row.modifiedKnown
-                  ? QLocale().toString(QDateTime::fromSecsSinceEpoch(row.modifiedTime),
-                                       QLocale::LongFormat)
-                  : tr("Unknown"));
-        if (!row.crc.isEmpty())
-            label("CRC32", row.crc);
+    if (rows.size() == 1) {
+        const auto &row = session_->model->row(session_->filter->mapToSource(rows.first()).row());
+        QDialog dialog(this);
+        dialog.setWindowTitle(tr("Properties"));
+        dialog.setMinimumWidth(360);
+        auto *layout = new QFormLayout(&dialog);
+        auto label = [&](const QString &title, const QString &value) {
+            auto *text = new QLabel(value);
+            text->setTextFormat(Qt::PlainText);
+            text->setWordWrap(true);
+            text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+            layout->addRow(title, text);
+        };
+        label(tr("Name"), row.name);
+        label(tr("Archive path"), row.fullPath);
+        if (!row.folder) {
+            label(tr("Size"), displaySize(row.size));
+            label(tr("Packed"), row.packed ? displaySize(row.packed) : tr("Unknown"));
+            label(tr("Modified"),
+                  row.modifiedKnown
+                      ? QLocale().toString(QDateTime::fromSecsSinceEpoch(row.modifiedTime),
+                                           QLocale::LongFormat)
+                      : tr("Unknown"));
+            if (!row.crc.isEmpty())
+                label("CRC32", row.crc);
+        }
+        auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        dialog.exec();
+    } else {
+        QDialog dialog(this);
+        dialog.setWindowTitle(tr("Archive Properties"));
+        dialog.setMinimumWidth(380);
+        auto *layout = new QFormLayout(&dialog);
+        auto label = [&](const QString &title, const QString &value) {
+            auto *text = new QLabel(value);
+            text->setTextFormat(Qt::PlainText);
+            text->setWordWrap(true);
+            text->setTextInteractionFlags(Qt::TextSelectableByMouse);
+            layout->addRow(title, text);
+        };
+        label(tr("Archive name"), QFileInfo(session_->path).fileName());
+        label(tr("Full path"), session_->path);
+        label(tr("Format"), text(vynx::archive_format(**session_->archive)));
+        label(tr("Total entries"), QString::number(session_->model->rowCount()));
+        label(tr("Uncompressed size"), displaySize(session_->model->totalSize()));
+        label(tr("Compressed size"), displaySize(session_->model->totalPacked()));
+        label(tr("Writable"), writableArchive() ? tr("Yes") : tr("No (Read-only)"));
+        auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+        layout->addRow(buttons);
+        connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+        dialog.exec();
     }
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
-    layout->addRow(buttons);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-    dialog.exec();
 }
 void MainWindow::updateRecent() {
     recent_->clear();
